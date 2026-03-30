@@ -99,7 +99,7 @@
         <easyj-maven-plugin.version>1.1.5</easyj-maven-plugin.version>
         <maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
         <!-- Compiler -->
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <kotlin-maven-plugin.version>2.2.20</kotlin-maven-plugin.version>
         <!-- Check -->

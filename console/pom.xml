@@ -33,10 +33,10 @@
 
     <properties>
         <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
+        <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
         <tomcat-embed.version>11.0.12</tomcat-embed.version>
         <spring-ai.version>1.1.0</spring-ai.version>
-        <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
     </properties>
 
     <dependencyManagement>
@@ -72,7 +72,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>

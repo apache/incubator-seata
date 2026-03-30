@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.expression.Expression;
@@ -36,6 +37,8 @@ import java.util.Map;
  */
 public class ParameterUtils {
 
+    private static final ResourceLock INPUT_LOCK = new ResourceLock();
+
     public static List<Object> createInputParams(
             ExpressionResolver expressionResolver,
             StateInstanceImpl stateInstance,
@@ -48,7 +51,7 @@ public class ParameterUtils {
 
         List<Object> inputExpressions = serviceTaskState.getInputExpressions();
         if (inputExpressions == null) {
-            synchronized (serviceTaskState) {
+            try (ResourceLock ignored = INPUT_LOCK.obtain()) {
                 inputExpressions = serviceTaskState.getInputExpressions();
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
@@ -77,7 +80,7 @@ public class ParameterUtils {
 
         Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
         if (outputExpressions == null) {
-            synchronized (serviceTaskState) {
+            try (ResourceLock ignored = INPUT_LOCK.obtain()) {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
