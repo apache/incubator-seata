@@ -78,7 +78,7 @@
     "@alicloud/console-components-app-layout": "^1.1.4",
     "@alicloud/console-components-console-menu": "^1.2.12",
     "@babel/traverse": "^7.23.7",
-    "axios": "^1.12.2",
+    "axios": "^1.13.5",
     "browserify-sign": "^4.2.2",
     "decode-uri-component": "^0.4.1",
     "elliptic": "^6.5.7",
@@ -110,12 +110,14 @@
     "@babel/runtime": "^7.27.0",
     "braces": "3.0.3",
     "micromatch": "4.0.8",
-    "serialize-javascript": "6.0.2",
+    "serialize-javascript": "^7.0.5",
     "node-forge": "1.4.0",
     "min-document": "^2.19.1",
     "js-yaml": "^3.14.2",
     "qs": "^6.14.1",
     "tar": "7.5.11",
-    "minimatch": "^3.1.4"
+    "minimatch": "^3.1.4",
+    "svgo": "^3.3.3",
+    "brace-expansion": "^1.1.13"
   }
 }

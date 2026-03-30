@@ -70,6 +70,7 @@
     "lodash": "^4.17.23",
     "flatted": "3.4.2",
     "minimatch": "3.1.4",
-    "picomatch": "^2.3.2"
+    "picomatch": "^2.3.2",
+    "serialize-javascript": "^7.0.5"
   }
 }
