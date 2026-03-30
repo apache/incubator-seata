@@ -69,7 +69,7 @@
     "typescript": "^5.3.3",
     "url-loader": "^4.1.1",
     "webpack": "^5.102.1",
-    "webpack-cli": "^4.10.0",
+    "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
@@ -100,7 +100,7 @@
     "yamljs": "^0.3.0"
   },
   "overrides": {
-    "swiper": "6.5.9",
+    "swiper": "12.1.2",
     "node-fetch": "2.7.0",
     "nanoid": "3.3.8",
     "ip": "2.0.1",
