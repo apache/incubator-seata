@@ -64,11 +64,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
         ALLOWLIST_PARSER_CONFIG.setAutoTypeSupport(true);
         ALLOWLIST_PARSER_CONFIG.addAutoTypeCheckHandler((typeName, expectClass, features) -> {
             JsonAllowlistManager.getInstance().checkClass(typeName);
-            try {
-                return Class.forName(typeName);
-            } catch (ClassNotFoundException e) {
-                return null;
-            }
+            return null;
         });
     }
 

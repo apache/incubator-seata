@@ -201,6 +201,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
 
         @Override
         public Validity validateSubType(MapperConfig<?> config, JavaType baseType, JavaType subType) {
+            JsonAllowlistManager.getInstance().checkClass(subType.getRawClass().getName());
             return Validity.ALLOWED;
         }
     }
