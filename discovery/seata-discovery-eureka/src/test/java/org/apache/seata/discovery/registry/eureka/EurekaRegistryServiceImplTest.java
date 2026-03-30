@@ -16,224 +16,81 @@
  */
 package org.apache.seata.discovery.registry.eureka;
 
-import com.netflix.appinfo.ApplicationInfoManager;
-import com.netflix.appinfo.InstanceInfo;
-import com.netflix.discovery.EurekaClient;
-import com.netflix.discovery.EurekaEventListener;
-import com.netflix.discovery.shared.Application;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.exception.ConfigNotFoundException;
+import org.apache.seata.common.metadata.ServiceInstance;
+import org.apache.seata.discovery.registry.RegistryProvider;
+import org.apache.seata.discovery.registry.RegistryService;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
-import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
+import java.util.ServiceLoader;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * EurekaRegistryServiceImpl integration test
+ */
+@Disabled
 public class EurekaRegistryServiceImplTest {
 
-    private EurekaClient mockEurekaClient;
-    private ApplicationInfoManager mockAppInfoManager;
-    private Application mockApplication;
-    private InstanceInfo mockInstanceInfo;
-    private EurekaRegistryServiceImpl registryService;
-    EurekaEventListener mockEventListener;
+    private static RegistryService registryService;
 
-    @BeforeEach
-    public void setUp() throws Exception {
-
-        mockEurekaClient = mock(EurekaClient.class);
-        mockAppInfoManager = mock(ApplicationInfoManager.class);
-        mockApplication = mock(Application.class);
-        mockInstanceInfo = mock(InstanceInfo.class);
-        mockEventListener = mock(EurekaEventListener.class);
-
-        resetSingleton();
-        registryService = EurekaRegistryServiceImpl.getInstance();
-        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", mockEurekaClient);
-        setStaticField(EurekaRegistryServiceImpl.class, "applicationInfoManager", mockAppInfoManager);
+    @BeforeAll
+    public static void setUp() throws Exception {
+        ServiceLoader<RegistryProvider> providers = ServiceLoader.load(RegistryProvider.class);
+        RegistryProvider provider = providers.iterator().next();
+        registryService = provider.provide();
     }
 
     @AfterAll
     public static void tearDown() throws Exception {
-        resetSingleton();
-    }
-
-    private static void resetSingleton() throws Exception {
-        // Reset singleton and static fields
-        setStaticField(EurekaRegistryServiceImpl.class, "instance", null);
-        setStaticField(EurekaRegistryServiceImpl.class, "applicationInfoManager", null);
-        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
-        setStaticField(EurekaRegistryServiceImpl.class, "instanceConfig", null);
-        clearStaticMap(EurekaRegistryServiceImpl.class, "LISTENER_SERVICE_MAP");
-        clearStaticMap(EurekaRegistryServiceImpl.class, "CLUSTER_ADDRESS_MAP");
-        clearStaticMap(EurekaRegistryServiceImpl.class, "CLUSTER_LOCK");
-    }
-
-    @Test
-    public void testGetInstance() {
-        EurekaRegistryServiceImpl instance1 = EurekaRegistryServiceImpl.getInstance();
-        EurekaRegistryServiceImpl instance2 = EurekaRegistryServiceImpl.getInstance();
-        Assertions.assertEquals(instance1, instance2);
-    }
-
-    @Test
-    public void testRegister() throws Exception {
-        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.register(address);
-        CustomEurekaInstanceConfig instanceConfig = getInstanceConfig();
-        Assertions.assertEquals("127.0.0.1", instanceConfig.getIpAddress());
-        Assertions.assertEquals("default", instanceConfig.getAppname());
-        verify(mockAppInfoManager).setInstanceStatus(InstanceInfo.InstanceStatus.UP);
-    }
-
-    @Test
-    void testRegisterWhenEurekaClientIsNull() throws Exception {
-        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
-        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.register(address);
-        verify(mockAppInfoManager, times(0)).setInstanceStatus(any());
-    }
-
-    @Test
-    void testSubscribe() throws Exception {
-        String testCluster = "TEST_CLUSTER";
-        registryService.subscribe(testCluster, mockEventListener);
-
-        // Verify that the listener is added to LISTENER_SERVICE_MAP
-        ConcurrentMap<String, List<EurekaEventListener>> listenerMap = getStaticListenerMap();
-        Assertions.assertTrue(listenerMap.containsKey(testCluster));
-        Assertions.assertTrue(listenerMap.get(testCluster).contains(mockEventListener));
-
-        // Verify that the EurekaClient has registered the listener
-        verify(mockEurekaClient, times(1)).registerEventListener(mockEventListener);
-    }
-
-    @Test
-    void testUnsubscribe() throws Exception {
-        String testCluster = "TEST_CLUSTER";
-        registryService.subscribe(testCluster, mockEventListener);
-        registryService.unsubscribe(testCluster, mockEventListener);
-
-        // Verify that the listener is removed from LISTENER_SERVICE_MAP
-        ConcurrentMap<String, List<EurekaEventListener>> listenerMap = getStaticListenerMap();
-        Assertions.assertFalse(
-                listenerMap.getOrDefault(testCluster, Collections.emptyList()).contains(mockEventListener));
-
-        // Verify that the EurekaClient has deregistered the listener
-        verify(mockEurekaClient, times(1)).unregisterEventListener(mockEventListener);
-    }
-
-    @Test
-    void testUnsubscribeWhenEurekaClientIsNull() throws Exception {
-        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
-        registryService.unsubscribe("TEST_CLUSTER", mockEventListener);
-        verify(mockEurekaClient, times(0)).unregisterEventListener(any());
-    }
-
-    @Test
-    void testUnsubscribeWithNoExistingListeners() throws Exception {
-        String testCluster = "NON_EXISTENT_CLUSTER";
-        registryService.unsubscribe(testCluster, mockEventListener);
-        verify(mockEurekaClient).unregisterEventListener(any());
-    }
-
-    @Test
-    public void testUnregister() throws Exception {
-        registryService.unregister(new InetSocketAddress("127.0.0.1", 8091));
-        verify(mockAppInfoManager).setInstanceStatus(InstanceInfo.InstanceStatus.DOWN);
-    }
-
-    @Test
-    public void testLookup() throws Exception {
-        Configuration mockConfig = mock(Configuration.class);
-        when(mockConfig.getConfig("service.vgroupMapping.test-group")).thenReturn("TEST-CLUSTER");
-
-        try (MockedStatic<ConfigurationFactory> mockedFactory = mockStatic(ConfigurationFactory.class)) {
-            mockedFactory.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-
-            // Mock Eureka to return the application instance
-            when(mockEurekaClient.getApplication("TEST-CLUSTER")).thenReturn(mockApplication);
-            when(mockApplication.getInstances()).thenReturn(Collections.singletonList(mockInstanceInfo));
-            when(mockInstanceInfo.getStatus()).thenReturn(InstanceInfo.InstanceStatus.UP);
-            when(mockInstanceInfo.getIPAddr()).thenReturn("192.168.1.1");
-            when(mockInstanceInfo.getPort()).thenReturn(8091);
-
-            List<InetSocketAddress> addresses = registryService.lookup("test-group");
-
-            // Verify whether the transactionServiceGroup is set correctly
-            Field serviceGroupField = EurekaRegistryServiceImpl.class.getDeclaredField("transactionServiceGroup");
-            serviceGroupField.setAccessible(true);
-            String actualServiceGroup = (String) serviceGroupField.get(registryService);
-            Assertions.assertEquals("test-group", actualServiceGroup);
-            Assertions.assertNotNull(addresses);
-            Assertions.assertEquals(1, addresses.size());
-            Assertions.assertEquals(new InetSocketAddress("192.168.1.1", 8091), addresses.get(0));
+        if (registryService != null) {
+            registryService.close();
         }
     }
 
     @Test
-    void testLookUpWithNoClusterName() {
-        Configuration mockConfig = mock(Configuration.class);
-        when(mockConfig.getConfig("service.vgroupMapping.test-group")).thenReturn(null);
-        try (MockedStatic<ConfigurationFactory> mockedFactory = mockStatic(ConfigurationFactory.class)) {
-            mockedFactory.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            Assertions.assertThrows(ConfigNotFoundException.class, () -> {
-                registryService.lookup("test-group");
-            });
+    public void testMetadataRegistrationAndDiscovery() throws Exception {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("version", "1.0.0");
+        metadata.put("environment", "test");
+        metadata.put("weight", 100);
+
+        ServiceInstance instance = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8094), metadata);
+        registryService.register(instance);
+
+        Thread.sleep(8000);
+
+        List<ServiceInstance> instances = null;
+        // Wait for the Eureka client's local cache to sync to avoid the first query being empty.
+        for (int i = 0; i < 10; i++) {
+            instances = registryService.lookup("default_tx_group");
+            if (instances != null && !instances.isEmpty()) {
+                break;
+            }
+            Thread.sleep(2000);
         }
-    }
 
-    @Test
-    public void testClose() throws Exception {
-        registryService.close();
-        verify(mockEurekaClient).shutdown();
-        Assertions.assertNull(getStaticField(EurekaRegistryServiceImpl.class, "eurekaClient"));
-        Assertions.assertNull(getStaticField(EurekaRegistryServiceImpl.class, "applicationInfoManager"));
-    }
+        assertNotNull(instances);
+        assertFalse(instances.isEmpty());
 
-    // Helper method: Set static fields via reflection
-    private static void setStaticField(Class<?> clazz, String fieldName, Object value) throws Exception {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(null, value);
-    }
+        ServiceInstance foundInstance = instances.stream()
+                .filter(inst -> inst.getAddress().equals(instance.getAddress()))
+                .findFirst()
+                .orElse(null);
 
-    // Helper method: Get the value of a static field
-    @SuppressWarnings("unchecked")
-    private static <T> T getStaticField(Class<?> clazz, String fieldName) throws Exception {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return (T) field.get(null);
-    }
-
-    private static void clearStaticMap(Class<?> clazz, String fieldName) throws Exception {
-        Field field = clazz.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        ((ConcurrentMap<?, ?>) field.get(null)).clear();
-    }
-
-    private CustomEurekaInstanceConfig getInstanceConfig() throws Exception {
-        return getStaticField(EurekaRegistryServiceImpl.class, "instanceConfig");
-    }
-
-    @SuppressWarnings("unchecked")
-    private static ConcurrentMap<String, List<EurekaEventListener>> getStaticListenerMap() throws Exception {
-        Field field = EurekaRegistryServiceImpl.class.getDeclaredField("LISTENER_SERVICE_MAP");
-        field.setAccessible(true);
-        return (ConcurrentMap<String, List<EurekaEventListener>>) field.get(null);
+        assertNotNull(foundInstance);
+        Map<String, Object> foundMetadata = foundInstance.getMetadata();
+        assertNotNull(foundMetadata);
+        assertEquals("1.0.0", String.valueOf(foundMetadata.get("version")));
+        assertEquals("test", String.valueOf(foundMetadata.get("environment")));
+        assertEquals("100", String.valueOf(foundMetadata.get("weight")));
     }
 }

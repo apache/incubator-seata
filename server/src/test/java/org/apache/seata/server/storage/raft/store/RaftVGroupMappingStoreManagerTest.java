@@ -18,7 +18,7 @@ package org.apache.seata.server.storage.raft.store;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Status;
-import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -394,7 +394,7 @@ public class RaftVGroupMappingStoreManagerTest extends BaseSpringBootTest {
             try {
                 Mockito.doThrow(new RuntimeException("Registry error"))
                         .when(mockRegistryService)
-                        .register(any(Instance.class));
+                        .register(any(ServiceInstance.class));
             } catch (Exception e) {
                 // This shouldn't happen as we're just configuring the mock
             }

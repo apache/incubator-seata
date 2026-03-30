@@ -25,6 +25,7 @@ import org.apache.seata.spring.boot.autoconfigure.properties.SeataTccProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.LockProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.ServiceProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.TmProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.UndoCompressProperties;
@@ -41,6 +42,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.COMPRE
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.ROUTING_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SAGA_ASYNC_THREAD_POOL_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SAGA_STATE_MACHINE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
@@ -67,6 +69,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
         PROPERTY_BEAN_MAP.put(TCC_PREFIX, SeataTccProperties.class);
+        PROPERTY_BEAN_MAP.put(ROUTING_PREFIX, RoutingProperties.class);
     }
 
     @Override

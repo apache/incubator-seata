@@ -16,14 +16,12 @@
  */
 package org.apache.seata.discovery.registry;
 
-import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
 
-import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,9 +29,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * The interface Registry service.
+ * Service registry interface for managing service registration and discovery.
  *
- * @param <T> the type parameter
+ * @param <T> the listener type parameter
  */
 public interface RegistryService<T> {
 
@@ -41,65 +39,45 @@ public interface RegistryService<T> {
      * The constant PREFIX_SERVICE_MAPPING.
      */
     String PREFIX_SERVICE_MAPPING = "vgroupMapping.";
+
     /**
      * The constant PREFIX_SERVICE_ROOT.
      */
     String PREFIX_SERVICE_ROOT = "service";
+
     /**
      * The constant CONFIG_SPLIT_CHAR.
      */
     String CONFIG_SPLIT_CHAR = ".";
 
-    Set<String> SERVICE_GROUP_NAME = new HashSet<>();
+    /**
+     * Set of service group names.
+     */
+    Set<String> SERVICE_GROUP_NAME = ConcurrentHashMap.newKeySet();
 
     /**
-     * Service node health check
+     * Current instance cache map for service node health check.
      */
-    Map<String, Map<String, List<InetSocketAddress>>> CURRENT_ADDRESS_MAP = new ConcurrentHashMap<>();
+    Map<String, Map<String, List<ServiceInstance>>> CURRENT_INSTANCE_MAP = new ConcurrentHashMap<>();
+
     /**
-     * Register.
+     * Register a serviceInstance.
      *
-     * @param address the address
+     * @param address the serviceInstance to register
      * @throws Exception the exception
      */
-    @Deprecated
-    void register(InetSocketAddress address) throws Exception;
+    void register(ServiceInstance address) throws Exception;
 
     /**
-     * Register.
+     * Unregister a serviceInstance.
      *
-     * @param instance the address
+     * @param address the service instance to unregister
      * @throws Exception the exception
      */
-    default void register(Instance instance) throws Exception {
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(
-                instance.getTransaction().getHost(), instance.getTransaction().getPort());
-        register(inetSocketAddress);
-    }
+    void unregister(ServiceInstance address) throws Exception;
 
     /**
-     * Unregister.
-     *
-     * @param address the address
-     * @throws Exception the exception
-     */
-    @Deprecated
-    void unregister(InetSocketAddress address) throws Exception;
-
-    /**
-     * Unregister.
-     *
-     * @param instance the instance
-     * @throws Exception the exception
-     */
-    default void unregister(Instance instance) throws Exception {
-        InetSocketAddress inetSocketAddress = new InetSocketAddress(
-                instance.getTransaction().getHost(), instance.getTransaction().getPort());
-        unregister(inetSocketAddress);
-    }
-
-    /**
-     * Subscribe.
+     * Subscribe to cluster changes.
      *
      * @param cluster  the cluster
      * @param listener the listener
@@ -108,7 +86,7 @@ public interface RegistryService<T> {
     void subscribe(String cluster, T listener) throws Exception;
 
     /**
-     * Unsubscribe.
+     * Unsubscribe from cluster changes.
      *
      * @param cluster  the cluster
      * @param listener the listener
@@ -117,22 +95,22 @@ public interface RegistryService<T> {
     void unsubscribe(String cluster, T listener) throws Exception;
 
     /**
-     * Lookup list.
+     * Look up serviceInstances by key.
      *
      * @param key the key
-     * @return the list
+     * @return list of serviceInstances
      * @throws Exception the exception
      */
-    List<InetSocketAddress> lookup(String key) throws Exception;
+    List<ServiceInstance> lookup(String key) throws Exception;
 
     /**
-     * Close.
+     * Close the registry service.
      * @throws Exception the exception
      */
     void close() throws Exception;
 
     /**
-     * Get current service group name
+     * Get current service group name from configuration.
      *
      * @param key service group
      * @return the service group name
@@ -145,57 +123,67 @@ public interface RegistryService<T> {
         return ConfigurationFactory.getInstance().getConfig(key);
     }
 
-    default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        Map<String, List<InetSocketAddress>> clusterAddressMap =
-                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ConcurrentHashMap<>());
+    /**
+     * Look up alive serviceInstances for a transaction service group.
+     *
+     * @param transactionServiceGroup the transaction service group
+     * @return list of alive serviceInstances
+     */
+    default List<ServiceInstance> aliveLookup(String transactionServiceGroup) {
+        Map<String, List<ServiceInstance>> clusterInstanceMap =
+                CURRENT_INSTANCE_MAP.computeIfAbsent(transactionServiceGroup, key -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
-        List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(clusterName);
-        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
-            return inetSocketAddresses;
+        List<ServiceInstance> serviceInstances = clusterInstanceMap.get(clusterName);
+        if (CollectionUtils.isNotEmpty(serviceInstances)) {
+            return serviceInstances;
         }
 
         // fall back to addresses of any cluster
-        return clusterAddressMap.values().stream()
+        return clusterInstanceMap.values().stream()
                 .filter(CollectionUtils::isNotEmpty)
                 .findAny()
                 .orElse(Collections.emptyList());
     }
 
-    default List<InetSocketAddress> refreshAliveLookup(
-            String transactionServiceGroup, List<InetSocketAddress> aliveAddress) {
-
-        Map<String, List<InetSocketAddress>> clusterAddressMap =
-                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, key -> new ConcurrentHashMap<>());
+    /**
+     * Refresh alive serviceInstances for a transaction service group.
+     *
+     * @param transactionServiceGroup the transaction service group
+     * @param aliveInstances the alive instances to update
+     * @return the previous list of instances
+     */
+    default List<ServiceInstance> refreshAliveLookup(
+            String transactionServiceGroup, List<ServiceInstance> aliveInstances) {
+        Map<String, List<ServiceInstance>> clusterInstanceMap =
+                CURRENT_INSTANCE_MAP.computeIfAbsent(transactionServiceGroup, key -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
 
-        return clusterAddressMap.put(clusterName, aliveAddress);
+        return clusterInstanceMap.put(clusterName, aliveInstances);
     }
 
     /**
+     * Remove offline instances if necessary by intersecting old and new instances.
      *
-     * remove offline addresses if necessary.
-     *
-     * Intersection of the old and new addresses
-     *
-     * @param clusterName
-     * @param newAddressed
+     * @param transactionGroupService the transaction group service
+     * @param clusterName the cluster name
+     * @param onlineInstances the online instances
      */
     default void removeOfflineAddressesIfNecessary(
-            String transactionGroupService, String clusterName, Collection<InetSocketAddress> newAddressed) {
+            String transactionGroupService, String clusterName, Collection<ServiceInstance> onlineInstances) {
 
-        Map<String, List<InetSocketAddress>> clusterAddressMap =
-                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService, key -> new ConcurrentHashMap<>());
+        Map<String, List<ServiceInstance>> clusterInstanceMap =
+                CURRENT_INSTANCE_MAP.computeIfAbsent(transactionGroupService, key -> new ConcurrentHashMap<>());
 
-        List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, Collections.emptyList());
+        List<ServiceInstance> currentInstances = clusterInstanceMap.getOrDefault(clusterName, Collections.emptyList());
 
-        List<InetSocketAddress> inetSocketAddresses =
-                currentAddresses.stream().filter(newAddressed::contains).collect(Collectors.toList());
+        List<ServiceInstance> serviceInstances =
+                currentInstances.stream().filter(onlineInstances::contains).collect(Collectors.toList());
 
         // prevent empty update
-        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
-            clusterAddressMap.put(clusterName, inetSocketAddresses);
+        if (CollectionUtils.isNotEmpty(serviceInstances)) {
+            clusterInstanceMap.put(clusterName, serviceInstances);
         }
     }
 }

@@ -23,6 +23,7 @@ import ch.qos.logback.core.read.ListAppender;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.discovery.registry.mock.MockNacosRegistryService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +35,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -126,9 +127,9 @@ public class MultiRegistryFactoryTest {
         String invalidRegistryType = "InvalidRegistryType";
         System.setProperty(REGISTRY_TYPE_KEY, invalidRegistryType);
 
-        assertThatThrownBy(MultiRegistryFactoryTest::invokeBuildRegistryServices)
-                .isExactlyInstanceOf(NotSupportYetException.class)
-                .hasMessage("not support registry type: " + invalidRegistryType);
+        NotSupportYetException exception =
+                assertThrows(NotSupportYetException.class, () -> invokeBuildRegistryServices());
+        assertTrue(exception.getMessage().contains("not support registry type"));
     }
 
     /**

@@ -16,6 +16,7 @@
  */
 package org.apache.seata.discovery.registry;
 
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigChangeListener;
@@ -29,7 +30,6 @@ import java.util.List;
 
 /**
  * The type File registry service.
- *
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
 
@@ -57,10 +57,10 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {}
+    public void register(ServiceInstance address) throws Exception {}
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {}
+    public void unregister(ServiceInstance address) throws Exception {}
 
     @Override
     public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {}
@@ -69,7 +69,10 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {}
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public void close() throws Exception {}
+
+    @Override
+    public List<ServiceInstance> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -77,12 +80,13 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         String endpointStr = getGroupListFromConfig(clusterName);
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
-        List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
+        List<ServiceInstance> serviceInstances = new ArrayList<>();
         for (String endpoint : endpoints) {
             String[] ipAndPort = NetUtil.splitIPPortStr(endpoint);
-            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
+            serviceInstances.add(
+                    new ServiceInstance(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1]))));
         }
-        return inetSocketAddresses;
+        return serviceInstances;
     }
 
     private String getGroupListFromConfig(String clusterName) {
@@ -95,7 +99,4 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         return endpointStr;
     }
-
-    @Override
-    public void close() throws Exception {}
 }

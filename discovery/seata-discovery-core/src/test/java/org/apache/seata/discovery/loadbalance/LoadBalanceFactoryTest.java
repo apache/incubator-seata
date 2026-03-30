@@ -16,115 +16,47 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
-import org.apache.seata.discovery.registry.RegistryFactory;
-import org.apache.seata.discovery.registry.RegistryService;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
-import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Load balance factory test.
- *
  */
 public class LoadBalanceFactoryTest {
 
-    private static final String XID = "XID";
+    private MockedStatic<ConfigurationFactory> mockedConfigurationFactory;
 
-    /**
-     * Test get registry.
-     *
-     * @param loadBalance the load balance
-     * @throws Exception the exception
-     */
-    @ParameterizedTest
-    @MethodSource("instanceProvider")
-    @Disabled
-    public void testGetRegistry(LoadBalance loadBalance) throws Exception {
-        Assertions.assertNotNull(loadBalance);
-        RegistryService registryService = RegistryFactory.getInstance();
-        InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
-        InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
-        registryService.register(address1);
-        registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup(DEFAULT_TX_GROUP);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
-        Assertions.assertNotNull(balanceAddress);
+    @BeforeEach
+    public void setUp() {
+        mockedConfigurationFactory = mockStatic(ConfigurationFactory.class);
     }
 
-    /**
-     * Test get address.
-     *
-     * @param loadBalance the load balance
-     * @throws Exception the exception
-     */
-    @ParameterizedTest
-    @MethodSource("instanceProvider")
-    @Disabled
-    public void testUnRegistry(LoadBalance loadBalance) throws Exception {
-        RegistryService registryService = RegistryFactory.getInstance();
-        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.unregister(address);
+    @AfterEach
+    public void tearDown() {
+        if (mockedConfigurationFactory != null) {
+            mockedConfigurationFactory.close();
+        }
     }
 
-    /**
-     * Test subscribe.
-     *
-     * @param loadBalance the load balance
-     * @throws Exception the exception
-     */
-    @ParameterizedTest
-    @MethodSource("instanceProvider")
-    @Disabled
-    public void testSubscribe(LoadBalance loadBalance) throws Exception {
-        Assertions.assertNotNull(loadBalance);
-        RegistryService registryService = RegistryFactory.getInstance();
-        InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
-        InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
-        registryService.register(address1);
-        registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup(DEFAULT_TX_GROUP);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
-        Assertions.assertNotNull(balanceAddress);
-        // wait trigger testUnRegistry
-        TimeUnit.SECONDS.sleep(30);
-        List<InetSocketAddress> addressList1 = registryService.lookup(DEFAULT_TX_GROUP);
-        Assertions.assertEquals(1, addressList1.size());
-    }
+    @Test
+    public void testGetInstance() {
+        Configuration mockConfig = mock(Configuration.class);
+        mockedConfigurationFactory.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
 
-    /**
-     * Test get address.
-     *
-     * @param loadBalance the load balance
-     * @throws Exception the exception
-     */
-    @ParameterizedTest
-    @MethodSource("instanceProvider")
-    public void testGetAddress(LoadBalance loadBalance) throws Exception {
-        Assertions.assertNotNull(loadBalance);
-        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        List<InetSocketAddress> addressList = new ArrayList<>();
-        addressList.add(address);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
-        Assertions.assertEquals(address, balanceAddress);
-    }
+        when(mockConfig.getConfig(eq("client.loadBalance.type"), anyString())).thenReturn("XID");
 
-    /**
-     * Instance provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    static Stream<Arguments> instanceProvider() {
         LoadBalance loadBalance = LoadBalanceFactory.getInstance();
-        return Stream.of(Arguments.of(loadBalance));
+        assertInstanceOf(XIDLoadBalance.class, loadBalance);
     }
 }

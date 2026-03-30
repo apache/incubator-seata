@@ -20,19 +20,18 @@ import java.util.List;
 
 /**
  * The interface Load balance.
- *
  */
 public interface LoadBalance {
 
     String SPLIT = ":";
 
     /**
-     * Select t.
+     * Select ServiceInstances.
      *
      * @param <T>      the type parameter
      * @param invokers the invokers
      * @param xid      the xid
-     * @return the t
+     * @return the ServiceInstance
      * @throws Exception the exception
      */
     <T> T select(List<T> invokers, String xid) throws Exception;

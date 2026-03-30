@@ -20,6 +20,7 @@ import com.alipay.sofa.jraft.Closure;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -29,6 +30,7 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftVGroupSyncMsg;
 import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -136,8 +138,14 @@ public class RaftVGroupMappingStoreManager implements VGroupMappingStoreManager 
                 Instance node = instance.clone();
                 node.setRole(RaftServerManager.isLeader(group) ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
                 Instance.getInstances().add(node);
+                if (node.getTransaction() == null) {
+                    continue;
+                }
+                InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                        node.getTransaction().getHost(), node.getTransaction().getPort());
+                ServiceInstance serviceInstance = new ServiceInstance(inetSocketAddress, node.getMetadata());
                 for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
-                    registryService.register(node);
+                    registryService.register(serviceInstance);
                 }
             }
         } catch (Exception e) {

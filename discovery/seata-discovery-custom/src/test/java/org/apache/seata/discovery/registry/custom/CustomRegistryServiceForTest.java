@@ -16,35 +16,35 @@
  */
 package org.apache.seata.discovery.registry.custom;
 
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.config.ConfigChangeListener;
 import org.apache.seata.discovery.registry.RegistryService;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 
 public class CustomRegistryServiceForTest implements RegistryService<ConfigChangeListener> {
     @Override
-    public void register(InetSocketAddress address) throws Exception {
+    public void register(ServiceInstance instance) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
+    public void unregister(ServiceInstance instance) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {
+    public void subscribe(String cluster, ConfigChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {
+    public void unsubscribe(String cluster, ConfigChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServiceInstance> lookup(String key) {
         throw new UnsupportedOperationException();
     }
 

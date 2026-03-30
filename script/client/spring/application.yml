@@ -66,6 +66,24 @@ seata:
     load-balance:
       type: XID
       virtual-nodes: 10
+    routing:
+      enabled: false
+      debug: false
+      routers: ""
+      # Metadata-router configuration examples (using numbered format)
+      # Single router: use metadata-router-1
+      # routers: metadata-router-1
+      # metadata-router-1:
+      #   enabled: true
+      #   expression: version >= 2.0
+      # Multiple routers: use metadata-router-1, metadata-router-2, etc.
+      # routers: metadata-router-1,metadata-router-2
+      # metadata-router-1:
+      #   enabled: true
+      #   expression: version >= 2.0
+      # metadata-router-2:
+      #   enabled: true
+      #   expression: env == prod
   service:
     vgroup-mapping:
       default_tx_group: default

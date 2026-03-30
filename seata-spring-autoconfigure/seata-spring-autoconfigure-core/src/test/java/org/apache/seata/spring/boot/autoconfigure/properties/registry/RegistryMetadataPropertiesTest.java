@@ -18,19 +18,37 @@ package org.apache.seata.spring.boot.autoconfigure.properties.registry;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RegistryMetadataPropertiesTest {
 
     @Test
-    void testRegistryMetadataProperties() {
-        RegistryMetadataProperties metadataProperties = new RegistryMetadataProperties();
+    public void testCommonMetadataConfiguration() {
+        RegistryMetadataProperties properties = new RegistryMetadataProperties();
 
-        metadataProperties.setExternal("external-metadata");
-        assertEquals("external-metadata", metadataProperties.getExternal());
+        properties.setEnv("prod");
+        assertEquals("prod", properties.getEnv());
 
-        metadataProperties.setExternal(null);
-        assertNull(metadataProperties.getExternal());
+        properties.setRegion("cn-north");
+        assertEquals("cn-north", properties.getRegion());
+
+        properties.setVersion("1.0.0");
+        assertEquals("1.0.0", properties.getVersion());
+
+        properties.setWeight("100");
+        assertEquals("100", properties.getWeight());
+    }
+
+    @Test
+    public void testMetadataMapOperations() {
+        RegistryMetadataProperties properties = new RegistryMetadataProperties();
+
+        properties.setMetadataValue("custom-key", "custom-value");
+        assertEquals("custom-value", properties.getMetadata().get("custom-key"));
+
+        properties.setEnv("staging");
+        properties.setRegion("us-east");
+        assertEquals("staging", properties.getMetadata().get("env"));
+        assertEquals("us-east", properties.getMetadata().get("region"));
     }
 }

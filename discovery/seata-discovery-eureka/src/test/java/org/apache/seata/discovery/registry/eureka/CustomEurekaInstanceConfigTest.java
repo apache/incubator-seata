@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -95,6 +97,18 @@ public class CustomEurekaInstanceConfigTest {
     void testGetHostNameWhenIpAddressNotSet() throws Exception {
         String ipAddress = (String) getConfigString("getIpAddress");
         assertEquals(ipAddress, config.getHostName(false));
+    }
+
+    @Test
+    void testSetMetadata() {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("key1", "value1");
+        metadata.put("key2", 123);
+
+        config.setMetadata(metadata);
+        assertEquals(2, config.getMetadata().size());
+        assertEquals("value1", config.getMetadata().get("key1"));
+        assertEquals(123, config.getMetadata().get("key2"));
     }
 
     private Object getConfigString(String method)

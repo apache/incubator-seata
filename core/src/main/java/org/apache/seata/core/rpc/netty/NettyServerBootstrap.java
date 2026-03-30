@@ -31,6 +31,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.detector.Http2Detector;
@@ -197,10 +198,13 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             Instance instance = Instance.getInstance();
             // Lines 177-180 are just for compatibility with test cases
             if (instance.getTransaction() == null) {
-                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
+                instance.setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
             }
+            InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                    instance.getTransaction().getHost(),
+                    instance.getTransaction().getPort());
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
-                registryService.register(Instance.getInstance());
+                registryService.register(new ServiceInstance(inetSocketAddress, instance.getMetadata()));
             }
             initialized.set(true);
         } catch (SocketException se) {
@@ -217,8 +221,12 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 LOGGER.info("Shutting server down, the listen port: {}", getListenPort());
             }
             if (initialized.get()) {
+                Instance instance = Instance.getInstance();
+                InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                        instance.getTransaction().getHost(),
+                        instance.getTransaction().getPort());
                 for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
-                    registryService.unregister(Instance.getInstance());
+                    registryService.unregister(new ServiceInstance(inetSocketAddress, instance.getMetadata()));
                     registryService.close();
                 }
                 // wait a few seconds for server transport

@@ -21,6 +21,7 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -31,7 +32,6 @@ import org.apache.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -189,7 +189,7 @@ class NettyClientChannelManager {
      * @param failFast
      */
     void doReconnect(String transactionServiceGroup, boolean failFast) {
-        List<String> availList;
+        List<ServiceInstance> availList;
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception e) {
@@ -234,16 +234,16 @@ class NettyClientChannelManager {
      * @param availList avail list
      * @param transactionServiceGroup transaction service group
      */
-    void doReconnect(List<String> availList, String transactionServiceGroup) {
-        Set<String> channelAddress = new HashSet<>(availList.size());
-        Map<String, Exception> failedMap = new HashMap<>();
+    void doReconnect(List<ServiceInstance> availList, String transactionServiceGroup) {
+        Set<ServiceInstance> channelAddress = new HashSet<>(availList.size());
+        Map<ServiceInstance, Exception> failedMap = new HashMap<>();
         try {
-            for (String serverAddress : availList) {
+            for (ServiceInstance serviceInstance : availList) {
                 try {
-                    acquireChannel(serverAddress);
-                    channelAddress.add(serverAddress);
+                    acquireChannel(NetUtil.toStringAddress(serviceInstance.getAddress()));
+                    channelAddress.add(serviceInstance);
                 } catch (Exception e) {
-                    failedMap.put(serverAddress, e);
+                    failedMap.put(serviceInstance, e);
                 }
             }
             if (failedMap.size() > 0) {
@@ -272,12 +272,8 @@ class NettyClientChannelManager {
             }
         } finally {
             if (CollectionUtils.isNotEmpty(channelAddress)) {
-                List<InetSocketAddress> aliveAddress = new ArrayList<>(channelAddress.size());
-                for (String address : channelAddress) {
-                    String[] array = NetUtil.splitIPPortStr(address);
-                    aliveAddress.add(new InetSocketAddress(array[0], Integer.parseInt(array[1])));
-                }
-                RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, aliveAddress);
+                RegistryFactory.getInstance()
+                        .refreshAliveLookup(transactionServiceGroup, new ArrayList<>(channelAddress));
             } else {
                 RegistryFactory.getInstance().refreshAliveLookup(transactionServiceGroup, Collections.emptyList());
             }
@@ -315,14 +311,15 @@ class NettyClientChannelManager {
         return channelFromPool;
     }
 
-    private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
-        List<InetSocketAddress> availInetSocketAddressList =
+    private List<ServiceInstance> getAvailServerList(String transactionServiceGroup) throws Exception {
+        @SuppressWarnings("unchecked")
+        List<ServiceInstance> availServiceInstanceList =
                 RegistryFactory.getInstance().lookup(transactionServiceGroup);
-        if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+        if (CollectionUtils.isEmpty(availServiceInstanceList)) {
             return Collections.emptyList();
         }
 
-        return availInetSocketAddressList.stream().map(NetUtil::toStringAddress).collect(Collectors.toList());
+        return availServiceInstanceList;
     }
 
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {

@@ -27,6 +27,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
@@ -48,6 +49,7 @@ import org.apache.seata.core.rpc.processor.Pair;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.seata.discovery.loadbalance.LoadBalanceFactory;
 import org.apache.seata.discovery.registry.RegistryFactory;
+import org.apache.seata.discovery.routing.RoutingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,10 +295,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
-            @SuppressWarnings("unchecked")
-            List<InetSocketAddress> inetSocketAddressList =
+            List<ServiceInstance> serviceInstances =
                     RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
-            address = this.doSelect(inetSocketAddressList, msg);
+
+            // Apply routing filter
+            serviceInstances = applyRoutingFilter(serviceInstances);
+
+            address = this.doSelect(serviceInstances, msg);
         } catch (Exception ex) {
             LOGGER.error("Select the address failed: {}", ex.getMessage());
         }
@@ -306,12 +311,37 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return NetUtil.toStringAddress(address);
     }
 
-    protected InetSocketAddress doSelect(List<InetSocketAddress> list, Object msg) throws Exception {
+    /**
+     * Apply routing filter
+     *
+     * @param serviceInstances original service instances list
+     * @return filtered service instances list
+     */
+    private List<ServiceInstance> applyRoutingFilter(List<ServiceInstance> serviceInstances) {
+        try {
+            if (serviceInstances == null || serviceInstances.isEmpty()) {
+                return serviceInstances;
+            }
+
+            // Get routing manager
+            RoutingManager routingManager = RoutingManager.getInstance();
+
+            // Execute routing filter
+            return routingManager.filter(serviceInstances);
+        } catch (Exception e) {
+            LOGGER.warn("Routing filter failed, using original service instances", e);
+            return serviceInstances;
+        }
+    }
+
+    protected InetSocketAddress doSelect(List<ServiceInstance> list, Object msg) throws Exception {
         if (CollectionUtils.isNotEmpty(list)) {
             if (list.size() > 1) {
-                return LoadBalanceFactory.getInstance().select(list, getXid(msg));
+                return LoadBalanceFactory.getInstance()
+                        .select(list, getXid(msg))
+                        .getAddress();
             } else {
-                return list.get(0);
+                return list.get(0).getAddress();
             }
         }
         return null;

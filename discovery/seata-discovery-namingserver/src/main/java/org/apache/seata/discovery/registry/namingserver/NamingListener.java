@@ -16,11 +16,15 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
+/**
+ * Listener interface for namingserver events.
+ */
 public interface NamingListener {
+
     /**
-     * on event
+     * Called when a namingserver event occurs.
      *
-     * @param vGroup
+     * @param vGroup the vGroup
      */
     void onEvent(String vGroup);
 }

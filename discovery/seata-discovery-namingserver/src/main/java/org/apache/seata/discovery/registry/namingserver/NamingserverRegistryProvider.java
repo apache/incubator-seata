@@ -20,8 +20,17 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.discovery.registry.RegistryProvider;
 import org.apache.seata.discovery.registry.RegistryService;
 
+/**
+ * Registry provider for namingserver.
+ */
 @LoadLevel(name = "Seata", order = 1)
 public class NamingserverRegistryProvider implements RegistryProvider {
+
+    /**
+     * Provides the namingserver registryService instance.
+     *
+     * @return the namingserver registryService
+     */
     @Override
     public RegistryService provide() {
         return NamingserverRegistryServiceImpl.getInstance();

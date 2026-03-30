@@ -23,6 +23,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
@@ -37,7 +38,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -547,8 +553,8 @@ public class AbstractNettyRemotingClientTest {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName("test-tx");
 
-        java.util.List<InetSocketAddress> list = new java.util.ArrayList<>();
-        list.add(new InetSocketAddress("127.0.0.1", 8080));
+        List<ServiceInstance> list = new ArrayList<>();
+        list.add(new ServiceInstance(new InetSocketAddress("127.0.0.1", 8080)));
 
         InetSocketAddress address = client.doSelect(list, request);
         assertNotNull(address);
@@ -1557,6 +1563,63 @@ public class AbstractNettyRemotingClientTest {
         @Override
         public NettyClientChannelManager getClientChannelManager() {
             return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
+        }
+    }
+
+    /**
+     * Test applyRoutingFilter with service instances containing different metadata
+     */
+    @Test
+    public void testApplyRoutingFilter() throws Exception {
+        System.setProperty("client.routing.enabled", "true");
+        System.setProperty("client.routing.routers", "metadata-router-1");
+        System.setProperty("client.routing.metadata-router-1.enabled", "true");
+        System.setProperty("client.routing.metadata-router-1.expression", "version >= 2.0");
+
+        try {
+            Method method = AbstractNettyRemotingClient.class.getDeclaredMethod("applyRoutingFilter", List.class);
+            method.setAccessible(true);
+
+            List<ServiceInstance> serviceInstances = new ArrayList<>();
+
+            // Instance 1: version=1.5 (should be filtered out)
+            Map<String, Object> metadata1 = new HashMap<>();
+            metadata1.put("version", "1.5");
+            metadata1.put("zone", "zone-a");
+            ServiceInstance instance1 = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8091), metadata1);
+            serviceInstances.add(instance1);
+
+            // Instance 2: version=2.0 (should pass the filter)
+            Map<String, Object> metadata2 = new HashMap<>();
+            metadata2.put("version", "2.0");
+            metadata2.put("zone", "zone-b");
+            ServiceInstance instance2 = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8092), metadata2);
+            serviceInstances.add(instance2);
+
+            // Instance 3: version=2.5 (should pass the filter)
+            Map<String, Object> metadata3 = new HashMap<>();
+            metadata3.put("version", "2.5");
+            metadata3.put("zone", "zone-a");
+            ServiceInstance instance3 = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8093), metadata3);
+            serviceInstances.add(instance3);
+
+            // Instance 4: no version metadata (should be filtered out)
+            Map<String, Object> metadata4 = new HashMap<>();
+            metadata4.put("zone", "zone-c");
+            ServiceInstance instance4 = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8094), metadata4);
+            serviceInstances.add(instance4);
+
+            List<ServiceInstance> result = (List<ServiceInstance>) method.invoke(client, serviceInstances);
+
+            assertNotNull(result);
+            assertEquals(2, result.size());
+            assertTrue(result.contains(instance2));
+            assertTrue(result.contains(instance3));
+        } finally {
+            System.clearProperty("client.routing.enabled");
+            System.clearProperty("client.routing.routers");
+            System.clearProperty("client.routing.metadata-router-1.enabled");
+            System.clearProperty("client.routing.metadata-router-1.expression");
         }
     }
 }

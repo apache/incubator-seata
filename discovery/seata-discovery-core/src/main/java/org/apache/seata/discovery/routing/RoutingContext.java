@@ -14,34 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.discovery.registry;
+package org.apache.seata.discovery.routing;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * the mock nacos RegistryService
+ * Contains various information needed during routing process
  */
-public class MockNacosRegistryService implements RegistryService<Object> {
+public class RoutingContext {
 
-    @Override
-    public void register(InetSocketAddress address) throws Exception {}
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
-    @Override
-    public void unregister(InetSocketAddress address) throws Exception {}
-
-    @Override
-    public void subscribe(String cluster, Object listener) throws Exception {}
-
-    @Override
-    public void unsubscribe(String cluster, Object listener) throws Exception {}
-
-    @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
-        return new ArrayList<>();
+    /**
+     * Set attribute
+     * @param key key
+     * @param value value
+     */
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
     }
 
-    @Override
-    public void close() throws Exception {}
+    /**
+     * Get attribute
+     * @param key key
+     * @return value
+     */
+    public Object getAttribute(String key) {
+        return attributes.get(key);
+    }
 }

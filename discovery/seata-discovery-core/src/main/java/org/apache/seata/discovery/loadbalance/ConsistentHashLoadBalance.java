@@ -37,18 +37,13 @@ import static org.apache.seata.common.DefaultValues.VIRTUAL_NODES_DEFAULT;
 public class ConsistentHashLoadBalance implements LoadBalance {
 
     /**
-     * The constant LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES.
+     * The number of virtual nodes
      */
-    public static final String LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES =
-            LoadBalanceFactory.LOAD_BALANCE_PREFIX + "virtualNodes";
-    /**
-     * The constant VIRTUAL_NODES_NUM.
-     */
-    private static final int VIRTUAL_NODES_NUM = ConfigurationFactory.getInstance()
-            .getInt(LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES, VIRTUAL_NODES_DEFAULT);
+    private static final int VIRTUAL_NODES_NUM =
+            ConfigurationFactory.getInstance().getInt("client.loadBalance.virtualNodes", VIRTUAL_NODES_DEFAULT);
 
     /**
-     * The ConsistentHashSelectorWrapper that caches a {@link ConsistentHashSelector}.
+     * Consistent hashing selector wrapper for caching selector instances
      */
     private volatile ConsistentHashSelectorWrapper selectorWrapper;
 
@@ -66,6 +61,11 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         return (T) selectorWrapper.getSelector(invokers).select(xid);
     }
 
+    /**
+     * Consistent hash selector wrapper
+     *
+     * <p>Cache selector instances and update selectors when the service instance list changes</p>
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static final class ConsistentHashSelectorWrapper {
 
@@ -103,6 +103,13 @@ public class ConsistentHashLoadBalance implements LoadBalance {
         }
     }
 
+    /**
+     * Consistent hash selector
+     *
+     * <p>Maintain the mapping from virtual nodes to actual service instances and provide consistent hash selection function</p>
+     *
+     * @param <T> ServiceInstance
+     */
     private static final class ConsistentHashSelector<T> {
 
         private final SortedMap<Long, T> virtualInvokers = new TreeMap<>();

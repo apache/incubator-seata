@@ -14,17 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.discovery.registry;
+package org.apache.seata.discovery.routing;
 
-import org.apache.seata.common.loader.LoadLevel;
+import java.util.List;
 
 /**
- * the mock nacos RegistryProvider
+ * State router interface
+ *
+ * @param <T> service instance type
  */
-@LoadLevel(name = "Nacos", order = 1)
-public class MockNacosRegistryProvider implements RegistryProvider {
-    @Override
-    public RegistryService provide() {
-        return new MockNacosRegistryService();
-    }
+public interface StateRouter<T> {
+
+    /**
+     * Execute routing
+     * @param servers service instances list
+     * @param ctx routing context
+     * @param snapshots snapshot list, used to collect snapshots from all routers
+     * @return routed service instances list
+     */
+    List<T> route(List<T> servers, RoutingContext ctx, List<RouterSnapshotNode<T>> snapshots);
+
+    /**
+     * Build snapshot
+     * @return snapshot string
+     */
+    String buildSnapshot();
 }

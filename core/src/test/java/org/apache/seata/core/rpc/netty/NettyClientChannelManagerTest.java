@@ -19,6 +19,7 @@ package org.apache.seata.core.rpc.netty;
 import io.netty.channel.Channel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -275,8 +276,8 @@ class NettyClientChannelManagerTest {
     @Test
     void testDoReconnectWithAvailableServers() {
         String transactionServiceGroup = "default_tx_group";
-        List<InetSocketAddress> availableServers = new ArrayList<>();
-        availableServers.add(new InetSocketAddress("127.0.0.1", 8091));
+        List<ServiceInstance> availableServers = new ArrayList<>();
+        availableServers.add(new ServiceInstance(new InetSocketAddress("127.0.0.1", 8091)));
 
         try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
             registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
@@ -394,9 +395,9 @@ class NettyClientChannelManagerTest {
     @Test
     void testDoReconnectWithPartialFailures() {
         String transactionServiceGroup = "default_tx_group";
-        List<InetSocketAddress> availableServers = new ArrayList<>();
-        availableServers.add(new InetSocketAddress("127.0.0.1", 8091));
-        availableServers.add(new InetSocketAddress("127.0.0.1", 8092));
+        List<ServiceInstance> availableServers = new ArrayList<>();
+        availableServers.add(new ServiceInstance(new InetSocketAddress("127.0.0.1", 8091)));
+        availableServers.add(new ServiceInstance(new InetSocketAddress("127.0.0.1", 8092)));
 
         try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
             registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);

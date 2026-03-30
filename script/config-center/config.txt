@@ -64,6 +64,24 @@ service.vgroupMapping.default_tx_group=default
 service.default.grouplist=127.0.0.1:8091
 service.disableGlobalTransaction=false
 
+# Client routing configuration
+client.routing.enabled=false
+client.routing.debug=false
+client.routing.routers=
+
+# Metadata-router configuration examples (using numbered format)
+# Single router: use metadata-router-1
+# client.routing.routers=metadata-router-1
+# client.routing.metadata-router-1.enabled=true
+# client.routing.metadata-router-1.expression=version >= 2.0
+
+# Multiple routers: use metadata-router-1, metadata-router-2, etc.
+# client.routing.routers=metadata-router-1,metadata-router-2
+# client.routing.metadata-router-1.enabled=true
+# client.routing.metadata-router-1.expression=version >= 2.0
+# client.routing.metadata-router-2.enabled=true
+# client.routing.metadata-router-2.expression=env == prod
+
 client.metadataMaxAgeMs=30000
 #Transaction rule configuration, only for the client
 client.rm.asyncCommitBufferLimit=10000

@@ -14,9 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-#apollo config
-registry.redis.serverAddr = 192.168.1.204:6379
-registry.redis.db = 6
-registry.redis.max.active = 16
-service.vgroupMapping.default_tx_group = default
+org.apache.seata.discovery.routing.router.RegionRouter
+org.apache.seata.discovery.routing.router.MetadataRouter

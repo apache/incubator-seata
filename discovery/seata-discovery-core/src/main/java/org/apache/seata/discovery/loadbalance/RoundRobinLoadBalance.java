@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * The type Round robin load balance.
- *
  */
 @LoadLevel(name = LoadBalanceFactory.ROUND_ROBIN_LOAD_BALANCE)
 public class RoundRobinLoadBalance implements LoadBalance {

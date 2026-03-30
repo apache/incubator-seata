@@ -16,8 +16,8 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.rpc.RpcStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +33,11 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-/**
- * Created by guoyao on 2019/2/14.
- */
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class LoadBalanceTest {
 
     private static final String XID = "XID";
@@ -42,155 +45,200 @@ public class LoadBalanceTest {
     /**
      * Test random load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testRandomLoadBalance_select(List<InetSocketAddress> addresses) {
+    @MethodSource("instanceProvider")
+    public void testRandomLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         int runs = 10000;
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RandomLoadBalance());
-        for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
-            Assertions.assertTrue(count > 0, "selecte one time at last");
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, new RandomLoadBalance());
+        for (ServiceInstance instance : counter.keySet()) {
+            Long count = counter.get(instance).get();
+            assertTrue(count > 0, "selecte one time at last");
         }
     }
 
     /**
-     * Test round robin load balance select.
+     * Test round-robin load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testRoundRobinLoadBalance_select(List<InetSocketAddress> addresses) {
+    @MethodSource("instanceProvider")
+    public void testRoundRobinLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         int runs = 10000;
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RoundRobinLoadBalance());
-        for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
-            Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, new RoundRobinLoadBalance());
+        for (ServiceInstance instance : counter.keySet()) {
+            Long count = counter.get(instance).get();
+            assertTrue(Math.abs(count - runs / (0f + instances.size())) < 1f, "abs diff shoud < 1");
         }
     }
 
     /**
      * Test xid load load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testXIDLoadBalance_select(List<InetSocketAddress> addresses) throws Exception {
+    @MethodSource("instanceProvider")
+    public void testXIDLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         XIDLoadBalance loadBalance = new XIDLoadBalance();
         // ipv4
-        InetSocketAddress inetSocketAddress = loadBalance.select(addresses, "127.0.0.1:8092:123456");
-        Assertions.assertNotNull(inetSocketAddress);
+        ServiceInstance serviceInstance = loadBalance.select(instances, "127.0.0.1:8092:123456");
+        assertNotNull(serviceInstance);
         // ipv6
-        inetSocketAddress = loadBalance.select(addresses, "2000:0000:0000:0000:0001:2345:6789:abcd:8092:123456");
-        Assertions.assertNotNull(inetSocketAddress);
+        serviceInstance = loadBalance.select(instances, "2000:0000:0000:0000:0001:2345:6789:abcd:8092:123456");
+        assertNotNull(serviceInstance);
         // test not found tc channel
-        inetSocketAddress = loadBalance.select(addresses, "127.0.0.1:8199:123456");
-        Assertions.assertNotEquals(inetSocketAddress.getPort(), 8199);
+        serviceInstance = loadBalance.select(instances, "127.0.0.1:8199:123456");
+        assertNotEquals(serviceInstance.getAddress().getPort(), 8199);
     }
 
     /**
-     * Test consistent hash load load balance select.
+     * Test consistent hash load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) {
+    @MethodSource("instanceProvider")
+    public void testConsistentHashLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         int runs = 10000;
         int selected = 0;
         ConsistentHashLoadBalance loadBalance = new ConsistentHashLoadBalance();
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, loadBalance);
-        for (InetSocketAddress address : counter.keySet()) {
-            if (counter.get(address).get() > 0) {
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, loadBalance);
+        for (ServiceInstance instance : counter.keySet()) {
+            if (counter.get(instance).get() > 0) {
                 selected++;
             }
         }
-        Assertions.assertEquals(1, selected, "selected must be equal to 1");
+        assertEquals(1, selected, "selected must be equal to 1");
     }
 
     /**
      * Test cached consistent hash load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testCachedConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) throws Exception {
+    @MethodSource("instanceProvider")
+    public void testCachedConsistentHashLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         ConsistentHashLoadBalance loadBalance = new ConsistentHashLoadBalance();
 
-        List<InetSocketAddress> addresses1 = new ArrayList<>(addresses);
-        loadBalance.select(addresses1, XID);
+        List<ServiceInstance> instances1 = new ArrayList<>(instances);
+        loadBalance.select(instances1, XID);
         Object o1 = getConsistentHashSelectorByReflect(loadBalance);
-        List<InetSocketAddress> addresses2 = new ArrayList<>(addresses);
-        loadBalance.select(addresses2, XID);
+        List<ServiceInstance> instances2 = new ArrayList<>(instances);
+        loadBalance.select(instances2, XID);
         Object o2 = getConsistentHashSelectorByReflect(loadBalance);
-        Assertions.assertEquals(o1, o2);
+        assertEquals(o1, o2);
 
-        List<InetSocketAddress> addresses3 = new ArrayList<>(addresses);
-        addresses3.remove(ThreadLocalRandom.current().nextInt(addresses.size()));
-        loadBalance.select(addresses3, XID);
+        List<ServiceInstance> instances3 = new ArrayList<>(instances);
+        instances3.remove(ThreadLocalRandom.current().nextInt(instances.size()));
+        loadBalance.select(instances3, XID);
         Object o3 = getConsistentHashSelectorByReflect(loadBalance);
-        Assertions.assertNotEquals(o1, o3);
+        assertNotEquals(o1, o3);
     }
 
     /**
      * Test least active load balance select.
      *
-     * @param addresses the addresses
+     * @param instances the instances
      */
     @ParameterizedTest
-    @MethodSource("addressProvider")
-    public void testLeastActiveLoadBalance_select(List<InetSocketAddress> addresses) throws Exception {
+    @MethodSource("instanceProvider")
+    public void testLeastActiveLoadBalance_select(List<ServiceInstance> instances) throws Exception {
         int runs = 10000;
-        int size = addresses.size();
+        int size = instances.size();
         for (int i = 0; i < size - 1; i++) {
-            RpcStatus.beginCount(addresses.get(i).toString());
+            RpcStatus.beginCount(instances.get(i).getAddress().toString());
         }
-        InetSocketAddress socketAddress = addresses.get(size - 1);
+        ServiceInstance targetInstance = instances.get(size - 1);
         LoadBalance loadBalance = new LeastActiveLoadBalance();
         for (int i = 0; i < runs; i++) {
-            InetSocketAddress selectAddress = loadBalance.select(addresses, XID);
-            Assertions.assertEquals(selectAddress, socketAddress);
+            ServiceInstance selectInstance = loadBalance.select(instances, XID);
+            assertEquals(selectInstance, targetInstance);
         }
-        RpcStatus.beginCount(socketAddress.toString());
-        RpcStatus.beginCount(socketAddress.toString());
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, loadBalance);
-        for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
-            if (address == socketAddress) {
-                Assertions.assertEquals(count, 0);
+        RpcStatus.beginCount(targetInstance.getAddress().toString());
+        RpcStatus.beginCount(targetInstance.getAddress().toString());
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, loadBalance);
+        for (ServiceInstance instance : counter.keySet()) {
+            Long count = counter.get(instance).get();
+            if (instance == targetInstance) {
+                assertEquals(count, 0);
             } else {
-                Assertions.assertTrue(count > 0);
+                assertTrue(count > 0);
             }
         }
     }
 
     /**
-     * Gets selected counter.
+     * Test weighted random load balance select with instances without weights.
+     * Should downgrade to random load balancing.
      *
-     * @param runs        the runs
-     * @param addresses   the addresses
-     * @param loadBalance the load balance
-     * @return the selected counter
+     * @param instances the instances without weights
      */
-    public Map<InetSocketAddress, AtomicLong> getSelectedCounter(
-            int runs, List<InetSocketAddress> addresses, LoadBalance loadBalance) {
-        Assertions.assertNotNull(loadBalance);
-        Map<InetSocketAddress, AtomicLong> counter = new ConcurrentHashMap<>();
-        for (InetSocketAddress address : addresses) {
-            counter.put(address, new AtomicLong(0));
+    @ParameterizedTest
+    @MethodSource("instanceProvider")
+    public void testWeightedRandomLoadBalance_selectWithoutWeights(List<ServiceInstance> instances) throws Exception {
+        int runs = 10000;
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, new WeightedRandomLoadBalance());
+
+        // Verify all instances are selected roughly equally (random distribution)
+        for (ServiceInstance instance : counter.keySet()) {
+            Long count = counter.get(instance).get();
+            assertTrue(count > 0);
+
+            // In random distribution, each instance should be selected roughly 1/n times
+            double expectedCount = runs / (double) instances.size();
+            double actualCount = count;
+            double tolerance = expectedCount * 0.2; // 20% tolerance
+            assertTrue(Math.abs(actualCount - expectedCount) < tolerance);
         }
-        try {
-            for (int i = 0; i < runs; i++) {
-                InetSocketAddress selectAddress = loadBalance.select(addresses, XID);
-                counter.get(selectAddress).incrementAndGet();
-            }
-        } catch (Exception e) {
-            // do nothing
+    }
+
+    /**
+     * Test weighted random load balance select with weighted instances.
+     * Verifies that instances with higher weights are selected more frequently.
+     *
+     * @param instances the instances with weights configured
+     */
+    @ParameterizedTest
+    @MethodSource("weightedInstanceProvider")
+    public void testWeightedRandomLoadBalance_selectWithWeights(List<ServiceInstance> instances) throws Exception {
+        int runs = 10000;
+        Map<ServiceInstance, AtomicLong> counter = getSelectedCounter(runs, instances, new WeightedRandomLoadBalance());
+
+        // Verify all instances are selected at least once
+        for (ServiceInstance instance : counter.keySet()) {
+            Long count = counter.get(instance).get();
+            assertTrue(count > 0);
         }
+
+        // Verify that instances with higher weights are selected more frequently
+        verifyWeightedDistribution(instances, counter);
+    }
+
+    /**
+     * Get the selection count for each ServiceInstance after running the load balancing algorithm multiple times.
+     *
+     * @param runs        the number of times to perform selection
+     * @param instances   the list of service instances to select from
+     * @param loadBalance the load balancing strategy to use
+     * @return a map where the key is the ServiceInstance and the value is the number of times it was selected
+     */
+    public Map<ServiceInstance, AtomicLong> getSelectedCounter(
+            int runs, List<ServiceInstance> instances, LoadBalance loadBalance) throws Exception {
+        assertNotNull(loadBalance);
+        Map<ServiceInstance, AtomicLong> counter = new ConcurrentHashMap<>();
+        for (ServiceInstance instance : instances) {
+            counter.put(instance, new AtomicLong(0));
+        }
+
+        for (int i = 0; i < runs; i++) {
+            ServiceInstance selectInstance = loadBalance.select(instances, XID);
+            counter.get(selectInstance).incrementAndGet();
+        }
+
         return counter;
     }
 
@@ -204,24 +252,111 @@ public class LoadBalanceTest {
         Field selectorWrapperField = ConsistentHashLoadBalance.class.getDeclaredField("selectorWrapper");
         selectorWrapperField.setAccessible(true);
         Object selectWrapper = selectorWrapperField.get(loadBalance);
-        Assertions.assertNotNull(selectWrapper);
+        assertNotNull(selectWrapper);
         Field selectorField = selectWrapper.getClass().getDeclaredField("selector");
         selectorField.setAccessible(true);
         return selectorField.get(selectWrapper);
     }
 
     /**
-     * Address provider object [ ] [ ].
+     * Provides a stream of service instance lists for parameterized tests.
      *
-     * @return Stream<List < InetSocketAddress>>
+     * @return Stream<List < ServiceInstance>> service instance lists
      */
-    static Stream<List<InetSocketAddress>> addressProvider() {
+    static Stream<List<ServiceInstance>> instanceProvider() {
         return Stream.of(Arrays.asList(
-                new InetSocketAddress("127.0.0.1", 8091),
-                new InetSocketAddress("127.0.0.1", 8092),
-                new InetSocketAddress("127.0.0.1", 8093),
-                new InetSocketAddress("127.0.0.1", 8094),
-                new InetSocketAddress("127.0.0.1", 8095),
-                new InetSocketAddress("2000:0000:0000:0000:0001:2345:6789:abcd", 8092)));
+                new ServiceInstance(new InetSocketAddress("127.0.0.1", 8091)),
+                new ServiceInstance(new InetSocketAddress("127.0.0.1", 8092)),
+                new ServiceInstance(new InetSocketAddress("127.0.0.1", 8093)),
+                new ServiceInstance(new InetSocketAddress("127.0.0.1", 8094)),
+                new ServiceInstance(new InetSocketAddress("127.0.0.1", 8095)),
+                new ServiceInstance(new InetSocketAddress("2000:0000:0000:0000:0001:2345:6789:abcd", 8092))));
+    }
+
+    /**
+     * Provides a stream of weighted service instance lists for parameterized tests.
+     *
+     * @return Stream<List<ServiceInstance>> weighted service instance lists
+     */
+    static Stream<List<ServiceInstance>> weightedInstanceProvider() {
+        return Stream.of(Arrays.asList(
+                createWeightedInstance("127.0.0.1", 8091, 2),
+                createWeightedInstance("127.0.0.1", 8092, 3),
+                createWeightedInstance("127.0.0.1", 8093, 1),
+                createWeightedInstance("127.0.0.1", 8094, 4),
+                createWeightedInstance("127.0.0.1", 8095, 2)));
+    }
+
+    /**
+     * Verify that the selection distribution roughly matches the configured weights.
+     * Instances with higher weights should be selected more frequently.
+     *
+     * @param instances the list of service instances
+     * @param counter   the selection count for each instance
+     */
+    private void verifyWeightedDistribution(List<ServiceInstance> instances, Map<ServiceInstance, AtomicLong> counter) {
+        // Calculate total weight and expected selection ratios
+        int totalWeight = 0;
+        Map<ServiceInstance, Integer> weights = new HashMap<>();
+
+        for (ServiceInstance instance : instances) {
+            int weight = getWeightFromInstance(instance);
+            weights.put(instance, weight);
+            totalWeight += weight;
+        }
+
+        if (totalWeight > 0) {
+            // Verify that instances with higher weights are selected more frequently
+            for (ServiceInstance instance : instances) {
+                int weight = weights.get(instance);
+                if (weight > 0) {
+                    double expectedRatio = (double) weight / totalWeight;
+                    double actualRatio = (double) counter.get(instance).get()
+                            / counter.values().stream()
+                                    .mapToLong(AtomicLong::get)
+                                    .sum();
+
+                    // Allow 30% tolerance for random distribution
+                    double tolerance = expectedRatio * 0.3;
+                    assertTrue(Math.abs(actualRatio - expectedRatio) < tolerance);
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract weight from ServiceInstance metadata.
+     *
+     * @param instance the service instance
+     * @return the weight value, default is 1 if not configured
+     */
+    private int getWeightFromInstance(ServiceInstance instance) {
+        if (instance.getMetadata() != null && instance.getMetadata().containsKey("weight")) {
+            Object weightObj = instance.getMetadata().get("weight");
+            if (weightObj instanceof Number) {
+                return Math.max(0, ((Number) weightObj).intValue());
+            } else if (weightObj instanceof String) {
+                try {
+                    return Math.max(0, Integer.parseInt((String) weightObj));
+                } catch (NumberFormatException e) {
+                    return 1;
+                }
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * Helper method to create a weighted service instance.
+     *
+     * @param host   the host
+     * @param port   the port
+     * @param weight the weight value
+     * @return ServiceInstance with weight configured in metadata
+     */
+    private static ServiceInstance createWeightedInstance(String host, int port, int weight) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("weight", weight);
+        return new ServiceInstance(new InetSocketAddress(host, port), metadata);
     }
 }

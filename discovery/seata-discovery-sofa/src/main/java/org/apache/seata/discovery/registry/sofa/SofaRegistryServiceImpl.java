@@ -26,6 +26,7 @@ import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClientConfigBuilder;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -74,7 +75,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP =
             new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<ServiceInstance>> CLUSTER_INSTANCE_MAP = new ConcurrentHashMap<>();
     private static Properties registryProps;
     private static volatile RegistryClient registryClient;
 
@@ -102,7 +103,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
+    public void register(ServiceInstance instance) throws Exception {
+        InetSocketAddress address = instance.getAddress();
         NetUtil.validAddress(address);
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
         PublisherRegistration publisherRegistration = new PublisherRegistration(clusterName);
@@ -112,8 +114,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
+    public void unregister(ServiceInstance instance) {
+        NetUtil.validAddress(instance.getAddress());
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
         getRegistryInstance().unregister(clusterName, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.PUBLISHER);
     }
@@ -143,7 +145,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     @Override
-    public void subscribe(String cluster, SubscriberDataObserver listener) throws Exception {
+    public void subscribe(String cluster, SubscriberDataObserver listener) {
         SubscriberRegistration subscriberRegistration = new SubscriberRegistration(cluster, listener);
         subscriberRegistration.setScopeEnum(ScopeEnum.global);
         subscriberRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
@@ -153,12 +155,12 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     @Override
-    public void unsubscribe(String cluster, SubscriberDataObserver listener) throws Exception {
+    public void unsubscribe(String cluster, SubscriberDataObserver listener) {
         getRegistryInstance().unregister(cluster, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.SUBSCRIBER);
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServiceInstance> lookup(String key) throws Exception {
         transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
@@ -169,13 +171,15 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
             CountDownLatch respondRegistries = new CountDownLatch(1);
             subscribe(clusterName, (dataId, data) -> {
                 Map<String, List<String>> instances = data.getZoneData();
-                if (instances == null && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
-                    CLUSTER_ADDRESS_MAP.remove(clusterName);
+                if (instances == null) {
+                    if (CLUSTER_INSTANCE_MAP.get(clusterName) != null) {
+                        CLUSTER_INSTANCE_MAP.remove(clusterName);
+                    }
                 } else {
-                    List<InetSocketAddress> newAddressList = flatData(instances);
-                    CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                    List<ServiceInstance> newInstanceList = flatData(instances);
+                    CLUSTER_INSTANCE_MAP.put(clusterName, newInstanceList);
 
-                    removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
+                    removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newInstanceList);
                 }
                 respondRegistries.countDown();
             });
@@ -184,18 +188,18 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
             final String property = registryProps.getProperty(PRO_ADDRESS_WAIT_TIME_KEY);
             respondRegistries.await(Integer.parseInt(property), TimeUnit.MILLISECONDS);
         }
-        return CLUSTER_ADDRESS_MAP.get(clusterName);
+        return CLUSTER_INSTANCE_MAP.get(clusterName);
     }
 
-    private List<InetSocketAddress> flatData(Map<String, List<String>> instances) {
-        List<InetSocketAddress> result = new ArrayList<>();
+    private List<ServiceInstance> flatData(Map<String, List<String>> instances) {
+        List<ServiceInstance> result = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> entry : instances.entrySet()) {
             for (String str : entry.getValue()) {
                 String ip = StringUtils.substringBeforeLast(str, HOST_SEPERATOR);
                 String port = StringUtils.substringAfterLast(str, HOST_SEPERATOR);
                 InetSocketAddress inetSocketAddress = new InetSocketAddress(ip, Integer.parseInt(port));
-                result.add(inetSocketAddress);
+                result.add(new ServiceInstance(inetSocketAddress));
             }
         }
         return result;

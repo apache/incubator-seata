@@ -31,6 +31,7 @@ import io.etcd.jetcd.lease.LeaseTimeToLiveResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.exception.ConfigNotFoundException;
@@ -162,7 +163,7 @@ public class EtcdRegistryServiceImplMockTest {
                 .thenReturn(CompletableFuture.completedFuture(new LeaseKeepAliveResponse(leaseKeepAliveResponse)));
 
         // Act
-        registryService.register(address);
+        registryService.register(new ServiceInstance(address));
 
         // verify the method to register the new service is called
         verify(mockKVClient, times(1)).put(any(), any(), any(PutOption.class));
@@ -180,7 +181,7 @@ public class EtcdRegistryServiceImplMockTest {
         when(mockKVClient.delete(any())).thenReturn(CompletableFuture.completedFuture(null));
 
         // Act
-        registryService.unregister(address);
+        registryService.unregister(new ServiceInstance(address));
 
         // Verify
         verify(mockKVClient, times(1)).delete(any());
@@ -199,9 +200,10 @@ public class EtcdRegistryServiceImplMockTest {
             mockConfig.when(ConfigurationFactory::getInstance).thenReturn(configuration);
             when(configuration.getConfig("service.vgroupMapping.default_tx_group"))
                     .thenReturn(CLUSTER_NAME);
-            List<InetSocketAddress> lookup = registryService.lookup(DEFAULT_TX_GROUP);
+            List<ServiceInstance> lookup = registryService.lookup(DEFAULT_TX_GROUP);
             List<String> lookupServices = lookup.stream()
-                    .map(address -> address.getHostString() + ":" + address.getPort())
+                    .map(instance -> instance.getAddress().getAddress().getHostAddress() + ":"
+                            + instance.getAddress().getPort())
                     .collect(Collectors.toList());
 
             // assert
@@ -217,7 +219,7 @@ public class EtcdRegistryServiceImplMockTest {
 
     @Order(4)
     @Test
-    public void testSubscribe() throws Exception {
+    public void testSubscribe() {
         Watch.Listener mockListener = mock(Watch.Listener.class);
         registryService.subscribe(CLUSTER_NAME, mockListener);
 

@@ -20,6 +20,7 @@ import com.ecwid.consul.transport.RawResponse;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.health.model.HealthService;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.exception.ConfigNotFoundException;
@@ -76,14 +77,14 @@ public class ConsulRegistryServiceImplMockTest {
     @Order(2)
     @Test
     public void testRegister() throws Exception {
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8080);
+        ServiceInstance serviceInstance = new ServiceInstance(new InetSocketAddress("127.0.0.1", 8080));
 
         when(client.agentServiceRegister(any())).thenReturn(null);
-        service.register(inetSocketAddress);
+        service.register(serviceInstance);
         verify(client).agentServiceRegister(any(), any());
 
         when(client.agentServiceDeregister(any())).thenReturn(null);
-        service.unregister(inetSocketAddress);
+        service.unregister(serviceInstance);
         verify(client).agentServiceDeregister(any(), any());
     }
 

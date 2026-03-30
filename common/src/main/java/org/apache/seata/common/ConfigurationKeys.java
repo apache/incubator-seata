@@ -264,6 +264,26 @@ public interface ConfigurationKeys {
     String DEFAULT_GLOBAL_TRANSACTION_TIMEOUT = CLIENT_TM_PREFIX + "defaultGlobalTransactionTimeout";
 
     /**
+     * The constant CLIENT_ROUTING_PREFIX.
+     */
+    String CLIENT_ROUTING_PREFIX = CLIENT_PREFIX + "routing.";
+
+    /**
+     * the constant CLIENT_ROUTING_ENABLED.
+     */
+    String CLIENT_ROUTING_ENABLED = CLIENT_ROUTING_PREFIX + "enabled";
+
+    /**
+     * the constant CLIENT_ROUTING_DEBUG.
+     */
+    String CLIENT_ROUTING_DEBUG = CLIENT_ROUTING_PREFIX + "debug";
+
+    /**
+     * the constant CLIENT_ROUTING_ROUTERS.
+     */
+    String CLIENT_ROUTING_ROUTERS = CLIENT_ROUTING_PREFIX + "routers";
+
+    /**
      * The constant SERIALIZE_FOR_RPC.
      */
     String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";

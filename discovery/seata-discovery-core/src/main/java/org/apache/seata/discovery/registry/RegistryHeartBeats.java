@@ -16,19 +16,19 @@
  */
 package org.apache.seata.discovery.registry;
 
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @since 2021/6/13 5:09 pm
+ * Responsible for managing the heartbeat mechanism for registry centers.
  */
 public class RegistryHeartBeats {
 
@@ -54,12 +54,11 @@ public class RegistryHeartBeats {
                 }
             });
 
-    public static void addHeartBeat(String registryType, InetSocketAddress serverAddress, ReRegister reRegister) {
-        addHeartBeat(registryType, serverAddress, getHeartbeatPeriod(registryType), reRegister);
+    public static void addHeartBeat(String registryType, ServiceInstance instance, ReRegister reRegister) {
+        addHeartBeat(registryType, instance, getHeartbeatPeriod(registryType), reRegister);
     }
 
-    public static void addHeartBeat(
-            String registryType, InetSocketAddress serverAddress, long period, ReRegister reRegister) {
+    public static void addHeartBeat(String registryType, ServiceInstance instance, long period, ReRegister reRegister) {
         if (!getHeartbeatEnabled(registryType)) {
             LOGGER.info("registry heartbeat disabled");
             return;
@@ -70,7 +69,7 @@ public class RegistryHeartBeats {
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("seata heartbeat re-registry.");
                         }
-                        reRegister.register(serverAddress);
+                        reRegister.register(instance);
                     } catch (Exception e) {
                         LOGGER.error("seata registry heartbeat failed!", e);
                     }
@@ -108,9 +107,9 @@ public class RegistryHeartBeats {
         /**
          * do re-register
          *
-         * @param serverAddress the server address
+         * @param instance the ServiceInstance
          * @throws Exception the exception
          */
-        void register(InetSocketAddress serverAddress) throws Exception;
+        void register(ServiceInstance instance) throws Exception;
     }
 }

@@ -101,9 +101,9 @@ public class RaftServerManager {
                 return;
             } else {
                 if (RAFT_MODE) {
-                    for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
-                        if (!(instance instanceof FileRegistryServiceImpl)
-                                && !(instance instanceof NamingserverRegistryServiceImpl)) {
+                    for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
+                        if (!(registryService instanceof FileRegistryServiceImpl)
+                                && !(registryService instanceof NamingserverRegistryServiceImpl)) {
                             throw new IllegalArgumentException("Raft store mode not support other Registration Center");
                         }
                     }

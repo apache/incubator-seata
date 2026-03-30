@@ -16,10 +16,13 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
+/**
+ * Exception thrown when namingserver registry fail.
+ */
 public class NamingRegistryException extends RuntimeException {
 
     /**
-     * naming registry exception.
+     * Creates an exception with message.
      *
      * @param message the message
      */

@@ -28,6 +28,7 @@ import org.apache.seata.common.exception.ParseEndpointException;
 import org.apache.seata.common.metadata.Metadata;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterAll;
@@ -246,7 +247,7 @@ class RaftRegistryServiceImplTest {
         RaftRegistryServiceImpl instance = RaftRegistryServiceImpl.getInstance();
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         // Should not throw exception even though it's an empty implementation
-        assertDoesNotThrow(() -> instance.register(address));
+        assertDoesNotThrow(() -> instance.register(new ServiceInstance(address)));
     }
 
     /**
@@ -257,7 +258,7 @@ class RaftRegistryServiceImplTest {
         RaftRegistryServiceImpl instance = RaftRegistryServiceImpl.getInstance();
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         // Should not throw exception even though it's an empty implementation
-        assertDoesNotThrow(() -> instance.unregister(address));
+        assertDoesNotThrow(() -> instance.unregister(new ServiceInstance(address)));
     }
 
     /**
@@ -475,7 +476,7 @@ class RaftRegistryServiceImplTest {
         MetadataResponse metadataResponse = objectMapper.readValue(jsonString, MetadataResponse.class);
         metadata.refreshMetadata("default", metadataResponse);
 
-        List<InetSocketAddress> result = instance.lookup("tx");
+        List<ServiceInstance> result = instance.lookup("tx");
 
         assertFalse(result.isEmpty(), "Should return non-empty list when metadata exists");
     }
@@ -499,7 +500,7 @@ class RaftRegistryServiceImplTest {
         MetadataResponse metadataResponse = objectMapper.readValue(jsonString, MetadataResponse.class);
         metadata.refreshMetadata("default", metadataResponse);
 
-        List<InetSocketAddress> result = instance.aliveLookup("tx");
+        List<ServiceInstance> result = instance.aliveLookup("tx");
 
         assertNotNull(result);
         if (metadata.isRaftMode() && metadata.getLeader("default") != null) {
@@ -537,12 +538,14 @@ class RaftRegistryServiceImplTest {
         initialList.add(new InetSocketAddress("localhost", 9091));
         aliveNodes.put("tx", initialList);
 
-        List<InetSocketAddress> aliveAddress = new ArrayList<>();
-        aliveAddress.add(new InetSocketAddress("localhost", 8091));
-        aliveAddress.add(new InetSocketAddress("localhost", 8092));
+        List<ServiceInstance> aliveAddress = new ArrayList<>();
+        aliveAddress.add(new ServiceInstance(new InetSocketAddress("localhost", 8091)));
+        aliveAddress.add(new ServiceInstance(new InetSocketAddress("localhost", 8092)));
 
         // Should return the previous value (initialList) from Map.put()
-        List<InetSocketAddress> result = instance.refreshAliveLookup("tx", aliveAddress);
+        @SuppressWarnings("unchecked")
+        List<InetSocketAddress> result =
+                (List<InetSocketAddress>) (List<?>) instance.refreshAliveLookup("tx", aliveAddress);
 
         assertNotNull(result, "Should return previous value from Map");
         assertEquals(1, result.size(), "Previous list should have 1 element");
@@ -785,10 +788,10 @@ class RaftRegistryServiceImplTest {
         // Setup INIT_ADDRESSES to avoid NullPointerException in queryHttpAddress
         Field initAddressesField = RaftRegistryServiceImpl.class.getDeclaredField("INIT_ADDRESSES");
         initAddressesField.setAccessible(true);
-        Map<String, List<InetSocketAddress>> initAddresses =
-                (Map<String, List<InetSocketAddress>>) initAddressesField.get(null);
-        List<InetSocketAddress> addressList = new ArrayList<>();
-        addressList.add(new InetSocketAddress("localhost", 7091));
+        Map<String, List<ServiceInstance>> initAddresses =
+                (Map<String, List<ServiceInstance>>) initAddressesField.get(null);
+        List<ServiceInstance> addressList = new ArrayList<>();
+        addressList.add(new ServiceInstance(new InetSocketAddress("localhost", 7091)));
         initAddresses.put("default", addressList);
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
@@ -817,7 +820,7 @@ class RaftRegistryServiceImplTest {
         RaftRegistryServiceImpl instance = RaftRegistryServiceImpl.getInstance();
 
         // Use a service group that doesn't have a mapping
-        List<InetSocketAddress> result = instance.lookup("nonexistent-service");
+        List<ServiceInstance> result = instance.lookup("nonexistent-service");
 
         // Should return null or empty list when cluster name cannot be resolved
         assertTrue(result == null || result.isEmpty());
@@ -923,9 +926,9 @@ class RaftRegistryServiceImplTest {
                 (Map<String, List<InetSocketAddress>>) aliveNodesField.get(null);
         aliveNodes.remove("tx");
 
-        List<InetSocketAddress> emptyList = new ArrayList<>();
+        List<ServiceInstance> emptyList = new ArrayList<>();
         // First call returns null (previous value from Map.put), which is expected
-        List<InetSocketAddress> result = instance.refreshAliveLookup("tx", emptyList);
+        List<ServiceInstance> result = instance.refreshAliveLookup("tx", emptyList);
 
         // Map.put() returns the previous value, which is null on first insert
         // This is expected behavior
@@ -1224,7 +1227,7 @@ class RaftRegistryServiceImplTest {
 
         try {
             RaftRegistryServiceImpl instance = RaftRegistryServiceImpl.getInstance();
-            List<InetSocketAddress> result = instance.lookup("emptyAddrGroup");
+            List<ServiceInstance> result = instance.lookup("emptyAddrGroup");
 
             assertTrue(result == null || result.isEmpty(), "Should return null or empty when serverAddr is empty");
         } finally {
@@ -1277,7 +1280,7 @@ class RaftRegistryServiceImplTest {
                     .thenReturn(mockMetadataResponse);
 
             RaftRegistryServiceImpl instance = RaftRegistryServiceImpl.getInstance();
-            List<InetSocketAddress> result = instance.lookup("initFlowGroup");
+            List<ServiceInstance> result = instance.lookup("initFlowGroup");
 
             assertFalse(result.isEmpty(), "Should return non-empty list after complete initialization");
         } finally {

@@ -20,7 +20,6 @@ import org.apache.seata.common.exception.NotSupportYetException;
 
 /**
  * The enum Registry type.
- *
  */
 public enum RegistryType {
     /**

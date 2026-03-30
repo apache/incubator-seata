@@ -22,6 +22,7 @@ import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
+import org.apache.seata.common.metadata.ServiceInstance;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -36,8 +37,10 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -65,7 +68,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String FILE_CONFIG_KEY_PREFIX =
             FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
 
-    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, List<ServiceInstance>> clusterAddressMap;
     private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
     private ExecutorService notifierExecutor;
     private ConcurrentMap<String, ConsulNotifier> notifiers;
@@ -123,24 +126,27 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
+    public void register(ServiceInstance instance) throws Exception {
+        InetSocketAddress address = instance.getAddress();
         NetUtil.validAddress(address);
-        doRegister(address);
-        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
+
+        doRegister(instance);
+        RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, instance, this::doRegister);
     }
 
-    private void doRegister(InetSocketAddress address) {
-        getConsulClient().agentServiceRegister(createService(address), getAclToken());
+    private void doRegister(ServiceInstance instance) {
+        getConsulClient().agentServiceRegister(createService(instance), getAclToken());
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
+    public void unregister(ServiceInstance instance) {
+        InetSocketAddress address = instance.getAddress();
         NetUtil.validAddress(address);
         getConsulClient().agentServiceDeregister(createServiceId(address), getAclToken());
     }
 
     @Override
-    public void subscribe(String cluster, ConsulListener listener) throws Exception {
+    public void subscribe(String cluster, ConsulListener listener) {
         // 1.add listener to subscribe list
         listenerMap.computeIfAbsent(cluster, key -> new HashSet<>()).add(listener);
         // 2.get healthy services
@@ -153,7 +159,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     @Override
-    public void unsubscribe(String cluster, ConsulListener listener) throws Exception {
+    public void unsubscribe(String cluster, ConsulListener listener) {
         // 1.remove notifier for the cluster
         ConsulNotifier notifier = notifiers.remove(cluster);
         // 2.stop the notifier
@@ -161,7 +167,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServiceInstance> lookup(String key) {
         transactionServiceGroup = key;
         final String cluster = getServiceGroup(key);
         if (cluster == null) {
@@ -171,7 +177,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         return lookupByCluster(cluster);
     }
 
-    private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
+    private List<ServiceInstance> lookupByCluster(String cluster) {
         if (!listenerMap.containsKey(cluster)) {
             // 1.refresh cluster
             refreshCluster(cluster);
@@ -240,10 +246,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     /**
      * create a new service
      *
-     * @param address
+     * @param instance
      * @return newService
      */
-    private NewService createService(InetSocketAddress address) {
+    private NewService createService(ServiceInstance instance) {
+        InetSocketAddress address = instance.getAddress();
+
         NewService newService = new NewService();
         newService.setId(createServiceId(address));
         newService.setName(getClusterName());
@@ -251,6 +259,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         newService.setPort(address.getPort());
         newService.setAddress(NetUtil.toIpAddress(address));
         newService.setCheck(createCheck(address));
+        newService.setMeta(ServiceInstance.getStringMap(instance.getMetadata()));
         return newService;
     }
 
@@ -314,14 +323,21 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             return;
         }
 
-        List<InetSocketAddress> addresses = services.stream()
+        List<ServiceInstance> instances = services.stream()
                 .map(HealthService::getService)
-                .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
+                .map(service -> {
+                    InetSocketAddress address = new InetSocketAddress(service.getAddress(), service.getPort());
+                    Map<String, Object> metadata = new HashMap<>();
+                    if (service.getMeta() != null) {
+                        metadata.putAll(service.getMeta());
+                    }
+                    return new ServiceInstance(address, metadata);
+                })
                 .collect(Collectors.toList());
 
-        clusterAddressMap.put(cluster, addresses);
+        clusterAddressMap.put(cluster, instances);
 
-        removeOfflineAddressesIfNecessary(transactionServiceGroup, cluster, addresses);
+        removeOfflineAddressesIfNecessary(transactionServiceGroup, cluster, instances);
     }
 
     /**

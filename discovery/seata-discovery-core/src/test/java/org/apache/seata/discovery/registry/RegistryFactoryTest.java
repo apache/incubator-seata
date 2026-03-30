@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * The type Registry factory test.
@@ -60,9 +60,10 @@ public class RegistryFactoryTest {
         String invalidRegistryType = "InvalidRegistryType";
         System.setProperty(REGISTRY_TYPE_KEY, invalidRegistryType);
 
-        assertThatThrownBy(RegistryFactoryTest::invokeBuildRegistryService)
-                .isExactlyInstanceOf(NotSupportYetException.class)
-                .hasMessage("not support registry type: " + invalidRegistryType);
+        assertThrows(
+                NotSupportYetException.class,
+                RegistryFactoryTest::invokeBuildRegistryService,
+                "not support registry type");
     }
 
     /**

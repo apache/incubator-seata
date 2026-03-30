@@ -317,6 +317,51 @@
       "type": "java.lang.Integer",
       "sourceType": "org.apache.seata.saga.engine.impl.DefaultStateMachineConfig",
       "defaultValue": 1800000
+    },
+    {
+      "name": "seata.client.routing.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable routing feature.",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.client.routing.debug",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable routing debug mode.",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.client.routing.metadata-routers",
+      "type": "java.util.Map<java.lang.String,org.apache.seata.spring.boot.autoconfigure.properties.client.MetadataRouterConfig>",
+      "description": "Dynamic metadata router configurations. Key: router name (e.g. metadata-router-1, metadata-router-2, custom-router), Value: router configuration",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties"
+    },
+    {
+      "name": "seata.client.routing.routers",
+      "type": "java.lang.String",
+      "description": "Comma-separated list of router names to load. Supports metadata-router-1, metadata-router-2, etc., and spi- prefixed routers",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties"
+    },
+    {
+      "name": "seata.client.routing.metadata-router-*",
+      "type": "org.apache.seata.spring.boot.autoconfigure.properties.client.MetadataRouterConfig",
+      "description": "Numbered metadata router configuration. Replace * with any number (e.g., metadata-router-1, metadata-router-2). For single router, use metadata-router-1. For multiple routers, use metadata-router-1, metadata-router-2, etc.",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RoutingProperties"
+    },
+    {
+      "name": "seata.client.routing.metadata-router-*.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable the numbered metadata router",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.MetadataRouterConfig",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.client.routing.metadata-router-*.expression",
+      "type": "java.lang.String",
+      "description": "Expression for the numbered metadata router",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.MetadataRouterConfig"
     }
   ],
   "hints": [
@@ -362,6 +407,9 @@
         },
         {
           "value": "RandomLoadBalance"
+        },
+        {
+          "value": "WeightedRandomLoadBalance"
         }
       ]
     },
@@ -438,6 +486,56 @@
           "parameters": {
             "target": "java.nio.charset.Charset"
           }
+        }
+      ]
+    },
+    {
+      "name": "seata.client.routing.routers",
+      "values": [
+        {
+          "value": "metadata-router-1",
+          "description": "First metadata router (use for single router)"
+        },
+        {
+          "value": "metadata-router-2",
+          "description": "Second metadata router"
+        },
+        {
+          "value": "metadata-router-1,metadata-router-2",
+          "description": "Multiple metadata routers"
+        },
+        {
+          "value": "spi-custom",
+          "description": "Custom SPI router implementation"
+        },
+        {
+          "value": "spi-region",
+          "description": "Region-based SPI router implementation"
+        }
+      ]
+    },
+    {
+      "name": "seata.client.routing.metadata-router-*.expression",
+      "values": [
+        {
+          "value": "env == prod",
+          "description": "Route to production environment only"
+        },
+        {
+          "value": "region == cn-north",
+          "description": "Route to North China region only"
+        },
+        {
+          "value": "version >= 2.0",
+          "description": "Route to version 2.0 or higher"
+        },
+        {
+          "value": "env == prod && region == cn-north",
+          "description": "Route to production environment in North China region"
+        },
+        {
+          "value": "(env == prod && region == cn-north) || (env == staging && region == us-east)",
+          "description": "Complex routing with OR logic"
         }
       ]
     }
