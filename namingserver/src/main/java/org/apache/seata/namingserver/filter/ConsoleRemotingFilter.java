@@ -118,13 +118,15 @@ public class ConsoleRemotingFilter implements Filter {
                                 return;
                             }
                             try {
-                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
-                                        URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
                                 responseEntity.getHeaders().forEach((key, value) -> {
-                                    value.forEach(v -> response.addHeader(key, v));
+                                    if (!"Content-Type".equalsIgnoreCase(key)) {
+                                        value.forEach(v -> response.addHeader(key, v));
+                                    }
                                 });
-                                response.setStatus(
-                                        responseEntity.getStatusCode().value());
+                                response.setContentType("application/json;charset=UTF-8");
+                                response.setHeader("X-Content-Type-Options", "nosniff");
+                                response.setStatus(responseEntity.getStatusCode().value());
                                 Optional.ofNullable(responseEntity.getBody()).ifPresent(body -> {
                                     try (ServletOutputStream outputStream = response.getOutputStream()) {
                                         outputStream.write(body);
