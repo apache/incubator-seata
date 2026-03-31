@@ -108,7 +108,14 @@ public class ConsoleRemotingFilter implements Filter {
                                     .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));
 
                             // Create the HttpEntity with headers and body
-                            HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
+                            HttpMethod httpMethod;
+                            try {
+                                httpMethod = HttpMethod.valueOf(request.getMethod());
+                            } catch (IllegalArgumentException ex) {
+                                LOGGER.error("Unsupported HTTP method: {}", request.getMethod(), ex);
+                                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+                                return;
+                            }
 
                             // GET/HEAD methods should not have a body; other methods may include a body as needed.
                             HttpEntity<byte[]> httpEntity;
@@ -119,17 +126,10 @@ public class ConsoleRemotingFilter implements Filter {
                             } else {
                                 byte[] body = request.getCachedBody();
                                 httpEntity = (body == null || body.length == 0)
-                                        ? new HttpEntity<>(headers)
+                                        ? new HttpEntity<>(new byte[0], headers)
                                         : new HttpEntity<>(body, headers);
                             }
 
-                            try {
-                                httpMethod = HttpMethod.valueOf(request.getMethod());
-                            } catch (IllegalArgumentException ex) {
-                                LOGGER.error("Unsupported HTTP method: {}", request.getMethod(), ex);
-                                response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                                return;
-                            }
                             try {
                                 ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
                                 responseEntity.getHeaders().forEach((key, value) -> {
