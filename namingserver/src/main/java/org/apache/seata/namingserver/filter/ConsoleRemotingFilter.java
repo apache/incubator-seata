@@ -140,9 +140,13 @@ public class ConsoleRemotingFilter implements Filter {
                                 httpEntity = new HttpEntity<>(headers); // headers-only
                             } else {
                                 byte[] body = request.getCachedBody();
-                                httpEntity = (body == null || body.length == 0)
-                                        ? new HttpEntity<>(new byte[0], headers)
-                                        : new HttpEntity<>(body, headers);
+                                if (body == null || body.length == 0) {
+                                    headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                    headers.remove(HttpHeaders.TRANSFER_ENCODING);
+                                    httpEntity = new HttpEntity<>(headers); // headers-only for empty body
+                                } else {
+                                    httpEntity = new HttpEntity<>(body, headers);
+                                }
                             }
 
                             try {
