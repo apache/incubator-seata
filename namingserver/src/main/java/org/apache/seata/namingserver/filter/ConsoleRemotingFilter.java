@@ -57,7 +57,7 @@ public class ConsoleRemotingFilter implements Filter {
 
     private final Pattern urlPattern = Pattern.compile(CONSOLE_PATTERN);
 
-    private final Logger LOGGER = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
 
     public ConsoleRemotingFilter(NamingManager namingManager, RestTemplate restTemplate) {
         this.namingManager = namingManager;
