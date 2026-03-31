@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -63,6 +62,21 @@ public class ConsoleRemotingFilter implements Filter {
     public ConsoleRemotingFilter(NamingManager namingManager, RestTemplate restTemplate) {
         this.namingManager = namingManager;
         this.restTemplate = restTemplate;
+    }
+
+    /**
+     * Check whether the proxied Content-Type is safe (will not be rendered as
+     * HTML / XML by the browser).  Only allow known-safe MIME types through;
+     * everything else is replaced with {@code application/json}.
+     */
+    private static boolean isSafeContentType(String contentType) {
+        String lower = contentType.toLowerCase();
+        return !lower.contains("text/html")
+                && !lower.contains("application/xhtml")
+                && !lower.contains("text/xml")
+                && !lower.contains("image/svg")
+                && !lower.contains("text/javascript")
+                && !lower.contains("application/javascript");
     }
 
     @Override
@@ -133,12 +147,23 @@ public class ConsoleRemotingFilter implements Filter {
 
                             try {
                                 ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                // Copy headers from proxied response, skipping hop-by-hop and
+                                // headers we manage ourselves to prevent XSS via Content-Type manipulation
                                 responseEntity.getHeaders().forEach((key, value) -> {
-                                    value.forEach(v -> response.addHeader(key, v));
+                                    if (!HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TRANSFER_ENCODING.equalsIgnoreCase(key)
+                                            && !"X-Content-Type-Options".equalsIgnoreCase(key)) {
+                                        value.forEach(v -> response.addHeader(key, v));
+                                    }
                                 });
+                                // Force a safe Content-Type: reject HTML/XML types that could
+                                // execute scripts; fall back to application/json
                                 String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-                                if (response.getContentType() == null) {
-                                    response.setContentType(Objects.requireNonNullElse(proxiedContentType, "application/json;charset=UTF-8"));
+                                if (proxiedContentType != null && isSafeContentType(proxiedContentType)) {
+                                    response.setContentType(proxiedContentType);
+                                } else {
+                                    response.setContentType("application/json;charset=UTF-8");
                                 }
                                 response.setHeader("X-Content-Type-Options", "nosniff");
                                 response.setStatus(responseEntity.getStatusCode().value());
