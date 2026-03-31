@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -137,11 +138,7 @@ public class ConsoleRemotingFilter implements Filter {
                                 });
                                 String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
                                 if (response.getContentType() == null) {
-                                    if (proxiedContentType != null) {
-                                        response.setContentType(proxiedContentType);
-                                    } else {
-                                        response.setContentType("application/json;charset=UTF-8");
-                                    }
+                                    response.setContentType(Objects.requireNonNullElse(proxiedContentType, "application/json;charset=UTF-8"));
                                 }
                                 response.setHeader("X-Content-Type-Options", "nosniff");
                                 response.setStatus(responseEntity.getStatusCode().value());
