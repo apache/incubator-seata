@@ -18,8 +18,6 @@ package org.apache.seata.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -28,7 +26,6 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.seata.common.executor.HttpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +43,7 @@ public class HttpClientUtil {
 
     private static final Map<Integer /*timeout*/, OkHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
-    private static final Map<Integer /*timeout*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
+    private static final Map<Integer /*readTimeoutSeconds*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -54,11 +51,25 @@ public class HttpClientUtil {
 
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
+    /**
+     * Fixed connection timeout for HTTP/2 watch connections (in seconds).
+     * Set to 10 seconds for fast failure when the server is unreachable.
+     */
+    private static final int HTTP2_WATCH_CONNECT_TIMEOUT_SECONDS = 10;
+
+    /**
+     * Default read timeout for HTTP/2 watch connections (in seconds).
+     * Used when no custom read timeout is specified. A finite value avoids indefinite blocking
+     * when the server dies without closing the TCP connection (e.g. crash). Clients can reconnect
+     * after timeout. Use overloaded watch methods with readTimeoutSeconds to customize.
+     */
+    private static final int HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT = 300;
+
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
                 try {
-                    // delay 3s, make sure unregister http request send successfully
+                    // Delay 3 seconds to ensure unregister HTTP requests are sent successfully
                     Thread.sleep(3000);
                     client.dispatcher().executorService().shutdown();
                     // Wait for up to 3 seconds for in-flight requests to complete
@@ -133,52 +144,6 @@ public class HttpClientUtil {
         return client.newCall(request).execute();
     }
 
-    public static void doPostWithHttp2(
-            String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
-        doPostWithHttp2(url, params, headers, callback, 10000);
-    }
-
-    public static void doPostWithHttp2(
-            String url,
-            Map<String, String> params,
-            Map<String, String> headers,
-            HttpCallback<Response> callback,
-            int timeoutMillis) {
-        try {
-            String contentType = headers != null ? headers.get("Content-Type") : "";
-            RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildRequest(url, headers, requestBody, "POST");
-            OkHttpClient client = createHttp2ClientWithTimeout(timeoutMillis);
-            executeAsync(client, request, callback);
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
-            callback.onFailure(e);
-        }
-    }
-
-    public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        // default timeout 10000 milliseconds
-        doPostWithHttp2(url, body, headers, callback, 10000);
-    }
-
-    public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeout) {
-        RequestBody requestBody = StringUtils.isNotBlank(body)
-                ? RequestBody.create(body, MEDIA_TYPE_JSON)
-                : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
-        Request request = buildRequest(url, headers, requestBody, "POST");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
-        executeAsync(client, request, callback);
-    }
-
-    public static void doGetWithHttp2(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
-        Request request = buildRequest(url, headers, null, "GET");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
-        executeAsync(client, request, callback);
-    }
-
     private static RequestBody createRequestBody(Map<String, String> params, String contentType)
             throws JsonProcessingException {
         if (params == null || params.isEmpty()) {
@@ -200,16 +165,6 @@ public class HttpClientUtil {
     private static OkHttpClient createHttp1ClientWithTimeout(int timeoutMillis) {
         return HTTP_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
                 // Use HTTP/1.1 (default protocol, no need to specify)
-                .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
-                .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
-                .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
-                .build());
-    }
-
-    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutMillis) {
-        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
-                // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
-                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
                 .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
@@ -265,25 +220,138 @@ public class HttpClientUtil {
         return urlBuilder.toString();
     }
 
-    private static void executeAsync(OkHttpClient client, Request request, final HttpCallback<Response> callback) {
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                try {
-                    callback.onSuccess(response);
-                } finally {
-                    response.close();
-                }
-            }
+    /**
+     * Create an HTTP/2 client for watch connections.
+     * This client is configured for long-lived connections to receive Server-Sent Events (SSE).
+     * The client instances are cached and reused by read timeout (key) to improve performance.
+     * Connect timeout is fixed at 10 seconds.
+     *
+     * @param readTimeoutSeconds read timeout in seconds (0 = infinite; finite value avoids indefinite block on server crash)
+     * @return configured OkHttpClient instance (cached and reused)
+     */
+    private static OkHttpClient createHttp2WatchClient(int readTimeoutSeconds) {
+        return HTTP2_CLIENT_MAP.computeIfAbsent(readTimeoutSeconds, k -> new OkHttpClient.Builder()
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(HTTP2_WATCH_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .readTimeout(readTimeoutSeconds, TimeUnit.SECONDS)
+                .writeTimeout(HTTP2_WATCH_CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                .build());
+    }
 
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (call.isCanceled()) {
-                    callback.onCancelled();
-                } else {
-                    callback.onFailure(e);
-                }
-            }
-        });
+    public static <T> SeataHttpWatch<T> watch(String url, Map<String, String> headers, Class<T> eventType)
+            throws IOException {
+        return watch(url, headers, null, "GET", eventType, HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT);
+    }
+
+    public static <T> SeataHttpWatch<T> watch(String url, Class<T> eventType) throws IOException {
+        return watch(url, null, null, "GET", eventType, HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT);
+    }
+
+    /**
+     * Execute a watch request with specified HTTP method and read timeout.
+     * This method creates a long-lived HTTP/2 connection to receive Server-Sent Events (SSE).
+     *
+     * @param url the URL to watch (must not be null or blank)
+     * @param headers HTTP headers
+     * @param requestBody request body (optional)
+     * @param method HTTP method (GET, POST, PUT)
+     * @param eventType the class type for deserializing event data
+     * @param readTimeoutSeconds read timeout in seconds (0 = infinite)
+     * @param <T> the event data type
+     * @return a Watch instance for receiving SSE events
+     * @throws IOException if the request fails
+     * @throws IllegalArgumentException if the URL is null or blank
+     */
+    private static <T> SeataHttpWatch<T> watch(
+            String url,
+            Map<String, String> headers,
+            RequestBody requestBody,
+            String method,
+            Class<T> eventType,
+            int readTimeoutSeconds)
+            throws IOException {
+
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("URL must not be null or blank");
+        }
+
+        OkHttpClient client = createHttp2WatchClient(readTimeoutSeconds);
+        Request request = buildHttp2WatchRequest(url, headers, requestBody, method);
+        return SeataHttpWatch.createWatch(client, request, eventType);
+    }
+
+    public static <T> SeataHttpWatch<T> watch(
+            String url, Map<String, String> headers, Class<T> eventType, int readTimeoutSeconds) throws IOException {
+        return watch(url, headers, null, "GET", eventType, readTimeoutSeconds);
+    }
+
+    public static <T> SeataHttpWatch<T> watch(String url, Class<T> eventType, int readTimeoutSeconds)
+            throws IOException {
+        return watch(url, null, null, "GET", eventType, readTimeoutSeconds);
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url, Map<String, String> params, Map<String, String> headers, Class<T> eventType)
+            throws IOException {
+        try {
+            String contentType = headers != null ? headers.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            return watch(url, headers, requestBody, "POST", eventType, HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to create request body", e);
+            throw new IOException("Failed to create request body", e);
+        }
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url,
+            Map<String, String> params,
+            Map<String, String> headers,
+            Class<T> eventType,
+            int readTimeoutSeconds)
+            throws IOException {
+        try {
+            String contentType = headers != null ? headers.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            return watch(url, headers, requestBody, "POST", eventType, readTimeoutSeconds);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to create request body", e);
+            throw new IOException("Failed to create request body", e);
+        }
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(String url, Map<String, String> params, Class<T> eventType)
+            throws IOException {
+        return watchPost(url, params, null, eventType);
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url, Map<String, String> params, Class<T> eventType, int readTimeoutSeconds) throws IOException {
+        return watchPost(url, params, null, eventType, readTimeoutSeconds);
+    }
+
+    private static Request buildHttp2WatchRequest(
+            String url, Map<String, String> headers, RequestBody requestBody, String method) {
+        Headers.Builder headerBuilder = new Headers.Builder();
+        if (headers != null) {
+            headers.forEach(headerBuilder::add);
+        }
+        // Always add Accept header for SSE
+        headerBuilder.add("Accept", "text/event-stream");
+
+        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
+
+        if ("POST".equals(method) && requestBody != null) {
+            requestBuilder.post(requestBody);
+        } else if ("PUT".equals(method) && requestBody != null) {
+            requestBuilder.put(requestBody);
+        } else if ("GET".equals(method)) {
+            requestBuilder.get();
+        } else {
+            // Default to GET if method is not specified or not supported
+            requestBuilder.get();
+        }
+
+        return requestBuilder.build();
     }
 }

@@ -19,9 +19,6 @@ package org.apache.seata.rm.datasource.exec;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.util.JdbcConstants;
 import com.google.common.collect.Lists;
 import org.apache.seata.rm.datasource.ConnectionProxy;
@@ -29,8 +26,8 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.mock.MockDriver;
+import org.apache.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -117,30 +114,26 @@ public class DeleteExecutorTest {
             throw new RuntimeException("init failed");
         }
         String sql = "delete from table_delete_executor_test where id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         deleteExecutor = new DeleteExecutor(
                 statementProxy,
                 (statement, args) -> {
                     return null;
                 },
-                recognizer);
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
     }
 
     private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection().getConnection();
-        if (connection instanceof DruidStatementConnection) {
-            return ((DruidStatementConnection) connection).getConnection();
-        }
-        return connection;
+        return connection.unwrap(Connection.class);
     }
 
     @Test
     public void testBeforeAndAfterImage() throws SQLException {
         String sql = "delete from table_delete_executor_test";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -151,9 +144,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableAlias() throws SQLException {
         String sql = "delete from table_delete_executor_test t where t.id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -164,9 +158,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableSchema() throws SQLException {
         String sql = "delete from seata.table_delete_executor_test where id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -177,9 +172,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableSchemaAndTableAlias() throws SQLException {
         String sql = "delete from seata.table_delete_executor_test t where t.id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -190,9 +186,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableSchemaQuote() throws SQLException {
         String sql = "delete from `seata`.table_delete_executor_test where id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -203,9 +200,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableSchemaAndTableNameQuote() throws SQLException {
         String sql = "delete from seata.`table_delete_executor_test` where id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -216,9 +214,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableSchemaQuoteAndTableNameQuote() throws SQLException {
         String sql = "delete from `seata`.`table_delete_executor_test` where id = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -229,9 +228,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithColumnQuote() throws SQLException {
         String sql = "delete from table_delete_executor_test where `id` = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -242,9 +242,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithUpperColumn() throws SQLException {
         String sql = "delete from table_delete_executor_test where ID = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -255,9 +256,11 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithTableAliasAndUpperColumn() throws SQLException {
         String sql = "delete from table_delete_executor_test t where t.ID = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
@@ -268,9 +271,10 @@ public class DeleteExecutorTest {
     @Test
     public void testBeforeAndAfterImageWithKeyword() throws SQLException {
         String sql = "delete from table_delete_executor_test where `or` = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
-        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
+        deleteExecutor = new DeleteExecutor(
+                statementProxy,
+                (statement, args) -> null,
+                SQLVisitorFactory.get(sql, JdbcConstants.MYSQL.name()).get(0));
 
         TableRecords beforeImage = deleteExecutor.beforeImage();
         TableRecords afterImage = deleteExecutor.afterImage(beforeImage);
