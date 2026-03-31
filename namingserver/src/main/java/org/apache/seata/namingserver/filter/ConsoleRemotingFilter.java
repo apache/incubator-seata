@@ -135,8 +135,13 @@ public class ConsoleRemotingFilter implements Filter {
                                 responseEntity.getHeaders().forEach((key, value) -> {
                                     value.forEach(v -> response.addHeader(key, v));
                                 });
+                                String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
                                 if (response.getContentType() == null) {
-                                    response.setContentType("application/json;charset=UTF-8");
+                                    if (proxiedContentType != null) {
+                                        response.setContentType(proxiedContentType);
+                                    } else {
+                                        response.setContentType("application/json;charset=UTF-8");
+                                    }
                                 }
                                 response.setHeader("X-Content-Type-Options", "nosniff");
                                 response.setStatus(responseEntity.getStatusCode().value());
