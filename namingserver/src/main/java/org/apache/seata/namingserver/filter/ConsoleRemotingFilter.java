@@ -57,7 +57,7 @@ public class ConsoleRemotingFilter implements Filter {
 
     private final Pattern urlPattern = Pattern.compile(CONSOLE_PATTERN);
 
-    private final Logger logger = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
 
     public ConsoleRemotingFilter(NamingManager namingManager, RestTemplate restTemplate) {
         this.namingManager = namingManager;
@@ -108,12 +108,25 @@ public class ConsoleRemotingFilter implements Filter {
                                     .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));
 
                             // Create the HttpEntity with headers and body
-                            HttpEntity<byte[]> httpEntity = new HttpEntity<>(request.getCachedBody(), headers);
-                            HttpMethod httpMethod;
+                            HttpMethod httpMethod = HttpMethod.valueOf(request.getMethod());
+
+                            // GET/HEAD methods should not have a body; other methods may include a body as needed.
+                            HttpEntity<byte[]> httpEntity;
+                            if (HttpMethod.GET.equals(httpMethod) || HttpMethod.HEAD.equals(httpMethod)) {
+                                headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                headers.remove(HttpHeaders.TRANSFER_ENCODING);
+                                httpEntity = new HttpEntity<>(headers); // headers-only
+                            } else {
+                                byte[] body = request.getCachedBody();
+                                httpEntity = (body == null || body.length == 0)
+                                        ? new HttpEntity<>(headers)
+                                        : new HttpEntity<>(body, headers);
+                            }
+
                             try {
                                 httpMethod = HttpMethod.valueOf(request.getMethod());
                             } catch (IllegalArgumentException ex) {
-                                logger.error("Unsupported HTTP method: {}", request.getMethod(), ex);
+                                LOGGER.error("Unsupported HTTP method: {}", request.getMethod(), ex);
                                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                                 return;
                             }
@@ -132,11 +145,11 @@ public class ConsoleRemotingFilter implements Filter {
                                         outputStream.write(body);
                                         outputStream.flush();
                                     } catch (IOException e) {
-                                        logger.error(e.getMessage(), e);
+                                        LOGGER.error(e.getMessage(), e);
                                     }
                                 });
                             } catch (Exception ex) {
-                                logger.error(ex.getMessage(), ex);
+                                LOGGER.error(ex.getMessage(), ex);
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
                             return;
