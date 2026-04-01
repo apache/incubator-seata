@@ -40,9 +40,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -66,17 +66,46 @@ public class ConsoleRemotingFilter implements Filter {
 
     /**
      * Check whether the proxied Content-Type is safe (will not be rendered as
-     * HTML / XML by the browser).  Only allow known-safe MIME types through;
-     * everything else is replaced with {@code application/json}.
+     * HTML / XML by the browser).  Only allow known-safe MIME types through
+     * (allowlist approach); everything else is replaced with
+     * {@code application/json}.
      */
     private static boolean isSafeContentType(String contentType) {
+        if (contentType == null) {
+            return false;
+        }
         String lower = contentType.toLowerCase();
-        return !lower.contains("text/html")
-                && !lower.contains("application/xhtml")
-                && !lower.contains("text/xml")
-                && !lower.contains("image/svg")
-                && !lower.contains("text/javascript")
-                && !lower.contains("application/javascript");
+        // Extract the primary MIME type (ignore parameters such as charset)
+        int semicolonIdx = lower.indexOf(';');
+        String mimeType = (semicolonIdx >= 0 ? lower.substring(0, semicolonIdx) : lower).trim();
+        return "application/json".equals(mimeType)
+                || "text/plain".equals(mimeType)
+                || "application/octet-stream".equals(mimeType);
+    }
+
+    /**
+     * Validate that the given byte array looks like well-formed JSON
+     * (starts with '{' or '[' after trimming leading whitespace).
+     * This is a lightweight sanity check to prevent forwarding
+     * arbitrary HTML / script payloads disguised as JSON.
+     */
+    private static boolean looksLikeJson(byte[] body) {
+        if (body == null || body.length == 0) {
+            return true;
+        }
+        int i = 0;
+        // skip leading whitespace
+        while (i < body.length && (body[i] == ' ' || body[i] == '\t'
+                || body[i] == '\r' || body[i] == '\n')) {
+            i++;
+        }
+        if (i >= body.length) {
+            return true;
+        }
+        byte first = body[i];
+        return first == '{' || first == '[' || first == '"'
+                || first == 't' || first == 'f' || first == 'n'
+                || (first >= '0' && first <= '9') || first == '-';
     }
 
     @Override
@@ -166,21 +195,30 @@ public class ConsoleRemotingFilter implements Filter {
                                 // Force a safe Content-Type: reject HTML/XML types that could
                                 // execute scripts; fall back to application/json
                                 String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+                                String safeContentType;
                                 if (proxiedContentType != null && isSafeContentType(proxiedContentType)) {
-                                    response.setContentType(proxiedContentType);
+                                    safeContentType = proxiedContentType;
                                 } else {
-                                    response.setContentType("application/json;charset=UTF-8");
+                                    safeContentType = "application/json;charset=UTF-8";
                                 }
+                                response.setContentType(safeContentType);
                                 response.setHeader("X-Content-Type-Options", "nosniff");
                                 response.setStatus(responseEntity.getStatusCode().value());
-                                Optional.ofNullable(responseEntity.getBody()).ifPresent(body -> {
-                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
-                                        outputStream.write(body);
-                                        outputStream.flush();
-                                    } catch (IOException e) {
-                                        LOGGER.error(e.getMessage(), e);
+                                byte[] responseBody = responseEntity.getBody();
+                                if (responseBody != null && responseBody.length > 0) {
+                                    // For JSON content type, validate that the body actually looks
+                                    // like JSON to prevent XSS via crafted upstream responses
+                                    if (safeContentType.toLowerCase().contains("application/json")
+                                            && !looksLikeJson(responseBody)) {
+                                        response.setContentType("application/json;charset=UTF-8");
+                                        responseBody = "{\"error\":\"Upstream returned invalid response body\"}"
+                                                .getBytes(StandardCharsets.UTF_8);
                                     }
-                                });
+                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                                        outputStream.write(responseBody);
+                                        outputStream.flush();
+                                    }
+                                }
                             } catch (Exception ex) {
                                 LOGGER.error(ex.getMessage(), ex);
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
