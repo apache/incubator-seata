@@ -36,6 +36,7 @@ public final class ServerLoadBalanceFactory {
     public static final String SERVER_LB_ENABLED = SERVER_LB_PREFIX + "%s.enabled";
     public static final String SERVER_LB_TYPE = SERVER_LB_PREFIX + "%s.type";
     public static final String DEFAULT_SERVER_AT_LB_TYPE = "RoundRobinLoadBalance";
+    public static final String XID_SERVER_LB_TYPE = "XID";
     private static final AtomicBoolean AT_DEFAULT_ENABLE_LOGGED = new AtomicBoolean(false);
     private static final AtomicBoolean AT_DEFAULT_TYPE_LOGGED = new AtomicBoolean(false);
 
@@ -79,6 +80,17 @@ public final class ServerLoadBalanceFactory {
                         buildTypeKey(branchType));
             }
             type = DEFAULT_SERVER_AT_LB_TYPE;
+        }
+        if (StringUtils.equalsIgnoreCase(type, XID_SERVER_LB_TYPE)) {
+            if (branchType == BranchType.AT) {
+                LOGGER.warn(
+                        "Server side XID load balance is removed for AT branch type, fallback to [{}]",
+                        DEFAULT_SERVER_AT_LB_TYPE);
+                type = DEFAULT_SERVER_AT_LB_TYPE;
+            } else {
+                LOGGER.warn("Server side XID load balance is removed for {} branch type", branchType);
+                return null;
+            }
         }
         if (branchType == BranchType.TCC && StringUtils.isBlank(type)) {
             return null;

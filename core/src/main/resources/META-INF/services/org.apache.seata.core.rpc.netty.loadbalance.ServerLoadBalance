@@ -1,5 +1,4 @@
 org.apache.seata.core.rpc.netty.loadbalance.ServerRandomLoadBalance
-org.apache.seata.core.rpc.netty.loadbalance.ServerXidLoadBalance
 org.apache.seata.core.rpc.netty.loadbalance.ServerRoundRobinLoadBalance
 org.apache.seata.core.rpc.netty.loadbalance.ServerLeastActiveLoadBalance
 org.apache.seata.core.rpc.netty.loadbalance.ServerConsistentHashLoadBalance

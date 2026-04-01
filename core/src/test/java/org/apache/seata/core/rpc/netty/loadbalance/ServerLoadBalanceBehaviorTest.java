@@ -41,18 +41,6 @@ import static org.mockito.Mockito.when;
 public class ServerLoadBalanceBehaviorTest {
 
     @Test
-    public void testServerXidLoadBalanceShouldPreferExactAddressFromXid() {
-        RpcContext target = buildRpcContext("app:10.10.10.10:8091", "10.10.10.10", 8091);
-        RpcContext other = buildRpcContext("app:10.10.10.11:8091", "10.10.10.11", 8091);
-        List<RpcContext> candidates = Arrays.asList(other, target);
-
-        ServerXidLoadBalance loadBalance = new ServerXidLoadBalance();
-        RpcContext selected = loadBalance.select(candidates, "10.10.10.10:8091:123456");
-
-        Assertions.assertSame(target, selected);
-    }
-
-    @Test
     public void testConsistentHashFallbackKeyShouldBeOrderStable() {
         RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
         RpcContext c2 = buildRpcContext("app:10.10.10.2:8091", "10.10.10.2", 8091);

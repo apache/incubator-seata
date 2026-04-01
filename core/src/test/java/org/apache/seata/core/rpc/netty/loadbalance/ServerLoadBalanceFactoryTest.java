@@ -57,4 +57,20 @@ public class ServerLoadBalanceFactoryTest {
         Assertions.assertNotNull(loadBalance);
         Assertions.assertTrue(loadBalance instanceof ServerRandomLoadBalance);
     }
+
+    @Test
+    public void testAtConfiguredXidShouldFallbackToRoundRobin() {
+        System.setProperty("seata.server.loadBalance.at.type", "XID");
+        ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(BranchType.AT);
+        Assertions.assertNotNull(loadBalance);
+        Assertions.assertTrue(loadBalance instanceof ServerRoundRobinLoadBalance);
+    }
+
+    @Test
+    public void testTccConfiguredXidShouldReturnNull() {
+        System.setProperty("seata.server.loadBalance.tcc.enabled", "true");
+        System.setProperty("seata.server.loadBalance.tcc.type", "XID");
+        ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(BranchType.TCC);
+        Assertions.assertNull(loadBalance);
+    }
 }
