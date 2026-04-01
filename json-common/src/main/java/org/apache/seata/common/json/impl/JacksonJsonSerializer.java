@@ -20,10 +20,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
+import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.json.JsonAllowlistManager;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
@@ -52,9 +56,16 @@ public class JacksonJsonSerializer implements JsonSerializer {
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
+        AllowlistTypeValidator validator = new AllowlistTypeValidator();
+        ObjectMapper.DefaultTypeResolverBuilder typer =
+                new ObjectMapper.DefaultTypeResolverBuilder(DefaultTyping.NON_FINAL, validator);
+        typer.init(JsonTypeInfo.Id.CLASS, null);
+        typer.inclusion(JsonTypeInfo.As.PROPERTY);
+        typer.typeProperty("@type");
+
         this.objectMapperWithAutoType = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")
+                .setDefaultTyping(typer)
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
@@ -83,7 +94,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return mapper.readValue(text, clazz);
+            return defaultObjectMapper.readValue(text, clazz);
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
@@ -96,7 +107,10 @@ public class JacksonJsonSerializer implements JsonSerializer {
         }
         try {
             return objectMapperWithAutoType.readValue(text, objectMapperWithAutoType.constructType(type));
+        } catch (SecurityException e) {
+            throw e;
         } catch (IOException e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("Jackson deserialize error", e);
         }
     }
@@ -152,8 +166,43 @@ public class JacksonJsonSerializer implements JsonSerializer {
             } else {
                 return objectMapperWithAutoType.readValue(json, type);
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (IOException e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("Jackson deserialize error", e);
+        }
+    }
+
+    private static void rethrowIfSecurityException(Throwable e) {
+        Throwable cause = e.getCause();
+        while (cause != null) {
+            if (cause instanceof SecurityException) {
+                throw (SecurityException) cause;
+            }
+            cause = cause.getCause();
+        }
+    }
+
+    private static class AllowlistTypeValidator extends PolymorphicTypeValidator.Base {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Validity validateBaseType(MapperConfig<?> config, JavaType baseType) {
+            return Validity.INDETERMINATE;
+        }
+
+        @Override
+        public Validity validateSubClassName(MapperConfig<?> config, JavaType baseType, String subClassName) {
+            // Throws SecurityException if not allowed
+            JsonAllowlistManager.getInstance().checkClass(subClassName);
+            return Validity.ALLOWED;
+        }
+
+        @Override
+        public Validity validateSubType(MapperConfig<?> config, JavaType baseType, JavaType subType) {
+            JsonAllowlistManager.getInstance().checkClass(subType.getRawClass().getName());
+            return Validity.ALLOWED;
         }
     }
 }
