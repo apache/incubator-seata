@@ -881,4 +881,209 @@ public class MySQLInsertExecutorTest {
         rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
+
+    /**
+     * Test that batch INSERT with function expressions containing hidden JDBC parameters
+     * correctly extracts PK values for all rows.
+     *
+     * Simulates: INSERT INTO t(id, name, location) VALUES
+     *   (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'))),
+     *   (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'))),
+     *   (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')))
+     *
+     * Each row has 2 visible placeholders + 2 hidden placeholders inside the function = 4 actual JDBC params per row.
+     * See: https://github.com/apache/incubator-seata/issues/6941
+     */
+    @Test
+    public void testGetPkValuesByColumn_BatchInsertWithFunctionExpression() throws SQLException {
+        // Setup: 3 columns (id, name, location), PK is id at index 0
+        List<String> columns = new ArrayList<>();
+        columns.add(ID_COLUMN);
+        columns.add(USER_NAME_COLUMN);
+        columns.add("location");
+        when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
+
+        // Row structure: ["?", "?", SqlMethodExpr] — function hides 2 extra params
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?", SqlMethodExpr.get()));
+        rows.add(Arrays.asList("?", "?", SqlMethodExpr.get()));
+        rows.add(Arrays.asList("?", "?", SqlMethodExpr.get()));
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+
+        // JDBC parameters: 4 per row (id, name, x, y), 12 total
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(12);
+        // Row 1: id=1, name="name1", x=10.0, y=20.0
+        parameters.put(1, new ArrayList<>(Arrays.asList(1)));
+        parameters.put(2, new ArrayList<>(Arrays.asList("name1")));
+        parameters.put(3, new ArrayList<>(Arrays.asList(10.0)));
+        parameters.put(4, new ArrayList<>(Arrays.asList(20.0)));
+        // Row 2: id=2, name="name2", x=30.0, y=40.0
+        parameters.put(5, new ArrayList<>(Arrays.asList(2)));
+        parameters.put(6, new ArrayList<>(Arrays.asList("name2")));
+        parameters.put(7, new ArrayList<>(Arrays.asList(30.0)));
+        parameters.put(8, new ArrayList<>(Arrays.asList(40.0)));
+        // Row 3: id=3, name="name3", x=50.0, y=60.0
+        parameters.put(9, new ArrayList<>(Arrays.asList(3)));
+        parameters.put(10, new ArrayList<>(Arrays.asList("name3")));
+        parameters.put(11, new ArrayList<>(Arrays.asList(50.0)));
+        parameters.put(12, new ArrayList<>(Arrays.asList(60.0)));
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
+
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
+        List<Object> idValues = pkValuesList.get(ID_COLUMN);
+
+        Assertions.assertNotNull(idValues);
+        Assertions.assertEquals(3, idValues.size());
+        Assertions.assertEquals(1, idValues.get(0));
+        Assertions.assertEquals(2, idValues.get(1));
+        Assertions.assertEquals(3, idValues.get(2));
+    }
+
+    /**
+     * Test that batch INSERT without function expressions still works correctly (no regression).
+     */
+    @Test
+    public void testGetPkValuesByColumn_BatchInsertWithoutFunctionExpression() throws SQLException {
+        List<String> columns = new ArrayList<>();
+        columns.add(ID_COLUMN);
+        columns.add(USER_NAME_COLUMN);
+        columns.add(USER_STATUS_COLUMN);
+        when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?", "?"));
+        rows.add(Arrays.asList("?", "?", "?"));
+        rows.add(Arrays.asList("?", "?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(9);
+        parameters.put(1, new ArrayList<>(Arrays.asList(1)));
+        parameters.put(2, new ArrayList<>(Arrays.asList("name1")));
+        parameters.put(3, new ArrayList<>(Arrays.asList("status1")));
+        parameters.put(4, new ArrayList<>(Arrays.asList(2)));
+        parameters.put(5, new ArrayList<>(Arrays.asList("name2")));
+        parameters.put(6, new ArrayList<>(Arrays.asList("status2")));
+        parameters.put(7, new ArrayList<>(Arrays.asList(3)));
+        parameters.put(8, new ArrayList<>(Arrays.asList("name3")));
+        parameters.put(9, new ArrayList<>(Arrays.asList("status3")));
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
+
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
+        List<Object> idValues = pkValuesList.get(ID_COLUMN);
+
+        Assertions.assertNotNull(idValues);
+        Assertions.assertEquals(3, idValues.size());
+        Assertions.assertEquals(1, idValues.get(0));
+        Assertions.assertEquals(2, idValues.get(1));
+        Assertions.assertEquals(3, idValues.get(2));
+    }
+
+    /**
+     * Test that batch INSERT with function expression BEFORE the PK column correctly
+     * extracts PK values. This covers the case where hidden JDBC parameters precede the
+     * PK placeholder in JDBC parameter order.
+     *
+     * Simulates: INSERT INTO t(location, id, name) VALUES
+     *   (ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')), ?, ?),
+     *   (ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')), ?, ?),
+     *   (ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')), ?, ?)
+     *
+     * Each row: 2 visible placeholders + 2 hidden placeholders before PK = 4 actual JDBC params.
+     * PK (id) is at column index 1, after the function expression.
+     */
+    @Test
+    public void testGetPkValuesByColumn_BatchInsertWithFunctionExprBeforePk() throws SQLException {
+        // Setup: 3 columns (location, id, name), PK is id at index 1
+        List<String> columns = new ArrayList<>();
+        columns.add("location");
+        columns.add(ID_COLUMN);
+        columns.add(USER_NAME_COLUMN);
+        when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
+
+        // Row structure: [SqlMethodExpr, "?", "?"] — function with 2 hidden params is before PK
+        List<List<Object>> rows = new ArrayList<>();
+        HashMap<String, Integer> customPkIndexMap = new HashMap<>();
+        customPkIndexMap.put(ID_COLUMN, 1);
+        rows.add(Arrays.asList(SqlMethodExpr.get(), "?", "?"));
+        rows.add(Arrays.asList(SqlMethodExpr.get(), "?", "?"));
+        rows.add(Arrays.asList(SqlMethodExpr.get(), "?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(customPkIndexMap.values())).thenReturn(rows);
+
+        // JDBC parameters: 4 per row (x, y, id, name), 12 total
+        // The function params (x, y) come first, then id, then name
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(12);
+        // Row 1: x=10.0, y=20.0, id=1, name="name1"
+        parameters.put(1, new ArrayList<>(Arrays.asList(10.0)));
+        parameters.put(2, new ArrayList<>(Arrays.asList(20.0)));
+        parameters.put(3, new ArrayList<>(Arrays.asList(1)));
+        parameters.put(4, new ArrayList<>(Arrays.asList("name1")));
+        // Row 2: x=30.0, y=40.0, id=2, name="name2"
+        parameters.put(5, new ArrayList<>(Arrays.asList(30.0)));
+        parameters.put(6, new ArrayList<>(Arrays.asList(40.0)));
+        parameters.put(7, new ArrayList<>(Arrays.asList(2)));
+        parameters.put(8, new ArrayList<>(Arrays.asList("name2")));
+        // Row 3: x=50.0, y=60.0, id=3, name="name3"
+        parameters.put(9, new ArrayList<>(Arrays.asList(50.0)));
+        parameters.put(10, new ArrayList<>(Arrays.asList(60.0)));
+        parameters.put(11, new ArrayList<>(Arrays.asList(3)));
+        parameters.put(12, new ArrayList<>(Arrays.asList("name3")));
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
+        doReturn(customPkIndexMap).when(insertExecutor).getPkIndex();
+
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
+        List<Object> idValues = pkValuesList.get(ID_COLUMN);
+
+        Assertions.assertNotNull(idValues);
+        Assertions.assertEquals(3, idValues.size());
+        Assertions.assertEquals(1, idValues.get(0));
+        Assertions.assertEquals(2, idValues.get(1));
+        Assertions.assertEquals(3, idValues.get(2));
+    }
+
+    /**
+     * Test single-row INSERT with function expression works correctly.
+     */
+    @Test
+    public void testGetPkValuesByColumn_SingleInsertWithFunctionExpression() throws SQLException {
+        List<String> columns = new ArrayList<>();
+        columns.add(ID_COLUMN);
+        columns.add("location");
+        when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", SqlMethodExpr.get()));
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(3);
+        parameters.put(1, new ArrayList<>(Arrays.asList(42)));
+        parameters.put(2, new ArrayList<>(Arrays.asList(10.0)));
+        parameters.put(3, new ArrayList<>(Arrays.asList(20.0)));
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
+        doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
+
+        Map<String, List<Object>> pkValuesList = insertExecutor.getPkValuesByColumn();
+        List<Object> idValues = pkValuesList.get(ID_COLUMN);
+
+        Assertions.assertNotNull(idValues);
+        Assertions.assertEquals(1, idValues.size());
+        Assertions.assertEquals(42, idValues.get(0));
+    }
 }
