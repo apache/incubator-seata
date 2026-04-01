@@ -18,8 +18,10 @@ package org.apache.seata.common.json.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.json.JsonAllowlistManager;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
@@ -56,6 +58,16 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     private static final Feature[] READER_FEATURES_IGNORE_AUTO_TYPE =
             new Feature[] {Feature.IgnoreAutoType, Feature.OrderedField};
 
+    private static final ParserConfig ALLOWLIST_PARSER_CONFIG = new ParserConfig();
+
+    static {
+        ALLOWLIST_PARSER_CONFIG.setAutoTypeSupport(true);
+        ALLOWLIST_PARSER_CONFIG.addAutoTypeCheckHandler((typeName, expectClass, features) -> {
+            JsonAllowlistManager.getInstance().checkClass(typeName);
+            return null;
+        });
+    }
+
     public static final String NAME = "fastjson";
 
     @Override
@@ -85,8 +97,11 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return JSON.parseObject(text, type);
+            return JSON.parseObject(text, type, ALLOWLIST_PARSER_CONFIG, Feature.SupportAutoType, Feature.OrderedField);
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("FastJSON deserialize error", e);
         }
     }
@@ -132,13 +147,28 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             if ("[]".equals(text)) {
                 return (T) new java.util.ArrayList<>();
             }
+
             if (ignoreAutoType) {
                 return JSON.parseObject(text, type, READER_FEATURES_IGNORE_AUTO_TYPE);
             } else {
-                return JSON.parseObject(text, type, READER_FEATURES_SUPPORT_AUTO_TYPE);
+                return JSON.parseObject(
+                        text, type, ALLOWLIST_PARSER_CONFIG, Feature.SupportAutoType, Feature.OrderedField);
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("FastJSON deserialize error", e);
+        }
+    }
+
+    private static void rethrowIfSecurityException(Throwable e) {
+        Throwable cause = e.getCause();
+        while (cause != null) {
+            if (cause instanceof SecurityException) {
+                throw (SecurityException) cause;
+            }
+            cause = cause.getCause();
         }
     }
 }
