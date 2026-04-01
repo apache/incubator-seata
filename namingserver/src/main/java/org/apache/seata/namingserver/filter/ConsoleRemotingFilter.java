@@ -182,8 +182,8 @@ public class ConsoleRemotingFilter implements Filter {
 
                             try {
                                 ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
-                                // Copy headers from proxied response, skipping hop-by-hop and
-                                // headers we manage ourselves to prevent XSS via Content-Type manipulation
+                                //Copy headers from proxied response, skipping hop-by-hop and headers we manage ourselves to mitigate
+                                // security risks from Content-Type manipulation
                                 responseEntity.getHeaders().forEach((key, value) -> {
                                     if (!HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
                                             && !HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(key)
