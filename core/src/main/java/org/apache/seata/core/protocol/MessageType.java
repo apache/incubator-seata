@@ -139,6 +139,14 @@ public interface MessageType {
      */
     short TYPE_REG_RM_RESULT = 104;
     /**
+     * The constant TYPE_UNREG_RM.
+     */
+    short TYPE_UNREG_RM = 105;
+    /**
+     * The constant TYPE_UNREG_RM_RESULT.
+     */
+    short TYPE_UNREG_RM_RESULT = 106;
+    /**
      * The constant TYPE_RM_DELETE_UNDOLOG.
      */
     short TYPE_RM_DELETE_UNDOLOG = 111;
