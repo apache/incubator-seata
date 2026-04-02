@@ -199,6 +199,8 @@ seata:
       name:
   log:
     exception-rate: 100
+  json:
+    allowlist: 
   tcc:
     fence:
       log-table-name: tcc_fence_log
