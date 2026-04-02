@@ -696,7 +696,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             timerExecutor.execute(() -> {
                 try {
-                    clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
+                    String serverAddress = getAddressFromChannel(ctx.channel());
+                    clientChannelManager.releaseChannel(ctx.channel(), serverAddress);
+                    clientChannelManager.cleanupDisconnectedChannelMetadata(serverAddress);
                 } catch (Throwable throwable) {
                     LOGGER.error("release channel error: {}", throwable.getMessage(), throwable);
                 }

@@ -194,6 +194,53 @@ public class ChannelManager {
         }
     }
 
+    /**
+     * Unregister rm channel for the specified resource ids.
+     *
+     * @param channel     the channel
+     * @param resourceIds the resource ids to unregister
+     */
+    public static boolean unregisterRMChannel(Channel channel, Set<String> resourceIds) {
+        RpcContext rpcContext = IDENTIFIED_CHANNELS.get(channel);
+        if (rpcContext == null) {
+            return false;
+        }
+        String applicationId = rpcContext.getApplicationId();
+        String clientIp = ChannelUtil.getClientIpFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
+
+        for (String resourceId : resourceIds) {
+            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap =
+                    RM_CHANNELS.get(resourceId);
+            if (applicationIdMap == null) {
+                continue;
+            }
+            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap = applicationIdMap.get(applicationId);
+            if (ipMap == null) {
+                continue;
+            }
+            ConcurrentMap<Integer, RpcContext> portMap = ipMap.get(clientIp);
+            if (portMap != null) {
+                portMap.remove(clientPort);
+                if (portMap.isEmpty()) {
+                    ipMap.remove(clientIp, portMap);
+                }
+            }
+            if (ipMap.isEmpty()) {
+                applicationIdMap.remove(applicationId, ipMap);
+            }
+            if (applicationIdMap.isEmpty()) {
+                RM_CHANNELS.remove(resourceId, applicationIdMap);
+            }
+            rpcContext.removeResource(resourceId);
+        }
+
+        if (rpcContext.getResourceSets() == null || rpcContext.getResourceSets().isEmpty()) {
+            IDENTIFIED_CHANNELS.remove(channel);
+        }
+        return true;
+    }
+
     private static void updateChannelsResource(String resourceId, String clientIp, String applicationId) {
         ConcurrentMap<Integer, RpcContext> sourcePortMap =
                 RM_CHANNELS.get(resourceId).get(applicationId).get(clientIp);
