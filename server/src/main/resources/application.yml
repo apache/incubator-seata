@@ -49,7 +49,16 @@ seata:
     type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa, seata
-    type: file
+    type: seata
+    seata:
+      server-addr: 127.0.0.1:8081
+      cluster: default
+      namespace: public
+      heartbeat-period: 5000
+      metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
   store:
     # support: file 、 db 、 redis 、 raft
     mode: file
