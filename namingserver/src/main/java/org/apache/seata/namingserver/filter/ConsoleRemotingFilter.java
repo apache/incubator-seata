@@ -43,6 +43,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -74,7 +75,7 @@ public class ConsoleRemotingFilter implements Filter {
         if (contentType == null) {
             return false;
         }
-        String lower = contentType.toLowerCase();
+        String lower = contentType.toLowerCase(Locale.ROOT);
         // Extract the primary MIME type (ignore parameters such as charset)
         int semicolonIdx = lower.indexOf(';');
         String mimeType = (semicolonIdx >= 0 ? lower.substring(0, semicolonIdx) : lower).trim();
@@ -188,7 +189,14 @@ public class ConsoleRemotingFilter implements Filter {
                                     if (!HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
                                             && !HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(key)
                                             && !HttpHeaders.TRANSFER_ENCODING.equalsIgnoreCase(key)
-                                            && !"X-Content-Type-Options".equalsIgnoreCase(key)) {
+                                            && !"X-Content-Type-Options".equalsIgnoreCase(key)
+                                            && !HttpHeaders.CONNECTION.equalsIgnoreCase(key)
+                                            && !"Keep-Alive".equalsIgnoreCase(key)
+                                            && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TRAILER.equalsIgnoreCase(key)
+                                            && !HttpHeaders.UPGRADE.equalsIgnoreCase(key)) {
                                         value.forEach(v -> response.addHeader(key, v));
                                     }
                                 });
@@ -208,8 +216,10 @@ public class ConsoleRemotingFilter implements Filter {
                                 if (responseBody != null && responseBody.length > 0) {
                                     // For JSON content type, validate that the body actually looks
                                     // like JSON to prevent XSS via crafted upstream responses
-                                    if (safeContentType.toLowerCase().contains("application/json")
+                                    if (safeContentType.toLowerCase(Locale.ROOT).contains("application/json")
                                             && !looksLikeJson(responseBody)) {
+                                        LOGGER.warn("Upstream returned non-JSON body for Content-Type {}, replacing with error response", safeContentType);
+                                        response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
                                         response.setContentType("application/json;charset=UTF-8");
                                         responseBody = "{\"error\":\"Upstream returned invalid response body\"}"
                                                 .getBytes(StandardCharsets.UTF_8);
@@ -217,6 +227,11 @@ public class ConsoleRemotingFilter implements Filter {
                                     try (ServletOutputStream outputStream = response.getOutputStream()) {
                                         outputStream.write(responseBody);
                                         outputStream.flush();
+                                    } catch (IOException e) {
+                                        // Client likely disconnected (broken pipe); log at debug
+                                        // level and do NOT attempt sendError – the response may
+                                        // already be committed.
+                                        LOGGER.debug("Failed to write proxy response body (client disconnect?): {}", e.getMessage());
                                     }
                                 }
                             } catch (Exception ex) {
