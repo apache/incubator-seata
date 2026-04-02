@@ -37,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -180,7 +181,7 @@ class ConsoleRemotingFilterTest {
         verify(restTemplate).exchange(any(URI.class), eq(HttpMethod.POST), entityCaptor.capture(), eq(byte[].class));
 
         byte[] capturedBody = entityCaptor.getValue().getBody();
-        assert capturedBody != null : "POST body should not be null";
+        assertNotNull(capturedBody, "POST body should not be null");
         assertEquals(new String(bodyBytes, StandardCharsets.UTF_8),
                 new String(capturedBody, StandardCharsets.UTF_8),
                 "POST request body should be forwarded as-is");
