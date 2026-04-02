@@ -373,7 +373,13 @@
           "description": "the default parser."
         },
         {
+          "value": "fastjson2"
+        },
+        {
           "value": "jackson"
+        },
+        {
+          "value": "jackson3"
         }
       ]
     },
@@ -398,7 +404,13 @@
           "description": "the default serialization."
         },
         {
+          "value": "jackson3"
+        },
+        {
           "value": "fastjson"
+        },
+        {
+          "value": "fastjson2"
         },
         {
           "value": "kryo"
