@@ -33,10 +33,12 @@ public class InventorySagaService {
 
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
+    private final boolean failInjectionEnabled;
 
-    public InventorySagaService(int rollbackPercentage, int simulatedDelayMs) {
+    public InventorySagaService(int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
+        this.failInjectionEnabled = failInjectionEnabled;
     }
 
     /**
@@ -54,7 +56,7 @@ public class InventorySagaService {
         // Simulate processing time
         simulateDelay();
 
-        // Simulate random failure based on rollback percentage
+        // Simulate failure injection on the selected step.
         if (shouldFail()) {
             LOGGER.debug("Inventory reservation failed (simulated): productId={}", productId);
             throw new RuntimeException("Simulated inventory reservation failure");
@@ -102,6 +104,6 @@ public class InventorySagaService {
     }
 
     private boolean shouldFail() {
-        return ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        return failInjectionEnabled && ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
     }
 }

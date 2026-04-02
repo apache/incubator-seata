@@ -93,6 +93,11 @@ public class BenchmarkApplication implements Callable<Integer> {
             description = "Number of branch transactions (0=empty mode, >=1=real mode with actual execution)")
     private Integer branches;
 
+    @Option(
+            names = {"--saga-fail-step"},
+            description = "Force SAGA forward failure at a specific step: inventory, payment, or order")
+    private String sagaFailStep;
+
     public static void main(String[] args) {
         // Parse server address from args before any Seata class loading
         String serverAddr = BenchmarkConstants.DEFAULT_SERVER_ADDRESS;
@@ -143,7 +148,8 @@ public class BenchmarkApplication implements Callable<Integer> {
                 applicationId,
                 txServiceGroup,
                 rollbackPercentage,
-                branches);
+                branches,
+                sagaFailStep);
     }
 
     private void printConfiguration(BenchmarkConfig config) {
@@ -159,6 +165,9 @@ public class BenchmarkApplication implements Callable<Integer> {
         System.out.println("  Rollback %:   " + config.getRollbackPercentage() + "%");
         System.out.println("  Branches:     " + config.getBranches()
                 + (config.getBranches() == 0 ? " (empty mode)" : " (real mode)"));
+        if (config.getSagaFailStep() != null && !config.getSagaFailStep().isEmpty()) {
+            System.out.println("  Saga Fail:    " + config.getSagaFailStep());
+        }
         System.out.println();
     }
 }

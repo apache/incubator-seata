@@ -65,6 +65,9 @@ public class SagaModeExecutor implements TransactionExecutor {
 
     private static final String SIMPLE_SAGA_NAME = "benchmarkSimpleSaga";
     private static final String ORDER_SAGA_NAME = "benchmarkOrderSaga";
+    private static final String STEP_INVENTORY = "inventory";
+    private static final String STEP_PAYMENT = "payment";
+    private static final String STEP_ORDER = "order";
 
     private final BenchmarkConfig config;
     private StateMachineEngine stateMachineEngine;
@@ -95,6 +98,7 @@ public class SagaModeExecutor implements TransactionExecutor {
             // Create and configure state machine config
             stateMachineConfig = new BenchmarkStateMachineConfig();
             stateMachineConfig.setRollbackPercentage(config.getRollbackPercentage());
+            stateMachineConfig.setSagaFailStep(config.getSagaFailStep());
             stateMachineConfig.init();
 
             // Create state machine engine
@@ -187,19 +191,15 @@ public class SagaModeExecutor implements TransactionExecutor {
             ExecutionStatus executionStatus = instance.getStatus();
             ExecutionStatus compensationStatus = instance.getCompensationStatus();
 
-            if (ExecutionStatus.SU.equals(executionStatus)) {
+            if (ExecutionStatus.SU.equals(compensationStatus)) {
+                status = STATUS_COMPENSATED;
+            } else if (ExecutionStatus.FA.equals(compensationStatus)) {
+                status = STATUS_COMPENSATION_FAILED;
+            } else if (ExecutionStatus.SU.equals(executionStatus)) {
                 status = STATUS_COMMITTED;
                 success = true;
             } else if (ExecutionStatus.FA.equals(executionStatus)) {
-                if (compensationStatus != null) {
-                    if (ExecutionStatus.SU.equals(compensationStatus)) {
-                        status = STATUS_COMPENSATED;
-                    } else {
-                        status = STATUS_COMPENSATION_FAILED;
-                    }
-                } else {
-                    status = STATUS_FAILED;
-                }
+                status = STATUS_FAILED;
             } else if (ExecutionStatus.UN.equals(executionStatus)) {
                 status = STATUS_UNKNOWN;
             } else {
@@ -262,9 +262,14 @@ public class SagaModeExecutor implements TransactionExecutor {
     private static class BenchmarkStateMachineConfig extends AbstractStateMachineConfig {
 
         private int rollbackPercentage = 0;
+        private String sagaFailStep;
 
         public void setRollbackPercentage(int rollbackPercentage) {
             this.rollbackPercentage = rollbackPercentage;
+        }
+
+        public void setSagaFailStep(String sagaFailStep) {
+            this.sagaFailStep = sagaFailStep;
         }
 
         @Override
@@ -308,9 +313,14 @@ public class SagaModeExecutor implements TransactionExecutor {
                 // Divide rollback percentage by 3 for each service so total probability is approximately correct
                 int serviceRollbackPct = rollbackPercentage > 0 ? Math.max(1, rollbackPercentage / 3) : 0;
 
-                serviceInvoker.registerService("orderService", new OrderSagaService(serviceRollbackPct, 5));
-                serviceInvoker.registerService("inventoryService", new InventorySagaService(serviceRollbackPct, 5));
-                serviceInvoker.registerService("paymentService", new PaymentSagaService(serviceRollbackPct, 5));
+                serviceInvoker.registerService(
+                        "orderService", new OrderSagaService(serviceRollbackPct, 5, STEP_ORDER.equals(sagaFailStep)));
+                serviceInvoker.registerService(
+                        "inventoryService",
+                        new InventorySagaService(serviceRollbackPct, 5, STEP_INVENTORY.equals(sagaFailStep)));
+                serviceInvoker.registerService(
+                        "paymentService",
+                        new PaymentSagaService(serviceRollbackPct, 5, STEP_PAYMENT.equals(sagaFailStep)));
 
                 // Register the service invoker for different service types
                 getServiceInvokerManager().putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, serviceInvoker);

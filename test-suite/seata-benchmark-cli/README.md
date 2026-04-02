@@ -27,6 +27,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - **Configurable TPS** (Transactions Per Second) control
 - **Multi-threaded** workload generation
 - **Fault injection** with configurable rollback percentage
+- **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
 - **CSV export** for post-analysis
@@ -96,6 +97,16 @@ java -jar seata-benchmark-cli.jar \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
+
+# SAGA mode with payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
 ```
 
 ### Performance Testing Modes
@@ -157,6 +168,7 @@ java -jar seata-benchmark-cli.jar \
 Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [-d=<duration>] [--export-csv=<exportCsv>]
                        [-m=<mode>] [-s=<server>] [-t=<targetTps>]
+                       [--saga-fail-step=<sagaFailStep>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
                        [--rollback-percentage=<rollbackPercentage>]
@@ -172,6 +184,10 @@ Options:
                                        Warmup duration in seconds (default: 0)
       --rollback-percentage=<rollbackPercentage>
                                        Rollback percentage for fault injection (0-100, default: 2)
+      --saga-fail-step=<sagaFailStep>  Restrict SAGA failure injection to one forward step:
+                                       inventory, payment, or order.
+                                       The failure ratio is still controlled by
+                                       --rollback-percentage.
       --branches=<branches>            Number of branch transactions
                                        0 = empty mode (protocol overhead only)
                                        >=1 = real mode (actual execution)
@@ -329,6 +345,19 @@ java -jar seata-benchmark-cli.jar \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
+```
+
+### Test SAGA Mode with Payment-Step Failure Injection
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
 ```
 
 ### Test TCC Mode at High Load

@@ -34,6 +34,7 @@ public class BenchmarkConfig {
     private String txServiceGroup = "default_tx_group";
     private int rollbackPercentage = 2;
     private int branches = 0;
+    private String sagaFailStep;
 
     public BranchType getMode() {
         return mode;
@@ -119,6 +120,14 @@ public class BenchmarkConfig {
         this.branches = branches;
     }
 
+    public String getSagaFailStep() {
+        return sagaFailStep;
+    }
+
+    public void setSagaFailStep(String sagaFailStep) {
+        this.sagaFailStep = sagaFailStep;
+    }
+
     public void validate() {
         validateMode();
         validateNotEmpty(server, "server");
@@ -130,6 +139,7 @@ public class BenchmarkConfig {
         validateNonNegative(warmupDuration, "warmupDuration");
         validateNonNegative(branches, "branches");
         validateRange(rollbackPercentage, 0, 100, "rollbackPercentage");
+        validateSagaFailStep();
         validateTpsAndThreads();
     }
 
@@ -161,6 +171,19 @@ public class BenchmarkConfig {
         if (value < min || value > max) {
             throw new IllegalArgumentException(fieldName + " must be between " + min + " and " + max);
         }
+    }
+
+    private void validateSagaFailStep() {
+        if (sagaFailStep == null || sagaFailStep.trim().isEmpty()) {
+            return;
+        }
+
+        String normalized = sagaFailStep.trim().toLowerCase();
+        if (!"inventory".equals(normalized) && !"payment".equals(normalized) && !"order".equals(normalized)) {
+            throw new IllegalArgumentException(
+                    "sagaFailStep must be one of: inventory, payment, order");
+        }
+        sagaFailStep = normalized;
     }
 
     private void validateTpsAndThreads() {

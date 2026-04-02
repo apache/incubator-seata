@@ -99,7 +99,8 @@ public class BenchmarkConfigLoader {
             String applicationId,
             String txServiceGroup,
             Integer rollbackPercentage,
-            Integer branches) {
+            Integer branches,
+            String sagaFailStep) {
         if (StringUtils.isNotEmpty(server)) {
             config.setServer(server);
         }
@@ -129,6 +130,9 @@ public class BenchmarkConfigLoader {
         }
         if (branches != null && branches >= 0) {
             config.setBranches(branches);
+        }
+        if (StringUtils.isNotEmpty(sagaFailStep)) {
+            config.setSagaFailStep(sagaFailStep);
         }
         return config;
     }

@@ -34,10 +34,12 @@ public class OrderSagaService {
 
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
+    private final boolean failInjectionEnabled;
 
-    public OrderSagaService(int rollbackPercentage, int simulatedDelayMs) {
+    public OrderSagaService(int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
+        this.failInjectionEnabled = failInjectionEnabled;
     }
 
     /**
@@ -58,7 +60,7 @@ public class OrderSagaService {
         // Simulate processing time
         simulateDelay();
 
-        // Simulate random failure based on rollback percentage
+        // Simulate failure injection on the selected step.
         if (shouldFail()) {
             LOGGER.debug("Order creation failed (simulated): userId={}", userId);
             throw new RuntimeException("Simulated order creation failure");
@@ -106,6 +108,6 @@ public class OrderSagaService {
     }
 
     private boolean shouldFail() {
-        return ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        return failInjectionEnabled && ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
     }
 }

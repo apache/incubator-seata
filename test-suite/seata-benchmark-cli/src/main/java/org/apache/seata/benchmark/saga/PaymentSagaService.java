@@ -34,10 +34,12 @@ public class PaymentSagaService {
 
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
+    private final boolean failInjectionEnabled;
 
-    public PaymentSagaService(int rollbackPercentage, int simulatedDelayMs) {
+    public PaymentSagaService(int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
+        this.failInjectionEnabled = failInjectionEnabled;
     }
 
     /**
@@ -57,7 +59,7 @@ public class PaymentSagaService {
         // Simulate processing time
         simulateDelay();
 
-        // Simulate random failure based on rollback percentage
+        // Simulate failure injection on the selected step.
         if (shouldFail()) {
             LOGGER.debug("Payment debit failed (simulated): accountId={}", accountId);
             throw new RuntimeException("Simulated payment debit failure");
@@ -107,6 +109,6 @@ public class PaymentSagaService {
     }
 
     private boolean shouldFail() {
-        return ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        return failInjectionEnabled && ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
     }
 }
