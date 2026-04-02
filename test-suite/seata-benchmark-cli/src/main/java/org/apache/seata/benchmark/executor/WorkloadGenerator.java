@@ -102,12 +102,7 @@ public class WorkloadGenerator {
     private void executeTransaction() {
         try {
             TransactionRecord record = executor.execute();
-
-            if (record.isSuccess()) {
-                metrics.recordSuccess(record.getDuration());
-            } else {
-                metrics.recordFailure(record.getDuration());
-            }
+            metrics.recordTransaction(record.getStatus(), record.getDuration());
 
             addRecentRecord(record);
 

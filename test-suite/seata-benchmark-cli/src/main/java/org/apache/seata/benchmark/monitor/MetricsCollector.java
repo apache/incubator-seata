@@ -45,7 +45,15 @@ public class MetricsCollector {
             writer.println("Total Transactions," + metrics.getTotalCount());
             writer.println("Success Count," + metrics.getSuccessCount());
             writer.println("Failed Count," + metrics.getFailedCount());
+            writer.println("Committed Count," + metrics.getCommittedCount());
+            writer.println("Compensated Count," + metrics.getCompensatedCount());
+            writer.println("Execution Failed Count," + metrics.getExecutionFailedCount());
+            writer.println("Compensation Failed Count," + metrics.getCompensationFailedCount());
+            writer.println("Unknown Count," + metrics.getUnknownCount());
             writer.println("Success Rate (%)," + String.format("%.2f", metrics.getSuccessRate()));
+            writer.println("Committed Rate (%)," + String.format("%.2f", metrics.getCommittedRate()));
+            writer.println("Compensated Rate (%)," + String.format("%.2f", metrics.getCompensatedRate()));
+            writer.println("End-State Success Rate (%)," + String.format("%.2f", metrics.getEndStateSuccessRate()));
             writer.println("Average TPS," + String.format("%.2f", metrics.getAverageTps()));
             writer.println("Elapsed Time (s)," + metrics.getElapsedTimeSeconds());
 
@@ -75,6 +83,14 @@ public class MetricsCollector {
         report.append(String.format("Success Count:         %,d\n", metrics.getSuccessCount()));
         report.append(String.format("Failed Count:          %,d\n", metrics.getFailedCount()));
         report.append(String.format("Success Rate:          %.2f%%\n", metrics.getSuccessRate()));
+        report.append(String.format("Committed Count:       %,d\n", metrics.getCommittedCount()));
+        report.append(String.format("Compensated Count:     %,d\n", metrics.getCompensatedCount()));
+        report.append(String.format("Execution Failed Count:%,d\n", metrics.getExecutionFailedCount()));
+        report.append(String.format("Compensation Failed Count: %,d\n", metrics.getCompensationFailedCount()));
+        report.append(String.format("Unknown Count:         %,d\n", metrics.getUnknownCount()));
+        report.append(String.format("Committed Rate:        %.2f%%\n", metrics.getCommittedRate()));
+        report.append(String.format("Compensated Rate:      %.2f%%\n", metrics.getCompensatedRate()));
+        report.append(String.format("End-State Success Rate: %.2f%%\n", metrics.getEndStateSuccessRate()));
         report.append(String.format("Average TPS:           %.2f\n", metrics.getAverageTps()));
         report.append(String.format("Elapsed Time:          %d seconds\n", metrics.getElapsedTimeSeconds()));
         report.append("\n");

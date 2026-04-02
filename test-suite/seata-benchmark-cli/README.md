@@ -236,6 +236,14 @@ Total Transactions:    6,000
 Success Count:         5,940
 Failed Count:          60
 Success Rate:          99.00%
+Committed Count:       4,860
+Compensated Count:     920
+Execution Failed Count:140
+Compensation Failed Count: 40
+Unknown Count:         0
+Committed Rate:        81.00%
+Compensated Rate:      15.33%
+End-State Success Rate: 96.33%
 Average TPS:           100.2
 Elapsed Time:          60 seconds
 
@@ -243,6 +251,7 @@ Latency Statistics:
   P50:                 12 ms
   P95:                 45 ms
   P99:                 89 ms
+  P99.9:               120 ms
   Max:                 230 ms
 ===================================================
 ```
@@ -268,11 +277,20 @@ Total Transactions,6000
 Success Count,5940
 Failed Count,60
 Success Rate (%),99.00
+Committed Count,4860
+Compensated Count,920
+Execution Failed Count,140
+Compensation Failed Count,40
+Unknown Count,0
+Committed Rate (%),81.00
+Compensated Rate (%),15.33
+End-State Success Rate (%),96.33
 Average TPS,100.2
 Elapsed Time (s),60
 Latency P50 (ms),12
 Latency P95 (ms),45
 Latency P99 (ms),89
+Latency P99.9 (ms),120
 Latency Max (ms),230
 Export Timestamp,2025-12-01 10:30:45
 ```
