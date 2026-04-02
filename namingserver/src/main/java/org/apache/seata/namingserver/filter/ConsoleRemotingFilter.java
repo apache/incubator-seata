@@ -253,7 +253,7 @@ public class ConsoleRemotingFilter implements Filter {
                                         // Client likely disconnected (broken pipe); log at debug
                                         // level and do NOT attempt sendError – the response may
                                         // already be committed.
-                                        LOGGER.debug("Failed to write proxy response body (client disconnect?): {}", e.getMessage());
+                                        LOGGER.debug("Failed to write proxy response body (client disconnect?): {}", e.getMessage(), e);
                                     }
                                 }
                             } catch (Exception ex) {
