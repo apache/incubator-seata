@@ -95,14 +95,7 @@ public class ConsoleRemotingFilter implements Filter {
             return true;
         }
         int i = 0;
-        // Skip optional UTF-8 BOM (0xEF, 0xBB, 0xBF)
-        if (body.length >= 3
-                && (body[0] & 0xFF) == 0xEF
-                && (body[1] & 0xFF) == 0xBB
-                && (body[2] & 0xFF) == 0xBF) {
-            i = 3;
-        }
-        // skip leading whitespace (including Unicode NBSP / BOM that survived as whitespace)
+        // skip leading whitespace
         while (i < body.length && (body[i] == ' ' || body[i] == '\t'
                 || body[i] == '\r' || body[i] == '\n')) {
             i++;
@@ -151,26 +144,13 @@ public class ConsoleRemotingFilter implements Filter {
                                     + request.getRequestURI()
                                     + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-                            // Copy headers from the original request, stripping hop-by-hop
-                            // headers (RFC 7230 §6.1) and Host (so the client library sets
-                            // the correct value for the upstream target).
+                            // Copy headers from the original request
                             HttpHeaders headers = new HttpHeaders();
                             if (node.getRole() == ClusterRole.LEADER) {
                                 headers.add(RAFT_GROUP_HEADER, node.getUnit());
                             }
                             Collections.list(request.getHeaderNames())
-                                    .forEach(headerName -> {
-                                        if (!HttpHeaders.HOST.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.CONNECTION.equalsIgnoreCase(headerName)
-                                                && !"Keep-Alive".equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.TE.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.TRAILER.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.UPGRADE.equalsIgnoreCase(headerName)) {
-                                            headers.add(headerName, request.getHeader(headerName));
-                                        }
-                                    });
+                                    .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));
 
                             // Create the HttpEntity with headers and body
                             HttpMethod httpMethod;
@@ -224,7 +204,7 @@ public class ConsoleRemotingFilter implements Filter {
                                 // execute scripts; fall back to application/json
                                 String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
                                 String safeContentType;
-                                if (isSafeContentType(proxiedContentType)) {
+                                if (proxiedContentType != null && isSafeContentType(proxiedContentType)) {
                                     safeContentType = proxiedContentType;
                                 } else {
                                     safeContentType = "application/json;charset=UTF-8";
@@ -233,9 +213,7 @@ public class ConsoleRemotingFilter implements Filter {
                                 response.setHeader("X-Content-Type-Options", "nosniff");
                                 response.setStatus(responseEntity.getStatusCode().value());
                                 byte[] responseBody = responseEntity.getBody();
-                                // HEAD responses must not include a message body (RFC 7231 §4.3.2)
-                                if (!HttpMethod.HEAD.equals(httpMethod)
-                                        && responseBody != null && responseBody.length > 0) {
+                                if (responseBody != null && responseBody.length > 0) {
                                     // For JSON content type, validate that the body actually looks
                                     // like JSON to prevent XSS via crafted upstream responses
                                     if (safeContentType.toLowerCase(Locale.ROOT).contains("application/json")
