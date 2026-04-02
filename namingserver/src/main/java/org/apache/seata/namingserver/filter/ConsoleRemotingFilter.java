@@ -197,6 +197,9 @@ public class ConsoleRemotingFilter implements Filter {
                                     // headers-only for empty body
                                     httpEntity = new HttpEntity<>(headers);
                                 } else {
+                                    // Remove potentially stale length/transfer headers and let the client recompute them
+                                    headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                    headers.remove(HttpHeaders.TRANSFER_ENCODING);
                                     httpEntity = new HttpEntity<>(body, headers);
                                 }
                             }
