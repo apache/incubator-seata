@@ -16,6 +16,7 @@
  */
 package org.apache.seata.benchmark.monitor;
 
+import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,15 +34,21 @@ public class MetricsCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsCollector.class);
 
+    private final BenchmarkConfig config;
     private final BenchmarkMetrics metrics;
 
-    public MetricsCollector(BenchmarkMetrics metrics) {
+    public MetricsCollector(BenchmarkConfig config, BenchmarkMetrics metrics) {
+        this.config = config;
         this.metrics = metrics;
     }
 
     public void exportToCsv(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             writer.println("Metric,Value");
+            writer.println("Mode," + config.getMode());
+            if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+                writer.println("Saga Shape," + config.getSagaShape());
+            }
             writer.println("Total Transactions," + metrics.getTotalCount());
             writer.println("Success Count," + metrics.getSuccessCount());
             writer.println("Failed Count," + metrics.getFailedCount());
@@ -79,6 +86,10 @@ public class MetricsCollector {
         report.append("===================================================\n");
         report.append("           Seata Benchmark Final Report\n");
         report.append("===================================================\n");
+        report.append(String.format("Mode:                  %s\n", config.getMode()));
+        if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+            report.append(String.format("Saga Shape:            %s\n", config.getSagaShape()));
+        }
         report.append(String.format("Total Transactions:    %,d\n", metrics.getTotalCount()));
         report.append(String.format("Success Count:         %,d\n", metrics.getSuccessCount()));
         report.append(String.format("Failed Count:          %,d\n", metrics.getFailedCount()));

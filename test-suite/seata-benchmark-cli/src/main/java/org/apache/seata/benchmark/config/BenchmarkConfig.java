@@ -34,6 +34,7 @@ public class BenchmarkConfig {
     private String txServiceGroup = "default_tx_group";
     private int rollbackPercentage = 2;
     private int branches = 0;
+    private String sagaShape;
     private String sagaFailStep;
 
     public BranchType getMode() {
@@ -120,6 +121,14 @@ public class BenchmarkConfig {
         this.branches = branches;
     }
 
+    public String getSagaShape() {
+        return sagaShape;
+    }
+
+    public void setSagaShape(String sagaShape) {
+        this.sagaShape = sagaShape;
+    }
+
     public String getSagaFailStep() {
         return sagaFailStep;
     }
@@ -139,6 +148,7 @@ public class BenchmarkConfig {
         validateNonNegative(warmupDuration, "warmupDuration");
         validateNonNegative(branches, "branches");
         validateRange(rollbackPercentage, 0, 100, "rollbackPercentage");
+        validateSagaShape();
         validateSagaFailStep();
         validateTpsAndThreads();
     }
@@ -171,6 +181,18 @@ public class BenchmarkConfig {
         if (value < min || value > max) {
             throw new IllegalArgumentException(fieldName + " must be between " + min + " and " + max);
         }
+    }
+
+    private void validateSagaShape() {
+        if (sagaShape == null || sagaShape.trim().isEmpty()) {
+            return;
+        }
+
+        String normalized = sagaShape.trim().toLowerCase();
+        if (!"simple".equals(normalized) && !"order".equals(normalized)) {
+            throw new IllegalArgumentException("sagaShape must be one of: simple, order");
+        }
+        sagaShape = normalized;
     }
 
     private void validateSagaFailStep() {

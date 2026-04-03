@@ -68,6 +68,8 @@ public class SagaModeExecutor implements TransactionExecutor {
     private static final String STEP_INVENTORY = "inventory";
     private static final String STEP_PAYMENT = "payment";
     private static final String STEP_ORDER = "order";
+    private static final String SHAPE_SIMPLE = "simple";
+    private static final String SHAPE_ORDER = "order";
 
     private final BenchmarkConfig config;
     private StateMachineEngine stateMachineEngine;
@@ -177,8 +179,7 @@ public class SagaModeExecutor implements TransactionExecutor {
         boolean success = false;
 
         try {
-            // Choose state machine based on branch count
-            String stateMachineName = branchCount >= 3 ? ORDER_SAGA_NAME : SIMPLE_SAGA_NAME;
+            String stateMachineName = resolveStateMachineName(branchCount);
 
             // Prepare start parameters
             Map<String, Object> startParams = createStartParams();
@@ -213,6 +214,16 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         long duration = System.currentTimeMillis() - startTime;
         return new TransactionRecord(businessKey, status, duration, branchCount, success);
+    }
+
+    private String resolveStateMachineName(int branchCount) {
+        if (SHAPE_ORDER.equals(config.getSagaShape())) {
+            return ORDER_SAGA_NAME;
+        }
+        if (SHAPE_SIMPLE.equals(config.getSagaShape())) {
+            return SIMPLE_SAGA_NAME;
+        }
+        return branchCount >= 3 ? ORDER_SAGA_NAME : SIMPLE_SAGA_NAME;
     }
 
     private Map<String, Object> createStartParams() {

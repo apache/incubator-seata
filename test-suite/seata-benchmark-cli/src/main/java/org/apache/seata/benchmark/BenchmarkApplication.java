@@ -94,6 +94,11 @@ public class BenchmarkApplication implements Callable<Integer> {
     private Integer branches;
 
     @Option(
+            names = {"--saga-shape"},
+            description = "Select SAGA state machine shape: simple or order")
+    private String sagaShape;
+
+    @Option(
             names = {"--saga-fail-step"},
             description = "Force SAGA forward failure at a specific step: inventory, payment, or order")
     private String sagaFailStep;
@@ -149,6 +154,7 @@ public class BenchmarkApplication implements Callable<Integer> {
                 txServiceGroup,
                 rollbackPercentage,
                 branches,
+                sagaShape,
                 sagaFailStep);
     }
 
@@ -165,6 +171,9 @@ public class BenchmarkApplication implements Callable<Integer> {
         System.out.println("  Rollback %:   " + config.getRollbackPercentage() + "%");
         System.out.println("  Branches:     " + config.getBranches()
                 + (config.getBranches() == 0 ? " (empty mode)" : " (real mode)"));
+        if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+            System.out.println("  Saga Shape:   " + config.getSagaShape());
+        }
         if (config.getSagaFailStep() != null && !config.getSagaFailStep().isEmpty()) {
             System.out.println("  Saga Fail:    " + config.getSagaFailStep());
         }

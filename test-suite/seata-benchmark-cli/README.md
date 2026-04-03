@@ -27,6 +27,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - **Configurable TPS** (Transactions Per Second) control
 - **Multi-threaded** workload generation
 - **Fault injection** with configurable rollback percentage
+- **Selectable SAGA state machine shapes** such as `simple` and `order`
 - **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
@@ -98,6 +99,15 @@ java -jar seata-benchmark-cli.jar \
   --branches 3 \
   --rollback-percentage 5
 
+# SAGA mode with explicit order state machine shape
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order
+
 # SAGA mode with payment-step failure injection
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
@@ -168,6 +178,7 @@ java -jar seata-benchmark-cli.jar \
 Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [-d=<duration>] [--export-csv=<exportCsv>]
                        [-m=<mode>] [-s=<server>] [-t=<targetTps>]
+                       [--saga-shape=<sagaShape>]
                        [--saga-fail-step=<sagaFailStep>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
@@ -184,6 +195,9 @@ Options:
                                        Warmup duration in seconds (default: 0)
       --rollback-percentage=<rollbackPercentage>
                                        Rollback percentage for fault injection (0-100, default: 2)
+      --saga-shape=<sagaShape>         Select SAGA state machine shape: simple or order.
+                                       If omitted, the benchmark keeps the existing
+                                       branches-based compatibility behavior.
       --saga-fail-step=<sagaFailStep>  Restrict SAGA failure injection to one forward step:
                                        inventory, payment, or order.
                                        The failure ratio is still controlled by
@@ -248,6 +262,8 @@ When the benchmark completes, a final report is displayed:
 ===================================================
            Seata Benchmark Final Report
 ===================================================
+Mode:                  SAGA
+Saga Shape:            order
 Total Transactions:    6,000
 Success Count:         5,940
 Failed Count:          60
@@ -289,6 +305,8 @@ Output format:
 
 ```csv
 Metric,Value
+Mode,SAGA
+Saga Shape,order
 Total Transactions,6000
 Success Count,5940
 Failed Count,60
