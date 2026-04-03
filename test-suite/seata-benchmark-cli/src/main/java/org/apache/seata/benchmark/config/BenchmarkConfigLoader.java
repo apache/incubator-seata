@@ -101,7 +101,8 @@ public class BenchmarkConfigLoader {
             Integer rollbackPercentage,
             Integer branches,
             String sagaShape,
-            String sagaFailStep) {
+            String sagaFailStep,
+            Long sagaRandomSeed) {
         if (StringUtils.isNotEmpty(server)) {
             config.setServer(server);
         }
@@ -137,6 +138,9 @@ public class BenchmarkConfigLoader {
         }
         if (StringUtils.isNotEmpty(sagaFailStep)) {
             config.setSagaFailStep(sagaFailStep);
+        }
+        if (sagaRandomSeed != null) {
+            config.setSagaRandomSeed(sagaRandomSeed);
         }
         return config;
     }

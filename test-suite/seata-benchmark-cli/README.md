@@ -29,6 +29,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - **Fault injection** with configurable rollback percentage
 - **Selectable SAGA state machine shapes** such as `simple` and `order`
 - **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
+- **Reproducible SAGA failure injection** with `--saga-random-seed`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
 - **CSV export** for post-analysis
@@ -117,6 +118,18 @@ java -jar seata-benchmark-cli.jar \
   --branches 3 \
   --rollback-percentage 20 \
   --saga-fail-step payment
+
+# SAGA mode with reproducible payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --rollback-percentage 20 \
+  --saga-fail-step payment \
+  --saga-random-seed 123
 ```
 
 ### Performance Testing Modes
@@ -180,6 +193,7 @@ Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [-m=<mode>] [-s=<server>] [-t=<targetTps>]
                        [--saga-shape=<sagaShape>]
                        [--saga-fail-step=<sagaFailStep>]
+                       [--saga-random-seed=<sagaRandomSeed>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
                        [--rollback-percentage=<rollbackPercentage>]
@@ -202,6 +216,9 @@ Options:
                                        inventory, payment, or order.
                                        The failure ratio is still controlled by
                                        --rollback-percentage.
+      --saga-random-seed=<sagaRandomSeed>
+                                       Optional random seed for reproducible SAGA
+                                       failure injection behavior.
       --branches=<branches>            Number of branch transactions
                                        0 = empty mode (protocol overhead only)
                                        >=1 = real mode (actual execution)

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -34,11 +35,14 @@ public class InventorySagaService {
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
+    private final Random failureRandom;
 
-    public InventorySagaService(int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled) {
+    public InventorySagaService(
+            int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled, Random failureRandom) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
         this.failInjectionEnabled = failInjectionEnabled;
+        this.failureRandom = failureRandom;
     }
 
     /**
@@ -104,6 +108,18 @@ public class InventorySagaService {
     }
 
     private boolean shouldFail() {
-        return failInjectionEnabled && ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        if (!failInjectionEnabled) {
+            return false;
+        }
+        return nextFailurePercent() < rollbackPercentage;
+    }
+
+    private int nextFailurePercent() {
+        if (failureRandom != null) {
+            synchronized (failureRandom) {
+                return failureRandom.nextInt(100);
+            }
+        }
+        return ThreadLocalRandom.current().nextInt(100);
     }
 }

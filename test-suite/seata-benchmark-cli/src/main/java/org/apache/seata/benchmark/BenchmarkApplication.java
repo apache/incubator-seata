@@ -103,6 +103,11 @@ public class BenchmarkApplication implements Callable<Integer> {
             description = "Force SAGA forward failure at a specific step: inventory, payment, or order")
     private String sagaFailStep;
 
+    @Option(
+            names = {"--saga-random-seed"},
+            description = "Seed for reproducible SAGA failure injection")
+    private Long sagaRandomSeed;
+
     public static void main(String[] args) {
         // Parse server address from args before any Seata class loading
         String serverAddr = BenchmarkConstants.DEFAULT_SERVER_ADDRESS;
@@ -155,7 +160,8 @@ public class BenchmarkApplication implements Callable<Integer> {
                 rollbackPercentage,
                 branches,
                 sagaShape,
-                sagaFailStep);
+                sagaFailStep,
+                sagaRandomSeed);
     }
 
     private void printConfiguration(BenchmarkConfig config) {
@@ -176,6 +182,9 @@ public class BenchmarkApplication implements Callable<Integer> {
         }
         if (config.getSagaFailStep() != null && !config.getSagaFailStep().isEmpty()) {
             System.out.println("  Saga Fail:    " + config.getSagaFailStep());
+        }
+        if (config.getSagaRandomSeed() != null) {
+            System.out.println("  Saga Seed:    " + config.getSagaRandomSeed());
         }
         System.out.println();
     }

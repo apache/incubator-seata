@@ -36,6 +36,7 @@ public class BenchmarkConfig {
     private int branches = 0;
     private String sagaShape;
     private String sagaFailStep;
+    private Long sagaRandomSeed;
 
     public BranchType getMode() {
         return mode;
@@ -135,6 +136,14 @@ public class BenchmarkConfig {
 
     public void setSagaFailStep(String sagaFailStep) {
         this.sagaFailStep = sagaFailStep;
+    }
+
+    public Long getSagaRandomSeed() {
+        return sagaRandomSeed;
+    }
+
+    public void setSagaRandomSeed(Long sagaRandomSeed) {
+        this.sagaRandomSeed = sagaRandomSeed;
     }
 
     public void validate() {

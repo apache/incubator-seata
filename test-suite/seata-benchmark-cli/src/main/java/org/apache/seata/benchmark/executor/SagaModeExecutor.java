@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -101,6 +102,7 @@ public class SagaModeExecutor implements TransactionExecutor {
             stateMachineConfig = new BenchmarkStateMachineConfig();
             stateMachineConfig.setRollbackPercentage(config.getRollbackPercentage());
             stateMachineConfig.setSagaFailStep(config.getSagaFailStep());
+            stateMachineConfig.setSagaRandomSeed(config.getSagaRandomSeed());
             stateMachineConfig.init();
 
             // Create state machine engine
@@ -274,6 +276,7 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         private int rollbackPercentage = 0;
         private String sagaFailStep;
+        private Long sagaRandomSeed;
 
         public void setRollbackPercentage(int rollbackPercentage) {
             this.rollbackPercentage = rollbackPercentage;
@@ -281,6 +284,10 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         public void setSagaFailStep(String sagaFailStep) {
             this.sagaFailStep = sagaFailStep;
+        }
+
+        public void setSagaRandomSeed(Long sagaRandomSeed) {
+            this.sagaRandomSeed = sagaRandomSeed;
         }
 
         @Override
@@ -323,15 +330,21 @@ public class SagaModeExecutor implements TransactionExecutor {
                 // Register services with configured rollback percentage
                 // Divide rollback percentage by 3 for each service so total probability is approximately correct
                 int serviceRollbackPct = rollbackPercentage > 0 ? Math.max(1, rollbackPercentage / 3) : 0;
+                Random failureRandom =
+                        sagaRandomSeed == null ? null : new Random(sagaRandomSeed);
 
                 serviceInvoker.registerService(
-                        "orderService", new OrderSagaService(serviceRollbackPct, 5, STEP_ORDER.equals(sagaFailStep)));
+                        "orderService",
+                        new OrderSagaService(
+                                serviceRollbackPct, 5, STEP_ORDER.equals(sagaFailStep), failureRandom));
                 serviceInvoker.registerService(
                         "inventoryService",
-                        new InventorySagaService(serviceRollbackPct, 5, STEP_INVENTORY.equals(sagaFailStep)));
+                        new InventorySagaService(
+                                serviceRollbackPct, 5, STEP_INVENTORY.equals(sagaFailStep), failureRandom));
                 serviceInvoker.registerService(
                         "paymentService",
-                        new PaymentSagaService(serviceRollbackPct, 5, STEP_PAYMENT.equals(sagaFailStep)));
+                        new PaymentSagaService(
+                                serviceRollbackPct, 5, STEP_PAYMENT.equals(sagaFailStep), failureRandom));
 
                 // Register the service invoker for different service types
                 getServiceInvokerManager().putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, serviceInvoker);
