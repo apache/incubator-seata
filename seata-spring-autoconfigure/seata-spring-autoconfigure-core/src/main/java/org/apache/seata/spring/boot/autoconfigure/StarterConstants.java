@@ -40,6 +40,7 @@ public interface StarterConstants {
     String LOG_PREFIX = SEATA_PREFIX + ".log";
     String COMPRESS_PREFIX = UNDO_PREFIX + ".compress";
     String TCC_PREFIX = SEATA_PREFIX + ".tcc";
+    String JSON_PREFIX = SEATA_PREFIX + ".json";
     String TCC_FENCE_PREFIX = TCC_PREFIX + ".fence";
     String SAGA_STATE_MACHINE_PREFIX = SAGA_PREFIX + ".state-machine";
     String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
