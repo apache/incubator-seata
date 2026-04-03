@@ -282,18 +282,18 @@ When the benchmark completes, a final report is displayed:
 Mode:                  SAGA
 Saga Shape:            order
 Total Transactions:    6,000
-Success Count:         5,940
-Failed Count:          60
-Success Rate:          99.00%
+Success Count:         4,860
+Failed Count:          1,140
+Success Rate:          81.00%
 Committed Count:       4,860
 Compensated Count:     920
-Execution Failed Count:140
+Execution Failed Count: 180
 Compensation Failed Count: 40
 Unknown Count:         0
 Committed Rate:        81.00%
 Compensated Rate:      15.33%
 End-State Success Rate: 96.33%
-Average TPS:           100.2
+Average TPS:           100.0
 Elapsed Time:          60 seconds
 
 Latency Statistics:
@@ -325,25 +325,25 @@ Metric,Value
 Mode,SAGA
 Saga Shape,order
 Total Transactions,6000
-Success Count,5940
-Failed Count,60
-Success Rate (%),99.00
+Success Count,4860
+Failed Count,1140
+Success Rate (%),81.00
 Committed Count,4860
 Compensated Count,920
-Execution Failed Count,140
+Execution Failed Count,180
 Compensation Failed Count,40
 Unknown Count,0
 Committed Rate (%),81.00
 Compensated Rate (%),15.33
 End-State Success Rate (%),96.33
-Average TPS,100.2
+Average TPS,100.0
 Elapsed Time (s),60
 Latency P50 (ms),12
 Latency P95 (ms),45
 Latency P99 (ms),89
 Latency P99.9 (ms),120
 Latency Max (ms),230
-Export Timestamp,2025-12-01 10:30:45
+Export Time,2025-12-01 10:30:45
 ```
 
 ## Examples

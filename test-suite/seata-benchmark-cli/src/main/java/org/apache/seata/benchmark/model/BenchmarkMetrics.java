@@ -39,7 +39,7 @@ public class BenchmarkMetrics {
     private final List<Long> latencies =
             Collections.synchronizedList(new ArrayList<>(BenchmarkConstants.MAX_LATENCY_SAMPLES));
     private final AtomicLong totalSamples = new AtomicLong(0);
-    private final long startTime = System.currentTimeMillis();
+    private volatile long startTime = System.currentTimeMillis();
 
     private volatile long lastCountSnapshot = 0;
     private volatile long lastSnapshotTime = System.currentTimeMillis();
@@ -220,6 +220,7 @@ public class BenchmarkMetrics {
     }
 
     public void reset() {
+        startTime = System.currentTimeMillis();
         totalCount.set(0);
         successCount.set(0);
         failedCount.set(0);

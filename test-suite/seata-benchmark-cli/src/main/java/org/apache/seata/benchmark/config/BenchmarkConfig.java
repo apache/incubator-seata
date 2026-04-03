@@ -19,6 +19,8 @@ package org.apache.seata.benchmark.config;
 import org.apache.seata.benchmark.constant.BenchmarkConstants;
 import org.apache.seata.core.model.BranchType;
 
+import java.util.Locale;
+
 /**
  * Benchmark configuration
  */
@@ -197,7 +199,7 @@ public class BenchmarkConfig {
             return;
         }
 
-        String normalized = sagaShape.trim().toLowerCase();
+        String normalized = sagaShape.trim().toLowerCase(Locale.ROOT);
         if (!"simple".equals(normalized) && !"order".equals(normalized)) {
             throw new IllegalArgumentException("sagaShape must be one of: simple, order");
         }
@@ -209,7 +211,7 @@ public class BenchmarkConfig {
             return;
         }
 
-        String normalized = sagaFailStep.trim().toLowerCase();
+        String normalized = sagaFailStep.trim().toLowerCase(Locale.ROOT);
         if (!"inventory".equals(normalized) && !"payment".equals(normalized) && !"order".equals(normalized)) {
             throw new IllegalArgumentException(
                     "sagaFailStep must be one of: inventory, payment, order");

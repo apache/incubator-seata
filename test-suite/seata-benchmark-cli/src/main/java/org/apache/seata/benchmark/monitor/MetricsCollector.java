@@ -96,7 +96,7 @@ public class MetricsCollector {
         report.append(String.format("Success Rate:          %.2f%%\n", metrics.getSuccessRate()));
         report.append(String.format("Committed Count:       %,d\n", metrics.getCommittedCount()));
         report.append(String.format("Compensated Count:     %,d\n", metrics.getCompensatedCount()));
-        report.append(String.format("Execution Failed Count:%,d\n", metrics.getExecutionFailedCount()));
+        report.append(String.format("Execution Failed Count: %,d\n", metrics.getExecutionFailedCount()));
         report.append(String.format("Compensation Failed Count: %,d\n", metrics.getCompensationFailedCount()));
         report.append(String.format("Unknown Count:         %,d\n", metrics.getUnknownCount()));
         report.append(String.format("Committed Rate:        %.2f%%\n", metrics.getCommittedRate()));

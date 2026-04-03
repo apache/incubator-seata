@@ -327,24 +327,27 @@ public class SagaModeExecutor implements TransactionExecutor {
                 // Register benchmark services with the service invoker manager
                 BenchmarkServiceInvoker serviceInvoker = new BenchmarkServiceInvoker();
 
-                // Register services with configured rollback percentage
-                // Divide rollback percentage by 3 for each service so total probability is approximately correct
-                int serviceRollbackPct = rollbackPercentage > 0 ? Math.max(1, rollbackPercentage / 3) : 0;
-                Random failureRandom =
-                        sagaRandomSeed == null ? null : new Random(sagaRandomSeed);
+                boolean restrictFailureStep = sagaFailStep != null && !sagaFailStep.trim().isEmpty();
+                int serviceRollbackPct = restrictFailureStep
+                        ? rollbackPercentage
+                        : (rollbackPercentage > 0 ? Math.max(1, rollbackPercentage / 3) : 0);
+
+                boolean orderFailEnabled = !restrictFailureStep || STEP_ORDER.equals(sagaFailStep);
+                boolean inventoryFailEnabled = !restrictFailureStep || STEP_INVENTORY.equals(sagaFailStep);
+                boolean paymentFailEnabled = !restrictFailureStep || STEP_PAYMENT.equals(sagaFailStep);
 
                 serviceInvoker.registerService(
                         "orderService",
                         new OrderSagaService(
-                                serviceRollbackPct, 5, STEP_ORDER.equals(sagaFailStep), failureRandom));
+                                serviceRollbackPct, 5, orderFailEnabled, createFailureRandom(11)));
                 serviceInvoker.registerService(
                         "inventoryService",
                         new InventorySagaService(
-                                serviceRollbackPct, 5, STEP_INVENTORY.equals(sagaFailStep), failureRandom));
+                                serviceRollbackPct, 5, inventoryFailEnabled, createFailureRandom(17)));
                 serviceInvoker.registerService(
                         "paymentService",
                         new PaymentSagaService(
-                                serviceRollbackPct, 5, STEP_PAYMENT.equals(sagaFailStep), failureRandom));
+                                serviceRollbackPct, 5, paymentFailEnabled, createFailureRandom(23)));
 
                 // Register the service invoker for different service types
                 getServiceInvokerManager().putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, serviceInvoker);
@@ -359,6 +362,10 @@ public class SagaModeExecutor implements TransactionExecutor {
                 buffer.write(data, 0, nRead);
             }
             return buffer.toByteArray();
+        }
+
+        private Random createFailureRandom(int salt) {
+            return sagaRandomSeed == null ? null : new Random(sagaRandomSeed + salt);
         }
     }
 }
