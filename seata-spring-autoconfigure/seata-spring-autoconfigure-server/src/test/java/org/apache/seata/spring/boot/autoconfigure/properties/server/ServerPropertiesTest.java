@@ -28,6 +28,7 @@ public class ServerPropertiesTest {
         serverProperties.setRetryDeadThreshold(1);
         serverProperties.setApplicationDataLimit(1);
         serverProperties.setServicePort(1);
+        serverProperties.setRegistryPort(1);
         serverProperties.setEnableCheckAuth(true);
         serverProperties.setApplicationDataLimitCheck(true);
         serverProperties.setEnableParallelHandleBranch(true);
@@ -41,6 +42,7 @@ public class ServerPropertiesTest {
         Assertions.assertEquals(1, serverProperties.getRetryDeadThreshold());
         Assertions.assertEquals(1, serverProperties.getApplicationDataLimit());
         Assertions.assertEquals(1, serverProperties.getServicePort());
+        Assertions.assertEquals(1, serverProperties.getRegistryPort());
         Assertions.assertTrue(serverProperties.getEnableCheckAuth());
         Assertions.assertTrue(serverProperties.getApplicationDataLimitCheck());
         Assertions.assertTrue(serverProperties.getEnableParallelHandleBranch());

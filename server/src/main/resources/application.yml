@@ -55,3 +55,4 @@ seata:
     mode: file
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+  #    registry-port: 21908 #If not configured, the registration port equals the service port

@@ -33,6 +33,9 @@ import java.util.Properties;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_REGISTRY_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_REGISTRY_PORT_CAMEL;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_REGISTRY_PORT_CONFIG;
 import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
@@ -65,6 +68,11 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
         String[] args = environmentPreparedEvent.getArgs();
 
+        resolveServicePort(environment, args);
+        resolveRegistryPort(environment);
+    }
+
+    private void resolveServicePort(ConfigurableEnvironment environment, String[] args) {
         // port: -p > -D > env > yml > default
 
         // -p 8091
@@ -107,6 +115,24 @@ public class ServerApplicationListener implements GenericApplicationListener {
         setTargetPort(environment, servicePort, true);
     }
 
+    private void resolveRegistryPort(ConfigurableEnvironment environment) {
+        // registryPort: env > yml
+        // If not configured, the registration port equals the service port.
+
+        // docker -e SEATA_REGISTRY_PORT=21908
+        String envRegistryPort = environment.getProperty(ENV_SEATA_REGISTRY_PORT_KEY, String.class);
+        if (StringUtils.isNotBlank(envRegistryPort)) {
+            setTargetRegistryPort(environment, envRegistryPort);
+            return;
+        }
+
+        // yml properties seata.server.registry-port=21908
+        String configRegistryPort = environment.getProperty(SERVER_REGISTRY_PORT_CONFIG, String.class);
+        if (StringUtils.isNotBlank(configRegistryPort)) {
+            setTargetRegistryPort(environment, configRegistryPort);
+        }
+    }
+
     private void setTargetPort(ConfigurableEnvironment environment, String port, boolean needAddPropertySource) {
         // get rpc port first, use to logback-spring.xml, @see the class named `SystemPropertyLoggerContextListener`
         System.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
@@ -117,6 +143,14 @@ public class ServerApplicationListener implements GenericApplicationListener {
             pro.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
         }
+    }
+
+    private void setTargetRegistryPort(ConfigurableEnvironment environment, String registryPort) {
+        System.setProperty(SERVER_REGISTRY_PORT_CAMEL, registryPort);
+        Properties pro = new Properties();
+        pro.setProperty(SERVER_REGISTRY_PORT_CONFIG, registryPort);
+        pro.setProperty(SERVER_REGISTRY_PORT_CAMEL, registryPort);
+        environment.getPropertySources().addFirst(new PropertiesPropertySource("serverRegistryPortProperties", pro));
     }
 
     /**

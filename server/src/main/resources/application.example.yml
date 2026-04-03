@@ -146,6 +146,7 @@ seata:
 
   server:
     service-port: 8091 # If not configured, the default is '${server.port}'
+    registry-port: 21908 # If not configured, the registration port equals the service port
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-failed-unlock-enable: false

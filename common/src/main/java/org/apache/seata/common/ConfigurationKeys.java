@@ -456,6 +456,21 @@ public interface ConfigurationKeys {
     String ENV_SEATA_PORT_KEY = "SEATA_PORT";
 
     /**
+     * The constant SERVER_REGISTRY_PORT_CAMEL.
+     */
+    String SERVER_REGISTRY_PORT_CAMEL = SERVER_PREFIX + "registryPort";
+
+    /**
+     * The constant SERVER_REGISTRY_PORT_CONFIG.
+     */
+    String SERVER_REGISTRY_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "registry-port";
+
+    /**
+     * The constant ENV_SEATA_REGISTRY_PORT_KEY.
+     */
+    String ENV_SEATA_REGISTRY_PORT_KEY = "SEATA_REGISTRY_PORT";
+
+    /**
      * The constant RECOVERY_PREFIX.
      */
     String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";

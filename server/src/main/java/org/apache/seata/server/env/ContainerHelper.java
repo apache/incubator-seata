@@ -20,6 +20,7 @@ import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
 
 import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_REGISTRY_PORT_KEY;
 
 /**
  */
@@ -61,6 +62,16 @@ public class ContainerHelper {
      */
     public static int getPort() {
         return NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), 0);
+    }
+
+    /**
+     * Gets registry port from container.
+     * This port is used for service registration only, separated from the listen port.
+     *
+     * @return the registry port, 0 if not set
+     */
+    public static int getRegistryPort() {
+        return NumberUtils.toInt(System.getenv(ENV_SEATA_REGISTRY_PORT_KEY), 0);
     }
 
     /**
