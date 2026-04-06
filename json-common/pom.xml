@@ -81,6 +81,31 @@
         </dependency>
     </dependencies>
 
-
+    <profiles>
+        <!-- Jackson 3 requires JDK 17+, skip compilation on JDK 8 -->
+        <profile>
+            <id>skip-jackson3-on-jdk8</id>
+            <activation>
+                <jdk>(,17)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/Jackson3JsonSerializer.java</exclude>
+                            </excludes>
+                            <testExcludes>
+                                <testExclude>**/Jackson3JsonSerializerTest.java</testExclude>
+                                <testExclude>**/Jackson3AllowlistTest.java</testExclude>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

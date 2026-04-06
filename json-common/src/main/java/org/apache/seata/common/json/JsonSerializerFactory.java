@@ -18,6 +18,8 @@ package org.apache.seata.common.json;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +27,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class JsonSerializerFactory {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonSerializerFactory.class);
+
     private static final String DEFAULT_SERIALIZER = "jackson";
+
+    private static final String JACKSON3_SERIALIZER = "jackson3";
 
     private static final Map<String, JsonSerializer> INSTANCES = new ConcurrentHashMap<>();
 
@@ -34,12 +40,21 @@ public class JsonSerializerFactory {
     /**
      * Get JsonSerializer instance by name.
      *
-     * @param name the serializer name (e.g., "fastjson", "jackson", "gson")
+     * @param name the serializer name (e.g., "fastjson", "fastjson2", "jackson", "jackson3", "gson")
      * @return the JsonSerializer instance
      */
     public static JsonSerializer getSerializer(String name) {
         final String serializerName = Optional.ofNullable(name).orElse(DEFAULT_SERIALIZER);
-        return CollectionUtils.computeIfAbsent(
-                INSTANCES, serializerName, key -> EnhancedServiceLoader.load(JsonSerializer.class, key));
+        return CollectionUtils.computeIfAbsent(INSTANCES, serializerName, key -> {
+            try {
+                return EnhancedServiceLoader.load(JsonSerializer.class, key);
+            } catch (Exception e) {
+                if (JACKSON3_SERIALIZER.equals(key)) {
+                    LOGGER.warn("Jackson3 serializer is not available (requires JDK 17+), falling back to jackson.", e);
+                    return EnhancedServiceLoader.load(JsonSerializer.class, DEFAULT_SERIALIZER);
+                }
+                throw e;
+            }
+        });
     }
 }
