@@ -26,6 +26,7 @@ import org.apache.seata.core.rpc.processor.server.RegTmProcessor;
 import org.apache.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
 import org.apache.seata.core.rpc.processor.server.ServerOnRequestProcessor;
 import org.apache.seata.core.rpc.processor.server.ServerOnResponseProcessor;
+import org.apache.seata.core.rpc.processor.server.UnregRmProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -121,6 +122,9 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         // 3. registry rm message processor
         RegRmProcessor regRmProcessor = new RegRmProcessor(this);
         super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+        // 3.1 registry rm unregister message processor
+        UnregRmProcessor unregRmProcessor = new UnregRmProcessor(this);
+        super.registerProcessor(MessageType.TYPE_UNREG_RM, unregRmProcessor, messageExecutor);
         // 4. registry tm message processor
         RegTmProcessor regTmProcessor = new RegTmProcessor(this);
         super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
