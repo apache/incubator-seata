@@ -22,53 +22,44 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>json-common</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-    <artifactId>seata-saga</artifactId>
-    <name>seata-saga ${project.version}</name>
-    <description>saga top parent for Seata built with Maven</description>
+    <artifactId>json-common-jackson3</artifactId>
+    <packaging>jar</packaging>
+    <name>json-common-jackson3 ${project.version}</name>
+    <description>Jackson 3 JSON serializer for Seata (requires JDK 17+)</description>
 
-    <modules>
-        <module>seata-saga-processctrl</module>
-        <module>seata-saga-statelang</module>
-        <module>seata-saga-engine</module>
-        <module>seata-saga-rm</module>
-        <module>seata-saga-engine-store</module>
-        <module>seata-saga-spring</module>
-        <module>seata-saga-annotation</module>
-    </modules>
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>json-common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-annotations</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-
         <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.21</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>

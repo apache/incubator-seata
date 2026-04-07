@@ -59,7 +59,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>json-common</artifactId>
+            <artifactId>json-common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
