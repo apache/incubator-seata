@@ -274,6 +274,33 @@ public class Jackson3JsonSerializerTest {
                 .hasMessageContaining("Jackson3 deserialize error");
     }
 
+    /**
+     * The "[]" shortcut in parseObject(String, Class, boolean) must only apply when the
+     * target type is a Collection. Otherwise it would silently return an empty ArrayList
+     * cast to T, causing a ClassCastException at the call site. The exact behaviour of the
+     * underlying library when asked to map "[]" to a POJO may vary (return null, return an
+     * empty POJO, or throw); the only requirement enforced here is that the result is never
+     * an ArrayList.
+     */
+    @Test
+    public void testParseObject_emptyArrayJson_nonCollectionType_doesNotReturnArrayList() {
+        assertEmptyArrayDoesNotProduceCollection(true);
+        assertEmptyArrayDoesNotProduceCollection(false);
+    }
+
+    private void assertEmptyArrayDoesNotProduceCollection(boolean ignoreAutoType) {
+        Object result;
+        try {
+            result = jsonSerializer.parseObject("[]", TestObject.class, ignoreAutoType);
+        } catch (JsonParseException ignored) {
+            // throwing is also an acceptable outcome
+            return;
+        }
+        if (result != null) {
+            assertThat(result).isNotInstanceOf(java.util.Collection.class);
+        }
+    }
+
     public static class TestObject {
         private String name;
         private int value;
