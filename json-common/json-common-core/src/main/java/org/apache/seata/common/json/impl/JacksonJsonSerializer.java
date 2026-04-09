@@ -158,7 +158,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            if ("[]".equals(json) && java.util.Collection.class.isAssignableFrom(type)) {
+            if ("[]".equals(json) && (java.util.Collection.class.isAssignableFrom(type) || type == Object.class)) {
                 return (T) new ArrayList<>(0);
             }
             if (ignoreAutoType) {

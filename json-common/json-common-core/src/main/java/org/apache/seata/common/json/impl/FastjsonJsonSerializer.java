@@ -144,7 +144,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            if ("[]".equals(text) && java.util.Collection.class.isAssignableFrom(type)) {
+            if ("[]".equals(text) && (java.util.Collection.class.isAssignableFrom(type) || type == Object.class)) {
                 return (T) new java.util.ArrayList<>();
             }
 
