@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -69,7 +70,8 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
 
     @Override
     public Map<String, List<Object>> getPkValues() throws SQLException {
-        Map<String, List<Object>> pkValuesMap;
+        // Fix: Initialize pkValuesMap to support SQL Server composite primary keys.
+        Map<String, List<Object>> pkValuesMap = new HashMap<>();
         boolean isContainsPk = containsPK();
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
 
@@ -84,8 +86,30 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
                 pkValuesMap = getPkValuesWithNoColumn();
             }
         } else {
-            // when there is a composite primary key
-            throw new NotSupportYetException("composite primary key is not supported in sqlserver");
+            // when there is a composite primary key - Fix: Support SQL Server composite primary keys.
+            if (isContainsPk) {
+                // All primary key columns are manually assigned in the INSERT statement.
+                pkValuesMap = getPkValuesByColumn();
+            } else {
+                // Some or all primary key columns are auto-generated.
+                // Get metadata for all primary key columns.
+                Map<String, ColumnMeta> primaryKeyMap =
+                        getTableMeta().getPrimaryKeyMap();
+
+                // Iterate over each primary key column.
+                for (String pkColumnName : pkColumnNameList) {
+                    ColumnMeta pkMeta = primaryKeyMap.get(pkColumnName);
+                    if (pkMeta.isAutoincrement()) {
+                        // Auto-increment column: get from generated keys.
+                        pkValuesMap.put(pkColumnName, getGeneratedKeys());
+                    } else {
+                        // Non-auto-increment column: requires manual assignment, throw exception if not supported.
+                        throw new NotSupportYetException(
+                                "composite primary key with non-autoincrement column is not supported in sqlserver: "
+                                        + pkColumnName);
+                    }
+                }
+            }
         }
 
         return pkValuesMap;

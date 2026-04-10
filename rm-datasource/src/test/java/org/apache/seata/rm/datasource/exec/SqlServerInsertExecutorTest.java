@@ -209,4 +209,101 @@ public class SqlServerInsertExecutorTest {
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
+
+    @Test
+    public void testGetPkValues_compositePrimaryKey_withAllPkInInsert() throws Exception {
+        // Mock composite primary key: id + user_id
+        List<String> compositePkList = Arrays.asList(ID_COLUMN, USER_ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(compositePkList);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        doReturn(true).when(insertExecutor).containsPK(); // All primary keys are in INSERT statement
+
+        // Mock getPkValuesByColumn to return expected values directly
+        Map<String, List<Object>> expectedPkValues = new HashMap<>();
+        expectedPkValues.put(ID_COLUMN, Arrays.asList(1, 2));
+        expectedPkValues.put(USER_ID_COLUMN, Arrays.asList("user1", "user2"));
+        doReturn(expectedPkValues).when(insertExecutor).getPkValuesByColumn();
+
+        Map<String, List<Object>> pkValues = insertExecutor.getPkValues();
+
+        // Verify composite primary key values are correctly retrieved
+        Assertions.assertNotNull(pkValues);
+        Assertions.assertEquals(expectedPkValues, pkValues);
+        
+        // Verify that getPkValuesByColumn was called, confirming the code path for composite keys with manual values
+        verify(insertExecutor).getPkValuesByColumn();
+    }
+
+    @Test
+    public void testGetPkValues_compositePrimaryKey_withAutoIncrement() throws Exception {
+        // Mock composite primary key with auto-increment columns
+        List<String> compositePkList = Arrays.asList(ID_COLUMN, USER_ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(compositePkList);
+
+        Map<String, ColumnMeta> pkMap = new HashMap<>();
+        ColumnMeta idMeta = mock(ColumnMeta.class);
+        when(idMeta.isAutoincrement()).thenReturn(true); // Auto-increment
+        pkMap.put(ID_COLUMN, idMeta);
+
+        ColumnMeta userIdMeta = mock(ColumnMeta.class);
+        when(userIdMeta.isAutoincrement()).thenReturn(true); // Auto-increment
+        pkMap.put(USER_ID_COLUMN, userIdMeta);
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(pkMap);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        doReturn(false).when(insertExecutor).containsPK(); // Primary keys not in INSERT
+        doReturn(Arrays.asList(PK_VALUE)).when(insertExecutor).getGeneratedKeys();
+
+        Map<String, List<Object>> pkValues = insertExecutor.getPkValues();
+
+        // Verify auto-increment column gets value from generated keys
+        Assertions.assertEquals(Arrays.asList(PK_VALUE), pkValues.get(ID_COLUMN));
+        Assertions.assertEquals(Arrays.asList(PK_VALUE), pkValues.get(USER_ID_COLUMN));
+    }
+
+    @Test
+    public void testGetPkValues_compositePrimaryKey_nonAutoIncrementThrowsException() throws Exception {
+        // Mock composite primary key with non-auto-increment column not in INSERT
+        List<String> compositePkList = Arrays.asList(ID_COLUMN, USER_ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(compositePkList);
+
+        Map<String, ColumnMeta> pkMap = new HashMap<>();
+        ColumnMeta idMeta = mock(ColumnMeta.class);
+        when(idMeta.isAutoincrement()).thenReturn(false); // Not auto-increment
+        pkMap.put(ID_COLUMN, idMeta);
+
+        ColumnMeta userIdMeta = mock(ColumnMeta.class);
+        when(userIdMeta.isAutoincrement()).thenReturn(false);
+        pkMap.put(USER_ID_COLUMN, userIdMeta);
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(pkMap);
+
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        doReturn(false).when(insertExecutor).containsPK(); // Primary keys not in INSERT
+
+        // Should throw exception for non-auto-increment composite primary key
+        Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getPkValues());
+    }
+
+    private void mockParametersForCompositePk() {
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
+        ArrayList<Object> arrayList0 = new ArrayList<>();
+        arrayList0.add(1); // id value
+        ArrayList<Object> arrayList1 = new ArrayList<>();
+        arrayList1.add("userId1");
+        ArrayList<Object> arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList<Object> arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(parameters);
+
+        List<List<Object>> rows = new ArrayList<>();
+        rows.add(Arrays.asList("?", "?", "?", "?"));
+        when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
+    }
 }

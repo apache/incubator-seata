@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource;
 
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.sqlparser.util.ColumnUtils;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -78,6 +79,11 @@ public class SqlGenerateUtils {
      */
     public static List<WhereSql> buildWhereConditionListByPKs(
             List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
+        // SQL Server does not support tuple IN syntax: (col1,col2) IN ((?,?),(?,?))
+        // Use AND/OR syntax instead
+        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+            return buildWhereConditionListByPKsForSqlServer(pkNameList, rowSize, maxInSize, dbType);
+        }
         List<WhereSql> whereSqls = new ArrayList<>();
         // we must consider the situation of composite primary key
         int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
@@ -109,6 +115,45 @@ public class SqlGenerateUtils {
                 whereStr.append(")");
             }
             whereStr.append(" )");
+            whereSqls.add(new WhereSql(whereStr.toString(), eachSize, pkNameList.size()));
+        }
+
+        return whereSqls;
+    }
+
+    /**
+     * Build where condition list by PKs for SQL Server.
+     * SQL Server does not support tuple IN syntax: (col1,col2) IN ((?,?),(?,?))
+     * Use AND/OR syntax instead: (col1=? AND col2=?) OR (col1=? AND col2=?)
+     *
+     * @param pkNameList pk column name list
+     * @param rowSize the row size of records
+     * @param maxInSize the max in size
+     * @return where condition sql list for SQL Server
+     */
+    private static List<WhereSql> buildWhereConditionListByPKsForSqlServer(
+            List<String> pkNameList, int rowSize, int maxInSize, String dbType) {
+        List<WhereSql> whereSqls = new ArrayList<>();
+        int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
+        for (int batch = 0; batch < batchSize; batch++) {
+            StringBuilder whereStr = new StringBuilder();
+            int eachSize =
+                    (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize) : maxInSize;
+
+            for (int i = 0; i < eachSize; i++) {
+                if (i > 0) {
+                    whereStr.append(" OR ");
+                }
+                whereStr.append("(");
+                for (int x = 0; x < pkNameList.size(); x++) {
+                    if (x > 0) {
+                        whereStr.append(" AND ");
+                    }
+                    whereStr.append(ColumnUtils.addEscape(pkNameList.get(x), dbType));
+                    whereStr.append("=?");
+                }
+                whereStr.append(")");
+            }
             whereSqls.add(new WhereSql(whereStr.toString(), eachSize, pkNameList.size()));
         }
 
