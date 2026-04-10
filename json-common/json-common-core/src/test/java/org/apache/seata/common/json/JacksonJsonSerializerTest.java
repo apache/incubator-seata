@@ -84,6 +84,13 @@ public class JacksonJsonSerializerTest {
     }
 
     @Test
+    public void testUseAutoType_typeInValue() {
+        String json = "{\"comment\":\"this has @type in it\"}";
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
+        assertThat(hasAutoType).isFalse();
+    }
+
+    @Test
     public void testToJSONString_withAutoType() {
         TestObject obj = new TestObject("withType", 789);
         String jsonWithAutoType = jsonSerializer.toJSONString(obj, false, false);
@@ -231,6 +238,10 @@ public class JacksonJsonSerializerTest {
         String jsonWithoutAutoType = "{\"name\":\"test\"}";
         boolean noAutoType = jsonSerializer.useAutoType(jsonWithoutAutoType);
         assertThat(noAutoType).isFalse();
+
+        String jsonWithTypeInValue = "{\"comment\":\"this has @type in it\"}";
+        boolean typeInValue = jsonSerializer.useAutoType(jsonWithTypeInValue);
+        assertThat(typeInValue).isFalse();
 
         boolean nullAutoType = jsonSerializer.useAutoType(null);
         assertThat(nullAutoType).isFalse();

@@ -84,6 +84,13 @@ public class FastjsonJsonSerializerTest {
     }
 
     @Test
+    public void testUseAutoType_typeInValue() {
+        String json = "{\"comment\":\"this has @type in it\"}";
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
+        assertThat(hasAutoType).isFalse();
+    }
+
+    @Test
     public void testToJSONString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
         String prettyJson = jsonSerializer.toJSONString(obj, true);

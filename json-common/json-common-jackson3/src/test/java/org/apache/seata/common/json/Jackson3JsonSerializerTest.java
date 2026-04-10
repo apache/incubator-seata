@@ -94,6 +94,22 @@ public class Jackson3JsonSerializerTest {
     }
 
     @Test
+    public void testToJSONString_singleArg_containsAutoType() {
+        TestObject obj = new TestObject("singleArg", 321);
+        String json = jsonSerializer.toJSONString(obj);
+
+        assertThat(json).contains("@type");
+        assertThat(json).contains("\"name\":\"singleArg\"");
+        assertThat(json).contains("\"value\":321");
+    }
+
+    @Test
+    public void testEmptyList_toJSONString_singleArg() {
+        List<String> emptyList = new ArrayList<>();
+        assertThat(jsonSerializer.toJSONString(emptyList)).isEqualTo("[]");
+    }
+
+    @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
         String jsonWithAutoType = jsonSerializer.toJSONString(original, false, false);
@@ -203,6 +219,9 @@ public class Jackson3JsonSerializerTest {
 
         String jsonWithoutAutoType = "{\"name\":\"test\"}";
         assertThat(jsonSerializer.useAutoType(jsonWithoutAutoType)).isFalse();
+
+        String jsonWithTypeInValue = "{\"comment\":\"this has @type in it\"}";
+        assertThat(jsonSerializer.useAutoType(jsonWithTypeInValue)).isFalse();
 
         assertThat(jsonSerializer.useAutoType(null)).isFalse();
 

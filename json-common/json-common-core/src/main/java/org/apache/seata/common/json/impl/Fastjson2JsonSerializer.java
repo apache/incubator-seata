@@ -27,6 +27,7 @@ import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
 import java.lang.reflect.Type;
+import java.util.regex.Pattern;
 
 /**
  * Fastjson2 implementation of JsonSerializer
@@ -35,6 +36,8 @@ import java.lang.reflect.Type;
 public class Fastjson2JsonSerializer implements JsonSerializer {
 
     public static final String NAME = "fastjson2";
+
+    private static final Pattern AUTOTYPE_PATTERN = Pattern.compile("\"@type\"\\s*:");
 
     private static final JSONWriter.Feature[] SERIALIZER_FEATURES =
             new JSONWriter.Feature[] {JSONWriter.Feature.WriteClassName};
@@ -51,7 +54,7 @@ public class Fastjson2JsonSerializer implements JsonSerializer {
     @Override
     public String toJSONString(Object object) {
         try {
-            return JSON.toJSONString(object);
+            return JSON.toJSONString(object, SERIALIZER_FEATURES);
         } catch (Exception e) {
             throw new JsonParseException("Fastjson2 serialize error", e);
         }
@@ -86,7 +89,7 @@ public class Fastjson2JsonSerializer implements JsonSerializer {
 
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return json != null && AUTOTYPE_PATTERN.matcher(json).find();
     }
 
     @Override

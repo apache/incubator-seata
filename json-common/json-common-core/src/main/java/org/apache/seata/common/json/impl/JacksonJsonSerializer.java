@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Jackson implementation of JsonSerializer
@@ -42,6 +43,8 @@ import java.util.List;
 @LoadLevel(name = JacksonJsonSerializer.NAME)
 public class JacksonJsonSerializer implements JsonSerializer {
     public static final String NAME = "jackson";
+
+    private static final Pattern AUTOTYPE_PATTERN = Pattern.compile("\"@type\"\\s*:");
 
     private final ObjectMapper defaultObjectMapper;
 
@@ -118,7 +121,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
     // advanced methods for Saga
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return json != null && AUTOTYPE_PATTERN.matcher(json).find();
     }
 
     @Override

@@ -32,6 +32,7 @@ import tools.jackson.databind.jsontype.PolymorphicTypeValidator;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Jackson 3.x implementation of JsonSerializer
@@ -40,6 +41,8 @@ import java.util.List;
 public class Jackson3JsonSerializer implements JsonSerializer {
 
     public static final String NAME = "jackson3";
+
+    private static final Pattern AUTOTYPE_PATTERN = Pattern.compile("\"@type\"\\s*:");
 
     private final ObjectMapper defaultObjectMapper;
 
@@ -60,7 +63,10 @@ public class Jackson3JsonSerializer implements JsonSerializer {
     @Override
     public String toJSONString(Object object) {
         try {
-            return defaultObjectMapper.writeValueAsString(object);
+            if (object instanceof List && ((List<?>) object).isEmpty()) {
+                return "[]";
+            }
+            return objectMapperWithAutoType.writeValueAsString(object);
         } catch (JacksonException e) {
             throw new JsonParseException("Jackson3 serialize error", e);
         }
@@ -95,7 +101,7 @@ public class Jackson3JsonSerializer implements JsonSerializer {
 
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return json != null && AUTOTYPE_PATTERN.matcher(json).find();
     }
 
     @Override

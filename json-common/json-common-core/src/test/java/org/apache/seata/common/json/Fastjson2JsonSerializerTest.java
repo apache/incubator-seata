@@ -282,6 +282,9 @@ public class Fastjson2JsonSerializerTest {
         String jsonWithoutAutoType = "{\"name\":\"test\"}";
         assertThat(jsonSerializer.useAutoType(jsonWithoutAutoType)).isFalse();
 
+        String jsonWithTypeInValue = "{\"comment\":\"this has @type in it\"}";
+        assertThat(jsonSerializer.useAutoType(jsonWithTypeInValue)).isFalse();
+
         assertThat(jsonSerializer.useAutoType(null)).isFalse();
 
         assertThat(jsonSerializer.useAutoType("")).isFalse();

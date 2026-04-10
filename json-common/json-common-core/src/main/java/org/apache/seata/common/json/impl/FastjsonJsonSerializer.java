@@ -26,12 +26,15 @@ import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
 import java.lang.reflect.Type;
+import java.util.regex.Pattern;
 
 /**
  * FastJSON implementation of JsonSerializer
  */
 @LoadLevel(name = FastjsonJsonSerializer.NAME)
 public class FastjsonJsonSerializer implements JsonSerializer {
+
+    private static final Pattern AUTOTYPE_PATTERN = Pattern.compile("\"@type\"\\s*:");
 
     private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
         SerializerFeature.DisableCircularReferenceDetect,
@@ -109,7 +112,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     // advanced methods for Saga
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return json != null && AUTOTYPE_PATTERN.matcher(json).find();
     }
 
     @Override
