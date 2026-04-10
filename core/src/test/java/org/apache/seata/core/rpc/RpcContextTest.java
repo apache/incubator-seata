@@ -262,6 +262,29 @@ public class RpcContextTest {
     }
 
     @Test
+    void removeResourceTest() {
+        rpcContext.addResource("db1");
+        rpcContext.addResource("db2");
+        rpcContext.holdInResourceManagerChannels("db1", 8080);
+        rpcContext.holdInResourceManagerChannels("db2", 8080);
+
+        rpcContext.removeResource("db1");
+
+        assertNotNull(rpcContext.getResourceSets());
+        assertEquals(1, rpcContext.getResourceSets().size());
+        assertTrue(rpcContext.getResourceSets().contains("db2"));
+        assertNull(rpcContext.getClientRMHolderMap().get("db1"));
+        assertNotNull(rpcContext.getClientRMHolderMap().get("db2"));
+    }
+
+    @Test
+    void removeResourceWithNullSetsTest() {
+        rpcContext.setResourceSets(null);
+        rpcContext.removeResource("db1");
+        assertNull(rpcContext.getResourceSets());
+    }
+
+    @Test
     void testRelease() {
         Channel mockChannel = Mockito.mock(Channel.class);
         rpcContext.setChannel(mockChannel);

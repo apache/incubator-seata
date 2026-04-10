@@ -40,9 +40,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
@@ -57,11 +58,62 @@ public class ConsoleRemotingFilter implements Filter {
 
     private final Pattern urlPattern = Pattern.compile(CONSOLE_PATTERN);
 
-    private final Logger logger = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleRemotingFilter.class);
 
     public ConsoleRemotingFilter(NamingManager namingManager, RestTemplate restTemplate) {
         this.namingManager = namingManager;
         this.restTemplate = restTemplate;
+    }
+
+    /**
+     * Check whether the proxied Content-Type is safe (will not be rendered as
+     * HTML / XML by the browser).  Only allow known-safe MIME types through
+     * (allowlist approach); everything else is replaced with
+     * {@code application/json}.
+     */
+    private static boolean isSafeContentType(String contentType) {
+        if (contentType == null) {
+            return false;
+        }
+        String lower = contentType.toLowerCase(Locale.ROOT);
+        // Extract the primary MIME type (ignore parameters such as charset)
+        int semicolonIdx = lower.indexOf(';');
+        String mimeType = (semicolonIdx >= 0 ? lower.substring(0, semicolonIdx) : lower).trim();
+        return "application/json".equals(mimeType)
+                || "text/plain".equals(mimeType)
+                || "application/octet-stream".equals(mimeType);
+    }
+
+    /**
+     * Validate that the given byte array looks like well-formed JSON
+     * (starts with '{' or '[' after trimming leading whitespace).
+     * This is a lightweight sanity check to prevent forwarding
+     * arbitrary HTML / script payloads disguised as JSON.
+     */
+    private static boolean looksLikeJson(byte[] body) {
+        if (body == null || body.length == 0) {
+            return true;
+        }
+        int i = 0;
+        // Skip optional UTF-8 BOM (0xEF, 0xBB, 0xBF)
+        if (body.length >= 3
+                && (body[0] & 0xFF) == 0xEF
+                && (body[1] & 0xFF) == 0xBB
+                && (body[2] & 0xFF) == 0xBF) {
+            i = 3;
+        }
+        // skip leading whitespace (including Unicode NBSP / BOM that survived as whitespace)
+        while (i < body.length && (body[i] == ' ' || body[i] == '\t'
+                || body[i] == '\r' || body[i] == '\n')) {
+            i++;
+        }
+        if (i >= body.length) {
+            return true;
+        }
+        byte first = body[i];
+        return first == '{' || first == '[' || first == '"'
+                || first == 't' || first == 'f' || first == 'n'
+                || (first >= '0' && first <= '9') || first == '-';
     }
 
     @Override
@@ -99,42 +151,116 @@ public class ConsoleRemotingFilter implements Filter {
                                     + request.getRequestURI()
                                     + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
-                            // Copy headers from the original request
+                            // Copy headers from the original request, stripping hop-by-hop
+                            // headers (RFC 7230 §6.1) and Host (so the client library sets
+                            // the correct value for the upstream target).
                             HttpHeaders headers = new HttpHeaders();
                             if (node.getRole() == ClusterRole.LEADER) {
                                 headers.add(RAFT_GROUP_HEADER, node.getUnit());
                             }
                             Collections.list(request.getHeaderNames())
-                                    .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));
+                                    .forEach(headerName -> {
+                                        if (!HttpHeaders.HOST.equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.CONNECTION.equalsIgnoreCase(headerName)
+                                                && !"Keep-Alive".equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.TE.equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.TRAILER.equalsIgnoreCase(headerName)
+                                                && !HttpHeaders.UPGRADE.equalsIgnoreCase(headerName)) {
+                                            headers.add(headerName, request.getHeader(headerName));
+                                        }
+                                    });
 
                             // Create the HttpEntity with headers and body
-                            HttpEntity<byte[]> httpEntity = new HttpEntity<>(request.getCachedBody(), headers);
                             HttpMethod httpMethod;
                             try {
                                 httpMethod = HttpMethod.valueOf(request.getMethod());
                             } catch (IllegalArgumentException ex) {
-                                logger.error("Unsupported HTTP method: {}", request.getMethod(), ex);
+                                LOGGER.error("Unsupported HTTP method: {}", request.getMethod(), ex);
                                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                                 return;
                             }
+
+                            // GET/HEAD methods should not have a body; other methods may include a body as needed.
+                            HttpEntity<byte[]> httpEntity;
+                            if (HttpMethod.GET.equals(httpMethod) || HttpMethod.HEAD.equals(httpMethod)) {
+                                headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                headers.remove(HttpHeaders.TRANSFER_ENCODING);
+                                // headers-only
+                                httpEntity = new HttpEntity<>(headers);
+                            } else {
+                                byte[] body = request.getCachedBody();
+                                if (body == null || body.length == 0) {
+                                    headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                    headers.remove(HttpHeaders.TRANSFER_ENCODING);
+                                    // headers-only for empty body
+                                    httpEntity = new HttpEntity<>(headers);
+                                } else {
+                                    // Remove potentially stale length/transfer headers and let the client recompute them
+                                    headers.remove(HttpHeaders.CONTENT_LENGTH);
+                                    headers.remove(HttpHeaders.TRANSFER_ENCODING);
+                                    httpEntity = new HttpEntity<>(body, headers);
+                                }
+                            }
+
                             try {
-                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
-                                        URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                //Copy headers from proxied response, skipping hop-by-hop and headers we manage ourselves to mitigate
+                                // security risks from Content-Type manipulation
                                 responseEntity.getHeaders().forEach((key, value) -> {
-                                    value.forEach(v -> response.addHeader(key, v));
-                                });
-                                response.setStatus(
-                                        responseEntity.getStatusCode().value());
-                                Optional.ofNullable(responseEntity.getBody()).ifPresent(body -> {
-                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
-                                        outputStream.write(body);
-                                        outputStream.flush();
-                                    } catch (IOException e) {
-                                        logger.error(e.getMessage(), e);
+                                    if (!HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TRANSFER_ENCODING.equalsIgnoreCase(key)
+                                            && !"X-Content-Type-Options".equalsIgnoreCase(key)
+                                            && !HttpHeaders.CONNECTION.equalsIgnoreCase(key)
+                                            && !"Keep-Alive".equalsIgnoreCase(key)
+                                            && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TE.equalsIgnoreCase(key)
+                                            && !HttpHeaders.TRAILER.equalsIgnoreCase(key)
+                                            && !HttpHeaders.UPGRADE.equalsIgnoreCase(key)) {
+                                        value.forEach(v -> response.addHeader(key, v));
                                     }
                                 });
+                                // Force a safe Content-Type: reject HTML/XML types that could
+                                // execute scripts; fall back to application/json
+                                String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+                                String safeContentType;
+                                if (isSafeContentType(proxiedContentType)) {
+                                    safeContentType = proxiedContentType;
+                                } else {
+                                    safeContentType = "application/json;charset=UTF-8";
+                                }
+                                response.setContentType(safeContentType);
+                                response.setHeader("X-Content-Type-Options", "nosniff");
+                                response.setStatus(responseEntity.getStatusCode().value());
+                                byte[] responseBody = responseEntity.getBody();
+                                // HEAD responses must not include a message body (RFC 7231 §4.3.2)
+                                if (!HttpMethod.HEAD.equals(httpMethod)
+                                        && responseBody != null && responseBody.length > 0) {
+                                    // For JSON content type, validate that the body actually looks
+                                    // like JSON to prevent XSS via crafted upstream responses
+                                    if (safeContentType.toLowerCase(Locale.ROOT).contains("application/json")
+                                            && !looksLikeJson(responseBody)) {
+                                        LOGGER.warn("Upstream returned non-JSON body for Content-Type {}, replacing with error response", safeContentType);
+                                        response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
+                                        response.setContentType("application/json;charset=UTF-8");
+                                        responseBody = "{\"error\":\"Upstream returned invalid response body\"}"
+                                                .getBytes(StandardCharsets.UTF_8);
+                                    }
+                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                                        outputStream.write(responseBody);
+                                        outputStream.flush();
+                                    } catch (IOException e) {
+                                        // Client likely disconnected (broken pipe); log at debug
+                                        // level and do NOT attempt sendError – the response may
+                                        // already be committed.
+                                        LOGGER.debug("Failed to write proxy response body (client disconnect?): {}", e.getMessage(), e);
+                                    }
+                                }
                             } catch (Exception ex) {
-                                logger.error(ex.getMessage(), ex);
+                                LOGGER.error(ex.getMessage(), ex);
                                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                             }
                             return;
