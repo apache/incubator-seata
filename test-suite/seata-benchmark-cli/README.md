@@ -30,6 +30,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - **Selectable SAGA state machine shapes** such as `simple` and `order`
 - **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
 - **Reproducible SAGA failure injection** with `--saga-random-seed`
+- **Step-targeted SAGA timeout simulation** with `--saga-timeout-step` and `--saga-timeout-ms`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
 - **CSV export** for post-analysis
@@ -130,6 +131,18 @@ java -jar seata-benchmark-cli.jar \
   --rollback-percentage 20 \
   --saga-fail-step payment \
   --saga-random-seed 123
+
+# SAGA mode with payment-step timeout simulation
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 10 \
+  --threads 1 \
+  --duration 10 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-timeout-step payment \
+  --saga-timeout-ms 3000
 ```
 
 ### Performance Testing Modes
@@ -194,6 +207,8 @@ Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [--saga-shape=<sagaShape>]
                        [--saga-fail-step=<sagaFailStep>]
                        [--saga-random-seed=<sagaRandomSeed>]
+                       [--saga-timeout-step=<sagaTimeoutStep>]
+                       [--saga-timeout-ms=<sagaTimeoutMs>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
                        [--rollback-percentage=<rollbackPercentage>]
@@ -219,6 +234,12 @@ Options:
       --saga-random-seed=<sagaRandomSeed>
                                        Optional random seed for reproducible SAGA
                                        failure injection behavior.
+      --saga-timeout-step=<sagaTimeoutStep>
+                                       Simulate SAGA timeout at one forward step:
+                                       inventory, payment, or order.
+      --saga-timeout-ms=<sagaTimeoutMs>
+                                       Simulated timeout delay in milliseconds for
+                                       SAGA timeout injection (default: 3000).
       --branches=<branches>            Number of branch transactions
                                        0 = empty mode (protocol overhead only)
                                        >=1 = real mode (actual execution)
@@ -282,9 +303,9 @@ When the benchmark completes, a final report is displayed:
 Mode:                  SAGA
 Saga Shape:            order
 Total Transactions:    6,000
-Success Count:         4,860
-Failed Count:          1,140
-Success Rate:          81.00%
+Success Count:         5,780
+Failed Count:          220
+Success Rate:          96.33%
 Committed Count:       4,860
 Compensated Count:     920
 Execution Failed Count: 180
@@ -304,6 +325,8 @@ Latency Statistics:
   Max:                 230 ms
 ===================================================
 ```
+
+For timeout simulation scenarios, the reported `Elapsed Time` may slightly exceed the configured `--duration` because already-started transactions are allowed to finish before the workload generator stops.
 
 ### CSV Export
 
@@ -325,9 +348,9 @@ Metric,Value
 Mode,SAGA
 Saga Shape,order
 Total Transactions,6000
-Success Count,4860
-Failed Count,1140
-Success Rate (%),81.00
+Success Count,5780
+Failed Count,220
+Success Rate (%),96.33
 Committed Count,4860
 Compensated Count,920
 Execution Failed Count,180

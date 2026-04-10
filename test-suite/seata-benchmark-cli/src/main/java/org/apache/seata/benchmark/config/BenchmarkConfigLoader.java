@@ -102,7 +102,9 @@ public class BenchmarkConfigLoader {
             Integer branches,
             String sagaShape,
             String sagaFailStep,
-            Long sagaRandomSeed) {
+            Long sagaRandomSeed,
+            String sagaTimeoutStep,
+            Integer sagaTimeoutMs) {
         if (StringUtils.isNotEmpty(server)) {
             config.setServer(server);
         }
@@ -141,6 +143,12 @@ public class BenchmarkConfigLoader {
         }
         if (sagaRandomSeed != null) {
             config.setSagaRandomSeed(sagaRandomSeed);
+        }
+        if (StringUtils.isNotEmpty(sagaTimeoutStep)) {
+            config.setSagaTimeoutStep(sagaTimeoutStep);
+        }
+        if (sagaTimeoutMs != null && sagaTimeoutMs >= 0) {
+            config.setSagaTimeoutMs(sagaTimeoutMs);
         }
         return config;
     }

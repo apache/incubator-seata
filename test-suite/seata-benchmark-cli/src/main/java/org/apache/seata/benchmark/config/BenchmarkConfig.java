@@ -39,6 +39,8 @@ public class BenchmarkConfig {
     private String sagaShape;
     private String sagaFailStep;
     private Long sagaRandomSeed;
+    private String sagaTimeoutStep;
+    private int sagaTimeoutMs = 3000;
 
     public BranchType getMode() {
         return mode;
@@ -148,6 +150,22 @@ public class BenchmarkConfig {
         this.sagaRandomSeed = sagaRandomSeed;
     }
 
+    public String getSagaTimeoutStep() {
+        return sagaTimeoutStep;
+    }
+
+    public void setSagaTimeoutStep(String sagaTimeoutStep) {
+        this.sagaTimeoutStep = sagaTimeoutStep;
+    }
+
+    public int getSagaTimeoutMs() {
+        return sagaTimeoutMs;
+    }
+
+    public void setSagaTimeoutMs(int sagaTimeoutMs) {
+        this.sagaTimeoutMs = sagaTimeoutMs;
+    }
+
     public void validate() {
         validateMode();
         validateNotEmpty(server, "server");
@@ -161,6 +179,8 @@ public class BenchmarkConfig {
         validateRange(rollbackPercentage, 0, 100, "rollbackPercentage");
         validateSagaShape();
         validateSagaFailStep();
+        validateSagaTimeoutStep();
+        validateNonNegative(sagaTimeoutMs, "sagaTimeoutMs");
         validateTpsAndThreads();
     }
 
@@ -217,6 +237,19 @@ public class BenchmarkConfig {
                     "sagaFailStep must be one of: inventory, payment, order");
         }
         sagaFailStep = normalized;
+    }
+
+    private void validateSagaTimeoutStep() {
+        if (sagaTimeoutStep == null || sagaTimeoutStep.trim().isEmpty()) {
+            return;
+        }
+
+        String normalized = sagaTimeoutStep.trim().toLowerCase(Locale.ROOT);
+        if (!"inventory".equals(normalized) && !"payment".equals(normalized) && !"order".equals(normalized)) {
+            throw new IllegalArgumentException(
+                    "sagaTimeoutStep must be one of: inventory, payment, order");
+        }
+        sagaTimeoutStep = normalized;
     }
 
     private void validateTpsAndThreads() {

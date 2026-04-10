@@ -108,6 +108,16 @@ public class BenchmarkApplication implements Callable<Integer> {
             description = "Seed for reproducible SAGA failure injection")
     private Long sagaRandomSeed;
 
+    @Option(
+            names = {"--saga-timeout-step"},
+            description = "Simulate SAGA timeout at a specific forward step: inventory, payment, or order")
+    private String sagaTimeoutStep;
+
+    @Option(
+            names = {"--saga-timeout-ms"},
+            description = "Simulated timeout delay in milliseconds for SAGA timeout injection (default: 3000)")
+    private Integer sagaTimeoutMs;
+
     public static void main(String[] args) {
         // Parse server address from args before any Seata class loading
         String serverAddr = BenchmarkConstants.DEFAULT_SERVER_ADDRESS;
@@ -161,7 +171,9 @@ public class BenchmarkApplication implements Callable<Integer> {
                 branches,
                 sagaShape,
                 sagaFailStep,
-                sagaRandomSeed);
+                sagaRandomSeed,
+                sagaTimeoutStep,
+                sagaTimeoutMs);
     }
 
     private void printConfiguration(BenchmarkConfig config) {
@@ -185,6 +197,10 @@ public class BenchmarkApplication implements Callable<Integer> {
         }
         if (config.getSagaRandomSeed() != null) {
             System.out.println("  Saga Seed:    " + config.getSagaRandomSeed());
+        }
+        if (config.getSagaTimeoutStep() != null && !config.getSagaTimeoutStep().isEmpty()) {
+            System.out.println("  Saga Timeout: " + config.getSagaTimeoutStep());
+            System.out.println("  Timeout Ms:   " + config.getSagaTimeoutMs());
         }
         System.out.println();
     }

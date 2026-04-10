@@ -103,6 +103,8 @@ public class SagaModeExecutor implements TransactionExecutor {
             stateMachineConfig.setRollbackPercentage(config.getRollbackPercentage());
             stateMachineConfig.setSagaFailStep(config.getSagaFailStep());
             stateMachineConfig.setSagaRandomSeed(config.getSagaRandomSeed());
+            stateMachineConfig.setSagaTimeoutStep(config.getSagaTimeoutStep());
+            stateMachineConfig.setSagaTimeoutMs(config.getSagaTimeoutMs());
             stateMachineConfig.init();
 
             // Create state machine engine
@@ -198,6 +200,8 @@ public class SagaModeExecutor implements TransactionExecutor {
                 status = STATUS_COMPENSATED;
             } else if (ExecutionStatus.FA.equals(compensationStatus)) {
                 status = STATUS_COMPENSATION_FAILED;
+            } else if (ExecutionStatus.UN.equals(compensationStatus)) {
+                status = STATUS_UNKNOWN;
             } else if (ExecutionStatus.SU.equals(executionStatus)) {
                 status = STATUS_COMMITTED;
                 success = true;
@@ -277,6 +281,8 @@ public class SagaModeExecutor implements TransactionExecutor {
         private int rollbackPercentage = 0;
         private String sagaFailStep;
         private Long sagaRandomSeed;
+        private String sagaTimeoutStep;
+        private int sagaTimeoutMs = 3000;
 
         public void setRollbackPercentage(int rollbackPercentage) {
             this.rollbackPercentage = rollbackPercentage;
@@ -288,6 +294,14 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         public void setSagaRandomSeed(Long sagaRandomSeed) {
             this.sagaRandomSeed = sagaRandomSeed;
+        }
+
+        public void setSagaTimeoutStep(String sagaTimeoutStep) {
+            this.sagaTimeoutStep = sagaTimeoutStep;
+        }
+
+        public void setSagaTimeoutMs(int sagaTimeoutMs) {
+            this.sagaTimeoutMs = sagaTimeoutMs;
         }
 
         @Override
@@ -335,19 +349,37 @@ public class SagaModeExecutor implements TransactionExecutor {
                 boolean orderFailEnabled = !restrictFailureStep || STEP_ORDER.equals(sagaFailStep);
                 boolean inventoryFailEnabled = !restrictFailureStep || STEP_INVENTORY.equals(sagaFailStep);
                 boolean paymentFailEnabled = !restrictFailureStep || STEP_PAYMENT.equals(sagaFailStep);
+                boolean orderTimeoutEnabled = STEP_ORDER.equals(sagaTimeoutStep);
+                boolean inventoryTimeoutEnabled = STEP_INVENTORY.equals(sagaTimeoutStep);
+                boolean paymentTimeoutEnabled = STEP_PAYMENT.equals(sagaTimeoutStep);
 
                 serviceInvoker.registerService(
                         "orderService",
                         new OrderSagaService(
-                                serviceRollbackPct, 5, orderFailEnabled, createFailureRandom(11)));
+                                serviceRollbackPct,
+                                5,
+                                orderFailEnabled,
+                                createFailureRandom(11),
+                                orderTimeoutEnabled,
+                                sagaTimeoutMs));
                 serviceInvoker.registerService(
                         "inventoryService",
                         new InventorySagaService(
-                                serviceRollbackPct, 5, inventoryFailEnabled, createFailureRandom(17)));
+                                serviceRollbackPct,
+                                5,
+                                inventoryFailEnabled,
+                                createFailureRandom(17),
+                                inventoryTimeoutEnabled,
+                                sagaTimeoutMs));
                 serviceInvoker.registerService(
                         "paymentService",
                         new PaymentSagaService(
-                                serviceRollbackPct, 5, paymentFailEnabled, createFailureRandom(23)));
+                                serviceRollbackPct,
+                                5,
+                                paymentFailEnabled,
+                                createFailureRandom(23),
+                                paymentTimeoutEnabled,
+                                sagaTimeoutMs));
 
                 // Register the service invoker for different service types
                 getServiceInvokerManager().putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, serviceInvoker);

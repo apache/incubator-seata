@@ -67,7 +67,7 @@ public class BenchmarkMetrics {
             committedCount.incrementAndGet();
         } else if (BenchmarkConstants.STATUS_COMPENSATED.equals(status)) {
             compensatedCount.incrementAndGet();
-            failedCount.incrementAndGet();
+            successCount.incrementAndGet();
         } else if (BenchmarkConstants.STATUS_COMPENSATION_FAILED.equals(status)) {
             compensationFailedCount.incrementAndGet();
             failedCount.incrementAndGet();

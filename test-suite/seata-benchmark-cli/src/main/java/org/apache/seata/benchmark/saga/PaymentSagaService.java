@@ -37,13 +37,22 @@ public class PaymentSagaService {
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
     private final Random failureRandom;
+    private final boolean timeoutInjectionEnabled;
+    private final int timeoutMs;
 
     public PaymentSagaService(
-            int rollbackPercentage, int simulatedDelayMs, boolean failInjectionEnabled, Random failureRandom) {
+            int rollbackPercentage,
+            int simulatedDelayMs,
+            boolean failInjectionEnabled,
+            Random failureRandom,
+            boolean timeoutInjectionEnabled,
+            int timeoutMs) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
         this.failInjectionEnabled = failInjectionEnabled;
         this.failureRandom = failureRandom;
+        this.timeoutInjectionEnabled = timeoutInjectionEnabled;
+        this.timeoutMs = timeoutMs;
     }
 
     /**
@@ -62,6 +71,10 @@ public class PaymentSagaService {
 
         // Simulate processing time
         simulateDelay();
+
+        if (timeoutInjectionEnabled) {
+            simulateTimeout("payment debit");
+        }
 
         // Simulate failure injection on the selected step.
         if (shouldFail()) {
@@ -117,6 +130,16 @@ public class PaymentSagaService {
             return false;
         }
         return nextFailurePercent() < rollbackPercentage;
+    }
+
+    private void simulateTimeout(String operation) {
+        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
+        try {
+            Thread.sleep(timeoutMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        throw new RuntimeException("Simulated " + operation + " timeout");
     }
 
     private int nextFailurePercent() {
