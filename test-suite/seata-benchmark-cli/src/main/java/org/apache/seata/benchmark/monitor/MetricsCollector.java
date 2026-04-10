@@ -18,6 +18,7 @@ package org.apache.seata.benchmark.monitor;
 
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
+import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,10 @@ public class MetricsCollector {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             writer.println("Metric,Value");
             writer.println("Mode," + config.getMode());
+            if (config.getMode() == BranchType.SAGA && config.getSagaWorkload() != null
+                    && !config.getSagaWorkload().isEmpty()) {
+                writer.println("Saga Workload," + config.getSagaWorkload());
+            }
             if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
                 writer.println("Saga Shape," + config.getSagaShape());
             }
@@ -87,6 +92,10 @@ public class MetricsCollector {
         report.append("           Seata Benchmark Final Report\n");
         report.append("===================================================\n");
         report.append(String.format("Mode:                  %s\n", config.getMode()));
+        if (config.getMode() == BranchType.SAGA && config.getSagaWorkload() != null
+                && !config.getSagaWorkload().isEmpty()) {
+            report.append(String.format("Saga Workload:         %s\n", config.getSagaWorkload()));
+        }
         if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
             report.append(String.format("Saga Shape:            %s\n", config.getSagaShape()));
         }

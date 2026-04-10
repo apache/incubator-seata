@@ -19,9 +19,13 @@ package org.apache.seata.benchmark.executor;
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.model.TransactionRecord;
 import org.apache.seata.benchmark.saga.BenchmarkServiceInvoker;
+import org.apache.seata.benchmark.saga.InventoryDbSagaService;
 import org.apache.seata.benchmark.saga.InventorySagaService;
+import org.apache.seata.benchmark.saga.OrderDbSagaService;
 import org.apache.seata.benchmark.saga.OrderSagaService;
+import org.apache.seata.benchmark.saga.PaymentDbSagaService;
 import org.apache.seata.benchmark.saga.PaymentSagaService;
+import org.apache.seata.benchmark.saga.SagaDbEnvironment;
 import org.apache.seata.benchmark.saga.SimpleSpelExpressionFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
@@ -71,6 +75,7 @@ public class SagaModeExecutor implements TransactionExecutor {
     private static final String STEP_ORDER = "order";
     private static final String SHAPE_SIMPLE = "simple";
     private static final String SHAPE_ORDER = "order";
+    private static final String WORKLOAD_DB = "db";
 
     private final BenchmarkConfig config;
     private StateMachineEngine stateMachineEngine;
@@ -105,6 +110,8 @@ public class SagaModeExecutor implements TransactionExecutor {
             stateMachineConfig.setSagaRandomSeed(config.getSagaRandomSeed());
             stateMachineConfig.setSagaTimeoutStep(config.getSagaTimeoutStep());
             stateMachineConfig.setSagaTimeoutMs(config.getSagaTimeoutMs());
+            stateMachineConfig.setSagaWorkload(config.getSagaWorkload());
+            stateMachineConfig.setBenchmarkConfig(config);
             stateMachineConfig.init();
 
             // Create state machine engine
@@ -116,6 +123,9 @@ public class SagaModeExecutor implements TransactionExecutor {
             LOGGER.info("Available state machines: {}, {}", SIMPLE_SAGA_NAME, ORDER_SAGA_NAME);
 
         } catch (Exception e) {
+            if (stateMachineConfig != null) {
+                stateMachineConfig.destroy();
+            }
             throw new RuntimeException("Failed to initialize Saga state machine engine", e);
         }
     }
@@ -268,7 +278,9 @@ public class SagaModeExecutor implements TransactionExecutor {
 
     private void destroyRealMode() {
         LOGGER.info("Destroying Real Saga mode resources");
-        // StateMachineEngine doesn't have a close method
+        if (stateMachineConfig != null) {
+            stateMachineConfig.destroy();
+        }
         stateMachineEngine = null;
         stateMachineConfig = null;
     }
@@ -283,6 +295,9 @@ public class SagaModeExecutor implements TransactionExecutor {
         private Long sagaRandomSeed;
         private String sagaTimeoutStep;
         private int sagaTimeoutMs = 3000;
+        private String sagaWorkload = "mock";
+        private BenchmarkConfig benchmarkConfig;
+        private SagaDbEnvironment sagaDbEnvironment;
 
         public void setRollbackPercentage(int rollbackPercentage) {
             this.rollbackPercentage = rollbackPercentage;
@@ -302,6 +317,14 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         public void setSagaTimeoutMs(int sagaTimeoutMs) {
             this.sagaTimeoutMs = sagaTimeoutMs;
+        }
+
+        public void setSagaWorkload(String sagaWorkload) {
+            this.sagaWorkload = sagaWorkload;
+        }
+
+        public void setBenchmarkConfig(BenchmarkConfig benchmarkConfig) {
+            this.benchmarkConfig = benchmarkConfig;
         }
 
         @Override
@@ -353,33 +376,28 @@ public class SagaModeExecutor implements TransactionExecutor {
                 boolean inventoryTimeoutEnabled = STEP_INVENTORY.equals(sagaTimeoutStep);
                 boolean paymentTimeoutEnabled = STEP_PAYMENT.equals(sagaTimeoutStep);
 
-                serviceInvoker.registerService(
-                        "orderService",
-                        new OrderSagaService(
-                                serviceRollbackPct,
-                                5,
-                                orderFailEnabled,
-                                createFailureRandom(11),
-                                orderTimeoutEnabled,
-                                sagaTimeoutMs));
-                serviceInvoker.registerService(
-                        "inventoryService",
-                        new InventorySagaService(
-                                serviceRollbackPct,
-                                5,
-                                inventoryFailEnabled,
-                                createFailureRandom(17),
-                                inventoryTimeoutEnabled,
-                                sagaTimeoutMs));
-                serviceInvoker.registerService(
-                        "paymentService",
-                        new PaymentSagaService(
-                                serviceRollbackPct,
-                                5,
-                                paymentFailEnabled,
-                                createFailureRandom(23),
-                                paymentTimeoutEnabled,
-                                sagaTimeoutMs));
+                if (WORKLOAD_DB.equals(sagaWorkload)) {
+                    initDbEnvironment();
+                    registerDbServices(
+                            serviceInvoker,
+                            serviceRollbackPct,
+                            orderFailEnabled,
+                            inventoryFailEnabled,
+                            paymentFailEnabled,
+                            orderTimeoutEnabled,
+                            inventoryTimeoutEnabled,
+                            paymentTimeoutEnabled);
+                } else {
+                    registerMockServices(
+                            serviceInvoker,
+                            serviceRollbackPct,
+                            orderFailEnabled,
+                            inventoryFailEnabled,
+                            paymentFailEnabled,
+                            orderTimeoutEnabled,
+                            inventoryTimeoutEnabled,
+                            paymentTimeoutEnabled);
+                }
 
                 // Register the service invoker for different service types
                 getServiceInvokerManager().putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, serviceInvoker);
@@ -398,6 +416,100 @@ public class SagaModeExecutor implements TransactionExecutor {
 
         private Random createFailureRandom(int salt) {
             return sagaRandomSeed == null ? null : new Random(sagaRandomSeed + salt);
+        }
+
+        private void registerMockServices(
+                BenchmarkServiceInvoker serviceInvoker,
+                int serviceRollbackPct,
+                boolean orderFailEnabled,
+                boolean inventoryFailEnabled,
+                boolean paymentFailEnabled,
+                boolean orderTimeoutEnabled,
+                boolean inventoryTimeoutEnabled,
+                boolean paymentTimeoutEnabled) {
+            serviceInvoker.registerService(
+                    "orderService",
+                    new OrderSagaService(
+                            serviceRollbackPct,
+                            5,
+                            orderFailEnabled,
+                            createFailureRandom(11),
+                            orderTimeoutEnabled,
+                            sagaTimeoutMs));
+            serviceInvoker.registerService(
+                    "inventoryService",
+                    new InventorySagaService(
+                            serviceRollbackPct,
+                            5,
+                            inventoryFailEnabled,
+                            createFailureRandom(17),
+                            inventoryTimeoutEnabled,
+                            sagaTimeoutMs));
+            serviceInvoker.registerService(
+                    "paymentService",
+                    new PaymentSagaService(
+                            serviceRollbackPct,
+                            5,
+                            paymentFailEnabled,
+                            createFailureRandom(23),
+                            paymentTimeoutEnabled,
+                            sagaTimeoutMs));
+        }
+
+        private void registerDbServices(
+                BenchmarkServiceInvoker serviceInvoker,
+                int serviceRollbackPct,
+                boolean orderFailEnabled,
+                boolean inventoryFailEnabled,
+                boolean paymentFailEnabled,
+                boolean orderTimeoutEnabled,
+                boolean inventoryTimeoutEnabled,
+                boolean paymentTimeoutEnabled) {
+            serviceInvoker.registerService(
+                    "orderService",
+                    new OrderDbSagaService(
+                            sagaDbEnvironment.getDataSource(),
+                            serviceRollbackPct,
+                            5,
+                            orderFailEnabled,
+                            createFailureRandom(11),
+                            orderTimeoutEnabled,
+                            sagaTimeoutMs));
+            serviceInvoker.registerService(
+                    "inventoryService",
+                    new InventoryDbSagaService(
+                            sagaDbEnvironment.getDataSource(),
+                            serviceRollbackPct,
+                            5,
+                            inventoryFailEnabled,
+                            createFailureRandom(17),
+                            inventoryTimeoutEnabled,
+                            sagaTimeoutMs));
+            serviceInvoker.registerService(
+                    "paymentService",
+                    new PaymentDbSagaService(
+                            sagaDbEnvironment.getDataSource(),
+                            serviceRollbackPct,
+                            5,
+                            paymentFailEnabled,
+                            createFailureRandom(23),
+                            paymentTimeoutEnabled,
+                            sagaTimeoutMs));
+        }
+
+        private void initDbEnvironment() {
+            if (benchmarkConfig == null) {
+                throw new IllegalStateException("BenchmarkConfig is required for DB-backed Saga workload");
+            }
+            sagaDbEnvironment = new SagaDbEnvironment(benchmarkConfig);
+            sagaDbEnvironment.init();
+        }
+
+        public void destroy() {
+            if (sagaDbEnvironment != null) {
+                sagaDbEnvironment.destroy();
+                sagaDbEnvironment = null;
+            }
         }
     }
 }

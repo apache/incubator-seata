@@ -37,6 +37,7 @@ public class BenchmarkConfig {
     private int rollbackPercentage = 2;
     private int branches = 0;
     private String sagaShape;
+    private String sagaWorkload = "mock";
     private String sagaFailStep;
     private Long sagaRandomSeed;
     private String sagaTimeoutStep;
@@ -134,6 +135,14 @@ public class BenchmarkConfig {
         this.sagaShape = sagaShape;
     }
 
+    public String getSagaWorkload() {
+        return sagaWorkload;
+    }
+
+    public void setSagaWorkload(String sagaWorkload) {
+        this.sagaWorkload = sagaWorkload;
+    }
+
     public String getSagaFailStep() {
         return sagaFailStep;
     }
@@ -178,6 +187,7 @@ public class BenchmarkConfig {
         validateNonNegative(branches, "branches");
         validateRange(rollbackPercentage, 0, 100, "rollbackPercentage");
         validateSagaShape();
+        validateSagaWorkload();
         validateSagaFailStep();
         validateSagaTimeoutStep();
         validateNonNegative(sagaTimeoutMs, "sagaTimeoutMs");
@@ -224,6 +234,19 @@ public class BenchmarkConfig {
             throw new IllegalArgumentException("sagaShape must be one of: simple, order");
         }
         sagaShape = normalized;
+    }
+
+    private void validateSagaWorkload() {
+        if (sagaWorkload == null || sagaWorkload.trim().isEmpty()) {
+            sagaWorkload = "mock";
+            return;
+        }
+
+        String normalized = sagaWorkload.trim().toLowerCase(Locale.ROOT);
+        if (!"mock".equals(normalized) && !"db".equals(normalized)) {
+            throw new IllegalArgumentException("sagaWorkload must be one of: mock, db");
+        }
+        sagaWorkload = normalized;
     }
 
     private void validateSagaFailStep() {

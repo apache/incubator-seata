@@ -19,6 +19,7 @@ package org.apache.seata.benchmark;
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.config.BenchmarkConfigLoader;
 import org.apache.seata.benchmark.constant.BenchmarkConstants;
+import org.apache.seata.core.model.BranchType;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -99,6 +100,11 @@ public class BenchmarkApplication implements Callable<Integer> {
     private String sagaShape;
 
     @Option(
+            names = {"--saga-workload"},
+            description = "Select SAGA workload implementation: mock or db")
+    private String sagaWorkload;
+
+    @Option(
             names = {"--saga-fail-step"},
             description = "Force SAGA forward failure at a specific step: inventory, payment, or order")
     private String sagaFailStep;
@@ -170,6 +176,7 @@ public class BenchmarkApplication implements Callable<Integer> {
                 rollbackPercentage,
                 branches,
                 sagaShape,
+                sagaWorkload,
                 sagaFailStep,
                 sagaRandomSeed,
                 sagaTimeoutStep,
@@ -189,6 +196,10 @@ public class BenchmarkApplication implements Callable<Integer> {
         System.out.println("  Rollback %:   " + config.getRollbackPercentage() + "%");
         System.out.println("  Branches:     " + config.getBranches()
                 + (config.getBranches() == 0 ? " (empty mode)" : " (real mode)"));
+        if (config.getMode() == BranchType.SAGA && config.getSagaWorkload() != null
+                && !config.getSagaWorkload().isEmpty()) {
+            System.out.println("  Saga Workload:" + padValue(config.getSagaWorkload()));
+        }
         if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
             System.out.println("  Saga Shape:   " + config.getSagaShape());
         }
@@ -203,5 +214,9 @@ public class BenchmarkApplication implements Callable<Integer> {
             System.out.println("  Timeout Ms:   " + config.getSagaTimeoutMs());
         }
         System.out.println();
+    }
+
+    private String padValue(String value) {
+        return value == null ? "" : "   " + value;
     }
 }
