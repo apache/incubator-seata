@@ -155,8 +155,8 @@ public class SagaDbEnvironment {
     }
 
     private void seedAccounts(Connection conn) throws SQLException {
-        try (PreparedStatement pstmt = conn.prepareStatement(
-                "INSERT INTO benchmark_account (account_id, balance) VALUES (?, ?)")) {
+        try (PreparedStatement pstmt =
+                conn.prepareStatement("INSERT INTO benchmark_account (account_id, balance) VALUES (?, ?)")) {
             for (int i = 0; i < BenchmarkConstants.ACCOUNT_COUNT; i++) {
                 pstmt.setString(1, "account-" + i);
                 pstmt.setBigDecimal(2, BigDecimal.valueOf(BenchmarkConstants.SAGA_INITIAL_BALANCE));

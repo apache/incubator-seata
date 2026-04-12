@@ -196,7 +196,8 @@ public class BenchmarkApplication implements Callable<Integer> {
         System.out.println("  Rollback %:   " + config.getRollbackPercentage() + "%");
         System.out.println("  Branches:     " + config.getBranches()
                 + (config.getBranches() == 0 ? " (empty mode)" : " (real mode)"));
-        if (config.getMode() == BranchType.SAGA && config.getSagaWorkload() != null
+        if (config.getMode() == BranchType.SAGA
+                && config.getSagaWorkload() != null
                 && !config.getSagaWorkload().isEmpty()) {
             System.out.println("  Saga Workload:" + padValue(config.getSagaWorkload()));
         }

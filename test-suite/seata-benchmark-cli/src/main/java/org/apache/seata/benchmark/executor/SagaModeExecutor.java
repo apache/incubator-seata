@@ -48,7 +48,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -364,7 +363,8 @@ public class SagaModeExecutor implements TransactionExecutor {
                 // Register benchmark services with the service invoker manager
                 BenchmarkServiceInvoker serviceInvoker = new BenchmarkServiceInvoker();
 
-                boolean restrictFailureStep = sagaFailStep != null && !sagaFailStep.trim().isEmpty();
+                boolean restrictFailureStep =
+                        sagaFailStep != null && !sagaFailStep.trim().isEmpty();
                 int serviceRollbackPct = restrictFailureStep
                         ? rollbackPercentage
                         : (rollbackPercentage > 0 ? Math.max(1, rollbackPercentage / 3) : 0);
@@ -414,8 +414,9 @@ public class SagaModeExecutor implements TransactionExecutor {
             return buffer.toByteArray();
         }
 
-        private Random createFailureRandom(int salt) {
-            return sagaRandomSeed == null ? null : new Random(sagaRandomSeed + salt);
+        private ThreadLocal<java.util.Random> createFailureRandom(int salt) {
+            return org.apache.seata.benchmark.saga.FailureRandomProvider.create(
+                    sagaRandomSeed == null ? null : sagaRandomSeed + salt);
         }
 
         private void registerMockServices(

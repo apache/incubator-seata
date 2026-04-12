@@ -37,7 +37,7 @@ public class OrderDbSagaService {
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
-    private final Random failureRandom;
+    private final ThreadLocal<Random> failureRandom;
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
@@ -46,7 +46,7 @@ public class OrderDbSagaService {
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
-            Random failureRandom,
+            ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
         this.dataSource = dataSource;
@@ -74,10 +74,9 @@ public class OrderDbSagaService {
         }
 
         try (Connection conn = dataSource.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(
-                        "INSERT INTO benchmark_order "
-                                + "(order_id, user_id, product_id, quantity, amount, status) "
-                                + "VALUES (?, ?, ?, ?, ?, ?)")) {
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO benchmark_order "
+                        + "(order_id, user_id, product_id, quantity, amount, status) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)")) {
             pstmt.setString(1, orderId);
             pstmt.setString(2, userId);
             pstmt.setString(3, productId);
@@ -104,8 +103,8 @@ public class OrderDbSagaService {
         simulateDelay();
 
         try (Connection conn = dataSource.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(
-                        "UPDATE benchmark_order SET status = ? WHERE order_id = ?")) {
+                PreparedStatement pstmt =
+                        conn.prepareStatement("UPDATE benchmark_order SET status = ? WHERE order_id = ?")) {
             pstmt.setString(1, "CANCELLED");
             pstmt.setString(2, orderId);
             pstmt.executeUpdate();
@@ -148,11 +147,6 @@ public class OrderDbSagaService {
     }
 
     private int nextFailurePercent() {
-        if (failureRandom != null) {
-            synchronized (failureRandom) {
-                return failureRandom.nextInt(100);
-            }
-        }
-        return ThreadLocalRandom.current().nextInt(100);
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }

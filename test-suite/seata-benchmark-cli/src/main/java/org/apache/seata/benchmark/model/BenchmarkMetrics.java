@@ -116,7 +116,7 @@ public class BenchmarkMetrics {
     }
 
     public long getExecutionFailedCount() {
-        return failedCount.get() - compensatedCount.get() - compensationFailedCount.get() - unknownCount.get();
+        return failedCount.get() - compensationFailedCount.get() - unknownCount.get();
     }
 
     public long getCompensationFailedCount() {

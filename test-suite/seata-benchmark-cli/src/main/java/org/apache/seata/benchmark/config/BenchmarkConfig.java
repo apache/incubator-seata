@@ -256,8 +256,7 @@ public class BenchmarkConfig {
 
         String normalized = sagaFailStep.trim().toLowerCase(Locale.ROOT);
         if (!"inventory".equals(normalized) && !"payment".equals(normalized) && !"order".equals(normalized)) {
-            throw new IllegalArgumentException(
-                    "sagaFailStep must be one of: inventory, payment, order");
+            throw new IllegalArgumentException("sagaFailStep must be one of: inventory, payment, order");
         }
         sagaFailStep = normalized;
     }
@@ -269,8 +268,7 @@ public class BenchmarkConfig {
 
         String normalized = sagaTimeoutStep.trim().toLowerCase(Locale.ROOT);
         if (!"inventory".equals(normalized) && !"payment".equals(normalized) && !"order".equals(normalized)) {
-            throw new IllegalArgumentException(
-                    "sagaTimeoutStep must be one of: inventory, payment, order");
+            throw new IllegalArgumentException("sagaTimeoutStep must be one of: inventory, payment, order");
         }
         sagaTimeoutStep = normalized;
     }

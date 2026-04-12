@@ -20,7 +20,6 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,7 +36,7 @@ public class PaymentDbSagaService {
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
-    private final Random failureRandom;
+    private final ThreadLocal<Random> failureRandom;
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
@@ -46,7 +45,7 @@ public class PaymentDbSagaService {
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
-            Random failureRandom,
+            ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
         this.dataSource = dataSource;
@@ -71,18 +70,26 @@ public class PaymentDbSagaService {
         }
 
         try (Connection conn = dataSource.getConnection()) {
+            boolean originalAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            BigDecimal balance = queryBalance(conn, accountId);
-            if (balance.compareTo(amount) < 0) {
-                throw new RuntimeException("Insufficient balance for account " + accountId);
+            try {
+                try (PreparedStatement pstmt =
+                        conn.prepareStatement("UPDATE benchmark_account SET balance = balance - ? "
+                                + "WHERE account_id = ? AND balance >= ?")) {
+                    pstmt.setBigDecimal(1, amount);
+                    pstmt.setString(2, accountId);
+                    pstmt.setBigDecimal(3, amount);
+                    if (pstmt.executeUpdate() == 0) {
+                        throw new RuntimeException("Insufficient balance for account " + accountId);
+                    }
+                }
+                conn.commit();
+            } catch (Exception e) {
+                rollbackQuietly(conn, e);
+                throw e;
+            } finally {
+                restoreAutoCommit(conn, originalAutoCommit);
             }
-            try (PreparedStatement pstmt = conn.prepareStatement(
-                    "UPDATE benchmark_account SET balance = balance - ? WHERE account_id = ?")) {
-                pstmt.setBigDecimal(1, amount);
-                pstmt.setString(2, accountId);
-                pstmt.executeUpdate();
-            }
-            conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to debit payment", e);
         }
@@ -117,20 +124,20 @@ public class PaymentDbSagaService {
         return result;
     }
 
-    private BigDecimal queryBalance(Connection conn, String accountId) throws SQLException {
-        try (PreparedStatement pstmt =
-                        conn.prepareStatement("SELECT balance FROM benchmark_account WHERE account_id = ?");
-                ResultSet rs = executeQuery(pstmt, accountId)) {
-            if (!rs.next()) {
-                throw new RuntimeException("Account not found: " + accountId);
-            }
-            return rs.getBigDecimal(1);
+    private void rollbackQuietly(Connection conn, Exception original) {
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackException) {
+            original.addSuppressed(rollbackException);
         }
     }
 
-    private ResultSet executeQuery(PreparedStatement pstmt, String accountId) throws SQLException {
-        pstmt.setString(1, accountId);
-        return pstmt.executeQuery();
+    private void restoreAutoCommit(Connection conn, boolean originalAutoCommit) {
+        try {
+            conn.setAutoCommit(originalAutoCommit);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to restore auto-commit for payment connection", e);
+        }
     }
 
     private BigDecimal toBigDecimal(Object amountObj) {
@@ -161,11 +168,6 @@ public class PaymentDbSagaService {
     }
 
     private int nextFailurePercent() {
-        if (failureRandom != null) {
-            synchronized (failureRandom) {
-                return failureRandom.nextInt(100);
-            }
-        }
-        return ThreadLocalRandom.current().nextInt(100);
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }

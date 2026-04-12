@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class InventoryDbSagaService {
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
-    private final Random failureRandom;
+    private final ThreadLocal<Random> failureRandom;
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
@@ -50,7 +49,7 @@ public class InventoryDbSagaService {
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
-            Random failureRandom,
+            ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
         this.dataSource = dataSource;
@@ -75,21 +74,27 @@ public class InventoryDbSagaService {
         }
 
         try (Connection conn = dataSource.getConnection()) {
+            boolean originalAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            int available = queryAvailableQuantity(conn, productId);
-            if (available < quantity) {
-                throw new RuntimeException("Insufficient inventory for product " + productId);
+            try {
+                try (PreparedStatement pstmt = conn.prepareStatement("UPDATE benchmark_inventory "
+                        + "SET available_qty = available_qty - ?, reserved_qty = reserved_qty + ? "
+                        + "WHERE product_id = ? AND available_qty >= ?")) {
+                    pstmt.setInt(1, quantity);
+                    pstmt.setInt(2, quantity);
+                    pstmt.setString(3, productId);
+                    pstmt.setInt(4, quantity);
+                    if (pstmt.executeUpdate() == 0) {
+                        throw new RuntimeException("Insufficient inventory for product " + productId);
+                    }
+                }
+                conn.commit();
+            } catch (Exception e) {
+                rollbackQuietly(conn, e);
+                throw e;
+            } finally {
+                restoreAutoCommit(conn, originalAutoCommit);
             }
-            try (PreparedStatement pstmt = conn.prepareStatement(
-                    "UPDATE benchmark_inventory "
-                            + "SET available_qty = available_qty - ?, reserved_qty = reserved_qty + ? "
-                            + "WHERE product_id = ?")) {
-                pstmt.setInt(1, quantity);
-                pstmt.setInt(2, quantity);
-                pstmt.setString(3, productId);
-                pstmt.executeUpdate();
-            }
-            conn.commit();
         } catch (SQLException e) {
             throw new RuntimeException("Failed to reserve inventory", e);
         }
@@ -109,10 +114,9 @@ public class InventoryDbSagaService {
         simulateDelay();
 
         try (Connection conn = dataSource.getConnection();
-                PreparedStatement pstmt = conn.prepareStatement(
-                        "UPDATE benchmark_inventory "
-                                + "SET available_qty = available_qty + ?, reserved_qty = GREATEST(reserved_qty - ?, 0) "
-                                + "WHERE product_id = ?")) {
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE benchmark_inventory "
+                        + "SET available_qty = available_qty + ?, reserved_qty = GREATEST(reserved_qty - ?, 0) "
+                        + "WHERE product_id = ?")) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, quantity);
             pstmt.setString(3, productId);
@@ -128,20 +132,20 @@ public class InventoryDbSagaService {
         return result;
     }
 
-    private int queryAvailableQuantity(Connection conn, String productId) throws SQLException {
-        try (PreparedStatement pstmt =
-                        conn.prepareStatement("SELECT available_qty FROM benchmark_inventory WHERE product_id = ?");
-                ResultSet rs = executeQuery(pstmt, productId)) {
-            if (!rs.next()) {
-                throw new RuntimeException("Product not found: " + productId);
-            }
-            return rs.getInt(1);
+    private void rollbackQuietly(Connection conn, Exception original) {
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackException) {
+            original.addSuppressed(rollbackException);
         }
     }
 
-    private ResultSet executeQuery(PreparedStatement pstmt, String productId) throws SQLException {
-        pstmt.setString(1, productId);
-        return pstmt.executeQuery();
+    private void restoreAutoCommit(Connection conn, boolean originalAutoCommit) {
+        try {
+            conn.setAutoCommit(originalAutoCommit);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to restore auto-commit for inventory connection", e);
+        }
     }
 
     private void simulateDelay() {
@@ -168,11 +172,6 @@ public class InventoryDbSagaService {
     }
 
     private int nextFailurePercent() {
-        if (failureRandom != null) {
-            synchronized (failureRandom) {
-                return failureRandom.nextInt(100);
-            }
-        }
-        return ThreadLocalRandom.current().nextInt(100);
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }

@@ -36,7 +36,7 @@ public class PaymentSagaService {
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
-    private final Random failureRandom;
+    private final ThreadLocal<Random> failureRandom;
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
@@ -44,7 +44,7 @@ public class PaymentSagaService {
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
-            Random failureRandom,
+            ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
         this.rollbackPercentage = rollbackPercentage;
@@ -143,11 +143,6 @@ public class PaymentSagaService {
     }
 
     private int nextFailurePercent() {
-        if (failureRandom != null) {
-            synchronized (failureRandom) {
-                return failureRandom.nextInt(100);
-            }
-        }
-        return ThreadLocalRandom.current().nextInt(100);
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }
