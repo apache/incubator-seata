@@ -435,9 +435,13 @@ public class SagaModeExecutor implements TransactionExecutor {
                 boolean inventoryTimeoutEnabled,
                 boolean paymentTimeoutEnabled) {
             orderSagaService = new OrderSagaService(
-                    serviceRollbackPct, 5, orderFailEnabled, createFailureRandom(11), orderTimeoutEnabled, sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "orderService", orderSagaService);
+                    serviceRollbackPct,
+                    5,
+                    orderFailEnabled,
+                    createFailureRandom(11),
+                    orderTimeoutEnabled,
+                    sagaTimeoutMs);
+            serviceInvoker.registerService("orderService", orderSagaService);
             inventorySagaService = new InventorySagaService(
                     serviceRollbackPct,
                     5,
@@ -445,12 +449,15 @@ public class SagaModeExecutor implements TransactionExecutor {
                     createFailureRandom(17),
                     inventoryTimeoutEnabled,
                     sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "inventoryService", inventorySagaService);
+            serviceInvoker.registerService("inventoryService", inventorySagaService);
             paymentSagaService = new PaymentSagaService(
-                    serviceRollbackPct, 5, paymentFailEnabled, createFailureRandom(23), paymentTimeoutEnabled, sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "paymentService", paymentSagaService);
+                    serviceRollbackPct,
+                    5,
+                    paymentFailEnabled,
+                    createFailureRandom(23),
+                    paymentTimeoutEnabled,
+                    sagaTimeoutMs);
+            serviceInvoker.registerService("paymentService", paymentSagaService);
         }
 
         private void registerDbServices(
@@ -470,8 +477,7 @@ public class SagaModeExecutor implements TransactionExecutor {
                     createFailureRandom(11),
                     orderTimeoutEnabled,
                     sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "orderService", orderDbSagaService);
+            serviceInvoker.registerService("orderService", orderDbSagaService);
             inventoryDbSagaService = new InventoryDbSagaService(
                     sagaDbEnvironment.getDataSource(),
                     serviceRollbackPct,
@@ -480,8 +486,7 @@ public class SagaModeExecutor implements TransactionExecutor {
                     createFailureRandom(17),
                     inventoryTimeoutEnabled,
                     sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "inventoryService", inventoryDbSagaService);
+            serviceInvoker.registerService("inventoryService", inventoryDbSagaService);
             paymentDbSagaService = new PaymentDbSagaService(
                     sagaDbEnvironment.getDataSource(),
                     serviceRollbackPct,
@@ -490,8 +495,7 @@ public class SagaModeExecutor implements TransactionExecutor {
                     createFailureRandom(23),
                     paymentTimeoutEnabled,
                     sagaTimeoutMs);
-            serviceInvoker.registerService(
-                    "paymentService", paymentDbSagaService);
+            serviceInvoker.registerService("paymentService", paymentDbSagaService);
         }
 
         private void initDbEnvironment() {
