@@ -115,6 +115,12 @@ public class PaymentSagaService {
         return result;
     }
 
+    public void destroy() {
+        if (failureRandom != null) {
+            failureRandom.remove();
+        }
+    }
+
     private void simulateDelay() {
         if (simulatedDelayMs > 0) {
             try {

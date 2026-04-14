@@ -132,6 +132,12 @@ public class InventoryDbSagaService {
         return result;
     }
 
+    public void destroy() {
+        if (failureRandom != null) {
+            failureRandom.remove();
+        }
+    }
+
     private void rollbackQuietly(Connection conn, Exception original) {
         try {
             conn.rollback();

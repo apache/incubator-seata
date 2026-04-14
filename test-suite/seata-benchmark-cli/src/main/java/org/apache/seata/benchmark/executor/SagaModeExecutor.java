@@ -297,6 +297,12 @@ public class SagaModeExecutor implements TransactionExecutor {
         private String sagaWorkload = "mock";
         private BenchmarkConfig benchmarkConfig;
         private SagaDbEnvironment sagaDbEnvironment;
+        private OrderSagaService orderSagaService;
+        private InventorySagaService inventorySagaService;
+        private PaymentSagaService paymentSagaService;
+        private OrderDbSagaService orderDbSagaService;
+        private InventoryDbSagaService inventoryDbSagaService;
+        private PaymentDbSagaService paymentDbSagaService;
 
         public void setRollbackPercentage(int rollbackPercentage) {
             this.rollbackPercentage = rollbackPercentage;
@@ -428,33 +434,23 @@ public class SagaModeExecutor implements TransactionExecutor {
                 boolean orderTimeoutEnabled,
                 boolean inventoryTimeoutEnabled,
                 boolean paymentTimeoutEnabled) {
+            orderSagaService = new OrderSagaService(
+                    serviceRollbackPct, 5, orderFailEnabled, createFailureRandom(11), orderTimeoutEnabled, sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "orderService",
-                    new OrderSagaService(
-                            serviceRollbackPct,
-                            5,
-                            orderFailEnabled,
-                            createFailureRandom(11),
-                            orderTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "orderService", orderSagaService);
+            inventorySagaService = new InventorySagaService(
+                    serviceRollbackPct,
+                    5,
+                    inventoryFailEnabled,
+                    createFailureRandom(17),
+                    inventoryTimeoutEnabled,
+                    sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "inventoryService",
-                    new InventorySagaService(
-                            serviceRollbackPct,
-                            5,
-                            inventoryFailEnabled,
-                            createFailureRandom(17),
-                            inventoryTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "inventoryService", inventorySagaService);
+            paymentSagaService = new PaymentSagaService(
+                    serviceRollbackPct, 5, paymentFailEnabled, createFailureRandom(23), paymentTimeoutEnabled, sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "paymentService",
-                    new PaymentSagaService(
-                            serviceRollbackPct,
-                            5,
-                            paymentFailEnabled,
-                            createFailureRandom(23),
-                            paymentTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "paymentService", paymentSagaService);
         }
 
         private void registerDbServices(
@@ -466,36 +462,36 @@ public class SagaModeExecutor implements TransactionExecutor {
                 boolean orderTimeoutEnabled,
                 boolean inventoryTimeoutEnabled,
                 boolean paymentTimeoutEnabled) {
+            orderDbSagaService = new OrderDbSagaService(
+                    sagaDbEnvironment.getDataSource(),
+                    serviceRollbackPct,
+                    5,
+                    orderFailEnabled,
+                    createFailureRandom(11),
+                    orderTimeoutEnabled,
+                    sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "orderService",
-                    new OrderDbSagaService(
-                            sagaDbEnvironment.getDataSource(),
-                            serviceRollbackPct,
-                            5,
-                            orderFailEnabled,
-                            createFailureRandom(11),
-                            orderTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "orderService", orderDbSagaService);
+            inventoryDbSagaService = new InventoryDbSagaService(
+                    sagaDbEnvironment.getDataSource(),
+                    serviceRollbackPct,
+                    5,
+                    inventoryFailEnabled,
+                    createFailureRandom(17),
+                    inventoryTimeoutEnabled,
+                    sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "inventoryService",
-                    new InventoryDbSagaService(
-                            sagaDbEnvironment.getDataSource(),
-                            serviceRollbackPct,
-                            5,
-                            inventoryFailEnabled,
-                            createFailureRandom(17),
-                            inventoryTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "inventoryService", inventoryDbSagaService);
+            paymentDbSagaService = new PaymentDbSagaService(
+                    sagaDbEnvironment.getDataSource(),
+                    serviceRollbackPct,
+                    5,
+                    paymentFailEnabled,
+                    createFailureRandom(23),
+                    paymentTimeoutEnabled,
+                    sagaTimeoutMs);
             serviceInvoker.registerService(
-                    "paymentService",
-                    new PaymentDbSagaService(
-                            sagaDbEnvironment.getDataSource(),
-                            serviceRollbackPct,
-                            5,
-                            paymentFailEnabled,
-                            createFailureRandom(23),
-                            paymentTimeoutEnabled,
-                            sagaTimeoutMs));
+                    "paymentService", paymentDbSagaService);
         }
 
         private void initDbEnvironment() {
@@ -507,9 +503,37 @@ public class SagaModeExecutor implements TransactionExecutor {
         }
 
         public void destroy() {
+            destroyServices();
             if (sagaDbEnvironment != null) {
                 sagaDbEnvironment.destroy();
                 sagaDbEnvironment = null;
+            }
+        }
+
+        private void destroyServices() {
+            if (orderSagaService != null) {
+                orderSagaService.destroy();
+                orderSagaService = null;
+            }
+            if (inventorySagaService != null) {
+                inventorySagaService.destroy();
+                inventorySagaService = null;
+            }
+            if (paymentSagaService != null) {
+                paymentSagaService.destroy();
+                paymentSagaService = null;
+            }
+            if (orderDbSagaService != null) {
+                orderDbSagaService.destroy();
+                orderDbSagaService = null;
+            }
+            if (inventoryDbSagaService != null) {
+                inventoryDbSagaService.destroy();
+                inventoryDbSagaService = null;
+            }
+            if (paymentDbSagaService != null) {
+                paymentDbSagaService.destroy();
+                paymentDbSagaService = null;
             }
         }
     }

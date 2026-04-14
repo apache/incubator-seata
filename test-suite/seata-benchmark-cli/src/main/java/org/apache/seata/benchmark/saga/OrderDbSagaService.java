@@ -119,6 +119,12 @@ public class OrderDbSagaService {
         return result;
     }
 
+    public void destroy() {
+        if (failureRandom != null) {
+            failureRandom.remove();
+        }
+    }
+
     private BigDecimal toBigDecimal(Object amountObj) {
         return amountObj instanceof BigDecimal ? (BigDecimal) amountObj : new BigDecimal(amountObj.toString());
     }
