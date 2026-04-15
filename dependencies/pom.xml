@@ -87,6 +87,7 @@
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
+        <jackson3.version>3.1.1</jackson3.version>
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
@@ -151,6 +152,23 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Jackson 3.x -->
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Jackson 2.x BOM -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>
@@ -912,14 +930,6 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
-            </dependency>
-            <!-- Jackson BOM to manage all Jackson dependencies -->
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>cn.com.kingbase</groupId>

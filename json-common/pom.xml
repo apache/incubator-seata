@@ -27,38 +27,25 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>json-common</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>json-common ${project.version}</name>
-    <description>jsonUtil for Seata modules</description>
+    <description>json-common top parent for Seata built with Maven</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>json-common-core</module>
+    </modules>
 
-
+    <profiles>
+        <!-- Jackson 3 requires JDK 17+: only build the jackson3 submodule on JDK 17+ -->
+        <profile>
+            <id>JDK17Plus</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>json-common-jackson3</module>
+            </modules>
+        </profile>
+    </profiles>
 
 </project>
