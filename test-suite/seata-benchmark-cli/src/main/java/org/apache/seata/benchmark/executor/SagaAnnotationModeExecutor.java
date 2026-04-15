@@ -81,13 +81,12 @@ public class SagaAnnotationModeExecutor extends AbstractTransactionExecutor {
         // 1. Registers SagaAnnotationResource with DefaultResourceManager (enables TC callbacks)
         // 2. Returns a SagaAnnotationActionInterceptorHandler for proxy dispatch
         SagaAnnotationActionInterceptorParser parser = new SagaAnnotationActionInterceptorParser();
-        ProxyInvocationHandler handler =
-                parser.parserInterfaceToProxy(serviceImpl, "benchmarkSagaAnnotationService");
+        ProxyInvocationHandler handler = parser.parserInterfaceToProxy(serviceImpl, "benchmarkSagaAnnotationService");
 
         // Wrap the handler with a JDK dynamic proxy — equivalent to Spring AOP proxy
         serviceProxy = (BenchmarkCompensatableService) Proxy.newProxyInstance(
                 BenchmarkCompensatableService.class.getClassLoader(),
-                new Class[]{BenchmarkCompensatableService.class},
+                new Class[] {BenchmarkCompensatableService.class},
                 (proxy, method, args) -> handler.invoke(new InvocationWrapper() {
                     @Override
                     public Method getMethod() {
@@ -115,9 +114,7 @@ public class SagaAnnotationModeExecutor extends AbstractTransactionExecutor {
                     }
                 }));
 
-        LOGGER.info(
-                "SAGA_ANNOTATION mode executor initialized ({} branches per transaction)",
-                config.getBranches());
+        LOGGER.info("SAGA_ANNOTATION mode executor initialized ({} branches per transaction)", config.getBranches());
     }
 
     @Override
