@@ -19,19 +19,24 @@ package org.apache.seata.benchmark.saga;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Inventory Saga Service for benchmark testing.
- * Simulates inventory reservation/release operations.
+ * Database-backed inventory service for Saga benchmark.
+ * @author zihenzzz
  */
-public class InventorySagaService {
+public class InventoryDbSagaService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InventorySagaService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InventoryDbSagaService.class);
 
+    private final DataSource dataSource;
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
@@ -39,13 +44,15 @@ public class InventorySagaService {
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
-    public InventorySagaService(
+    public InventoryDbSagaService(
+            DataSource dataSource,
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
             ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
+        this.dataSource = dataSource;
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
         this.failInjectionEnabled = failInjectionEnabled;
@@ -54,32 +61,45 @@ public class InventorySagaService {
         this.timeoutMs = timeoutMs;
     }
 
-    /**
-     * Reserve inventory (forward action)
-     *
-     * @param params input parameters containing productId and quantity
-     * @return result map with success status
-     */
     public Map<String, Object> reserveInventory(Map<String, Object> params) {
         String productId = (String) params.get("productId");
         Integer quantity = (Integer) params.get("quantity");
 
-        LOGGER.debug("Reserving inventory: productId={}, quantity={}", productId, quantity);
-
-        // Simulate processing time
         simulateDelay();
-
         if (timeoutInjectionEnabled) {
             simulateTimeout("inventory reservation");
         }
-
-        // Simulate failure injection on the selected step.
         if (shouldFail()) {
-            LOGGER.debug("Inventory reservation failed (simulated): productId={}", productId);
             throw new RuntimeException("Simulated inventory reservation failure");
         }
 
-        LOGGER.debug("Inventory reserved successfully: productId={}, quantity={}", productId, quantity);
+        try (Connection conn = dataSource.getConnection()) {
+            boolean originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement pstmt = conn.prepareStatement("UPDATE benchmark_inventory "
+                        + "SET available_qty = available_qty - ?, reserved_qty = reserved_qty + ? "
+                        + "WHERE product_id = ? AND available_qty >= ?")) {
+                    pstmt.setInt(1, quantity);
+                    pstmt.setInt(2, quantity);
+                    pstmt.setString(3, productId);
+                    pstmt.setInt(4, quantity);
+                    if (pstmt.executeUpdate() == 0) {
+                        throw new RuntimeException("Insufficient inventory for product " + productId);
+                    }
+                }
+                conn.commit();
+            } catch (Exception e) {
+                rollbackQuietly(conn, e);
+                throw e;
+            } finally {
+                restoreAutoCommit(conn, originalAutoCommit);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to reserve inventory", e);
+        }
+
+        LOGGER.debug("Reserved inventory in DB: productId={}, quantity={}", productId, quantity);
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
         result.put("productId", productId);
@@ -87,22 +107,24 @@ public class InventorySagaService {
         return result;
     }
 
-    /**
-     * Release inventory (compensation action)
-     *
-     * @param params input parameters containing productId and quantity
-     * @return result map with success status
-     */
     public Map<String, Object> releaseInventory(Map<String, Object> params) {
         String productId = (String) params.get("productId");
         Integer quantity = (Integer) params.get("quantity");
 
-        LOGGER.debug("Releasing inventory (compensation): productId={}, quantity={}", productId, quantity);
-
-        // Simulate processing time
         simulateDelay();
 
-        LOGGER.debug("Inventory released successfully: productId={}, quantity={}", productId, quantity);
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement("UPDATE benchmark_inventory "
+                        + "SET available_qty = available_qty + ?, reserved_qty = GREATEST(reserved_qty - ?, 0) "
+                        + "WHERE product_id = ?")) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, quantity);
+            pstmt.setString(3, productId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to release inventory", e);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
         result.put("productId", productId);
@@ -113,6 +135,22 @@ public class InventorySagaService {
     public void destroy() {
         if (failureRandom != null) {
             failureRandom.remove();
+        }
+    }
+
+    private void rollbackQuietly(Connection conn, Exception original) {
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackException) {
+            original.addSuppressed(rollbackException);
+        }
+    }
+
+    private void restoreAutoCommit(Connection conn, boolean originalAutoCommit) {
+        try {
+            conn.setAutoCommit(originalAutoCommit);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to restore auto-commit for inventory connection", e);
         }
     }
 
@@ -127,14 +165,10 @@ public class InventorySagaService {
     }
 
     private boolean shouldFail() {
-        if (!failInjectionEnabled) {
-            return false;
-        }
-        return nextFailurePercent() < rollbackPercentage;
+        return failInjectionEnabled && nextFailurePercent() < rollbackPercentage;
     }
 
     private void simulateTimeout(String operation) {
-        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
         try {
             Thread.sleep(timeoutMs);
         } catch (InterruptedException e) {

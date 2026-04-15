@@ -16,22 +16,24 @@
  */
 package org.apache.seata.benchmark.saga;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Inventory Saga Service for benchmark testing.
- * Simulates inventory reservation/release operations.
+ * Database-backed order service for Saga benchmark.
+ * @author zihenzzz
  */
-public class InventorySagaService {
+public class OrderDbSagaService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InventorySagaService.class);
-
+    private final DataSource dataSource;
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
@@ -39,13 +41,15 @@ public class InventorySagaService {
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
-    public InventorySagaService(
+    public OrderDbSagaService(
+            DataSource dataSource,
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
             ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
+        this.dataSource = dataSource;
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
         this.failInjectionEnabled = failInjectionEnabled;
@@ -54,59 +58,64 @@ public class InventorySagaService {
         this.timeoutMs = timeoutMs;
     }
 
-    /**
-     * Reserve inventory (forward action)
-     *
-     * @param params input parameters containing productId and quantity
-     * @return result map with success status
-     */
-    public Map<String, Object> reserveInventory(Map<String, Object> params) {
+    public Map<String, Object> createOrder(Map<String, Object> params) {
+        String orderId = UUID.randomUUID().toString().substring(0, 8);
+        String userId = (String) params.get("userId");
         String productId = (String) params.get("productId");
         Integer quantity = (Integer) params.get("quantity");
+        BigDecimal amount = toBigDecimal(params.get("amount"));
 
-        LOGGER.debug("Reserving inventory: productId={}, quantity={}", productId, quantity);
-
-        // Simulate processing time
         simulateDelay();
-
         if (timeoutInjectionEnabled) {
-            simulateTimeout("inventory reservation");
+            simulateTimeout("order creation");
         }
-
-        // Simulate failure injection on the selected step.
         if (shouldFail()) {
-            LOGGER.debug("Inventory reservation failed (simulated): productId={}", productId);
-            throw new RuntimeException("Simulated inventory reservation failure");
+            throw new RuntimeException("Simulated order creation failure");
         }
 
-        LOGGER.debug("Inventory reserved successfully: productId={}, quantity={}", productId, quantity);
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement("INSERT INTO benchmark_order "
+                        + "(order_id, user_id, product_id, quantity, amount, status) "
+                        + "VALUES (?, ?, ?, ?, ?, ?)")) {
+            pstmt.setString(1, orderId);
+            pstmt.setString(2, userId);
+            pstmt.setString(3, productId);
+            pstmt.setInt(4, quantity);
+            pstmt.setBigDecimal(5, amount);
+            pstmt.setString(6, "CREATED");
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to create order", e);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
+        result.put("orderId", orderId);
+        result.put("userId", userId);
         result.put("productId", productId);
-        result.put("quantity", quantity);
         return result;
     }
 
-    /**
-     * Release inventory (compensation action)
-     *
-     * @param params input parameters containing productId and quantity
-     * @return result map with success status
-     */
-    public Map<String, Object> releaseInventory(Map<String, Object> params) {
-        String productId = (String) params.get("productId");
-        Integer quantity = (Integer) params.get("quantity");
+    public Map<String, Object> cancelOrder(Map<String, Object> params) {
+        String orderId = (String) params.get("orderId");
+        String userId = (String) params.get("userId");
 
-        LOGGER.debug("Releasing inventory (compensation): productId={}, quantity={}", productId, quantity);
-
-        // Simulate processing time
         simulateDelay();
 
-        LOGGER.debug("Inventory released successfully: productId={}, quantity={}", productId, quantity);
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt =
+                        conn.prepareStatement("UPDATE benchmark_order SET status = ? WHERE order_id = ?")) {
+            pstmt.setString(1, "CANCELLED");
+            pstmt.setString(2, orderId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to cancel order", e);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
-        result.put("productId", productId);
-        result.put("quantity", quantity);
+        result.put("orderId", orderId != null ? orderId : "unknown");
+        result.put("userId", userId);
         return result;
     }
 
@@ -114,6 +123,10 @@ public class InventorySagaService {
         if (failureRandom != null) {
             failureRandom.remove();
         }
+    }
+
+    private BigDecimal toBigDecimal(Object amountObj) {
+        return amountObj instanceof BigDecimal ? (BigDecimal) amountObj : new BigDecimal(amountObj.toString());
     }
 
     private void simulateDelay() {
@@ -127,14 +140,10 @@ public class InventorySagaService {
     }
 
     private boolean shouldFail() {
-        if (!failInjectionEnabled) {
-            return false;
-        }
-        return nextFailurePercent() < rollbackPercentage;
+        return failInjectionEnabled && nextFailurePercent() < rollbackPercentage;
     }
 
     private void simulateTimeout(String operation) {
-        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
         try {
             Thread.sleep(timeoutMs);
         } catch (InterruptedException e) {
