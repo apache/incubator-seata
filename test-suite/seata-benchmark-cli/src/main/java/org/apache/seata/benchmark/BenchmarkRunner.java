@@ -69,7 +69,7 @@ public class BenchmarkRunner {
             executor.init();
 
             BenchmarkMetrics metrics = new BenchmarkMetrics();
-            MetricsCollector metricsCollector = new MetricsCollector(metrics);
+            MetricsCollector metricsCollector = new MetricsCollector(config, metrics);
             workloadGenerator = new WorkloadGenerator(config, executor, metrics);
 
             System.out.println("Starting benchmark...\n");

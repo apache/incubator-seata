@@ -16,23 +16,23 @@
  */
 package org.apache.seata.benchmark.saga;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Payment Saga Service for benchmark testing.
- * Simulates payment debit/refund operations.
+ * Database-backed payment service for Saga benchmark.
+ * @author zihenzzz
  */
-public class PaymentSagaService {
+public class PaymentDbSagaService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PaymentSagaService.class);
-
+    private final DataSource dataSource;
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
     private final boolean failInjectionEnabled;
@@ -40,13 +40,15 @@ public class PaymentSagaService {
     private final boolean timeoutInjectionEnabled;
     private final int timeoutMs;
 
-    public PaymentSagaService(
+    public PaymentDbSagaService(
+            DataSource dataSource,
             int rollbackPercentage,
             int simulatedDelayMs,
             boolean failInjectionEnabled,
             ThreadLocal<Random> failureRandom,
             boolean timeoutInjectionEnabled,
             int timeoutMs) {
+        this.dataSource = dataSource;
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
         this.failInjectionEnabled = failInjectionEnabled;
@@ -55,63 +57,70 @@ public class PaymentSagaService {
         this.timeoutMs = timeoutMs;
     }
 
-    /**
-     * Debit payment (forward action)
-     *
-     * @param params input parameters containing accountId and amount
-     * @return result map with success status
-     */
     public Map<String, Object> debitPayment(Map<String, Object> params) {
         String accountId = (String) params.get("accountId");
-        Object amountObj = params.get("amount");
-        BigDecimal amount =
-                amountObj instanceof BigDecimal ? (BigDecimal) amountObj : new BigDecimal(amountObj.toString());
+        BigDecimal amount = toBigDecimal(params.get("amount"));
 
-        LOGGER.debug("Debiting payment: accountId={}, amount={}", accountId, amount);
-
-        // Simulate processing time
         simulateDelay();
-
         if (timeoutInjectionEnabled) {
             simulateTimeout("payment debit");
         }
-
-        // Simulate failure injection on the selected step.
         if (shouldFail()) {
-            LOGGER.debug("Payment debit failed (simulated): accountId={}", accountId);
             throw new RuntimeException("Simulated payment debit failure");
         }
 
-        LOGGER.debug("Payment debited successfully: accountId={}, amount={}", accountId, amount);
+        try (Connection conn = dataSource.getConnection()) {
+            boolean originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                try (PreparedStatement pstmt =
+                        conn.prepareStatement("UPDATE benchmark_account SET balance = balance - ? "
+                                + "WHERE account_id = ? AND balance >= ?")) {
+                    pstmt.setBigDecimal(1, amount);
+                    pstmt.setString(2, accountId);
+                    pstmt.setBigDecimal(3, amount);
+                    if (pstmt.executeUpdate() == 0) {
+                        throw new RuntimeException("Insufficient balance for account " + accountId);
+                    }
+                }
+                conn.commit();
+            } catch (Exception e) {
+                rollbackQuietly(conn, e);
+                throw e;
+            } finally {
+                restoreAutoCommit(conn, originalAutoCommit);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to debit payment", e);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
         result.put("accountId", accountId);
-        result.put("amount", amount.toString());
+        result.put("amount", amount.toPlainString());
         return result;
     }
 
-    /**
-     * Refund payment (compensation action)
-     *
-     * @param params input parameters containing accountId and amount
-     * @return result map with success status
-     */
     public Map<String, Object> refundPayment(Map<String, Object> params) {
         String accountId = (String) params.get("accountId");
-        Object amountObj = params.get("amount");
-        BigDecimal amount =
-                amountObj instanceof BigDecimal ? (BigDecimal) amountObj : new BigDecimal(amountObj.toString());
+        BigDecimal amount = toBigDecimal(params.get("amount"));
 
-        LOGGER.debug("Refunding payment (compensation): accountId={}, amount={}", accountId, amount);
-
-        // Simulate processing time
         simulateDelay();
 
-        LOGGER.debug("Payment refunded successfully: accountId={}, amount={}", accountId, amount);
+        try (Connection conn = dataSource.getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(
+                        "UPDATE benchmark_account SET balance = balance + ? WHERE account_id = ?")) {
+            pstmt.setBigDecimal(1, amount);
+            pstmt.setString(2, accountId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to refund payment", e);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("code", "S");
         result.put("accountId", accountId);
-        result.put("amount", amount.toString());
+        result.put("amount", amount.toPlainString());
         return result;
     }
 
@@ -119,6 +128,26 @@ public class PaymentSagaService {
         if (failureRandom != null) {
             failureRandom.remove();
         }
+    }
+
+    private void rollbackQuietly(Connection conn, Exception original) {
+        try {
+            conn.rollback();
+        } catch (SQLException rollbackException) {
+            original.addSuppressed(rollbackException);
+        }
+    }
+
+    private void restoreAutoCommit(Connection conn, boolean originalAutoCommit) {
+        try {
+            conn.setAutoCommit(originalAutoCommit);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to restore auto-commit for payment connection", e);
+        }
+    }
+
+    private BigDecimal toBigDecimal(Object amountObj) {
+        return amountObj instanceof BigDecimal ? (BigDecimal) amountObj : new BigDecimal(amountObj.toString());
     }
 
     private void simulateDelay() {
@@ -132,14 +161,10 @@ public class PaymentSagaService {
     }
 
     private boolean shouldFail() {
-        if (!failInjectionEnabled) {
-            return false;
-        }
-        return nextFailurePercent() < rollbackPercentage;
+        return failInjectionEnabled && nextFailurePercent() < rollbackPercentage;
     }
 
     private void simulateTimeout(String operation) {
-        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
         try {
             Thread.sleep(timeoutMs);
         } catch (InterruptedException e) {

@@ -27,6 +27,11 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - **Configurable TPS** (Transactions Per Second) control
 - **Multi-threaded** workload generation
 - **Fault injection** with configurable rollback percentage
+- **Selectable SAGA state machine shapes** such as `simple` and `order`
+- **Selectable SAGA workload implementations** such as `mock` and `db`
+- **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
+- **Reproducible SAGA failure injection** with `--saga-random-seed`
+- **Step-targeted SAGA timeout simulation** with `--saga-timeout-step` and `--saga-timeout-ms`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
 - **CSV export** for post-analysis
@@ -96,6 +101,59 @@ java -jar seata-benchmark-cli.jar \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
+
+# SAGA mode with explicit order state machine shape
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order
+
+# SAGA mode with DB-backed business actions (via Testcontainers MySQL)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db
+
+# SAGA mode with payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
+
+# SAGA mode with reproducible payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --rollback-percentage 20 \
+  --saga-fail-step payment \
+  --saga-random-seed 123
+
+# SAGA mode with payment-step timeout simulation
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 10 \
+  --threads 1 \
+  --duration 10 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-timeout-step payment \
+  --saga-timeout-ms 3000
 ```
 
 ### Performance Testing Modes
@@ -157,6 +215,12 @@ java -jar seata-benchmark-cli.jar \
 Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [-d=<duration>] [--export-csv=<exportCsv>]
                        [-m=<mode>] [-s=<server>] [-t=<targetTps>]
+                       [--saga-shape=<sagaShape>]
+                       [--saga-workload=<sagaWorkload>]
+                       [--saga-fail-step=<sagaFailStep>]
+                       [--saga-random-seed=<sagaRandomSeed>]
+                       [--saga-timeout-step=<sagaTimeoutStep>]
+                       [--saga-timeout-ms=<sagaTimeoutMs>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
                        [--rollback-percentage=<rollbackPercentage>]
@@ -172,6 +236,26 @@ Options:
                                        Warmup duration in seconds (default: 0)
       --rollback-percentage=<rollbackPercentage>
                                        Rollback percentage for fault injection (0-100, default: 2)
+      --saga-shape=<sagaShape>         Select SAGA state machine shape: simple or order.
+                                       If omitted, the benchmark keeps the existing
+                                       branches-based compatibility behavior.
+      --saga-workload=<sagaWorkload>   Select SAGA workload implementation: mock or db.
+                                       The default is mock. The db workload uses
+                                       Testcontainers MySQL for DB-backed order,
+                                       inventory, and payment actions.
+      --saga-fail-step=<sagaFailStep>  Restrict SAGA failure injection to one forward step:
+                                       inventory, payment, or order.
+                                       The failure ratio is still controlled by
+                                       --rollback-percentage.
+      --saga-random-seed=<sagaRandomSeed>
+                                       Optional random seed for reproducible SAGA
+                                       failure injection behavior.
+      --saga-timeout-step=<sagaTimeoutStep>
+                                       Simulate SAGA timeout at one forward step:
+                                       inventory, payment, or order.
+      --saga-timeout-ms=<sagaTimeoutMs>
+                                       Simulated timeout delay in milliseconds for
+                                       SAGA timeout injection (default: 3000).
       --branches=<branches>            Number of branch transactions
                                        0 = empty mode (protocol overhead only)
                                        >=1 = real mode (actual execution)
@@ -232,20 +316,36 @@ When the benchmark completes, a final report is displayed:
 ===================================================
            Seata Benchmark Final Report
 ===================================================
+Mode:                  SAGA
+Saga Workload:         db
+Saga Shape:            order
 Total Transactions:    6,000
-Success Count:         5,940
-Failed Count:          60
-Success Rate:          99.00%
-Average TPS:           100.2
+Success Count:         5,780
+Failed Count:          220
+Success Rate:          96.33%
+Committed Count:       4,860
+Compensated Count:     920
+Execution Failed Count: 180
+Compensation Failed Count: 40
+Unknown Count:         0
+Committed Rate:        81.00%
+Compensated Rate:      15.33%
+End-State Success Rate: 96.33%
+Average TPS:           100.0
 Elapsed Time:          60 seconds
 
 Latency Statistics:
   P50:                 12 ms
   P95:                 45 ms
   P99:                 89 ms
+  P99.9:               120 ms
   Max:                 230 ms
 ===================================================
 ```
+
+For timeout simulation scenarios, the reported `Elapsed Time` may slightly exceed the configured `--duration` because already-started transactions are allowed to finish before the workload generator stops.
+
+For DB-backed SAGA scenarios, the final report and CSV output also include `Saga Workload`, so benchmark results from `mock` and `db` workloads can be compared explicitly.
 
 ### CSV Export
 
@@ -264,17 +364,29 @@ Output format:
 
 ```csv
 Metric,Value
+Mode,SAGA
+Saga Workload,db
+Saga Shape,order
 Total Transactions,6000
-Success Count,5940
-Failed Count,60
-Success Rate (%),99.00
-Average TPS,100.2
+Success Count,5780
+Failed Count,220
+Success Rate (%),96.33
+Committed Count,4860
+Compensated Count,920
+Execution Failed Count,180
+Compensation Failed Count,40
+Unknown Count,0
+Committed Rate (%),81.00
+Compensated Rate (%),15.33
+End-State Success Rate (%),96.33
+Average TPS,100.0
 Elapsed Time (s),60
 Latency P50 (ms),12
 Latency P95 (ms),45
 Latency P99 (ms),89
+Latency P99.9 (ms),120
 Latency Max (ms),230
-Export Timestamp,2025-12-01 10:30:45
+Export Time,2025-12-01 10:30:45
 ```
 
 ## Examples
@@ -311,6 +423,48 @@ java -jar seata-benchmark-cli.jar \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
+```
+
+### Test SAGA Mode with Payment-Step Failure Injection
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
+```
+
+### Test SAGA Mode with DB-Backed Business Actions
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db
+```
+
+### Test DB-Backed SAGA with Payment-Step Failure Injection
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 10 \
+  --threads 1 \
+  --duration 10 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
 ```
 
 ### Test TCC Mode at High Load
@@ -372,10 +526,28 @@ When `--branches` is set to a value greater than 0:
 - **SAGA Mode**:
   - Uses Seata state machine engine
   - Executes predefined state machine definitions
+  - Supports `mock` and `db` workloads
   - Supports compensation on failure
   - Available state machines:
     - `benchmarkSimpleSaga`: For 1-2 branches
     - `benchmarkOrderSaga`: For 3+ branches (order/inventory/payment)
+  - DB workload behavior:
+    - Starts MySQL via Testcontainers
+    - Creates benchmark inventory, account, and order tables
+    - Executes DB-backed inventory/payment/order actions with compensation
+
+### SAGA Workloads
+
+- `mock` workload:
+  - Keeps the lightweight benchmark-oriented implementation
+  - Uses in-memory Saga services with simulated delay, failure injection, and timeout injection
+  - Is the default workload and preserves backward compatibility
+
+- `db` workload:
+  - Starts a MySQL container via Testcontainers
+  - Initializes benchmark tables for inventory, account, and order data
+  - Executes DB-backed order, inventory, and payment actions while still supporting the same Saga shape, fail-step, random-seed, and timeout options
+  - Is intended for more realistic business-style Saga benchmarking
 
 ### Fault Injection
 

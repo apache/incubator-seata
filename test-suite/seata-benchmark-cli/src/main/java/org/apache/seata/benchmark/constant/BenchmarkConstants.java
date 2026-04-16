@@ -41,6 +41,9 @@ public final class BenchmarkConstants {
     public static final int INITIAL_BALANCE = 10000;
     public static final int MIN_TRANSFER_AMOUNT = 1;
     public static final int MAX_TRANSFER_AMOUNT = 100;
+    public static final int SAGA_PRODUCT_COUNT = 100;
+    public static final int SAGA_INITIAL_BALANCE = 1000000;
+    public static final int SAGA_INITIAL_INVENTORY = 100000;
 
     // Thread pool configuration
     public static final int SHUTDOWN_TIMEOUT_SECONDS = 10;
