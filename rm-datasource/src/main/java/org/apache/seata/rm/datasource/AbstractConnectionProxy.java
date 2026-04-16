@@ -122,9 +122,11 @@ public abstract class AbstractConnectionProxy implements Connection {
                     String[] pkNameArray =
                             new String[tableMeta.getPrimaryKeyOnlyName().size()];
                     tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
-                    // Fix: SQL Server does not support array of column names for getGeneratedKeys, use RETURN_GENERATED_KEYS instead.
+                    // Fix: SQL Server does not support array of column names for getGeneratedKeys, use
+                    // RETURN_GENERATED_KEYS instead.
                     if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                        targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                        targetPreparedStatement =
+                                getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                     } else {
                         targetPreparedStatement = getTargetConnection().prepareStatement(sql, pkNameArray);
                     }

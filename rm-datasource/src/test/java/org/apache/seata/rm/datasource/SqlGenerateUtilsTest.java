@@ -87,8 +87,10 @@ class SqlGenerateUtilsTest {
         List<SqlGenerateUtils.WhereSql> resultsOdd =
                 SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 5, "sqlserver", 2);
         Assertions.assertEquals(3, resultsOdd.size());
-        Assertions.assertEquals("(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(0).getSql());
-        Assertions.assertEquals("(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(1).getSql());
+        Assertions.assertEquals(
+                "(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(0).getSql());
+        Assertions.assertEquals(
+                "(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(1).getSql());
         Assertions.assertEquals("(id=? AND name=?)", resultsOdd.get(2).getSql());
         Assertions.assertEquals(1, resultsOdd.get(2).getRowSize());
     }

@@ -42,10 +42,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -93,8 +93,7 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             } else {
                 // Some or all primary key columns are auto-generated.
                 // Get metadata for all primary key columns.
-                Map<String, ColumnMeta> primaryKeyMap =
-                        getTableMeta().getPrimaryKeyMap();
+                Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
 
                 // Iterate over each primary key column.
                 for (String pkColumnName : pkColumnNameList) {

@@ -230,7 +230,7 @@ public class SqlServerInsertExecutorTest {
         // Verify composite primary key values are correctly retrieved
         Assertions.assertNotNull(pkValues);
         Assertions.assertEquals(expectedPkValues, pkValues);
-        
+
         // Verify that getPkValuesByColumn was called, confirming the code path for composite keys with manual values
         verify(insertExecutor).getPkValuesByColumn();
     }
