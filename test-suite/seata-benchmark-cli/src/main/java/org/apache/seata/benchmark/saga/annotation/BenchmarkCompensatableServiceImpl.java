@@ -21,8 +21,7 @@ import org.apache.seata.rm.tcc.api.BusinessActionContext;
 /**
  * Benchmark implementation of {@link BenchmarkCompensatableService}.
  *
- * @author zihenzzz
- * Both the forward action and the compensation are no-ops so that benchmark
+ * <p>Both the forward action and the compensation are no-ops so that benchmark
  * results reflect pure Seata SAGA_ANNOTATION protocol overhead rather than
  * any application-level business logic cost.
  */

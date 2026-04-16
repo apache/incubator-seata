@@ -29,7 +29,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Database-backed order service for Saga benchmark.
- * @author zihenzzz
  */
 public class OrderDbSagaService {
 

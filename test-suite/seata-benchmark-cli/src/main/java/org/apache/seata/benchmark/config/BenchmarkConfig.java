@@ -19,6 +19,7 @@ package org.apache.seata.benchmark.config;
 import org.apache.seata.benchmark.constant.BenchmarkConstants;
 import org.apache.seata.core.model.BranchType;
 
+import java.util.EnumSet;
 import java.util.Locale;
 
 /**
@@ -194,11 +195,11 @@ public class BenchmarkConfig {
         validateTpsAndThreads();
     }
 
+    private static final EnumSet<BranchType> SUPPORTED_MODES =
+            EnumSet.of(BranchType.AT, BranchType.TCC, BranchType.SAGA, BranchType.SAGA_ANNOTATION);
+
     private void validateMode() {
-        if (mode != BranchType.AT
-                && mode != BranchType.TCC
-                && mode != BranchType.SAGA
-                && mode != BranchType.SAGA_ANNOTATION) {
+        if (!SUPPORTED_MODES.contains(mode)) {
             throw new IllegalArgumentException(
                     "Unsupported mode: " + mode + ". Only AT, TCC, SAGA, and SAGA_ANNOTATION are supported.");
         }

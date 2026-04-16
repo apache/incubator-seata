@@ -28,7 +28,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Database-backed payment service for Saga benchmark.
- * @author zihenzzz
  */
 public class PaymentDbSagaService {
 

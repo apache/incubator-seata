@@ -23,8 +23,7 @@ import org.apache.seata.saga.rm.api.SagaTransactional;
 /**
  * Benchmark service interface for SAGA_ANNOTATION mode.
  *
- * @author zihenzzz
- * Each call to {@link #execute} registers one SAGA_ANNOTATION branch with the TC.
+ * <p>Each call to {@link #execute} registers one SAGA_ANNOTATION branch with the TC.
  * When the global transaction rolls back, the TC invokes {@link #compensate} for every registered branch.
  */
 @SagaTransactional

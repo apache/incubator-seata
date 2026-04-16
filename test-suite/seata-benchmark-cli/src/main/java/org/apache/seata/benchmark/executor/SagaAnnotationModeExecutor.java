@@ -31,8 +31,6 @@ import java.lang.reflect.Proxy;
 /**
  * SAGA_ANNOTATION mode transaction executor.
  *
- * @author zihenzzz
- *
  * <p>Supports two sub-modes controlled by {@code --branches}:
  * <ul>
  *   <li><b>Empty mode</b> ({@code branches == 0}): starts and commits an empty global transaction.
