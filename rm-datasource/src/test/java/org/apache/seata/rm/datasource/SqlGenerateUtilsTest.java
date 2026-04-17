@@ -100,11 +100,12 @@ class SqlGenerateUtilsTest {
         List<String> pkNameList = new ArrayList<>();
         pkNameList.add("id");
 
+        // Single PK should use the common tuple IN syntax, not SQL Server special branch
         List<SqlGenerateUtils.WhereSql> results =
                 SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 3, "sqlserver", 2);
 
         Assertions.assertEquals(2, results.size());
-        Assertions.assertEquals("(id=?) OR (id=?)", results.get(0).getSql());
-        Assertions.assertEquals("(id=?)", results.get(1).getSql());
+        Assertions.assertEquals("(id) in ( (?),(?) )", results.get(0).getSql());
+        Assertions.assertEquals("(id) in ( (?) )", results.get(1).getSql());
     }
 }

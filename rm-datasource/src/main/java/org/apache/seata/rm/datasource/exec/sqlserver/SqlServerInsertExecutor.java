@@ -87,24 +87,39 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
             }
         } else {
             // when there is a composite primary key - Fix: Support SQL Server composite primary keys.
-            if (isContainsPk) {
-                // All primary key columns are manually assigned in the INSERT statement.
+            // SQL Server allows only one IDENTITY column per table.
+            // So composite PK can have at most one auto-increment column.
+            // Strategy: parse PK values from INSERT columns, then fill missing auto-increment PK from generated keys.
+            if (!getPkIndex().isEmpty()) {
+                // At least one PK column is in the INSERT statement.
                 pkValuesMap = getPkValuesByColumn();
-            } else {
-                // Some or all primary key columns are auto-generated.
-                // Get metadata for all primary key columns.
                 Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
 
-                // Iterate over each primary key column.
+                // Fill any missing auto-increment PK columns from generated keys.
+                for (String pkColumnName : pkColumnNameList) {
+                    if (!pkValuesMap.containsKey(pkColumnName)) {
+                        ColumnMeta pkMeta = primaryKeyMap.get(pkColumnName);
+                        if (pkMeta.isAutoincrement()) {
+                            pkValuesMap.put(pkColumnName, getGeneratedKeys());
+                        } else {
+                            throw new NotSupportYetException(
+                                    "composite primary key with non-autoincrement column not in INSERT is not supported in sqlserver: "
+                                            + pkColumnName);
+                        }
+                    }
+                }
+            } else {
+                // No PK columns in INSERT statement.
+                // For composite PK, this means all PK columns must have values from elsewhere.
+                // Since SQL Server only supports one IDENTITY column, non-identity PK columns would fail.
+                Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
                 for (String pkColumnName : pkColumnNameList) {
                     ColumnMeta pkMeta = primaryKeyMap.get(pkColumnName);
                     if (pkMeta.isAutoincrement()) {
-                        // Auto-increment column: get from generated keys.
                         pkValuesMap.put(pkColumnName, getGeneratedKeys());
                     } else {
-                        // Non-auto-increment column: requires manual assignment, throw exception if not supported.
                         throw new NotSupportYetException(
-                                "composite primary key with non-autoincrement column is not supported in sqlserver: "
+                                "composite primary key with non-autoincrement column not in INSERT is not supported in sqlserver: "
                                         + pkColumnName);
                     }
                 }

@@ -81,7 +81,7 @@ public class SqlGenerateUtils {
             List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
         // SQL Server does not support tuple IN syntax: (col1,col2) IN ((?,?),(?,?))
         // Use AND/OR syntax instead
-        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType) && pkNameList.size() > 1) {
             return buildWhereConditionListByPKsForSqlServer(pkNameList, rowSize, maxInSize, dbType);
         }
         List<WhereSql> whereSqls = new ArrayList<>();
