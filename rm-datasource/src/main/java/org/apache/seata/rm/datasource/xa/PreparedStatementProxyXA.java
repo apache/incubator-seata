@@ -16,6 +16,8 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
+import org.apache.seata.core.rpc.netty.SqlCollector;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -35,16 +37,24 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 
 /**
  * PreparedStatement proxy for XA mode.
- *
  */
 public class PreparedStatementProxyXA extends StatementProxyXA implements PreparedStatement {
 
+    protected String targetSQL;
+
     public PreparedStatementProxyXA(AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement) {
         super(connectionProxyXA, targetStatement);
+    }
+
+    public PreparedStatementProxyXA(
+            AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement, String targetSQL) {
+        super(connectionProxyXA, targetStatement);
+        this.targetSQL = targetSQL;
     }
 
     private PreparedStatement getTargetStatement() {
@@ -53,20 +63,44 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        ResultSet res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.executeQuery(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
+        }
+        return res;
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        int res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.executeUpdate(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
+        }
+        return res;
     }
 
     @Override
     public boolean execute() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        boolean res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.execute(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
+        }
+        return res;
     }
 
     @Override
