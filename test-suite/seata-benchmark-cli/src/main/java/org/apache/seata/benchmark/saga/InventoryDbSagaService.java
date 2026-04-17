@@ -30,7 +30,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Database-backed inventory service for Saga benchmark.
- * @author zihenzzz
  */
 public class InventoryDbSagaService {
 
