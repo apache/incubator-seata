@@ -345,7 +345,7 @@ public interface DefaultValues {
      * The constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER.
      */
     // default tcc business action context json parser
-    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "fastjson";
+    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "jackson";
 
     /**
      * The constant DEFAULT_SERVER_ENABLE_CHECK_AUTH.
