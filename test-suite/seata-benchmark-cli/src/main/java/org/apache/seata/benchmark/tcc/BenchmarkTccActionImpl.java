@@ -21,8 +21,6 @@ import org.apache.seata.rm.tcc.api.BusinessActionContext;
 /**
  * No-op implementation of {@link BenchmarkTccAction}.
  *
- * @author zihenzzz
- *
  * <p>All three TCC phases return immediately so the benchmark measures only the
  * Seata TCC protocol overhead (branch registration and TC callbacks), not any
  * business logic execution time.

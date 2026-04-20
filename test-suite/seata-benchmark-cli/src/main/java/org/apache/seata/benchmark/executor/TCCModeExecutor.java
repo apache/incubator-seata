@@ -31,8 +31,6 @@ import java.lang.reflect.Proxy;
 /**
  * TCC mode transaction executor.
  *
- * @author zihenzzz
- *
  * <p>Supports two sub-modes controlled by {@code --branches}:
  * <ul>
  *   <li><b>Empty mode</b> ({@code branches == 0}): starts and commits an empty global
@@ -80,12 +78,17 @@ public class TCCModeExecutor extends AbstractTransactionExecutor {
         // 1. Registers TCCResource with DefaultResourceManager (enables TC callbacks)
         // 2. Returns a TccActionInterceptorHandler for proxy dispatch
         TccActionInterceptorParser parser = new TccActionInterceptorParser();
-        ProxyInvocationHandler handler = parser.parserInterfaceToProxy(actionImpl, "benchmarkTccService");
+        ProxyInvocationHandler handler;
+        try {
+            handler = parser.parserInterfaceToProxy(actionImpl, "benchmarkTccService");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize TCC proxy", e);
+        }
 
         // Wrap the handler with a JDK dynamic proxy — equivalent to Spring AOP proxy
         actionProxy = (BenchmarkTccAction) Proxy.newProxyInstance(
                 BenchmarkTccAction.class.getClassLoader(),
-                new Class[]{BenchmarkTccAction.class},
+                new Class[] {BenchmarkTccAction.class},
                 (proxy, method, args) -> handler.invoke(new InvocationWrapper() {
                     @Override
                     public Method getMethod() {

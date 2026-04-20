@@ -23,8 +23,6 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 /**
  * Benchmark TCC action interface.
  *
- * @author zihenzzz
- *
  * <p>Used by {@link TCCModeExecutor} in real mode ({@code branches > 0}) to drive the TCC
  * protocol path through the Seata interceptor. Each call to {@link #prepare} registers one
  * TCC branch with the TC. On global commit the TC invokes {@link #commit}; on global rollback
@@ -36,10 +34,7 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 @LocalTCC
 public interface BenchmarkTccAction {
 
-    @TwoPhaseBusinessAction(
-            name = "benchmarkTccAction",
-            commitMethod = "commit",
-            rollbackMethod = "rollback")
+    @TwoPhaseBusinessAction(name = "benchmarkTccAction", commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext context);
 
     boolean commit(BusinessActionContext context);
