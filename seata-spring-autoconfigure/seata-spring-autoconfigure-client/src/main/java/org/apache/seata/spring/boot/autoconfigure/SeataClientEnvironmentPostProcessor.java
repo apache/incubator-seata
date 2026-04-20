@@ -20,6 +20,7 @@ import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.rm.fence.SpringFenceConfig;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.spring.boot.autoconfigure.properties.SagaAsyncThreadPoolProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.SeataJsonProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.SeataTccProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.client.LoadBalanceProperties;
@@ -38,6 +39,7 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_E
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.JSON_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOAD_BALANCE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
@@ -67,6 +69,7 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
         PROPERTY_BEAN_MAP.put(SAGA_STATE_MACHINE_PREFIX, StateMachineConfig.class);
         PROPERTY_BEAN_MAP.put(SAGA_ASYNC_THREAD_POOL_PREFIX, SagaAsyncThreadPoolProperties.class);
         PROPERTY_BEAN_MAP.put(TCC_PREFIX, SeataTccProperties.class);
+        PROPERTY_BEAN_MAP.put(JSON_PREFIX, SeataJsonProperties.class);
     }
 
     @Override

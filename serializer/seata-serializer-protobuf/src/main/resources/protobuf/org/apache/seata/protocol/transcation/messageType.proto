@@ -129,6 +129,14 @@ enum MessageTypeProto {
      * The constant TYPE_REG_RM_RESULT.
      */
     TYPE_REG_RM_RESULT = 104;
+    /**
+     * The constant TYPE_UNREG_RM.
+     */
+    TYPE_UNREG_RM = 105;
+    /**
+     * The constant TYPE_UNREG_RM_RESULT.
+     */
+    TYPE_UNREG_RM_RESULT = 106;
 
     /**
      * The constant TYPE_UNDO_LOG_DELETE.

@@ -34,6 +34,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
@@ -41,7 +43,9 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
@@ -125,12 +129,15 @@ public abstract class MultiVersionCompatibilityTest {
     protected final AtomicReference<Object> requestRef = new AtomicReference<>();
     protected final AtomicReference<Object> responseRef = new AtomicReference<>();
     protected CountDownLatch responseLatch;
+    private String originalTransportProtocol;
 
     // Helper for creating MultiProtocolDecoder with specific version (for V1 tests)
     private final MultiProtocolDecoderTest decoderTestHelper = new MultiProtocolDecoderTest();
 
     @BeforeEach
     public void setUp() {
+        originalTransportProtocol = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.SEATA.value);
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup();
         clientGroup = new NioEventLoopGroup();
@@ -165,6 +172,11 @@ public abstract class MultiVersionCompatibilityTest {
         bossGroup.shutdownGracefully().sync();
         workerGroup.shutdownGracefully().sync();
         clientGroup.shutdownGracefully().sync();
+        if (StringUtils.isBlank(originalTransportProtocol)) {
+            ConfigurationTestHelper.removeConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        } else {
+            ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);
+        }
     }
 
     // ==================== V1 Server Methods (manual, for legacy simulation) ====================

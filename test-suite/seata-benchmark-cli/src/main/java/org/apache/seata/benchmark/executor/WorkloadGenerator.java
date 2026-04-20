@@ -34,6 +34,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.apache.seata.benchmark.constant.BenchmarkConstants.STATUS_FAILED;
+
 /**
  * Workload generator with TPS rate limiting
  */
@@ -100,20 +102,17 @@ public class WorkloadGenerator {
     }
 
     private void executeTransaction() {
+        long startTime = System.currentTimeMillis();
         try {
             TransactionRecord record = executor.execute();
-
-            if (record.isSuccess()) {
-                metrics.recordSuccess(record.getDuration());
-            } else {
-                metrics.recordFailure(record.getDuration());
-            }
+            metrics.recordTransaction(record.getStatus(), record.getDuration());
 
             addRecentRecord(record);
 
         } catch (Exception e) {
             LOGGER.error("Transaction execution error", e);
-            metrics.recordFailure(0);
+            long duration = System.currentTimeMillis() - startTime;
+            metrics.recordTransaction(STATUS_FAILED, duration);
         }
     }
 
