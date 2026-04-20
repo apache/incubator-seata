@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.undo;
 
 import org.apache.seata.metrics.Counter;
+import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.Timer;
 import org.apache.seata.metrics.registry.Registry;
