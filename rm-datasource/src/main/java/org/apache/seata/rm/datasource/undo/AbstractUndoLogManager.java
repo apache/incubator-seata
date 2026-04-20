@@ -62,6 +62,21 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUndoLogManager.class);
 
+    /**
+     * Cached metrics registry instance to avoid repeated RegistryFactory lookups.
+     */
+    private static volatile Registry CACHED_REGISTRY;
+
+    /**
+     * Flag indicating that the metrics registry is unavailable and should not be retried.
+     */
+    private static volatile boolean REGISTRY_UNAVAILABLE;
+
+    /**
+     * Lock object for lazy initialization of the metrics registry.
+     */
+    private static final Object REGISTRY_INIT_LOCK = new Object();
+
     protected enum State {
         /**
          * This state can be properly rolled back by services
@@ -143,12 +158,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             deleteSubPST.setString(1, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
             deleteSubPST.setString(2, xid);
             deleteSubPST.executeUpdate();
-        } catch (Exception e) {
-            if (!(e instanceof SQLException)) {
-                e = new SQLException(e);
-            }
-            throw (SQLException) e;
-        } finally {
+
             Registry registry = getRegistry();
             if (registry != null) {
                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
@@ -156,6 +166,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
                         .increase(1);
             }
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
         }
     }
 
@@ -172,7 +187,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             return;
         }
         long start = System.nanoTime();
-        int totalDeleteRows = 0;
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -192,7 +206,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 paramsIndex++;
             }
             int deleteRows = deletePST.executeUpdate();
-            totalDeleteRows += deleteRows;
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
@@ -200,21 +213,21 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete sub undo log size {}", deleteSubRows);
             }
+
+            Registry registry = getRegistry();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                if (deleteRows > 0) {
+                    registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                            .increase(1);
+                }
+            }
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            Registry registry = getRegistry();
-            if (registry != null) {
-                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
-                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
-                if (totalDeleteRows > 0) {
-                    registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
-                            .increase(totalDeleteRows);
-                }
-            }
         }
     }
 
@@ -623,11 +636,32 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @return the Registry instance, or null if metrics are not enabled
      */
     protected Registry getRegistry() {
-        try {
-            return RegistryFactory.getInstance();
-        } catch (Throwable t) {
-            LOGGER.warn("Failed to get metrics registry: {}", t.getMessage());
+        // Fast path: return cached values without synchronization.
+        if (REGISTRY_UNAVAILABLE) {
             return null;
+        }
+        Registry registry = CACHED_REGISTRY;
+        if (registry != null) {
+            return registry;
+        }
+        // Lazy initialization with synchronization.
+        synchronized (REGISTRY_INIT_LOCK) {
+            if (REGISTRY_UNAVAILABLE) {
+                return null;
+            }
+            if (CACHED_REGISTRY != null) {
+                return CACHED_REGISTRY;
+            }
+            try {
+                registry = RegistryFactory.getInstance();
+                CACHED_REGISTRY = registry;
+                return registry;
+            } catch (Throwable t) {
+                // Mark as unavailable to avoid repeated initialization attempts and log noise.
+                REGISTRY_UNAVAILABLE = true;
+                LOGGER.warn("Failed to initialize metrics registry.", t);
+                return null;
+            }
         }
     }
 }
