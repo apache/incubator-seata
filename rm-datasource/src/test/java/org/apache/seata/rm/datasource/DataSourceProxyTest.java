@@ -238,6 +238,7 @@ public class DataSourceProxyTest {
             proxy.close();
 
             tmcfStatic.verify(() -> TableMetaCacheFactory.shutdown(proxy.getResourceId()));
+            verify(drm).unregisterResource(proxy);
         }
     }
 }
