@@ -45,7 +45,7 @@ public class BenchmarkApplication implements Callable<Integer> {
 
     @Option(
             names = {"-m", "--mode"},
-            description = "Transaction mode: AT, TCC, or SAGA",
+            description = "Transaction mode: AT, TCC, SAGA, or SAGA_ANNOTATION",
             required = false)
     private String mode;
 

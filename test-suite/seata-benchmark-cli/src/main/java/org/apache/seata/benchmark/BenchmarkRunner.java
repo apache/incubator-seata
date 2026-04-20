@@ -18,6 +18,7 @@ package org.apache.seata.benchmark;
 
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.executor.ATModeExecutor;
+import org.apache.seata.benchmark.executor.SagaAnnotationModeExecutor;
 import org.apache.seata.benchmark.executor.SagaModeExecutor;
 import org.apache.seata.benchmark.executor.TCCModeExecutor;
 import org.apache.seata.benchmark.executor.TransactionExecutor;
@@ -132,9 +133,13 @@ public class BenchmarkRunner {
                 String sagaMode = isRealMode ? " (state machine engine)" : " (empty transaction)";
                 System.out.println("Creating Saga mode executor" + sagaMode + "\n");
                 return new SagaModeExecutor(config);
+            case SAGA_ANNOTATION:
+                String sagaAnnotationMode = isRealMode ? " (annotation-based compensation)" : " (empty transaction)";
+                System.out.println("Creating SAGA_ANNOTATION mode executor" + sagaAnnotationMode + "\n");
+                return new SagaAnnotationModeExecutor(config);
             default:
                 throw new IllegalArgumentException(
-                        "Unsupported mode: " + branchType + ". Only AT, TCC, and SAGA are supported.");
+                        "Unsupported mode: " + branchType + ". Only AT, TCC, SAGA, and SAGA_ANNOTATION are supported.");
         }
     }
 }

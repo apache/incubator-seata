@@ -20,7 +20,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 
 ## Features
 
-- Support for **AT**, **TCC**, and **SAGA** transaction modes
+- Support for **AT**, **TCC**, **SAGA**, and **SAGA_ANNOTATION** transaction modes
 - **Dual execution modes**:
   - **Empty mode** (`--branches 0`): Pure Seata protocol overhead testing
   - **Real mode** (`--branches N`): Actual distributed transaction execution
@@ -78,6 +78,13 @@ java -jar seata-benchmark-cli.jar \
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
+  --tps 100 \
+  --duration 60
+
+# SAGA_ANNOTATION mode benchmark (empty transaction)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
   --tps 100 \
   --duration 60
 ```
@@ -228,7 +235,7 @@ Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
 
 Options:
   -s, --server=<server>                Seata Server address (host:port)
-  -m, --mode=<mode>                    Transaction mode: AT, TCC, or SAGA
+  -m, --mode=<mode>                    Transaction mode: AT, TCC, SAGA, or SAGA_ANNOTATION
   -t, --tps=<targetTps>                Target TPS (default: 100)
       --threads=<threads>              Concurrent threads (default: 10)
   -d, --duration=<duration>            Duration in seconds (default: 60)
@@ -467,6 +474,38 @@ java -jar seata-benchmark-cli.jar \
   --saga-fail-step payment
 ```
 
+### Test SAGA_ANNOTATION Mode (Annotation-based Compensation)
+
+```bash
+# Empty mode: protocol overhead only
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --duration 60
+
+# Real mode: 3 branches per transaction, 5% compensation rate
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 5
+```
+
+### Compare SAGA vs SAGA_ANNOTATION
+
+```bash
+# State-machine Saga
+java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
+  --mode SAGA --tps 10000 --threads 50 --duration 60 --branches 3
+
+# Annotation-based Saga
+java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION --tps 10000 --threads 50 --duration 60 --branches 3
+```
+
 ### Test TCC Mode at High Load
 
 ```bash
@@ -493,11 +532,12 @@ java -jar seata-benchmark-cli.jar \
 
 ### Transaction Modes
 
-| Mode | Empty Mode (branches=0) | Real Mode (branches>0) |
-|------|-------------------------|------------------------|
-| AT   | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
-| TCC  | Mock implementation     | Mock implementation |
-| SAGA | Mock simulation         | State machine engine with compensation |
+| Mode             | Empty Mode (branches=0) | Real Mode (branches>0) |
+|------------------|-------------------------|------------------------|
+| AT               | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
+| TCC              | Mock implementation     | Mock implementation |
+| SAGA             | Mock simulation         | State machine engine with compensation |
+| SAGA_ANNOTATION  | Pure protocol overhead  | Annotation interceptor + TC compensation callback |
 
 ### Empty Transaction Mode
 
@@ -506,6 +546,7 @@ For accurate benchmarking of Seata Server capacity, the tool executes **empty tr
 - **AT Mode**: Only `begin()` and `commit()` operations, no SQL execution
 - **TCC Mode**: Empty transaction flow (mock implementation)
 - **SAGA Mode**: Simplified simulation without state machine
+- **SAGA_ANNOTATION Mode**: Empty global transaction, no branch registration
 
 This approach:
 - Measures pure Seata protocol overhead
@@ -548,6 +589,12 @@ When `--branches` is set to a value greater than 0:
   - Initializes benchmark tables for inventory, account, and order data
   - Executes DB-backed order, inventory, and payment actions while still supporting the same Saga shape, fail-step, random-seed, and timeout options
   - Is intended for more realistic business-style Saga benchmarking
+
+- **SAGA_ANNOTATION Mode**:
+  - Uses `@SagaTransactional` + `@CompensationBusinessAction` annotation path
+  - Each branch is registered via the annotation interceptor (JDK dynamic proxy, no Spring required)
+  - On rollback, the TC invokes the compensation method for every registered branch
+  - `--branches N` = N `@CompensationBusinessAction` calls per transaction
 
 ### Fault Injection
 
@@ -616,7 +663,7 @@ Logs are written to `seata-benchmark.log` in the current directory.
 ## Roadmap
 
 ### Current Version (v1.0)
-- AT, TCC, and SAGA mode support
+- AT, TCC, SAGA, and SAGA_ANNOTATION mode support
 - Empty and real transaction modes
 - YAML configuration file support
 - Fault injection (rollback percentage)

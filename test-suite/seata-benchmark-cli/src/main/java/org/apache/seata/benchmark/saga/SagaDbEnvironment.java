@@ -34,7 +34,6 @@ import java.sql.Statement;
 
 /**
  * Database-backed environment for Saga benchmark business actions.
- * @author zihenzzz
  */
 public class SagaDbEnvironment {
 
