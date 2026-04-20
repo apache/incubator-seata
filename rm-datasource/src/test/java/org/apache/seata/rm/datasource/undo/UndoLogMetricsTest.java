@@ -121,8 +121,8 @@ public class UndoLogMetricsTest {
         MySQLUndoLogManager manager = spy(new MySQLUndoLogManager());
         doReturn(registry).when(manager).getRegistry();
 
-        manager.batchDeleteUndoLog(new HashSet<>(Arrays.asList("xid1", "xid2")), 
-                                   new HashSet<>(Arrays.asList(1L, 2L)), connection);
+        manager.batchDeleteUndoLog(
+                new HashSet<>(Arrays.asList("xid1", "xid2")), new HashSet<>(Arrays.asList(1L, 2L)), connection);
 
         verify(registry).getTimer(eq(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY));
         verify(timer).record(anyLong(), any(TimeUnit.class));
@@ -148,8 +148,10 @@ public class UndoLogMetricsTest {
         MySQLUndoLogManager manager = spy(new MySQLUndoLogManager());
         doReturn(registry).when(manager).getRegistry();
 
-        manager.batchDeleteUndoLog(new HashSet<>(Collections.singletonList("xid")), 
-                                   new HashSet<>(Collections.singletonList(1L)), connection);
+        manager.batchDeleteUndoLog(
+                new HashSet<>(Collections.singletonList("xid")),
+                new HashSet<>(Collections.singletonList(1L)),
+                connection);
 
         verify(registry).getTimer(eq(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY));
         verify(timer).record(anyLong(), any(TimeUnit.class));

@@ -96,24 +96,25 @@ public class ConsoleRemotingFilter implements Filter {
         }
         int i = 0;
         // Skip optional UTF-8 BOM (0xEF, 0xBB, 0xBF)
-        if (body.length >= 3
-                && (body[0] & 0xFF) == 0xEF
-                && (body[1] & 0xFF) == 0xBB
-                && (body[2] & 0xFF) == 0xBF) {
+        if (body.length >= 3 && (body[0] & 0xFF) == 0xEF && (body[1] & 0xFF) == 0xBB && (body[2] & 0xFF) == 0xBF) {
             i = 3;
         }
         // skip leading whitespace (including Unicode NBSP / BOM that survived as whitespace)
-        while (i < body.length && (body[i] == ' ' || body[i] == '\t'
-                || body[i] == '\r' || body[i] == '\n')) {
+        while (i < body.length && (body[i] == ' ' || body[i] == '\t' || body[i] == '\r' || body[i] == '\n')) {
             i++;
         }
         if (i >= body.length) {
             return true;
         }
         byte first = body[i];
-        return first == '{' || first == '[' || first == '"'
-                || first == 't' || first == 'f' || first == 'n'
-                || (first >= '0' && first <= '9') || first == '-';
+        return first == '{'
+                || first == '['
+                || first == '"'
+                || first == 't'
+                || first == 'f'
+                || first == 'n'
+                || (first >= '0' && first <= '9')
+                || first == '-';
     }
 
     @Override
@@ -158,19 +159,18 @@ public class ConsoleRemotingFilter implements Filter {
                             if (node.getRole() == ClusterRole.LEADER) {
                                 headers.add(RAFT_GROUP_HEADER, node.getUnit());
                             }
-                            Collections.list(request.getHeaderNames())
-                                    .forEach(headerName -> {
-                                        if (!HttpHeaders.HOST.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.CONNECTION.equalsIgnoreCase(headerName)
-                                                && !"Keep-Alive".equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.TE.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.TRAILER.equalsIgnoreCase(headerName)
-                                                && !HttpHeaders.UPGRADE.equalsIgnoreCase(headerName)) {
-                                            headers.add(headerName, request.getHeader(headerName));
-                                        }
-                                    });
+                            Collections.list(request.getHeaderNames()).forEach(headerName -> {
+                                if (!HttpHeaders.HOST.equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.CONNECTION.equalsIgnoreCase(headerName)
+                                        && !"Keep-Alive".equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.PROXY_AUTHENTICATE.equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.PROXY_AUTHORIZATION.equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.TE.equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.TRAILER.equalsIgnoreCase(headerName)
+                                        && !HttpHeaders.UPGRADE.equalsIgnoreCase(headerName)) {
+                                    headers.add(headerName, request.getHeader(headerName));
+                                }
+                            });
 
                             // Create the HttpEntity with headers and body
                             HttpMethod httpMethod;
@@ -197,7 +197,8 @@ public class ConsoleRemotingFilter implements Filter {
                                     // headers-only for empty body
                                     httpEntity = new HttpEntity<>(headers);
                                 } else {
-                                    // Remove potentially stale length/transfer headers and let the client recompute them
+                                    // Remove potentially stale length/transfer headers and let the client recompute
+                                    // them
                                     headers.remove(HttpHeaders.CONTENT_LENGTH);
                                     headers.remove(HttpHeaders.TRANSFER_ENCODING);
                                     httpEntity = new HttpEntity<>(body, headers);
@@ -205,8 +206,10 @@ public class ConsoleRemotingFilter implements Filter {
                             }
 
                             try {
-                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
-                                //Copy headers from proxied response, skipping hop-by-hop and headers we manage ourselves to mitigate
+                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
+                                        URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                // Copy headers from proxied response, skipping hop-by-hop and headers we manage
+                                // ourselves to mitigate
                                 // security risks from Content-Type manipulation
                                 responseEntity.getHeaders().forEach((key, value) -> {
                                     if (!HttpHeaders.CONTENT_TYPE.equalsIgnoreCase(key)
@@ -225,7 +228,8 @@ public class ConsoleRemotingFilter implements Filter {
                                 });
                                 // Force a safe Content-Type: reject HTML/XML types that could
                                 // execute scripts; fall back to application/json
-                                String proxiedContentType = responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
+                                String proxiedContentType =
+                                        responseEntity.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
                                 String safeContentType;
                                 if (isSafeContentType(proxiedContentType)) {
                                     safeContentType = proxiedContentType;
@@ -234,16 +238,20 @@ public class ConsoleRemotingFilter implements Filter {
                                 }
                                 response.setContentType(safeContentType);
                                 response.setHeader("X-Content-Type-Options", "nosniff");
-                                response.setStatus(responseEntity.getStatusCode().value());
+                                response.setStatus(
+                                        responseEntity.getStatusCode().value());
                                 byte[] responseBody = responseEntity.getBody();
                                 // HEAD responses must not include a message body (RFC 7231 §4.3.2)
                                 if (!HttpMethod.HEAD.equals(httpMethod)
-                                        && responseBody != null && responseBody.length > 0) {
+                                        && responseBody != null
+                                        && responseBody.length > 0) {
                                     // For JSON content type, validate that the body actually looks
                                     // like JSON to prevent XSS via crafted upstream responses
                                     if (safeContentType.toLowerCase(Locale.ROOT).contains("application/json")
                                             && !looksLikeJson(responseBody)) {
-                                        LOGGER.warn("Upstream returned non-JSON body for Content-Type {}, replacing with error response", safeContentType);
+                                        LOGGER.warn(
+                                                "Upstream returned non-JSON body for Content-Type {}, replacing with error response",
+                                                safeContentType);
                                         response.setStatus(HttpServletResponse.SC_BAD_GATEWAY);
                                         response.setContentType("application/json;charset=UTF-8");
                                         responseBody = "{\"error\":\"Upstream returned invalid response body\"}"
@@ -256,7 +264,10 @@ public class ConsoleRemotingFilter implements Filter {
                                         // Client likely disconnected (broken pipe); log at debug
                                         // level and do NOT attempt sendError – the response may
                                         // already be committed.
-                                        LOGGER.debug("Failed to write proxy response body (client disconnect?): {}", e.getMessage(), e);
+                                        LOGGER.debug(
+                                                "Failed to write proxy response body (client disconnect?): {}",
+                                                e.getMessage(),
+                                                e);
                                     }
                                 }
                             } catch (Exception ex) {
