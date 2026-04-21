@@ -85,8 +85,9 @@ public class TCCModeExecutor extends AbstractTransactionExecutor {
             throw new RuntimeException("Failed to initialize TCC proxy", e);
         }
         if (handler == null) {
-            throw new IllegalStateException("Failed to initialize TCC proxy: no @TwoPhaseBusinessAction method was found for "
-                    + BenchmarkTccAction.class.getName());
+            throw new IllegalStateException(
+                    "Failed to initialize TCC proxy: no @TwoPhaseBusinessAction method was found for "
+                            + BenchmarkTccAction.class.getName());
         }
 
         // Wrap the handler with a JDK dynamic proxy — equivalent to Spring AOP proxy
