@@ -200,13 +200,13 @@ seata:
   log:
     exception-rate: 100
   json:
+    # You can choose from the following options: fastjson, fastjson2, jackson, jackson3, gson
+    serializer-type: jackson
     allowlist: 
   tcc:
     fence:
       log-table-name: tcc_fence_log
       clean-period: 1h
-    # You can choose from the following options: fastjson, fastjson2, jackson, jackson3, gson
-    context-json-parser-type: fastjson
   saga:
     enabled: false
     state-machine:

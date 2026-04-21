@@ -31,12 +31,23 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.JSON_P
 @ConfigurationProperties(prefix = JSON_PREFIX)
 public class SeataJsonProperties {
 
+    private String serializerType;
+
     /**
      * JSON deserialization allowlist, comma-separated
      * Entries ending with '.' are prefix matches, otherwise exact matches
      * Example: com.company.model.,com.company.dto.,com.company.SomeClass
      */
     private String allowlist;
+
+    public String getSerializerType() {
+        return serializerType;
+    }
+
+    public SeataJsonProperties setSerializerType(String serializerType) {
+        this.serializerType = serializerType;
+        return this;
+    }
 
     public String getAllowlist() {
         return allowlist;
