@@ -34,7 +34,9 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 @LocalTCC
 public interface BenchmarkTccAction {
 
-    @TwoPhaseBusinessAction(name = "benchmarkTccAction", commitMethod = "commit", rollbackMethod = "rollback")
+    String ACTION_NAME = "seata-benchmark-cli-benchmarkTccAction";
+
+    @TwoPhaseBusinessAction(name = ACTION_NAME, commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext context);
 
     boolean commit(BusinessActionContext context);

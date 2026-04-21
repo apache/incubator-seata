@@ -64,6 +64,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
   --duration 60
 
 # TCC mode benchmark (empty transaction)
@@ -79,6 +80,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60
 
 # SAGA_ANNOTATION mode benchmark (empty transaction)
@@ -86,6 +88,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA_ANNOTATION \
   --tps 100 \
+  --threads 1 \
   --duration 60
 ```
 
@@ -97,6 +100,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3
 
@@ -105,6 +109,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode TCC \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3
 
@@ -113,6 +118,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
@@ -122,6 +128,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --saga-shape order
@@ -131,6 +138,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --saga-shape order \
@@ -141,6 +149,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 20 \
