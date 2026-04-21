@@ -23,10 +23,10 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 /**
  * Benchmark TCC action interface.
  *
- * <p>Used by {@link TCCModeExecutor} in real mode ({@code branches > 0}) to drive the TCC
- * protocol path through the Seata interceptor. Each call to {@link #prepare} registers one
- * TCC branch with the TC. On global commit the TC invokes {@link #commit}; on global rollback
- * it invokes {@link #rollback}.
+ * <p>Used by {@link org.apache.seata.benchmark.executor.TCCModeExecutor} in real mode
+ * ({@code branches > 0}) to drive the TCC protocol path through the Seata interceptor.
+ * Each call to {@link #prepare} registers one TCC branch with the TC. On global commit
+ * the TC invokes {@link #commit}; on global rollback it invokes {@link #rollback}.
  *
  * <p>All three methods are intentionally no-ops so the benchmark measures only Seata
  * protocol overhead, not business logic.
