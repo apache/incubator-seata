@@ -93,8 +93,9 @@ public class DataSourceManager extends AbstractResourceManager {
     @Override
     public void unregisterResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
-        super.unregisterResource(dataSourceProxy);
         dataSourceCache.remove(dataSourceProxy.getResourceId());
+        RmNettyRemotingClient.getInstance()
+                .unregisterResource(dataSourceProxy.getResourceGroupId(), dataSourceProxy.getResourceId());
     }
 
     /**
