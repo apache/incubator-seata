@@ -237,7 +237,32 @@ public class DataSourceProxyTest {
 
             proxy.close();
 
+            verify(drm).unregisterResource(proxy);
             tmcfStatic.verify(() -> TableMetaCacheFactory.shutdown(proxy.getResourceId()));
         }
+    }
+
+    @Test
+    public void testCloseRemovesResourceFromManager() throws Exception {
+        final MockDriver mockDriver = new MockDriver();
+        final String username = "username";
+        final String jdbcUrl = "jdbc:mock:xxx";
+
+        final DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(jdbcUrl);
+        dataSource.setDriver(mockDriver);
+        dataSource.setUsername(username);
+        dataSource.setPassword("password");
+
+        DataSourceProxy proxy = getDataSourceProxy(dataSource);
+
+        // Ensure it's registered
+        Assertions.assertNotNull(
+                DefaultResourceManager.get().getManagedResources().get(proxy.getResourceId()));
+
+        proxy.close();
+
+        // Ensure it's unregistered
+        Assertions.assertNull(DefaultResourceManager.get().getManagedResources().get(proxy.getResourceId()));
     }
 }
