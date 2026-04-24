@@ -28,6 +28,8 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.exception.BranchTransactionException;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.rpc.processor.Pair;
+import org.apache.seata.metrics.registry.Registry;
+import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.rm.datasource.ConnectionContext;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
@@ -58,6 +61,21 @@ import static org.apache.seata.core.exception.TransactionExceptionCode.BranchRol
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUndoLogManager.class);
+
+    /**
+     * Cached metrics registry instance to avoid repeated RegistryFactory lookups.
+     */
+    private static volatile Registry CACHED_REGISTRY;
+
+    /**
+     * Flag indicating that the metrics registry is unavailable and should not be retried.
+     */
+    private static volatile boolean REGISTRY_UNAVAILABLE;
+
+    /**
+     * Lock object for lazy initialization of the metrics registry.
+     */
+    private static final Object REGISTRY_INIT_LOCK = new Object();
 
     protected enum State {
         /**
@@ -130,6 +148,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
+        long start = System.nanoTime();
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
                 PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
@@ -139,6 +158,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             deleteSubPST.setString(1, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
             deleteSubPST.setString(2, xid);
             deleteSubPST.executeUpdate();
+
+            Registry registry = getRegistry();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                        .increase(1);
+            }
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
@@ -159,6 +186,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
+        long start = System.nanoTime();
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -184,6 +212,16 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             int deleteSubRows = deleteSubPST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete sub undo log size {}", deleteSubRows);
+            }
+
+            Registry registry = getRegistry();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                if (deleteRows > 0) {
+                    registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                            .increase(1);
+                }
             }
         } catch (Exception e) {
             if (!(e instanceof SQLException)) {
@@ -300,6 +338,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         String rollbackCtx =
                 buildContext(parser.getName(), compressorType, UndoLogConstants.MAX_ALLOWED_PACKET, maxAllowedPacket);
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
+        Registry registry = getRegistry();
+        if (registry != null) {
+            registry.getSummary(UndoLogConstants.SUMMARY_UNDO_LOG_SIZE).increase(undoLogContent.length);
+        }
     }
 
     /**
@@ -585,5 +627,41 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     protected String getCheckUndoLogTableExistSql() {
         return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
+    }
+
+    /**
+     * Get the metrics registry instance.
+     * This method is protected to allow testing with Mockito spy.
+     *
+     * @return the Registry instance, or null if metrics are not enabled
+     */
+    protected Registry getRegistry() {
+        // Fast path: return cached values without synchronization.
+        if (REGISTRY_UNAVAILABLE) {
+            return null;
+        }
+        Registry registry = CACHED_REGISTRY;
+        if (registry != null) {
+            return registry;
+        }
+        // Lazy initialization with synchronization.
+        synchronized (REGISTRY_INIT_LOCK) {
+            if (REGISTRY_UNAVAILABLE) {
+                return null;
+            }
+            if (CACHED_REGISTRY != null) {
+                return CACHED_REGISTRY;
+            }
+            try {
+                registry = RegistryFactory.getInstance();
+                CACHED_REGISTRY = registry;
+                return registry;
+            } catch (Throwable t) {
+                // Mark as unavailable to avoid repeated initialization attempts and log noise.
+                REGISTRY_UNAVAILABLE = true;
+                LOGGER.warn("Failed to initialize metrics registry.", t);
+                return null;
+            }
+        }
     }
 }
