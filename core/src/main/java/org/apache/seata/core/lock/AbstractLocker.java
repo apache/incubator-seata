@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
+
 /**
  * The type Abstract locker.
  *
@@ -79,13 +81,18 @@ public abstract class AbstractLocker implements Locker {
      * @return the string
      */
     protected String getRowKey(String resourceId, String tableName, String pk) {
-        return new StringBuilder()
+        String rowKey = new StringBuilder()
                 .append(resourceId)
                 .append(LOCK_SPLIT)
                 .append(tableName)
                 .append(LOCK_SPLIT)
                 .append(pk)
                 .toString();
+
+        if (rowKey.indexOf(';') >= 0) {
+            rowKey = rowKey.replace(ROW_LOCK_KEY_SPLIT_CHAR, LOCK_SPLIT);
+        }
+        return rowKey;
     }
 
     @Override
