@@ -127,7 +127,8 @@ public class BenchmarkRunner {
                 System.out.println("Creating AT mode executor" + atMode + "\n");
                 return new ATModeExecutor(config);
             case TCC:
-                System.out.println("Creating TCC mode executor (mock implementation)\n");
+                String tccMode = isRealMode ? " (try/confirm/cancel)" : " (empty transaction)";
+                System.out.println("Creating TCC mode executor" + tccMode + "\n");
                 return new TCCModeExecutor(config);
             case SAGA:
                 String sagaMode = isRealMode ? " (state machine engine)" : " (empty transaction)";
