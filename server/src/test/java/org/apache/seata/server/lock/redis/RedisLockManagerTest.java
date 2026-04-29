@@ -132,6 +132,44 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
         Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
+    /**
+     * Regression test for the SQL Server row-lock leak: a SQL Server JDBC URL contains ';'
+     * (the same character used as the row-lock join/split delimiter on Redis), which used
+     * to cause release paths to issue DEL against fragmentary keys, leaving the real lock
+     * keys leaked in Redis. After the fix in {@code AbstractLocker#getRowKey}, releaseLock
+     * MUST cleanly remove every lock key written during acquireLock.
+     */
+    @Test
+    public void releaseLockOfSqlServerResourceId() throws TransactionException {
+        BranchSession branchSession = new BranchSession();
+        branchSession.setXid("abc-sqlserver:1");
+        branchSession.setTransactionId(987654321L);
+        branchSession.setBranchId(123456L);
+        branchSession.setResourceId("jdbc:sqlserver://127.0.0.1:1433;databaseName=lxk");
+        branchSession.setLockKey("BPM_ACT_RU_TASK:123,456");
+
+        try {
+            Assertions.assertTrue(lockManager.acquireLock(branchSession));
+            Assertions.assertTrue(lockManager.isLockable(
+                    branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        }
+
+        BranchSession verifier = new BranchSession();
+        verifier.setXid("abc-sqlserver:2");
+        verifier.setTransactionId(987654322L);
+        verifier.setBranchId(123457L);
+        verifier.setResourceId("jdbc:sqlserver://127.0.0.1:1433;databaseName=lxk");
+        verifier.setLockKey("BPM_ACT_RU_TASK:123,456");
+        Assertions.assertTrue(
+                lockManager.acquireLock(verifier),
+                "Re-acquiring the same SQL Server row from a different xid must succeed; "
+                        + "if it fails, the previous releaseLock leaked the row lock - "
+                        + "this is the regression we are guarding against.");
+        Assertions.assertTrue(lockManager.releaseLock(verifier));
+    }
+
     public static class RedisLockManagerForTest extends RedisLockManager {
 
         public RedisLockManagerForTest() {}

@@ -86,7 +86,68 @@ public class AbstractLockerTest {
 
     @Test
     public void testGetRowKey() {
-        AbstractLocker locker = new AbstractLocker() {
+        AbstractLocker locker = newLocker();
+
+        // Call the getRowKey method
+        String rowKey = locker.getRowKey("resource1", "table1", "123");
+
+        // Assert that the row key is constructed correctly
+        Assertions.assertEquals("resource1^^^table1^^^123", rowKey);
+    }
+
+    /**
+     * Verify that a SQL Server JDBC URL (which uses ';' as property delimiter, e.g.
+     * "jdbc:sqlserver://127.0.0.1:1433;databaseName=lxk") is sanitized inside the rowKey.
+     * The Redis storage backend joins multiple rowKeys with ROW_LOCK_KEY_SPLIT_CHAR (";"),
+     * so any ';' inside a single rowKey would otherwise corrupt the join/split round-trip
+     * and leak row locks.
+     */
+    @Test
+    public void testGetRowKeyWithSqlServerResourceId() {
+        AbstractLocker locker = newLocker();
+
+        String rowKey = locker.getRowKey("jdbc:sqlserver://127.0.0.1:1433;databaseName=lxk", "BPM_ACT_RU_TASK", "123");
+
+        Assertions.assertFalse(
+                rowKey.contains(";"), "rowKey must not contain ';' to avoid collision with ROW_LOCK_KEY_SPLIT_CHAR");
+        Assertions.assertEquals("jdbc:sqlserver://127.0.0.1:1433^^^databaseName=lxk^^^BPM_ACT_RU_TASK^^^123", rowKey);
+    }
+
+    /**
+     * Verify the sanitization still holds when the SQL Server URL carries multiple
+     * properties (every ';' must be replaced).
+     */
+    @Test
+    public void testGetRowKeyWithSqlServerMultiPropertyUrl() {
+        AbstractLocker locker = newLocker();
+
+        String rowKey = locker.getRowKey(
+                "jdbc:sqlserver://127.0.0.1:1433;databaseName=lxk;encrypt=false;trustServerCertificate=true",
+                "BPM_ACT_RU_TASK",
+                "123");
+
+        Assertions.assertFalse(
+                rowKey.contains(";"), "rowKey must not contain ';' even when resourceId carries multiple properties");
+    }
+
+    /**
+     * Verify the sanitization also covers the pk segment, which is end-user data and may
+     * theoretically contain any character. The mapping is still idempotent for identical
+     * inputs.
+     */
+    @Test
+    public void testGetRowKeyWithSemicolonInPk() {
+        AbstractLocker locker = newLocker();
+
+        String rowKey1 = locker.getRowKey("jdbc:mysql://127.0.0.1:3306/seata", "ORDER", "1001;abnormal");
+        String rowKey2 = locker.getRowKey("jdbc:mysql://127.0.0.1:3306/seata", "ORDER", "1001;abnormal");
+
+        Assertions.assertFalse(rowKey1.contains(";"), "rowKey must not contain ';' even when pk carries it");
+        Assertions.assertEquals(rowKey1, rowKey2, "getRowKey must be idempotent for identical inputs");
+    }
+
+    private static AbstractLocker newLocker() {
+        return new AbstractLocker() {
             @Override
             public boolean acquireLock(List<RowLock> rowLock) {
                 return false;
@@ -110,12 +171,6 @@ public class AbstractLockerTest {
             @Override
             public void updateLockStatus(String xid, LockStatus lockStatus) {}
         };
-
-        // Call the getRowKey method
-        String rowKey = locker.getRowKey("resource1", "table1", "123");
-
-        // Assert that the row key is constructed correctly
-        Assertions.assertEquals("resource1^^^table1^^^123", rowKey);
     }
 
     private static List<RowLock> getRowLocks() {
