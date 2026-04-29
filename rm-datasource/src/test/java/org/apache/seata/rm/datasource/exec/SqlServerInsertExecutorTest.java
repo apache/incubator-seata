@@ -236,30 +236,27 @@ public class SqlServerInsertExecutorTest {
     }
 
     @Test
-    public void testGetPkValues_compositePrimaryKey_withAutoIncrement() throws Exception {
-        // Mock composite primary key with auto-increment columns
+    public void testGetPkValues_compositePrimaryKey_withOneAutoIncrementNoPkInInsert() throws Exception {
+        // Mock realistic SQL Server composite PK: one IDENTITY column + one non-auto-increment column
+        // When no PK columns are in INSERT, non-auto-increment column should throw exception
         List<String> compositePkList = Arrays.asList(ID_COLUMN, USER_ID_COLUMN);
         when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(compositePkList);
 
         Map<String, ColumnMeta> pkMap = new HashMap<>();
         ColumnMeta idMeta = mock(ColumnMeta.class);
-        when(idMeta.isAutoincrement()).thenReturn(true); // Auto-increment
+        when(idMeta.isAutoincrement()).thenReturn(true); // IDENTITY column
         pkMap.put(ID_COLUMN, idMeta);
 
         ColumnMeta userIdMeta = mock(ColumnMeta.class);
-        when(userIdMeta.isAutoincrement()).thenReturn(true); // Auto-increment
+        when(userIdMeta.isAutoincrement()).thenReturn(false); // Not auto-increment
         pkMap.put(USER_ID_COLUMN, userIdMeta);
         when(tableMeta.getPrimaryKeyMap()).thenReturn(pkMap);
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         doReturn(new HashMap<String, Integer>()).when(insertExecutor).getPkIndex(); // No PK columns in INSERT
         doReturn(Arrays.asList(PK_VALUE)).when(insertExecutor).getGeneratedKeys();
-
-        Map<String, List<Object>> pkValues = insertExecutor.getPkValues();
-
-        // Verify auto-increment column gets value from generated keys
-        Assertions.assertEquals(Arrays.asList(PK_VALUE), pkValues.get(ID_COLUMN));
-        Assertions.assertEquals(Arrays.asList(PK_VALUE), pkValues.get(USER_ID_COLUMN));
+        // Should throw because USER_ID_COLUMN is not auto-increment and not in INSERT
+        Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getPkValues());
     }
 
     @Test

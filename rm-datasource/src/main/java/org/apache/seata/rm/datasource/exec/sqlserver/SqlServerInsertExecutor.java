@@ -96,11 +96,15 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
                 Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
 
                 // Fill any missing auto-increment PK columns from generated keys.
+                List<Object> generatedKeys = null;
                 for (String pkColumnName : pkColumnNameList) {
                     if (!pkValuesMap.containsKey(pkColumnName)) {
                         ColumnMeta pkMeta = primaryKeyMap.get(pkColumnName);
                         if (pkMeta.isAutoincrement()) {
-                            pkValuesMap.put(pkColumnName, getGeneratedKeys());
+                            if (generatedKeys == null) {
+                                generatedKeys = getGeneratedKeys();
+                            }
+                            pkValuesMap.put(pkColumnName, generatedKeys);
                         } else {
                             throw new NotSupportYetException(
                                     "composite primary key with non-autoincrement column not in INSERT is not supported in sqlserver: "
@@ -113,10 +117,14 @@ public class SqlServerInsertExecutor extends BaseInsertExecutor implements Seque
                 // For composite PK, this means all PK columns must have values from elsewhere.
                 // Since SQL Server only supports one IDENTITY column, non-identity PK columns would fail.
                 Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
+                List<Object> generatedKeys = null;
                 for (String pkColumnName : pkColumnNameList) {
                     ColumnMeta pkMeta = primaryKeyMap.get(pkColumnName);
                     if (pkMeta.isAutoincrement()) {
-                        pkValuesMap.put(pkColumnName, getGeneratedKeys());
+                        if (generatedKeys == null) {
+                            generatedKeys = getGeneratedKeys();
+                        }
+                        pkValuesMap.put(pkColumnName, generatedKeys);
                     } else {
                         throw new NotSupportYetException(
                                 "composite primary key with non-autoincrement column not in INSERT is not supported in sqlserver: "

@@ -129,6 +129,7 @@ public class SqlGenerateUtils {
      * @param pkNameList pk column name list
      * @param rowSize the row size of records
      * @param maxInSize the max in size
+     * @param dbType the type of database
      * @return where condition sql list for SQL Server
      */
     private static List<WhereSql> buildWhereConditionListByPKsForSqlServer(
