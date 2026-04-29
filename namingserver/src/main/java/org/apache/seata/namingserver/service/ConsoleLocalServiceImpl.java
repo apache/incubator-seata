@@ -36,11 +36,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
@@ -56,13 +61,13 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
 
     private final NamingManager namingManager;
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     private final ObjectMapper objectMapper;
 
-    public ConsoleLocalServiceImpl(NamingManager namingManager, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public ConsoleLocalServiceImpl(NamingManager namingManager, RestClient restClient, ObjectMapper objectMapper) {
         this.namingManager = namingManager;
-        this.restTemplate = restTemplate;
+        this.restClient = restClient;
         this.objectMapper = objectMapper;
         LOGGER.info("ConsoleLocalServiceImpl initialized.");
     }
@@ -78,7 +83,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
         String cluster = nameSpaceDetail.getCluster();
         String vgroup = nameSpaceDetail.getvGroup();
         if (StringUtils.isNotBlank(namespace) && (StringUtils.isNotBlank(cluster) || StringUtils.isNotBlank(vgroup))) {
-            List<NamingServerNode> list = null;
+            List<NamingServerNode> list = Collections.emptyList();
             if (StringUtils.isNotBlank(vgroup)) {
                 list = namingManager.getInstancesByVgroupAndNamespace(
                         namespace, vgroup, HttpMethod.GET.equals(httpMethod));
@@ -100,8 +105,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                     HttpEntity<String> entity = new HttpEntity<>(headers);
                     String responseBody;
                     try {
-                        ResponseEntity<String> response =
-                                restTemplate.exchange(targetUrl, httpMethod, entity, String.class);
+                        ResponseEntity<String> response = executeRequest(targetUrl, httpMethod, entity);
 
                         responseBody = response.getBody();
 
@@ -123,6 +127,21 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
             throw new IllegalArgumentException("Couldn't find target node url");
         }
         throw new IllegalArgumentException("Invalid NameSpace Detail");
+    }
+
+    private ResponseEntity<String> executeRequest(String targetUrl, HttpMethod httpMethod, HttpEntity<String> entity)
+            throws RestClientException {
+        return restClient
+                .method(Objects.requireNonNull(httpMethod))
+                .uri(Objects.requireNonNull(targetUrl))
+                .headers(headers -> headers.addAll(entity.getHeaders()))
+                .exchange((request, response) -> new ResponseEntity<>(
+                        readResponseBody(response), response.getHeaders(), response.getStatusCode()));
+    }
+
+    private String readResponseBody(RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response)
+            throws IOException {
+        return response.getBody() == null ? "" : StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
     }
 
     @Override
