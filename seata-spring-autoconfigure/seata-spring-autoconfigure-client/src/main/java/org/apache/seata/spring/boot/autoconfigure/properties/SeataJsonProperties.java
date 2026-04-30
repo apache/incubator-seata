@@ -31,6 +31,12 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.JSON_P
 @ConfigurationProperties(prefix = JSON_PREFIX)
 public class SeataJsonProperties {
 
+    /**
+     * JSON serializer implementation to use for Seata JSON serialization/deserialization.
+     * Supported values include fastjson, fastjson2, jackson, and gson.
+     * This property is bound from the Spring Boot configuration key {@code seata.json.serializer-type}
+     * (derived from {@code JSON_PREFIX}).
+     */
     private String serializerType;
 
     /**
