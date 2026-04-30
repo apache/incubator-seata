@@ -64,21 +64,23 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
   --duration 60
 
-# TCC mode benchmark
+# TCC mode benchmark (empty transaction)
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode TCC \
-  --tps 200 \
-  --threads 20 \
-  --duration 120
+  --tps 100 \
+  --threads 1 \
+  --duration 60
 
 # SAGA mode benchmark (empty transaction)
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60
 
 # SAGA_ANNOTATION mode benchmark (empty transaction)
@@ -86,6 +88,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA_ANNOTATION \
   --tps 100 \
+  --threads 1 \
   --duration 60
 ```
 
@@ -97,6 +100,16 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
+
+# TCC mode with real try/confirm/cancel
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3
 
@@ -105,6 +118,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
@@ -114,6 +128,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --saga-shape order
@@ -123,6 +138,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --saga-shape order \
@@ -133,6 +149,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 20 \
@@ -506,15 +523,34 @@ java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
   --mode SAGA_ANNOTATION --tps 10000 --threads 50 --duration 60 --branches 3
 ```
 
-### Test TCC Mode at High Load
+### Test TCC Mode (try/confirm/cancel)
 
 ```bash
+# Empty mode: protocol overhead only (fixed TPS)
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode TCC \
-  --tps 500 \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# Empty mode: max throughput (fixed concurrency)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100000 \
   --threads 50 \
-  --duration 300
+  --duration 60
+
+# Real mode: 3 branches per transaction, 10% cancel rate
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 10
 ```
 
 ### Test with Warmup
@@ -524,6 +560,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 200 \
+  --threads 1 \
   --duration 120 \
   --warmup-duration 30
 ```
@@ -535,7 +572,7 @@ java -jar seata-benchmark-cli.jar \
 | Mode             | Empty Mode (branches=0) | Real Mode (branches>0) |
 |------------------|-------------------------|------------------------|
 | AT               | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
-| TCC              | Mock implementation     | Mock implementation |
+| TCC              | Pure protocol overhead  | Real try/confirm/cancel via @LocalTCC interceptor |
 | SAGA             | Mock simulation         | State machine engine with compensation |
 | SAGA_ANNOTATION  | Pure protocol overhead  | Annotation interceptor + TC compensation callback |
 
@@ -544,7 +581,7 @@ java -jar seata-benchmark-cli.jar \
 For accurate benchmarking of Seata Server capacity, the tool executes **empty transactions**:
 
 - **AT Mode**: Only `begin()` and `commit()` operations, no SQL execution
-- **TCC Mode**: Empty transaction flow (mock implementation)
+- **TCC Mode**: Empty global transaction, no branch registration
 - **SAGA Mode**: Simplified simulation without state machine
 - **SAGA_ANNOTATION Mode**: Empty global transaction, no branch registration
 
@@ -563,6 +600,13 @@ When `--branches` is set to a value greater than 0:
   - Creates accounts table with initial test data
   - Executes real account transfer operations
   - Each branch performs debit/credit operations
+
+- **TCC Mode**:
+  - Uses `@LocalTCC` + `@TwoPhaseBusinessAction` annotation path
+  - Each branch is registered via the TCC interceptor (JDK dynamic proxy, no Spring required)
+  - `try` (prepare) runs in the business thread; `commit` / `rollback` are invoked by the TC
+  - No-op implementation so the benchmark measures pure TCC protocol overhead
+  - `--branches N` = N TCC branch registrations per transaction
 
 - **SAGA Mode**:
   - Uses Seata state machine engine
@@ -675,7 +719,6 @@ Logs are written to `seata-benchmark.log` in the current directory.
 
 **v1.1 - Enhancement:**
 - P99.9 percentile
-- Real TCC implementation with try/confirm/cancel
 - XA mode support
 
 **v2.0 - Advanced Features:**

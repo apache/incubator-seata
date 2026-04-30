@@ -399,51 +399,27 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- PMD-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-pmd-plugin</artifactId>
-                <version>${maven-pmd-plugin.version}</version>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
                 <configuration>
-                    <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-                    <minimumPriority>2</minimumPriority>
-                    <printFailingErrors>true</printFailingErrors>
-                    <rulesets>
-                        <ruleset>rulesets/java/ali-comment.xml</ruleset>
-                        <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
-                        <ruleset>rulesets/java/ali-constant.xml</ruleset>
-                        <ruleset>rulesets/java/ali-exception.xml</ruleset>
-                        <ruleset>rulesets/java/ali-flowcontrol.xml</ruleset>
-                        <ruleset>rulesets/java/ali-naming.xml</ruleset>
-                        <ruleset>rulesets/java/ali-oop.xml</ruleset>
-                        <ruleset>rulesets/java/ali-orm.xml</ruleset>
-                        <ruleset>rulesets/java/ali-other.xml</ruleset>
-                        <ruleset>rulesets/java/ali-set.xml</ruleset>
-                    </rulesets>
-                    <excludes>
-                        <exclude>**/generated/*.java</exclude>
-                        <exclude>**/antlr/mysql/parser/*.*</exclude>
-                        <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                        <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                    </excludes>
+                    <configLocation>style/checkstyle.xml</configLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <detail>true</detail>
+                    <skip>${checkstyle.skip}</skip>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>pmd-check</id>
-                        <phase>validate</phase>
+                        <id>verify-style</id>
+                        <phase>process-classes</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
+
             <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>

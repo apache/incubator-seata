@@ -17,21 +17,18 @@
 package org.apache.seata.namingserver.config;
 
 import jakarta.servlet.Filter;
-import okhttp3.Dispatcher;
-import okhttp3.OkHttpClient;
 import org.apache.seata.namingserver.filter.ConsoleRemotingFilter;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
-import java.util.concurrent.TimeUnit;
+import java.net.http.HttpClient;
+import java.time.Duration;
 
-import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_PER_ROUTE;
-import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_TOTAL;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_REQUEST_TIMEOUT;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_WRITE_TIMEOUT;
 
@@ -39,26 +36,19 @@ import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_WRIT
 public class WebConfig {
 
     @Bean
-    public RestTemplate restTemplate() {
-        Dispatcher dispatcher = new Dispatcher();
-        dispatcher.setMaxRequests(DEFAULT_CONNECTION_MAX_TOTAL);
-        dispatcher.setMaxRequestsPerHost(DEFAULT_CONNECTION_MAX_PER_ROUTE);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .dispatcher(dispatcher)
-                .connectTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
-                .readTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(DEFAULT_WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
+    public RestClient restClient(RestClient.Builder restClientBuilder) {
+        HttpClient httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(DEFAULT_REQUEST_TIMEOUT))
+                .version(HttpClient.Version.HTTP_1_1)
                 .build();
-
-        // Create and return a RestTemplate with the custom request factory
-        return new RestTemplate(new OkHttp3ClientHttpRequestFactory(client));
+        JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
+        requestFactory.setReadTimeout(Duration.ofMillis(Math.max(DEFAULT_REQUEST_TIMEOUT, DEFAULT_WRITE_TIMEOUT)));
+        return restClientBuilder.requestFactory(requestFactory).build();
     }
 
     @Bean
-    public FilterRegistrationBean<Filter> consoleRemotingFilter(
-            NamingManager namingManager, RestTemplate restTemplate) {
-        ConsoleRemotingFilter consoleRemotingFilter = new ConsoleRemotingFilter(namingManager, restTemplate);
+    public FilterRegistrationBean<Filter> consoleRemotingFilter(NamingManager namingManager, RestClient restClient) {
+        ConsoleRemotingFilter consoleRemotingFilter = new ConsoleRemotingFilter(namingManager, restClient);
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
         registration.setFilter(consoleRemotingFilter);
         registration.addUrlPatterns("/*");
