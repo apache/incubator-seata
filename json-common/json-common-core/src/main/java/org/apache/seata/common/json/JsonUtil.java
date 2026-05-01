@@ -35,7 +35,8 @@ public final class JsonUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
 
-    private static final String CONFIG_JSON_SERIALIZER_NAME = resolveJsonSerializerName(ConfigurationFactory.getInstance());
+    private static final String CONFIG_JSON_SERIALIZER_NAME =
+            resolveJsonSerializerName(ConfigurationFactory.getInstance());
 
     private static final JsonSerializer DEFAULT_SERIALIZER =
             JsonSerializerFactory.getSerializer(CONFIG_JSON_SERIALIZER_NAME);
