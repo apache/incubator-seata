@@ -35,10 +35,10 @@ public final class JsonUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
 
-    private static final String CONFIG_JSON_PARSER_NAME = resolveJsonSerializerName(ConfigurationFactory.getInstance());
+    private static final String CONFIG_JSON_SERIALIZER_NAME = resolveJsonSerializerName(ConfigurationFactory.getInstance());
 
     private static final JsonSerializer DEFAULT_SERIALIZER =
-            JsonSerializerFactory.getSerializer(CONFIG_JSON_PARSER_NAME);
+            JsonSerializerFactory.getSerializer(CONFIG_JSON_SERIALIZER_NAME);
 
     static String resolveJsonSerializerName(Configuration configuration) {
         String serializerType = configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE);
@@ -85,7 +85,7 @@ public final class JsonUtil {
         }
         String jsonParseName = text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX)
                 ? Constants.JACKSON_JSON_PARSER_NAME
-                : CONFIG_JSON_PARSER_NAME;
+                : CONFIG_JSON_SERIALIZER_NAME;
         return JsonSerializerFactory.getSerializer(jsonParseName).parseObject(text, clazz);
     }
 }
