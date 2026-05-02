@@ -34,6 +34,8 @@ public class SeataJsonProperties {
     /**
      * JSON serializer implementation to use for Seata JSON serialization/deserialization.
      * Supported values include fastjson, fastjson2, jackson, jackson3, and gson.
+     * The {@code jackson3} option requires JDK 17 or later; on lower JDK versions,
+     * Seata falls back to {@code jackson}.
      * This property is bound from the Spring Boot configuration key {@code seata.json.serializer-type}
      * (derived from {@code JSON_PREFIX}).
      */
