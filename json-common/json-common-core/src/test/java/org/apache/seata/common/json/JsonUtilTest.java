@@ -32,7 +32,7 @@ public class JsonUtilTest {
     void setUp() {}
 
     @Test
-    public void testToJSONString_basicObject() {
+    public void testToJSONStringBasicObject() {
         TestObject obj = new TestObject("test", 123);
         String json = JsonUtil.toJSONString(obj);
 
@@ -42,7 +42,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_basicObject() {
+    public void testParseObjectBasicObject() {
         String json = "{\"name\":\"test\",\"value\":123}";
         TestObject obj = JsonUtil.parseObject(json, TestObject.class);
 
@@ -52,7 +52,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testToJSONString_and_parseObject_apple() {
+    public void testToJSONStringAndParseObjectApple() {
         TestObject original = new TestObject("apple", 456);
         String json = JsonUtil.toJSONString(original);
         TestObject restored = JsonUtil.parseObject(json, TestObject.class);
@@ -62,7 +62,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_nullInputs() {
+    public void testParseObjectNullInputs() {
         TestObject obj1 = JsonUtil.parseObject(null, TestObject.class);
         assertThat(obj1).isNull();
 
@@ -71,7 +71,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_prefixLogic() {
+    public void testParseObjectPrefixLogic() {
         String normalJson = "{\"name\":\"normalTest\",\"value\":888}";
         TestObject obj = JsonUtil.parseObject(normalJson, TestObject.class);
         assertThat(obj).isNotNull();
@@ -80,13 +80,13 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testToJSONString_nullObject() {
+    public void testToJSONStringNullObject() {
         String json = JsonUtil.toJSONString(null);
         assertThat(json).isEqualTo("null");
     }
 
     @Test
-    public void testParseObject_complexObject() {
+    public void testParseObjectComplexObject() {
         ComplexTestObject complexObj = new ComplexTestObject();
         complexObj.setName("complex");
         complexObj.setValue(789);
@@ -104,7 +104,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testResolveJsonSerializerName_prefersNewConfig() {
+    public void testResolveJsonSerializerNamePrefersNewConfig() {
         Configuration configuration = mock(Configuration.class);
         when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn("gson");
 
@@ -112,7 +112,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testResolveJsonSerializerName_fallsBackToDeprecatedConfig() {
+    public void testResolveJsonSerializerNameFallsBackToDeprecatedConfig() {
         Configuration configuration = mock(Configuration.class);
         when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(null);
         when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
@@ -122,7 +122,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testResolveJsonSerializerName_returnsDefaultWhenConfigMissing() {
+    public void testResolveJsonSerializerNameReturnsDefaultWhenConfigMissing() {
         Configuration configuration = mock(Configuration.class);
         when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(null);
         when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
@@ -133,7 +133,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testResolveJsonSerializerName_ignoresBlankNewConfigAndFallsBackToDeprecatedConfig() {
+    public void testResolveJsonSerializerNameIgnoresBlankNewConfigAndFallsBackToDeprecatedConfig() {
         Configuration configuration = mock(Configuration.class);
         when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(" ");
         when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
