@@ -201,6 +201,7 @@ seata:
     exception-rate: 100
   json:
     # You can choose from the following options: fastjson, fastjson2, jackson, jackson3, gson
+    # Note: jackson3 is only available with JDK 17+ builds; otherwise Seata falls back to jackson
     serializer-type: jackson
     allowlist: 
   tcc:
