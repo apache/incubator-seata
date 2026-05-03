@@ -407,6 +407,7 @@
                     <configLocation>style/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <detail>true</detail>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <skip>${checkstyle.skip}</skip>
                 </configuration>
                 <executions>
