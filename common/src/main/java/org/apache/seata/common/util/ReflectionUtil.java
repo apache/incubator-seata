@@ -26,6 +26,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -165,6 +166,31 @@ public final class ReflectionUtil {
             }
             clazz = clazz.getSuperclass();
         }
+        return interfaces;
+    }
+
+    /**
+     * get all interface of the clazz,include all parent class and all parent interface
+     * @param clazz
+     * @return
+     */
+    public static Set<Class<?>> getInterfacesInHierarchy(Class<?> clazz) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        if (clazz == null) {
+            return interfaces;
+        }
+
+        Class<?>[] declaredInterfaces = clazz.getInterfaces();
+        for (Class<?> iface : declaredInterfaces) {
+            interfaces.add(iface);
+            interfaces.addAll(getInterfacesInHierarchy(iface));
+        }
+
+        Class<?> superClass = clazz.getSuperclass();
+        if (superClass != null && superClass != Object.class) {
+            interfaces.addAll(getInterfacesInHierarchy(superClass));
+        }
+
         return interfaces;
     }
 
@@ -703,6 +729,93 @@ public final class ReflectionUtil {
     public static Map<String, Object> getAnnotationValues(Annotation annotation) throws NoSuchFieldException {
         InvocationHandler h = Proxy.getInvocationHandler(annotation);
         return getFieldValue(h, "memberValues");
+    }
+
+    /**
+     *
+     * @param targetClass the target class
+     * @param methodName the method name
+     * @param paramTypes the param types
+     * @param annotationClass the annotation class
+     * @return the annotation
+     * @param <A>
+     */
+    public static <A extends Annotation> A findAnnotationInHierarchy(
+            Class<?> targetClass, String methodName, Class<?>[] paramTypes, Class<A> annotationClass) {
+        A classLevelAnnotation = findClassLevelAnnotation(targetClass, annotationClass);
+        if (classLevelAnnotation != null) {
+            return classLevelAnnotation;
+        }
+
+        if (methodName != null) {
+            A methodLevelAnnotation = findMethodLevelAnnotation(targetClass, methodName, paramTypes, annotationClass);
+            if (methodLevelAnnotation != null) {
+                return methodLevelAnnotation;
+            }
+        }
+
+        return null;
+    }
+
+    private static <A extends Annotation> A findClassLevelAnnotation(Class<?> targetClass, Class<A> annotationClass) {
+        if (targetClass == null || annotationClass == null) {
+            return null;
+        }
+
+        A annotation = null;
+
+        Class<?> superClass = targetClass.getSuperclass();
+        while (superClass != null && superClass != Object.class) {
+            annotation = superClass.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
+            superClass = superClass.getSuperclass();
+        }
+
+        Set<Class<?>> allInterfaces = getInterfacesInHierarchy(targetClass);
+        for (Class<?> iface : allInterfaces) {
+            annotation = iface.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
+        }
+
+        return null;
+    }
+
+    private static <A extends Annotation> A findMethodLevelAnnotation(
+            Class<?> targetClass, String methodName, Class<?>[] paramTypes, Class<A> annotationClass) {
+        if (targetClass == null || methodName == null || annotationClass == null) {
+            return null;
+        }
+
+        Class<?> superClass = targetClass.getSuperclass();
+        while (superClass != null && superClass != Object.class) {
+            try {
+                Method superMethod = superClass.getDeclaredMethod(methodName, paramTypes);
+                A superAnnotation = superMethod.getAnnotation(annotationClass);
+                if (superAnnotation != null) {
+                    return superAnnotation;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+            superClass = superClass.getSuperclass();
+        }
+
+        Set<Class<?>> interfaces = getInterfacesInHierarchy(targetClass);
+        for (Class<?> iface : interfaces) {
+            try {
+                Method ifaceMethod = iface.getDeclaredMethod(methodName, paramTypes);
+                A ifaceAnnotation = ifaceMethod.getAnnotation(annotationClass);
+                if (ifaceAnnotation != null) {
+                    return ifaceAnnotation;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+        }
+
+        return null;
     }
 
     // endregion

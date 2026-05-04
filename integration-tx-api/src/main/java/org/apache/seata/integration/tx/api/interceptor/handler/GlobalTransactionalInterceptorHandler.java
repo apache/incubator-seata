@@ -19,6 +19,7 @@ package org.apache.seata.integration.tx.api.interceptor.handler;
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -52,6 +53,7 @@ import org.apache.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -283,7 +285,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
     public GlobalLockConfig getGlobalLockConfig(Method method, Class<?> targetClass) {
-        final GlobalLock globalLockAnno = getAnnotation(method, targetClass, GlobalLock.class);
+        final GlobalLock globalLockAnno = findAnnotation(method, targetClass, GlobalLock.class);
         if (globalLockAnno != null) {
             GlobalLockConfig config = new GlobalLockConfig();
             config.setLockRetryInterval(globalLockAnno.lockRetryInterval());
@@ -296,7 +298,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
     public AspectTransactional getAspectTransactional(Method method, Class<?> targetClass) {
         final GlobalTransactional globalTransactionalAnnotation =
-                getAnnotation(method, targetClass, GlobalTransactional.class);
+                findAnnotation(method, targetClass, GlobalTransactional.class);
         return globalTransactionalAnnotation != null
                 ? new AspectTransactional(
                         globalTransactionalAnnotation.timeoutMills(),
@@ -310,6 +312,15 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
                         globalTransactionalAnnotation.lockRetryTimes(),
                         globalTransactionalAnnotation.lockStrategyMode())
                 : null;
+    }
+
+    private <A extends Annotation> A findAnnotation(Method method, Class<?> targetClass, Class<A> annotationClass) {
+        A anno = getAnnotation(method, targetClass, annotationClass);
+        if (anno == null) {
+            anno = ReflectionUtil.findAnnotationInHierarchy(
+                    targetClass, method.getName(), method.getParameterTypes(), annotationClass);
+        }
+        return anno;
     }
 
     private String formatMethod(Method method) {
