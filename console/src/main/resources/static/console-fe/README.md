@@ -137,14 +137,7 @@ npm run preview
 
 ## Development Server Configuration
 
-The Vite dev server is configured through the `server` field in `vite.config.ts`.
-
-| Item         | Value                           | Description                             |
-| ------------ | ------------------------------- | --------------------------------------- |
-| Default port | `5173`                          | Can be changed with `--port`            |
-| Host         | `localhost`                     | Can be exposed with `--host 0.0.0.0`    |
-| API proxy    | `/api` → `http://43.142.148.30` | Proxies API requests during development |
-| HMR          | WebSocket                       | Hot updates after code changes          |
+The Vite dev server uses port `5173` by default. It can be changed with `--port` or exposed to the network with `--host 0.0.0.0`.
 
 Common variants:
 
@@ -159,7 +152,22 @@ npm run dev -- --port 3000
 npm run dev -- --host 0.0.0.0 --port 3000
 ```
 
-The `/api` proxy avoids browser CORS restrictions during development. In production, reverse proxy handling should be done by the gateway or Nginx.
+**API proxy example (optional)**:
+
+To enable API proxying during local development, add the following to `vite.config.ts`:
+
+```ts
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://127.0.0.1:8080',
+      changeOrigin: true,
+    },
+  },
+},
+```
+
+> **Note**: The API proxy is optional and has been removed from `vite.config.ts`. In production, reverse proxy handling is done by the backend gateway or Nginx.
 
 ---
 
