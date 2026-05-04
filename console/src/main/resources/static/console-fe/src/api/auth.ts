@@ -14,8 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+import request from '@/utils/request'
 
-const requestV2 = createRequest('/api/v2')
+export interface LoginParams {
+  username: string
+  password: string
+}
 
-export default requestV2
+export interface LoginResult {
+  code: string
+  message: string
+  data: string
+}
+
+export function login(params: LoginParams): Promise<LoginResult> {
+  return request.post('/auth/login', params) as Promise<LoginResult>
+}

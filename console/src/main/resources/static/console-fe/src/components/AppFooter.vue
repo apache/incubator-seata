@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,38 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <footer class="public-footer">
+    <span class="footer-text">Apache Seata (Incubating) Version: {{ version }}</span>
+  </footer>
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 
-export default requestV2
+const version = ref(import.meta.env.DEV ? 'dev' : '')
+
+onMounted(async () => {
+  try {
+    const res = await fetch('/version.json')
+    const data = await res.json()
+    if (data.version) {
+      version.value = data.version
+    }
+  } catch {
+    // dev: 保持 'dev'；prod: version.json 必然存在，无需处理
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+.public-footer {
+  background: #fff;
+  box-shadow: 0 -1px 4px rgba(0, 21, 41, 0.08);
+  text-align: center;
+  padding: 24px 0;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+</style>

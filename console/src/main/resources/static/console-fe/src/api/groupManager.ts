@@ -14,8 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+import request from '@/utils/request'
+import qs from 'qs'
 
-const requestV2 = createRequest('/api/v2')
+/**
+ * Add a transaction group
+ */
+export function addGroup(namespace: string, clusterName: string, vGroup: string, unitName: string = ''): Promise<any> {
+  return request.post('/naming/addGroup', qs.stringify({ namespace, clusterName, vGroup, unitName }), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }) as Promise<any>
+}
 
-export default requestV2
+/**
+ * Change a transaction group
+ */
+export function changeGroup(namespace: string, clusterName: string, vGroup: string, unitName: string = ''): Promise<any> {
+  return request.post('/naming/changeGroup', qs.stringify({ namespace, clusterName, vGroup, unitName }), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  }) as Promise<any>
+}

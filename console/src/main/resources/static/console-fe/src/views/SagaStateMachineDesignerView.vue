@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <IframePage
+    :src="iframeSrc"
+    :title="t('sagaStateMachineDesigner.title')"
+  />
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import IframePage from '@/components/IframePage.vue'
 
-export default requestV2
+const { t } = useI18n()
+
+const iframeSrc = computed(() => {
+  return './saga-statemachine-designer/designer.html'
+})
+</script>

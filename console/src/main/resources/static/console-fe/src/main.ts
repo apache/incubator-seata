@@ -14,8 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import router from './router'
+import i18n from './i18n'
+import App from './App.vue'
+import '@/styles/global.scss'
 
-const requestV2 = createRequest('/api/v2')
-
-export default requestV2
+const app = createApp(App)
+app.use(createPinia())
+app.use(router)
+app.use(i18n)
+app.mount('#app')

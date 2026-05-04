@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <div class="public-layout">
+    <AppHeader />
+    <main class="public-main">
+      <router-view />
+    </main>
+    <AppFooter />
+  </div>
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+import AppHeader from '@/components/AppHeader.vue'
+import AppFooter from '@/components/AppFooter.vue'
+</script>
 
-export default requestV2
+<style lang="scss" scoped>
+.public-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .public-main {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+</style>

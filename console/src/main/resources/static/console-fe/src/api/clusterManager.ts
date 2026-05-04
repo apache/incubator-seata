@@ -14,8 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+import request from '@/utils/request'
+import requestV2 from '@/utils/requestV2'
 
-const requestV2 = createRequest('/api/v2')
+/**
+ * Fetch available namespaces (v2 API)
+ */
+export function fetchNamespaceV2(): Promise<any> {
+  return requestV2.get('/naming/namespace') as Promise<any>
+}
 
-export default requestV2
+/**
+ * Fetch cluster data including unit info and cluster type
+ */
+export function fetchClusterData(namespace: string, clusterName: string): Promise<any> {
+  return request.get('/naming/clusterData', {
+    params: { namespace, clusterName },
+  }) as Promise<any>
+}
