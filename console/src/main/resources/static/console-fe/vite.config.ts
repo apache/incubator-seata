@@ -48,12 +48,4 @@ export default defineConfig({
       },
     },
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://43.142.148.30',
-        changeOrigin: true,
-      },
-    },
-  },
 })
