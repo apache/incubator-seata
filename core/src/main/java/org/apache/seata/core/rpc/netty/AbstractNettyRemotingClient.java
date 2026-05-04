@@ -372,6 +372,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected abstract long getRpcRequestTimeout();
 
     /**
+     * Create heartbeat message for sending to server.
+     * Subclasses can override this to provide enhanced heartbeat messages.
+     *
+     * @return heartbeat message (HeartbeatMessage or EnhancedHeartbeatMessage)
+     */
+    protected Object createHeartbeatMessage() {
+        return HeartbeatMessage.PING;
+    }
+
+    /**
      * Registers a channel event listener to receive channel events.
      * If the listener is already registered, it will not be added again.
      *
@@ -740,7 +750,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
-                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING);
+                        Object heartbeatMessage = createHeartbeatMessage();
+                        AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), heartbeatMessage);
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }

@@ -17,12 +17,15 @@
 package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.seata.core.protocol.ConnectionPoolInfo;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * process client heartbeat message request(PING).
@@ -37,13 +40,26 @@ public class ServerHeartbeatProcessor implements RemotingProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerHeartbeatProcessor.class);
 
     private RemotingServer remotingServer;
+    private final ConnectionPoolInfoCache poolInfoCache;
 
     public ServerHeartbeatProcessor(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
+        this.poolInfoCache = new ConnectionPoolInfoCache();
     }
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+        handleStandardHeartbeat(ctx, rpcMessage);
+        LOGGER.debug("received PING  {}", rpcMessage.getBody());
+        HeartbeatMessage heartbeatMessage = (HeartbeatMessage) rpcMessage.getBody();
+        ConnectionPoolInfo poolInfo = heartbeatMessage.getConnectionPoolInfo();
+        LOGGER.debug("received PING from {}", heartbeatMessage);
+        String clientAddress = ctx.channel().remoteAddress().toString();
+        poolInfoCache.updatePoolInfo(clientAddress, poolInfo);
+    }
+
+
+    private void handleStandardHeartbeat(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         try {
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
@@ -52,5 +68,13 @@ public class ServerHeartbeatProcessor implements RemotingProcessor {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
+    }
+
+    public Map<String, ConnectionPoolInfo> getAllPoolInfo() {
+        return poolInfoCache.getAllPoolInfo();
+    }
+
+    public ConnectionPoolInfo getClientPoolInfo(String clientAddress) {
+        return poolInfoCache.getPoolInfo(clientAddress);
     }
 }
