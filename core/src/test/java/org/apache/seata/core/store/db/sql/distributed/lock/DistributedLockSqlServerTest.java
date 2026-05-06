@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BaseDistributedLockSqlServerTest {
+class DistributedLockSqlServerTest {
 
     private BaseDistributedLockSqlServer baseDistributedLockSqlServer;
     private final String testTable = "test_lock_table";

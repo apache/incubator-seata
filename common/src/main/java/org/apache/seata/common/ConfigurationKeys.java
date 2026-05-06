@@ -167,6 +167,11 @@ public interface ConfigurationKeys {
     String TRANSPORT_PREFIX = "transport.";
 
     /**
+     * The transport thread pool type configuration key.
+     */
+    String TRANSPORT_THREADPOOL = TRANSPORT_PREFIX + "threadpool";
+
+    /**
      * The constant CLIENT_RM_PREFIX.
      */
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";

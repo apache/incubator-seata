@@ -164,6 +164,11 @@ public interface DefaultValues {
     String DEFAULT_PROTOCOL = "seata";
 
     /**
+     * The default transport thread pool type.
+     */
+    String DEFAULT_TRANSPORT_THREADPOOL = "auto";
+
+    /**
      * The constant DEFAULT_MIN_HTTP_POOL_SIZE.
      */
     int DEFAULT_MIN_HTTP_POOL_SIZE = 10;

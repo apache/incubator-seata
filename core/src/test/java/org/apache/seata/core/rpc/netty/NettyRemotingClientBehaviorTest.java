@@ -60,7 +60,7 @@ import static org.mockito.Mockito.when;
 /**
  * Test for AbstractNettyRemotingClient
  */
-public class AbstractNettyRemotingClientTest {
+public class NettyRemotingClientBehaviorTest {
 
     private TestNettyRemotingClient client;
     private ThreadPoolExecutor messageExecutor;

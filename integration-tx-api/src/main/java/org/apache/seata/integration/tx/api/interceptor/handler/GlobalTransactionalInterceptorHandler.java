@@ -18,7 +18,7 @@ package org.apache.seata.integration.tx.api.interceptor.handler;
 
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -368,7 +368,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         if (executor != null && !executor.isShutdown()) {
             return;
         }
-        executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("degradeCheckWorker", 1, true));
+        executor = ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("degradeCheckWorker", 1, true);
         executor.scheduleAtFixedRate(
                 () -> {
                     if (ATOMIC_DEGRADE_CHECK.get()) {

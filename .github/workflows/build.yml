@@ -80,6 +80,7 @@ jobs:
            ${{ runner.os }}-maven-
       # step 6.1：Support GitHub Actions, local shell
       - name: Checkstyle
+        if: matrix.java == '25'
         run: |
           GITHUB_BASE_REF=${GITHUB_BASE_REF:-2.x}
           echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"

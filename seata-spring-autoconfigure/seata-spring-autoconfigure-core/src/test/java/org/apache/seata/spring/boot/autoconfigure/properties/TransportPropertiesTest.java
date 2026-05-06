@@ -24,10 +24,12 @@ public class TransportPropertiesTest {
     @Test
     public void testTransportProperties() {
         TransportProperties transportProperties = new TransportProperties();
+        Assertions.assertEquals("auto", transportProperties.getThreadpool());
         transportProperties.setServer("server");
         transportProperties.setType("type");
         transportProperties.setSerialization("serialization");
         transportProperties.setCompressor("compressor");
+        transportProperties.setThreadpool("virtual");
         transportProperties.setHeartbeat(true);
         transportProperties.setEnableClientBatchSendRequest(true);
         transportProperties.setEnableRmClientBatchSendRequest(true);
@@ -56,6 +58,7 @@ public class TransportPropertiesTest {
         Assertions.assertEquals("type", transportProperties.getType());
         Assertions.assertEquals("serialization", transportProperties.getSerialization());
         Assertions.assertEquals("compressor", transportProperties.getCompressor());
+        Assertions.assertEquals("virtual", transportProperties.getThreadpool());
         Assertions.assertTrue(transportProperties.isHeartbeat());
         Assertions.assertTrue(transportProperties.isEnableClientBatchSendRequest());
         Assertions.assertTrue(transportProperties.isEnableRmClientBatchSendRequest());

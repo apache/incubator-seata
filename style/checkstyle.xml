@@ -46,6 +46,20 @@
         <property name="checks" value="ConstantName"/>
         <property name="files" value="MySqlLexer\.java$"/>
     </module>
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="LocalVariableName|MemberName|NeedBraces|EmptyBlock|ConstantName"/>
+        <property name="files" value="Echo\.java$"/>
+    </module>
+
+    <!-- MethodName: source files (no underscores) vs test files (underscores allowed) -->
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="MethodNameSource"/>
+        <property name="files" value=".*[\\/]test[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="MethodNameTest"/>
+        <property name="files" value="^(?!.*[\\/]test[\\/].*).*$"/>
+    </module>
 
     <!-- Allow using @SuppressWarnings("checkstyle:...") in code -->
     <module name="SuppressWarningsFilter"/>
@@ -63,7 +77,14 @@
         <module name="MemberName"/>
         <module name="LocalVariableName"/>
         <module name="ParameterName"/>
-        <module name="MethodName"/>
+        <module name="MethodName">
+            <property name="id" value="MethodNameSource"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MethodName">
+            <property name="id" value="MethodNameTest"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+        </module>
         <module name="PackageName"/>
         <module name="ArrayTypeStyle"/>
 

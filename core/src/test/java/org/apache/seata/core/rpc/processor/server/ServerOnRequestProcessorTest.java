@@ -611,8 +611,12 @@ public class ServerOnRequestProcessorTest {
             boolean hasCodec7 = false;
             boolean hasCodec8 = false;
             for (RpcMessage msg : capturedRpcMessages) {
-                if (msg.getCodec() == 7) hasCodec7 = true;
-                if (msg.getCodec() == 8) hasCodec8 = true;
+                if (msg.getCodec() == 7) {
+                    hasCodec7 = true;
+                }
+                if (msg.getCodec() == 8) {
+                    hasCodec8 = true;
+                }
             }
 
             assertTrue(hasCodec7 || hasCodec8);

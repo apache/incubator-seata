@@ -48,6 +48,16 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
+                <artifactId>seata-threadpool</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-threadpool-loom</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-config-core</artifactId>
                 <version>${project.version}</version>
             </dependency>

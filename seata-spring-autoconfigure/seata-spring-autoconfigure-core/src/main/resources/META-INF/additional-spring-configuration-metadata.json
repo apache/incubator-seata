@@ -2,6 +2,12 @@
   "groups": [],
   "properties": [
     {
+      "name": "seata.transport.threadpool",
+      "type": "java.lang.String",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": "auto"
+    },
+    {
       "name": "seata.transport.heartbeat",
       "type": "java.lang.Boolean",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
@@ -148,6 +154,21 @@
           "parameters": {
             "target": "org.apache.seata.discovery.registry.RegistryType"
           }
+        }
+      ]
+    },
+    {
+      "name": "seata.transport.threadpool",
+      "values": [
+        {
+          "value": "auto",
+          "description": "Select virtual threads only when the loom extension is present on a supported JDK."
+        },
+        {
+          "value": "platform"
+        },
+        {
+          "value": "virtual"
         }
       ]
     },

@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * The AbstractLocker Test
  */
-public class AbstractLockerTest {
+public class LockerBehaviorTest {
 
     @Test
     public void testConvertToLockDO() {

@@ -74,6 +74,7 @@ seata:
     disable-global-transaction: false
   transport:
     protocol: seata
+    threadpool: auto
     shutdown:
       wait: 3
     thread-factory:

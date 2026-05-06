@@ -39,6 +39,7 @@
         <module>bom</module>
         <module>common</module>
         <module>config</module>
+        <module>threadpool</module>
 <!--        <module>console</module>-->
         <module>core</module>
         <module>compatible</module>
@@ -130,6 +131,16 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: onlyBuildOnJDK21+ -->
+        <profile>
+            <id>JDK21Plus</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <modules>
+                <module>threadpool-loom</module>
+            </modules>
+        </profile>
         <!-- profile: onlyBuildOnJDK25+ -->
         <profile>
             <id>JDK25Plus</id>
