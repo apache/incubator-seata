@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.MissingResourceException;
 
-class AbstractRemoteResourceBundleTest {
+class RemoteResourceBundleTest {
 
     private static class TestResourceBundle extends AbstractRemoteResourceBundle {
 

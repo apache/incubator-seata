@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
-class AbstractConfigurationTest {
+class ConfigurationBehaviorTest {
 
     private Configuration configuration;
 

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * The type Base param test.
  */
-public class BaseParamTest {
+public class ParamBehaviorTest {
 
     @Test
     public void testDefaultConstructor() {
