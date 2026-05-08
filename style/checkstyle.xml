@@ -61,6 +61,25 @@
         <property name="files" value="^(?!.*[\\/]test[\\/].*).*$"/>
     </module>
 
+    <module name="SuppressionSingleFilter">
+        <!-- new Thread() -->
+        <property name="id" value="DirectThreadCreation"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <!-- Executors.new -->
+        <property name="id" value="ExecutorsUsage"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <!-- new ThreadPoolExecutor -->
+        <property name="id" value="DirectThreadPoolExecutorCreation"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
+
     <!-- Allow using @SuppressWarnings("checkstyle:...") in code -->
     <module name="SuppressWarningsFilter"/>
 
@@ -99,5 +118,27 @@
 
         <!-- Constant -->
         <module name="UpperEll"/>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DirectThreadCreation"/>
+            <property name="format" value="new\s+Thread\s*\("/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Direct thread creation is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="ExecutorsUsage"/>
+            <property name="format" value="Executors\s*\.\s*new"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Using Executors factory methods is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DirectThreadPoolExecutorCreation"/>
+            <property name="format" value="new\s+ThreadPoolExecutor\s*\("/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Direct ThreadPoolExecutor creation is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
     </module>
 </module>
