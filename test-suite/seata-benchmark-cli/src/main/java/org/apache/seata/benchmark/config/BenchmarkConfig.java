@@ -196,12 +196,12 @@ public class BenchmarkConfig {
     }
 
     private static final EnumSet<BranchType> SUPPORTED_MODES =
-            EnumSet.of(BranchType.AT, BranchType.TCC, BranchType.SAGA, BranchType.SAGA_ANNOTATION);
+            EnumSet.of(BranchType.AT, BranchType.TCC, BranchType.SAGA, BranchType.XA, BranchType.SAGA_ANNOTATION);
 
     private void validateMode() {
         if (!SUPPORTED_MODES.contains(mode)) {
             throw new IllegalArgumentException(
-                    "Unsupported mode: " + mode + ". Only AT, TCC, SAGA, and SAGA_ANNOTATION are supported.");
+                    "Unsupported mode: " + mode + ". Only AT, TCC, SAGA, XA, and SAGA_ANNOTATION are supported.");
         }
     }
 

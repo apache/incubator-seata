@@ -20,7 +20,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 
 ## Features
 
-- Support for **AT**, **TCC**, **SAGA**, and **SAGA_ANNOTATION** transaction modes
+- Support for **AT**, **TCC**, **SAGA**, **XA**, and **SAGA_ANNOTATION** transaction modes
 - **Dual execution modes**:
   - **Empty mode** (`--branches 0`): Pure Seata protocol overhead testing
   - **Real mode** (`--branches N`): Actual distributed transaction execution
@@ -87,6 +87,14 @@ java -jar seata-benchmark-cli.jar \
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# XA mode benchmark (empty transaction)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
   --tps 100 \
   --threads 1 \
   --duration 60
@@ -178,6 +186,15 @@ java -jar seata-benchmark-cli.jar \
   --saga-shape order \
   --saga-timeout-step payment \
   --saga-timeout-ms 3000
+
+# XA mode with real MySQL XA branches (via Testcontainers)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
 ```
 
 ### Performance Testing Modes
@@ -252,7 +269,7 @@ Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
 
 Options:
   -s, --server=<server>                Seata Server address (host:port)
-  -m, --mode=<mode>                    Transaction mode: AT, TCC, SAGA, or SAGA_ANNOTATION
+  -m, --mode=<mode>                    Transaction mode: AT, TCC, SAGA, XA, or SAGA_ANNOTATION
   -t, --tps=<targetTps>                Target TPS (default: 100)
       --threads=<threads>              Concurrent threads (default: 10)
   -d, --duration=<duration>            Duration in seconds (default: 60)
@@ -523,6 +540,37 @@ java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
   --mode SAGA_ANNOTATION --tps 10000 --threads 50 --duration 60 --branches 3
 ```
 
+### Test XA Mode
+
+```bash
+# Empty mode: protocol overhead only
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# Real mode: 3 XA branches per transaction
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
+
+# Real mode with rollback injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 10
+```
+
 ### Test TCC Mode (try/confirm/cancel)
 
 ```bash
@@ -574,6 +622,7 @@ java -jar seata-benchmark-cli.jar \
 | AT               | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
 | TCC              | Pure protocol overhead  | Real try/confirm/cancel via @LocalTCC interceptor |
 | SAGA             | Mock simulation         | State machine engine with compensation |
+| XA               | Pure protocol overhead  | MySQL XA via Testcontainers (account transfer) |
 | SAGA_ANNOTATION  | Pure protocol overhead  | Annotation interceptor + TC compensation callback |
 
 ### Empty Transaction Mode
@@ -583,6 +632,7 @@ For accurate benchmarking of Seata Server capacity, the tool executes **empty tr
 - **AT Mode**: Only `begin()` and `commit()` operations, no SQL execution
 - **TCC Mode**: Empty global transaction, no branch registration
 - **SAGA Mode**: Simplified simulation without state machine
+- **XA Mode**: Empty global transaction, no XA branch registration
 - **SAGA_ANNOTATION Mode**: Empty global transaction, no branch registration
 
 This approach:
@@ -620,6 +670,12 @@ When `--branches` is set to a value greater than 0:
     - Starts MySQL via Testcontainers
     - Creates benchmark inventory, account, and order tables
     - Executes DB-backed inventory/payment/order actions with compensation
+
+- **XA Mode**:
+  - Starts MySQL container via Testcontainers
+  - Wraps the datasource with `DataSourceProxyXA`
+  - Creates an XA benchmark account table with initial test data
+  - Executes `--branches N` XA-backed account transfer branches per global transaction
 
 ### SAGA Workloads
 
@@ -707,7 +763,7 @@ Logs are written to `seata-benchmark.log` in the current directory.
 ## Roadmap
 
 ### Current Version (v1.0)
-- AT, TCC, SAGA, and SAGA_ANNOTATION mode support
+- AT, TCC, SAGA, XA, and SAGA_ANNOTATION mode support
 - Empty and real transaction modes
 - YAML configuration file support
 - Fault injection (rollback percentage)
@@ -719,7 +775,6 @@ Logs are written to `seata-benchmark.log` in the current directory.
 
 **v1.1 - Enhancement:**
 - P99.9 percentile
-- XA mode support
 
 **v2.0 - Advanced Features:**
 - Real-time TUI (Terminal User Interface)
