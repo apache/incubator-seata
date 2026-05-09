@@ -144,9 +144,8 @@ public class BenchmarkRunner {
                 System.out.println("Creating SAGA_ANNOTATION mode executor" + sagaAnnotationMode + "\n");
                 return new SagaAnnotationModeExecutor(config);
             default:
-                throw new IllegalArgumentException(
-                        "Unsupported mode: " + branchType
-                                + ". Only AT, TCC, SAGA, XA, and SAGA_ANNOTATION are supported.");
+                throw new IllegalArgumentException("Unsupported mode: " + branchType
+                        + ". Only AT, TCC, SAGA, XA, and SAGA_ANNOTATION are supported.");
         }
     }
 }

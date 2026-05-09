@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
+import java.security.SecureRandom;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * XA mode transaction executor supporting both empty and real transaction modes.
@@ -46,6 +46,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class XAModeExecutor extends AbstractTransactionExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XAModeExecutor.class);
+    private static final ThreadLocal<SecureRandom> SECURE_RANDOM = ThreadLocal.withInitial(SecureRandom::new);
 
     private MySQLContainer<?> mysqlContainer;
     private HikariDataSource rawDataSource;
@@ -139,7 +140,8 @@ public class XAModeExecutor extends AbstractTransactionExecutor {
                     + ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
             stmt.execute("TRUNCATE TABLE xa_accounts");
-            try (PreparedStatement pstmt = conn.prepareStatement("INSERT INTO xa_accounts (id, balance) VALUES (?, ?)")) {
+            try (PreparedStatement pstmt =
+                    conn.prepareStatement("INSERT INTO xa_accounts (id, balance) VALUES (?, ?)")) {
                 for (int i = 1; i <= BenchmarkConstants.ACCOUNT_COUNT; i++) {
                     pstmt.setLong(1, i);
                     pstmt.setInt(2, BenchmarkConstants.INITIAL_BALANCE);
@@ -188,9 +190,10 @@ public class XAModeExecutor extends AbstractTransactionExecutor {
         try (Connection conn = dataSourceProxyXA.getConnection()) {
             conn.setAutoCommit(false);
 
-            long fromAccount = ThreadLocalRandom.current().nextInt(BenchmarkConstants.ACCOUNT_COUNT) + 1L;
+            SecureRandom secureRandom = SECURE_RANDOM.get();
+            long fromAccount = secureRandom.nextInt(BenchmarkConstants.ACCOUNT_COUNT) + 1L;
             long toAccount = (fromAccount % BenchmarkConstants.ACCOUNT_COUNT) + 1L;
-            int amount = ThreadLocalRandom.current().nextInt(BenchmarkConstants.MAX_TRANSFER_AMOUNT)
+            int amount = secureRandom.nextInt(BenchmarkConstants.MAX_TRANSFER_AMOUNT)
                     + BenchmarkConstants.MIN_TRANSFER_AMOUNT;
 
             try (PreparedStatement pstmt =
