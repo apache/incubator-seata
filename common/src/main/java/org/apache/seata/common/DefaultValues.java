@@ -347,10 +347,15 @@ public interface DefaultValues {
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     /**
+     * The default global JSON serializer.
+     */
+    String BUSINESS_ACTION_CONTEXT_JSON_PARSER = "jackson";
+
+    /**
      * The constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER.
      */
-    // default tcc business action context json parser
-    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "jackson";
+    @Deprecated
+    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = BUSINESS_ACTION_CONTEXT_JSON_PARSER;
 
     /**
      * The constant DEFAULT_SERVER_ENABLE_CHECK_AUTH.

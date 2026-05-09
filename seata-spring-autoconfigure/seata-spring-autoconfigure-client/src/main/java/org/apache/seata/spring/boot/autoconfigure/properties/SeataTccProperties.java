@@ -24,12 +24,24 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TCC_PR
 @Component
 @ConfigurationProperties(prefix = TCC_PREFIX)
 public class SeataTccProperties {
+    /**
+     * @deprecated Use {@code seata.json.serializer-type} / {@code json.serializerType} instead.
+     */
+    @Deprecated
     private String contextJsonParserType;
 
+    /**
+     * @deprecated Use {@code seata.json.serializer-type} / {@code json.serializerType} instead.
+     */
+    @Deprecated
     public String getContextJsonParserType() {
         return contextJsonParserType;
     }
 
+    /**
+     * @deprecated Use {@code seata.json.serializer-type} / {@code json.serializerType} instead.
+     */
+    @Deprecated
     public void setContextJsonParserType(String contextJsonParserType) {
         this.contextJsonParserType = contextJsonParserType;
     }
