@@ -28,11 +28,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class ContextCoreTest {
 
-    private final String FIRST_KEY = "first_key";
-    private final String FIRST_VALUE = "first_value";
-    private final String SECOND_KEY = "second_key";
-    private final String SECOND_VALUE = "second_value";
-    private final String NOT_EXIST_KEY = "not_exist_key";
+    private static final String FIRST_KEY = "first_key";
+    private static final String FIRST_VALUE = "first_value";
+    private static final String SECOND_KEY = "second_key";
+    private static final String SECOND_VALUE = "second_value";
+    private static final String NOT_EXIST_KEY = "not_exist_key";
 
     /**
      * Test put.

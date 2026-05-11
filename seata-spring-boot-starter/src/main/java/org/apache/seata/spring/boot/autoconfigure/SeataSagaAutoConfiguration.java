@@ -16,6 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.config.DbStateMachineConfig;
@@ -33,7 +34,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 
 import javax.sql.DataSource;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -118,20 +118,13 @@ public class SeataSagaAutoConfiguration {
                 SagaAsyncThreadPoolProperties properties,
                 @Qualifier(SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME)
                         RejectedExecutionHandler rejectedExecutionHandler) {
-            ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
-            threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
-            threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
-            threadFactory.setCorePoolSize(properties.getCorePoolSize());
-            threadFactory.setMaxPoolSize(properties.getMaxPoolSize());
-            threadFactory.setKeepAliveSeconds(properties.getKeepAliveTime());
-
-            return new ThreadPoolExecutor(
+            return ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    "sagaAsyncExecute",
                     properties.getCorePoolSize(),
                     properties.getMaxPoolSize(),
                     properties.getKeepAliveTime(),
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(),
-                    threadFactory,
                     rejectedExecutionHandler);
         }
     }

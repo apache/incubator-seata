@@ -57,7 +57,7 @@ public class GrpcTest {
 
     private final ServerInterceptor mockServerInterceptor =
             mock(ServerInterceptor.class, delegatesTo(new ServerTransactionInterceptor()));
-    private final String XID = "192.168.0.1:8091:10086";
+    private static final String XID = "192.168.0.1:8091:10086";
 
     @Test
     public void clientHeaderDeliveredToServer() throws Exception {

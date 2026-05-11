@@ -19,7 +19,7 @@ package org.apache.seata.mockserver;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -81,13 +81,13 @@ public class MockServer {
                     System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
                     System.clearProperty("server.port");
                     inited = true;
-                    workingThreads = new ThreadPoolExecutor(
+                    workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            "ServerHandlerThread",
                             50,
                             50,
                             500,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
-                            new NamedThreadFactory("ServerHandlerThread", 500),
                             new ThreadPoolExecutor.CallerRunsPolicy());
                     NettyServerConfig config = new NettyServerConfig();
                     config.setServerListenPort(port);

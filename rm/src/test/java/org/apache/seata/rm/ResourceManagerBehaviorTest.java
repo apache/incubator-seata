@@ -46,7 +46,7 @@ import static org.mockito.ArgumentMatchers.any;
 /**
  * Unit tests for AbstractResourceManager
  */
-public class AbstractResourceManagerTest {
+public class ResourceManagerBehaviorTest {
     // Create anonymous implementation classes for testing
     private final AbstractResourceManager rm = new AbstractResourceManager() {
         @Override

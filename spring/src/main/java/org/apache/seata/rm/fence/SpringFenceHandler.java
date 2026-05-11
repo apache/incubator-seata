@@ -21,7 +21,7 @@ import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.common.executor.Callback;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.FenceHandler;
 import org.apache.seata.integration.tx.api.fence.constant.CommonFenceConstant;
@@ -52,7 +52,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -414,13 +413,14 @@ public class SpringFenceHandler implements FenceHandler {
     }
 
     private static void initLogCleanExecutor() {
-        logCleanExecutor = new ThreadPoolExecutor(
+        logCleanExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "fenceLogCleanThread",
                 MAX_THREAD_CLEAN,
                 MAX_THREAD_CLEAN,
                 Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("fenceLogCleanThread", MAX_THREAD_CLEAN, true));
+                true);
         fenceLogCleanRunnable = new FenceLogCleanRunnable();
         logCleanExecutor.submit(fenceLogCleanRunnable);
     }

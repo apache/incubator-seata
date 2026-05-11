@@ -48,7 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractRMHandlerTest {
+class RMHandlerBehaviorTest {
 
     @Mock
     private ResourceManager resourceManager;

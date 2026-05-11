@@ -56,7 +56,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class AbstractNettyRemotingTest {
+class NettyRemotingBehaviorTest {
 
     private TestNettyRemoting nettyRemoting;
     private ThreadPoolExecutor messageExecutor;

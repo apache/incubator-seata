@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  *
  * This is the most production-like test scenario.
  */
-public class ServerV2ToClientV2Test extends MultiVersionCompatibilityTest {
+public class ServerV2ToClientV2Test extends AbstractMultiVersionCompatibilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerV2ToClientV2Test.class);
 

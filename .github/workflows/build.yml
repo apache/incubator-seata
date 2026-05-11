@@ -39,6 +39,7 @@ jobs:
         image: nacos/nacos-server:v2.4.2
         ports:
           - 8848:8848
+          - 9848:9848
         env:
           MODE: standalone
           SPRING_SECURITY_ENABLED: false
@@ -80,6 +81,7 @@ jobs:
            ${{ runner.os }}-maven-
       # step 6.1：Support GitHub Actions, local shell
       - name: Checkstyle
+        if: matrix.java == '25'
         run: |
           GITHUB_BASE_REF=${GITHUB_BASE_REF:-2.x}
           echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"

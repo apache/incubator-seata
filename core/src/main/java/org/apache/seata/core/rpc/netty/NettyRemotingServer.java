@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
@@ -47,13 +47,13 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
 
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
-    private final ThreadPoolExecutor branchResultMessageExecutor = new ThreadPoolExecutor(
+    private final ThreadPoolExecutor branchResultMessageExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+            "BranchResultHandlerThread",
             NettyServerConfig.getMinBranchResultPoolSize(),
             NettyServerConfig.getMaxBranchResultPoolSize(),
             NettyServerConfig.getKeepAliveTime(),
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-            new NamedThreadFactory("BranchResultHandlerThread", NettyServerConfig.getMaxBranchResultPoolSize()),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
     @Override
