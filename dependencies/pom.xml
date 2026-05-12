@@ -117,7 +117,7 @@
         <kingbase.version>9.0.0</kingbase.version>
         <oscar.version>4.1.152</oscar.version>
         <!-- db connection pool -->
-        <druid.version>1.2.25</druid.version>
+        <druid.version>1.2.28</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <caffeine.version>2.9.3</caffeine.version>
