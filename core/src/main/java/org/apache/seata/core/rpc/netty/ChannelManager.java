@@ -372,7 +372,7 @@ public class ChannelManager {
     /**
      * Gets channel with transaction context for server-side load balancing.
      *
-     * <p>Only AT and TCC branch types support server-side load balancing.
+     * Only AT and TCC branch types support server-side load balancing.
      * XA is excluded because its second-phase operations are bound to the local database connection
      * of the original RM. SAGA is excluded because its state machine execution context is held
      * in memory with no distributed lock protection. For XA/SAGA and unconfigured AT/TCC,
