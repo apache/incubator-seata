@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.RmTransactionException;
@@ -93,7 +92,10 @@ public class DataSourceManager extends AbstractResourceManager {
 
     @Override
     public void unregisterResource(Resource resource) {
-        throw new NotSupportYetException("unregister a resource");
+        DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
+        dataSourceCache.remove(dataSourceProxy.getResourceId());
+        RmNettyRemotingClient.getInstance()
+                .unregisterResource(dataSourceProxy.getResourceGroupId(), dataSourceProxy.getResourceId());
     }
 
     /**

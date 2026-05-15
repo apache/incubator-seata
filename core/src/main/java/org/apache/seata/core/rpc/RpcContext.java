@@ -291,6 +291,20 @@ public class RpcContext {
     }
 
     /**
+     * Remove resource.
+     *
+     * @param resourceId the resource id
+     */
+    public void removeResource(String resourceId) {
+        if (resourceSets != null) {
+            resourceSets.remove(resourceId);
+        }
+        if (clientRMHolderMap != null) {
+            clientRMHolderMap.remove(resourceId);
+        }
+    }
+
+    /**
      * Add resource.
      *
      * @param resource the resource

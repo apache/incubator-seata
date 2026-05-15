@@ -32,10 +32,14 @@ public class BenchmarkMetrics {
     private final AtomicLong totalCount = new AtomicLong(0);
     private final AtomicLong successCount = new AtomicLong(0);
     private final AtomicLong failedCount = new AtomicLong(0);
+    private final AtomicLong committedCount = new AtomicLong(0);
+    private final AtomicLong compensatedCount = new AtomicLong(0);
+    private final AtomicLong compensationFailedCount = new AtomicLong(0);
+    private final AtomicLong unknownCount = new AtomicLong(0);
     private final List<Long> latencies =
             Collections.synchronizedList(new ArrayList<>(BenchmarkConstants.MAX_LATENCY_SAMPLES));
     private final AtomicLong totalSamples = new AtomicLong(0);
-    private final long startTime = System.currentTimeMillis();
+    private volatile long startTime = System.currentTimeMillis();
 
     private volatile long lastCountSnapshot = 0;
     private volatile long lastSnapshotTime = System.currentTimeMillis();
@@ -52,6 +56,29 @@ public class BenchmarkMetrics {
     public void recordFailure(long latencyMs) {
         totalCount.incrementAndGet();
         failedCount.incrementAndGet();
+        addLatencySample(latencyMs);
+    }
+
+    public void recordTransaction(String status, long latencyMs) {
+        totalCount.incrementAndGet();
+
+        if (BenchmarkConstants.STATUS_COMMITTED.equals(status)) {
+            successCount.incrementAndGet();
+            committedCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_COMPENSATED.equals(status)) {
+            compensatedCount.incrementAndGet();
+            successCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_COMPENSATION_FAILED.equals(status)) {
+            compensationFailedCount.incrementAndGet();
+            failedCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_FAILED.equals(status)
+                || BenchmarkConstants.STATUS_ROLLBACKED.equals(status)) {
+            failedCount.incrementAndGet();
+        } else {
+            unknownCount.incrementAndGet();
+            failedCount.incrementAndGet();
+        }
+
         addLatencySample(latencyMs);
     }
 
@@ -80,12 +107,56 @@ public class BenchmarkMetrics {
         return failedCount.get();
     }
 
+    public long getCommittedCount() {
+        return committedCount.get();
+    }
+
+    public long getCompensatedCount() {
+        return compensatedCount.get();
+    }
+
+    public long getExecutionFailedCount() {
+        return failedCount.get() - compensationFailedCount.get() - unknownCount.get();
+    }
+
+    public long getCompensationFailedCount() {
+        return compensationFailedCount.get();
+    }
+
+    public long getUnknownCount() {
+        return unknownCount.get();
+    }
+
     public double getSuccessRate() {
         long total = totalCount.get();
         if (total == 0) {
             return 0.0;
         }
         return (double) successCount.get() / total * 100;
+    }
+
+    public double getCommittedRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) committedCount.get() / total * 100;
+    }
+
+    public double getCompensatedRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) compensatedCount.get() / total * 100;
+    }
+
+    public double getEndStateSuccessRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) (committedCount.get() + compensatedCount.get()) / total * 100;
     }
 
     public double getAverageTps() {
@@ -149,12 +220,20 @@ public class BenchmarkMetrics {
     }
 
     public void reset() {
+        startTime = System.currentTimeMillis();
         totalCount.set(0);
         successCount.set(0);
         failedCount.set(0);
+        committedCount.set(0);
+        compensatedCount.set(0);
+        compensationFailedCount.set(0);
+        unknownCount.set(0);
+        totalSamples.set(0);
         latencies.clear();
         lastCountSnapshot = 0;
         lastSnapshotTime = System.currentTimeMillis();
+        cachedStats = null;
+        lastStatsUpdateTime = 0;
     }
 
     public static class LatencyStats {

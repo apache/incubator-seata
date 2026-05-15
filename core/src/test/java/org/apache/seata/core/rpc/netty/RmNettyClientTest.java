@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
@@ -360,6 +361,126 @@ class RmNettyClientTest {
 
         Object function = method.invoke(client);
         assertNotNull(function);
+    }
+
+    @Test
+    public void unregisterResourceWithBlankParamsTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        setChannelManager(client, channelManager);
+
+        client.setTransactionServiceGroup(null);
+        client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
+        verify(channelManager, never()).getChannels();
+
+        client.setTransactionServiceGroup("test_group");
+        client.unregisterResource("group1", "");
+        verify(channelManager, never()).getChannels();
+
+        client.unregisterResource("group1", null);
+        verify(channelManager, never()).getChannels();
+    }
+
+    @Test
+    public void unregisterResourceWithActiveChannelTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ChannelFuture channelFuture = mock(ChannelFuture.class);
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(true);
+        when(channel.writeAndFlush(any())).thenReturn(channelFuture);
+
+        String serverAddress = "127.0.0.1:8091";
+        ConcurrentHashMap<String, Channel> channels = new ConcurrentHashMap<>();
+        channels.put(serverAddress, channel);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(channels);
+        setChannelManager(client, channelManager);
+
+        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.6.0");
+
+        client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
+
+        verify(channel).writeAndFlush(any());
+    }
+
+    @Test
+    public void unregisterResourceSkipsOldServerVersionTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+
+        String serverAddress = "127.0.0.1:8091";
+        ConcurrentHashMap<String, Channel> channels = new ConcurrentHashMap<>();
+        channels.put(serverAddress, channel);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(channels);
+        setChannelManager(client, channelManager);
+
+        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.5.0");
+
+        client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
+
+        verify(channel, never()).writeAndFlush(any());
+    }
+
+    @Test
+    public void unregisterResourceSkipsInactiveChannelTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(false);
+
+        String serverAddress = "127.0.0.1:8091";
+        ConcurrentHashMap<String, Channel> channels = new ConcurrentHashMap<>();
+        channels.put(serverAddress, channel);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(channels);
+        setChannelManager(client, channelManager);
+
+        client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
+
+        verify(channel, never()).writeAndFlush(any());
+    }
+
+    @Test
+    public void unregisterResourceHandlesChannelNotWritableTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(false);
+
+        String serverAddress = "127.0.0.1:8091";
+        ConcurrentHashMap<String, Channel> channels = new ConcurrentHashMap<>();
+        channels.put(serverAddress, channel);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(channels);
+        setChannelManager(client, channelManager);
+
+        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.6.0");
+
+        client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
+
+        verify(channelManager).releaseChannel(eq(channel), eq(serverAddress));
+    }
+
+    @Test
+    public void unregisterResourceHandlesNullChannelsTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(null);
+        setChannelManager(client, channelManager);
+
+        Assertions.assertDoesNotThrow(() -> client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test"));
     }
 
     private void setChannelManager(RmNettyRemotingClient client, NettyClientChannelManager channelManager)

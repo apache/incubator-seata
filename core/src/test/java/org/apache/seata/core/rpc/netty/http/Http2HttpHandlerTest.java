@@ -157,9 +157,15 @@ class Http2HttpHandlerTest {
         Http2StreamFrame frame1 = null, frame2 = null;
         long deadline = System.currentTimeMillis() + 5000;
         while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-            if (frame1 == null) frame1 = channel.readOutbound();
-            if (frame2 == null) frame2 = channel.readOutbound();
-            if (frame1 == null || frame2 == null) Thread.sleep(500);
+            if (frame1 == null) {
+                frame1 = channel.readOutbound();
+            }
+            if (frame2 == null) {
+                frame2 = channel.readOutbound();
+            }
+            if (frame1 == null || frame2 == null) {
+                Thread.sleep(500);
+            }
         }
         assertNotNull(frame1);
         assertNotNull(frame2);
@@ -304,9 +310,15 @@ class Http2HttpHandlerTest {
         Http2StreamFrame frame1 = null, frame2 = null;
         long deadline = System.currentTimeMillis() + 5000;
         while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-            if (frame1 == null) frame1 = channel.readOutbound();
-            if (frame2 == null) frame2 = channel.readOutbound();
-            if (frame1 == null || frame2 == null) Thread.sleep(500);
+            if (frame1 == null) {
+                frame1 = channel.readOutbound();
+            }
+            if (frame2 == null) {
+                frame2 = channel.readOutbound();
+            }
+            if (frame1 == null || frame2 == null) {
+                Thread.sleep(500);
+            }
         }
         assertNotNull(frame1);
         assertNotNull(frame2);
@@ -332,9 +344,15 @@ class Http2HttpHandlerTest {
             Http2StreamFrame frame1 = null, frame2 = null;
             long deadline = System.currentTimeMillis() + 5000;
             while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-                if (frame1 == null) frame1 = channel.readOutbound();
-                if (frame2 == null) frame2 = channel.readOutbound();
-                if (frame1 == null || frame2 == null) Thread.sleep(500);
+                if (frame1 == null) {
+                    frame1 = channel.readOutbound();
+                }
+                if (frame2 == null) {
+                    frame2 = channel.readOutbound();
+                }
+                if (frame1 == null || frame2 == null) {
+                    Thread.sleep(500);
+                }
             }
             assertNotNull(frame1);
         }

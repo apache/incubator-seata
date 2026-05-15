@@ -24,7 +24,7 @@ public class TransactionExceptionCodeTest {
     private static final int BEGIN_CODE = 1;
     private static final int NONE = 99;
     private static final int MIN_CODE = 0;
-    private static final int Max_CODE = 18;
+    private static final int MAX_CODE = 18;
 
     @Test
     public void testGetCode() {
@@ -54,7 +54,7 @@ public class TransactionExceptionCodeTest {
         TransactionExceptionCode transactionExceptionCodeOne = TransactionExceptionCode.get(MIN_CODE);
         Assertions.assertEquals(transactionExceptionCodeOne, TransactionExceptionCode.Unknown);
 
-        TransactionExceptionCode transactionExceptionCodeTwo = TransactionExceptionCode.get(Max_CODE);
+        TransactionExceptionCode transactionExceptionCodeTwo = TransactionExceptionCode.get(MAX_CODE);
         Assertions.assertEquals(transactionExceptionCodeTwo, TransactionExceptionCode.FailedStore);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> TransactionExceptionCode.get(NONE));

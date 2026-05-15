@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -34,10 +35,24 @@ public class PaymentSagaService {
 
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
+    private final boolean failInjectionEnabled;
+    private final ThreadLocal<Random> failureRandom;
+    private final boolean timeoutInjectionEnabled;
+    private final int timeoutMs;
 
-    public PaymentSagaService(int rollbackPercentage, int simulatedDelayMs) {
+    public PaymentSagaService(
+            int rollbackPercentage,
+            int simulatedDelayMs,
+            boolean failInjectionEnabled,
+            ThreadLocal<Random> failureRandom,
+            boolean timeoutInjectionEnabled,
+            int timeoutMs) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
+        this.failInjectionEnabled = failInjectionEnabled;
+        this.failureRandom = failureRandom;
+        this.timeoutInjectionEnabled = timeoutInjectionEnabled;
+        this.timeoutMs = timeoutMs;
     }
 
     /**
@@ -57,7 +72,11 @@ public class PaymentSagaService {
         // Simulate processing time
         simulateDelay();
 
-        // Simulate random failure based on rollback percentage
+        if (timeoutInjectionEnabled) {
+            simulateTimeout("payment debit");
+        }
+
+        // Simulate failure injection on the selected step.
         if (shouldFail()) {
             LOGGER.debug("Payment debit failed (simulated): accountId={}", accountId);
             throw new RuntimeException("Simulated payment debit failure");
@@ -96,6 +115,12 @@ public class PaymentSagaService {
         return result;
     }
 
+    public void destroy() {
+        if (failureRandom != null) {
+            failureRandom.remove();
+        }
+    }
+
     private void simulateDelay() {
         if (simulatedDelayMs > 0) {
             try {
@@ -107,6 +132,23 @@ public class PaymentSagaService {
     }
 
     private boolean shouldFail() {
-        return ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        if (!failInjectionEnabled) {
+            return false;
+        }
+        return nextFailurePercent() < rollbackPercentage;
+    }
+
+    private void simulateTimeout(String operation) {
+        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
+        try {
+            Thread.sleep(timeoutMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        throw new RuntimeException("Simulated " + operation + " timeout");
+    }
+
+    private int nextFailurePercent() {
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }

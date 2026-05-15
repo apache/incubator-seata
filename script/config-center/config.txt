@@ -18,6 +18,7 @@
 #For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
 transport.protocol=seata
+transport.threadpool=auto
 transport.heartbeat=true
 transport.enableTmClientBatchSendRequest=false
 transport.enableRmClientBatchSendRequest=true
@@ -98,7 +99,7 @@ client.undo.compress.threshold=64k
 #For TCC transaction mode
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
-# You can choose from the following options: fastjson, jackson, gson
+# You can choose from the following options: fastjson, fastjson2, jackson, jackson3, gson
 tcc.contextJsonParserType=fastjson
 
 #Log rule configuration, for client and server
