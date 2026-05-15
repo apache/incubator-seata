@@ -22,15 +22,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,43 +34,85 @@ import static org.mockito.Mockito.when;
 public class ServerLoadBalanceBehaviorTest {
 
     @Test
-    public void testConsistentHashFallbackKeyShouldBeOrderStable() {
+    public void testRandomLoadBalanceShouldReturnValidCandidate() {
         RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
         RpcContext c2 = buildRpcContext("app:10.10.10.2:8091", "10.10.10.2", 8091);
-        List<RpcContext> firstOrder = Arrays.asList(c1, c2);
-        List<RpcContext> secondOrder = Arrays.asList(c2, c1);
+        List<RpcContext> candidates = Arrays.asList(c1, c2);
 
-        ServerConsistentHashLoadBalance lb1 = new ServerConsistentHashLoadBalance();
-        ServerConsistentHashLoadBalance lb2 = new ServerConsistentHashLoadBalance();
-
-        RpcContext result1 = lb1.select(firstOrder, null);
-        RpcContext result2 = lb2.select(secondOrder, null);
-
-        Assertions.assertEquals(result1.getClientId(), result2.getClientId());
+        ServerRandomLoadBalance lb = new ServerRandomLoadBalance();
+        for (int i = 0; i < 100; i++) {
+            RpcContext selected = lb.select(candidates);
+            Assertions.assertNotNull(selected);
+            Assertions.assertTrue(candidates.contains(selected));
+        }
     }
 
     @Test
-    public void testConsistentHashShouldBeThreadSafeForConcurrentSelect() throws ExecutionException, InterruptedException {
+    public void testRoundRobinLoadBalanceShouldDistributeEvenly() {
         RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
         RpcContext c2 = buildRpcContext("app:10.10.10.2:8091", "10.10.10.2", 8091);
-        List<RpcContext> candidates = Collections.unmodifiableList(Arrays.asList(c1, c2));
+        List<RpcContext> candidates = Arrays.asList(c1, c2);
 
-        ServerConsistentHashLoadBalance loadBalance = new ServerConsistentHashLoadBalance();
-        ExecutorService executor = Executors.newFixedThreadPool(8);
-        try {
-            List<CompletableFuture<String>> futures = new ArrayList<>(32);
-            for (int i = 0; i < 32; i++) {
-                futures.add(CompletableFuture.supplyAsync(
-                        () -> loadBalance.select(candidates, "xid-test-1").getClientId(), executor));
+        ServerRoundRobinLoadBalance lb = new ServerRoundRobinLoadBalance();
+        int c1Count = 0;
+        int c2Count = 0;
+        for (int i = 0; i < 100; i++) {
+            RpcContext selected = lb.select(candidates);
+            if (selected == c1) {
+                c1Count++;
+            } else {
+                c2Count++;
             }
-            String expected = futures.get(0).get();
-            for (CompletableFuture<String> future : futures) {
-                Assertions.assertEquals(expected, future.get());
-            }
-        } finally {
-            executor.shutdownNow();
-            executor.awaitTermination(1, TimeUnit.SECONDS);
         }
+        // RoundRobin should distribute evenly
+        Assertions.assertEquals(50, c1Count);
+        Assertions.assertEquals(50, c2Count);
+    }
+
+    @Test
+    public void testLeastActiveLoadBalanceShouldSelectLeastActive() {
+        RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
+        RpcContext c2 = buildRpcContext("app:10.10.10.2:8091", "10.10.10.2", 8091);
+        // c1 has lower active count
+        c1.incrementActiveCount();
+        c2.incrementActiveCount();
+        c2.incrementActiveCount();
+        c2.incrementActiveCount();
+
+        List<RpcContext> candidates = Arrays.asList(c1, c2);
+        ServerLeastActiveLoadBalance lb = new ServerLeastActiveLoadBalance();
+        RpcContext selected = lb.select(candidates);
+        Assertions.assertEquals(c1, selected);
+    }
+
+    @Test
+    public void testLeastActiveLoadBalanceWithSameActiveShouldRandomSelect() {
+        RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
+        RpcContext c2 = buildRpcContext("app:10.10.10.2:8091", "10.10.10.2", 8091);
+        List<RpcContext> candidates = Arrays.asList(c1, c2);
+
+        ServerLeastActiveLoadBalance lb = new ServerLeastActiveLoadBalance();
+        // Both have same active count (0), should randomly select
+        for (int i = 0; i < 100; i++) {
+            RpcContext selected = lb.select(candidates);
+            Assertions.assertNotNull(selected);
+            Assertions.assertTrue(candidates.contains(selected));
+        }
+    }
+
+    @Test
+    public void testSingleCandidateShouldReturnItDirectly() {
+        RpcContext c1 = buildRpcContext("app:10.10.10.1:8091", "10.10.10.1", 8091);
+        List<RpcContext> candidates = Arrays.asList(c1);
+
+        ServerRandomLoadBalance randomLb = new ServerRandomLoadBalance();
+        Assertions.assertEquals(c1, randomLb.select(candidates));
+
+        ServerRoundRobinLoadBalance roundRobinLb = new ServerRoundRobinLoadBalance();
+        Assertions.assertEquals(c1, roundRobinLb.select(candidates));
+
+        ServerLeastActiveLoadBalance leastActiveLb = new ServerLeastActiveLoadBalance();
+        Assertions.assertEquals(c1, leastActiveLb.select(candidates));
     }
 
     private RpcContext buildRpcContext(String clientId, String ip, int port) {

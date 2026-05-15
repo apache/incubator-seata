@@ -29,8 +29,7 @@ public interface ServerLoadBalance {
      * Select one candidate.
      *
      * @param candidates candidate rpc contexts
-     * @param xid        global transaction xid, may be null
      * @return selected context
      */
-    RpcContext select(List<RpcContext> candidates, String xid);
+    RpcContext select(List<RpcContext> candidates);
 }

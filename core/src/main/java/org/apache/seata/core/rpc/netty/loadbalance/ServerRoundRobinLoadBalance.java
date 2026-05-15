@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Round robin load balance for server side.
+ * Round-robin load balance for server side.
  */
 @LoadLevel(name = "RoundRobinLoadBalance")
 public class ServerRoundRobinLoadBalance implements ServerLoadBalance {
@@ -31,7 +31,7 @@ public class ServerRoundRobinLoadBalance implements ServerLoadBalance {
     private final AtomicInteger sequence = new AtomicInteger();
 
     @Override
-    public RpcContext select(List<RpcContext> candidates, String xid) {
+    public RpcContext select(List<RpcContext> candidates) {
         return candidates.get(getPositiveSequence() % candidates.size());
     }
 

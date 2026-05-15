@@ -23,86 +23,68 @@ import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * Server side load balance factory.
+ * Only AT and TCC branch types support server-side load balancing.
+ * XA and SAGA are explicitly excluded because:
+ *  XA: second-phase operations are bound to the local database connection of the original RM
+ *  SAGA: state machine execution context is held in memory with no distributed lock protection
  */
 public final class ServerLoadBalanceFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLoadBalanceFactory.class);
 
     public static final String SERVER_LB_PREFIX = "server.loadBalance.";
-    public static final String SERVER_LB_ENABLED = SERVER_LB_PREFIX + "%s.enabled";
-    public static final String SERVER_LB_TYPE = SERVER_LB_PREFIX + "%s.type";
-    public static final String DEFAULT_SERVER_AT_LB_TYPE = "RoundRobinLoadBalance";
-    public static final String XID_SERVER_LB_TYPE = "XID";
-    private static final AtomicBoolean AT_DEFAULT_ENABLE_LOGGED = new AtomicBoolean(false);
-    private static final AtomicBoolean AT_DEFAULT_TYPE_LOGGED = new AtomicBoolean(false);
+
+    /**
+     * Configuration key for AT mode load balance type.
+     */
+    public static final String SERVER_LB_AT_TYPE = SERVER_LB_PREFIX + "at.type";
+
+    /**
+     * Configuration key for TCC mode load balance type.
+     */
+    public static final String SERVER_LB_TCC_TYPE = SERVER_LB_PREFIX + "tcc.type";
 
     private ServerLoadBalanceFactory() {}
 
     /**
-     * Whether load balance is enabled for given branch type.
+     * Get load balance strategy for the given branch type.
      *
-     * <p>Only AT/TCC are supported currently.</p>
-     */
-    public static boolean isEnabled(BranchType branchType) {
-        if (branchType == BranchType.AT) {
-            if (ConfigurationFactory.getInstance().getConfig(buildEnabledKey(branchType)) == null
-                    && AT_DEFAULT_ENABLE_LOGGED.compareAndSet(false, true)) {
-                LOGGER.info(
-                        "Use default server AT load balance switch as enabled, set {} explicitly to avoid implicit behavior",
-                        buildEnabledKey(branchType));
-            }
-            return ConfigurationFactory.getInstance().getBoolean(buildEnabledKey(branchType), true);
-        }
-        if (branchType == BranchType.TCC) {
-            return ConfigurationFactory.getInstance().getBoolean(buildEnabledKey(branchType), false);
-        }
-        return false;
-    }
-
-    /**
-     * Get load balance strategy for branch type.
+     * Only AT and TCC are supported. For XA/SAGA and other types, returns null
+     * to indicate that the original channel selection logic should be used.
+     *
+     * If the type configuration is not set or is blank, returns null to indicate
+     * that the original channel selection logic should be used.
+     *
+     * @param branchType the branch type
+     * @return the load balance instance, or null if load balancing is not configured/applicable
      */
     public static ServerLoadBalance getInstance(BranchType branchType) {
-        if (!isEnabled(branchType)) {
+        if (branchType != BranchType.AT && branchType != BranchType.TCC) {
             return null;
         }
-        String configType = ConfigurationFactory.getInstance().getConfig(buildTypeKey(branchType));
-        String type = configType;
-        if (branchType == BranchType.AT && StringUtils.isBlank(type)) {
-            if (AT_DEFAULT_TYPE_LOGGED.compareAndSet(false, true)) {
-                LOGGER.info(
-                        "Use default server AT load balance type [{}], set {} explicitly for server side",
-                        DEFAULT_SERVER_AT_LB_TYPE,
-                        buildTypeKey(branchType));
-            }
-            type = DEFAULT_SERVER_AT_LB_TYPE;
-        }
-        if (StringUtils.equalsIgnoreCase(type, XID_SERVER_LB_TYPE)) {
-            if (branchType == BranchType.AT) {
-                LOGGER.warn(
-                        "Server side XID load balance is removed for AT branch type, fallback to [{}]",
-                        DEFAULT_SERVER_AT_LB_TYPE);
-                type = DEFAULT_SERVER_AT_LB_TYPE;
-            } else {
-                LOGGER.warn("Server side XID load balance is removed for {} branch type", branchType);
-                return null;
-            }
-        }
-        if (branchType == BranchType.TCC && StringUtils.isBlank(type)) {
-            return null;
-        }
-        return EnhancedServiceLoader.load(ServerLoadBalance.class, type);
-    }
 
-    private static String buildEnabledKey(BranchType branchType) {
-        return String.format(SERVER_LB_ENABLED, branchType.name().toLowerCase());
+        String typeKey = buildTypeKey(branchType);
+        String type = ConfigurationFactory.getInstance().getConfig(typeKey);
+
+        if (StringUtils.isBlank(type)) {
+            return null;
+        }
+
+        try {
+            return EnhancedServiceLoader.load(ServerLoadBalance.class, type);
+        } catch (Exception e) {
+            LOGGER.error(
+                    "Failed to load server load balance [{}] for branch type [{}], fallback to original logic",
+                    type,
+                    branchType,
+                    e);
+            return null;
+        }
     }
 
     private static String buildTypeKey(BranchType branchType) {
-        return String.format(SERVER_LB_TYPE, branchType.name().toLowerCase());
+        return SERVER_LB_PREFIX + branchType.name().toLowerCase() + ".type";
     }
 }

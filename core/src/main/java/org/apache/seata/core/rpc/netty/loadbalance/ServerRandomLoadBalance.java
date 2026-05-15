@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ServerRandomLoadBalance implements ServerLoadBalance {
 
     @Override
-    public RpcContext select(List<RpcContext> candidates, String xid) {
+    public RpcContext select(List<RpcContext> candidates) {
         return candidates.get(ThreadLocalRandom.current().nextInt(candidates.size()));
     }
 }

@@ -29,7 +29,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ServerLeastActiveLoadBalance implements ServerLoadBalance {
 
     @Override
-    public RpcContext select(List<RpcContext> candidates, String xid) {
+    public RpcContext select(List<RpcContext> candidates) {
         long leastActive = -1;
         int leastCount = 0;
         int[] leastIndexes = new int[candidates.size()];

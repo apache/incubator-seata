@@ -323,14 +323,29 @@ public class ChannelManager {
     }
 
     /**
-     * Gets channel with transaction context.
+     * Gets channel with transaction context for server-side load balancing.
+     *
+     * <p>Only AT and TCC branch types support server-side load balancing.
+     * XA is excluded because its second-phase operations are bound to the local database connection
+     * of the original RM. SAGA is excluded because its state machine execution context is held
+     * in memory with no distributed lock protection. For XA/SAGA and unconfigured AT/TCC,
+     * the original priority-based channel selection logic is used.
+     *
+     * @param resourceId Resource ID
+     * @param clientId   Client ID - ApplicationId:IP:Port
+     * @param tryOtherApp try other app
+     * @param xid        global transaction xid, used for load balancing affinity
+     * @param branchType branch type, determines whether and which LB algorithm to use
+     * @return Corresponding channel, NULL if not found.
      */
     public static Channel getChannel(
             String resourceId, String clientId, boolean tryOtherApp, String xid, BranchType branchType) {
+        // XA and SAGA do not support server-side load balancing, use original priority-based logic
         if (branchType != BranchType.AT && branchType != BranchType.TCC) {
             return getChannelByPriority(resourceId, clientId, tryOtherApp);
         }
 
+        // If no load balance algorithm is configured for this branch type, use original logic
         ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(branchType);
         if (loadBalance == null) {
             return getChannelByPriority(resourceId, clientId, tryOtherApp);
@@ -366,7 +381,7 @@ public class ChannelManager {
         if (candidates.size() == 1) {
             return candidates.get(0).getChannel();
         }
-        RpcContext selected = loadBalance.select(candidates, xid);
+        RpcContext selected = loadBalance.select(candidates);
         return selected == null ? null : selected.getChannel();
     }
 
@@ -612,7 +627,10 @@ public class ChannelManager {
     /**
      * get rm channels by branch type.
      *
-     * @param branchType branch type
+     * Only AT and TCC branch types support server-side load balancing.
+     * For other branch types or when no LB algorithm is configured, the original logic is used.
+     *
+     * @param branchType branch type, determines whether and which LB algorithm to use
      * @return the rm channels,key:resourceId,value:channel
      */
     public static Map<String, Channel> getRmChannels(BranchType branchType) {
@@ -622,26 +640,25 @@ public class ChannelManager {
         Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
         ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(branchType);
         RM_CHANNELS.forEach((resourceId, value) -> {
-            if (loadBalance != null && branchType == BranchType.AT) {
+            Channel channel = null;
+            if (loadBalance != null) {
                 List<RpcContext> candidates = new ArrayList<>();
                 for (ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap : value.values()) {
                     collectActiveContexts(ipMap, candidates);
                 }
                 if (CollectionUtils.isNotEmpty(candidates)) {
-                    RpcContext selected = candidates.size() == 1
-                            ? candidates.get(0)
-                            : loadBalance.select(candidates, resourceId);
+                    RpcContext selected = candidates.size() == 1 ? candidates.get(0) : loadBalance.select(candidates);
                     if (selected != null) {
-                        channels.put(resourceId, selected.getChannel());
+                        channel = selected.getChannel();
                     }
                 }
-                return;
             }
-            Channel channel = tryOtherApp(value, null);
             if (channel == null) {
-                return;
+                channel = tryOtherApp(value, null);
             }
-            channels.put(resourceId, channel);
+            if (channel != null) {
+                channels.put(resourceId, channel);
+            }
         });
         return channels;
     }
