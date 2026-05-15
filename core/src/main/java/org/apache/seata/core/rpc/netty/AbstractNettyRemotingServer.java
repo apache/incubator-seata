@@ -83,7 +83,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     public Object sendSyncRequest(
             String resourceId, String clientId, Object msg, boolean tryOtherApp, String xid, BranchType branchType)
             throws TimeoutException, IOException {
-        Channel channel = ChannelManager.getChannel(resourceId, clientId, tryOtherApp, xid, branchType);
+        Channel channel = ChannelManager.getChannel(resourceId, clientId, tryOtherApp, branchType);
         if (channel == null) {
             throw new IOException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }

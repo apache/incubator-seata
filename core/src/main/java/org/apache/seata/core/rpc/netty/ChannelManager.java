@@ -366,7 +366,7 @@ public class ChannelManager {
      * @return Corresponding channel, NULL if not found.
      */
     public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
-        return getChannel(resourceId, clientId, tryOtherApp, null, null);
+        return getChannel(resourceId, clientId, tryOtherApp, null);
     }
 
     /**
@@ -381,12 +381,10 @@ public class ChannelManager {
      * @param resourceId Resource ID
      * @param clientId   Client ID - ApplicationId:IP:Port
      * @param tryOtherApp try other app
-     * @param xid        global transaction xid, used for load balancing affinity
      * @param branchType branch type, determines whether and which LB algorithm to use
      * @return Corresponding channel, NULL if not found.
      */
-    public static Channel getChannel(
-            String resourceId, String clientId, boolean tryOtherApp, String xid, BranchType branchType) {
+    public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp, BranchType branchType) {
         // XA and SAGA do not support server-side load balancing, use original priority-based logic
         if (branchType != BranchType.AT && branchType != BranchType.TCC) {
             return getChannelByPriority(resourceId, clientId, tryOtherApp);
