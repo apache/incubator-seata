@@ -46,7 +46,7 @@ class TransactionPropagationHandlerTest {
         RootContext.bind(DEFAULT_XID);
         Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
         assertThat(context).containsEntry(RootContext.KEY_XID, DEFAULT_XID);
-        assertThat(context).doesNotContainKey(RootContext.KEY_BRANCH_TYPE);
+        assertThat(context).containsEntry(RootContext.KEY_BRANCH_TYPE, BranchType.AT.name());
     }
 
     @Test
@@ -70,7 +70,7 @@ class TransactionPropagationHandlerTest {
         boolean bound = TransactionPropagationHandler.bindProviderContext(DEFAULT_XID, null);
         assertThat(bound).isTrue();
         assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-        assertThat(RootContext.getBranchType()).isNull();
+        assertThat(RootContext.getBranchType()).isEqualTo(BranchType.AT);
     }
 
     @Test
@@ -86,7 +86,7 @@ class TransactionPropagationHandlerTest {
         boolean bound = TransactionPropagationHandler.bindProviderContext(DEFAULT_XID, BranchType.AT.name());
         assertThat(bound).isTrue();
         assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
-        assertThat(RootContext.getBranchType()).isNull();
+        assertThat(RootContext.getBranchType()).isEqualTo(BranchType.AT);
     }
 
     @Test
