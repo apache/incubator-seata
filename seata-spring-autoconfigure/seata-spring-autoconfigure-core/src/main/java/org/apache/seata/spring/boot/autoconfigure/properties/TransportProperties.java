@@ -41,6 +41,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_SOCKET_RESV_B
 import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SO_BACK_LOG_SIZE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_THREADPOOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK;
 import static org.apache.seata.common.DefaultValues.DEFAULT_WRITE_BUFFER_LOW_WATER_MARK;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
@@ -70,6 +71,8 @@ public class TransportProperties {
     private String compressor = "none";
 
     private String protocol = DEFAULT_PROTOCOL;
+
+    private String threadpool = DEFAULT_TRANSPORT_THREADPOOL;
 
     /**
      * enable client batch send request
@@ -262,6 +265,14 @@ public class TransportProperties {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public String getThreadpool() {
+        return threadpool;
+    }
+
+    public void setThreadpool(String threadpool) {
+        this.threadpool = threadpool;
     }
 
     public int getMinHttpPoolSize() {

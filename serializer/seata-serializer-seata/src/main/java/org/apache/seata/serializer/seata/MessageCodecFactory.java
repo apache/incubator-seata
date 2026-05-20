@@ -45,6 +45,8 @@ import org.apache.seata.serializer.seata.protocol.RegisterRMRequestCodec;
 import org.apache.seata.serializer.seata.protocol.RegisterRMResponseCodec;
 import org.apache.seata.serializer.seata.protocol.RegisterTMRequestCodec;
 import org.apache.seata.serializer.seata.protocol.RegisterTMResponseCodec;
+import org.apache.seata.serializer.seata.protocol.UnregisterRMRequestCodec;
+import org.apache.seata.serializer.seata.protocol.UnregisterRMResponseCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchCommitRequestCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchCommitResponseCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchRegisterRequestCodec;
@@ -119,6 +121,12 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_REG_RM:
                 msgCodec = new RegisterRMRequestCodec();
+                break;
+            case MessageType.TYPE_UNREG_RM:
+                msgCodec = new UnregisterRMRequestCodec();
+                break;
+            case MessageType.TYPE_UNREG_RM_RESULT:
+                msgCodec = new UnregisterRMResponseCodec();
                 break;
             case MessageType.TYPE_REG_RM_RESULT:
                 if (version == ProtocolConstants.VERSION_2) {
@@ -230,6 +238,12 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_REG_RM_RESULT:
                 abstractMessage = new RegisterRMResponse();
+                break;
+            case MessageType.TYPE_UNREG_RM:
+                abstractMessage = new UnregisterRMRequest();
+                break;
+            case MessageType.TYPE_UNREG_RM_RESULT:
+                abstractMessage = new UnregisterRMResponse();
                 break;
             case MessageType.TYPE_BRANCH_COMMIT:
                 abstractMessage = new BranchCommitRequest();

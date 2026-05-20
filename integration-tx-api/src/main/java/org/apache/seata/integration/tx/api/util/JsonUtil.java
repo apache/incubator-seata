@@ -25,7 +25,7 @@ import org.apache.seata.integration.tx.api.json.JsonParserFactory;
 import java.util.Objects;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.JsonUtil} in json-common module instead.
+ * @deprecated use {@link org.apache.seata.common.json.JsonUtil} in json-common-core module instead.
  */
 @Deprecated
 public class JsonUtil {

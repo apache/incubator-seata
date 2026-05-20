@@ -17,7 +17,7 @@
 package org.apache.seata.server.storage.file.store;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.server.session.BranchSession;
@@ -47,7 +47,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -137,13 +136,14 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
-        fileWriteExecutor = new ThreadPoolExecutor(
+        fileWriteExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "fileTransactionStore",
                 MAX_THREAD_WRITE,
                 MAX_THREAD_WRITE,
                 Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
-                new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
+                true);
         writeDataFileRunnable = new WriteDataFileRunnable();
         fileWriteExecutor.submit(writeDataFileRunnable);
         this.sessionManager = sessionManager;

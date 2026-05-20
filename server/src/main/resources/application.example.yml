@@ -249,6 +249,7 @@ seata:
   transport:
     rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false
+    threadpool: auto
     # HTTP thread pool
     min-http-pool-size: 10
     max-http-pool-size: 100
