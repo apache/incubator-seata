@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.mock.MockDriver;
@@ -256,13 +257,15 @@ public class DataSourceProxyTest {
 
         DataSourceProxy proxy = getDataSourceProxy(dataSource);
 
+        DataSourceManager dsManager =
+                (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
+
         // Ensure it's registered
-        Assertions.assertNotNull(
-                DefaultResourceManager.get().getManagedResources().get(proxy.getResourceId()));
+        Assertions.assertNotNull(dsManager.getManagedResources().get(proxy.getResourceId()));
 
         proxy.close();
 
         // Ensure it's unregistered
-        Assertions.assertNull(DefaultResourceManager.get().getManagedResources().get(proxy.getResourceId()));
+        Assertions.assertNull(dsManager.getManagedResources().get(proxy.getResourceId()));
     }
 }
