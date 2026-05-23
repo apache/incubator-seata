@@ -23,6 +23,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalLockConfig;
+import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.ConnectionProxy.LockRetryPolicy;
 import org.apache.seata.rm.datasource.exec.LockConflictException;
@@ -63,6 +64,7 @@ public class ConnectionProxyTest {
 
     private Field branchRollbackFlagField;
     private boolean originalBranchRollbackFlag;
+    private ResourceManager originalAtResourceManager;
 
     @BeforeEach
     public void initBeforeEach() throws Exception {
@@ -89,12 +91,19 @@ public class ConnectionProxyTest {
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
+        originalAtResourceManager = defaultResourceManager.getResourceManager(BranchType.AT);
         DefaultResourceManager.mockResourceManager(BranchType.AT, rm);
     }
 
     @org.junit.jupiter.api.AfterEach
     public void cleanupAfterEach() throws Exception {
-        branchRollbackFlagField.set(null, originalBranchRollbackFlag);
+        try {
+            branchRollbackFlagField.set(null, originalBranchRollbackFlag);
+        } finally {
+            if (originalAtResourceManager != null) {
+                DefaultResourceManager.mockResourceManager(BranchType.AT, originalAtResourceManager);
+            }
+        }
     }
 
     @Test
