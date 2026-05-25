@@ -16,10 +16,15 @@
  */
 package org.apache.seata.common.json;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.DefaultValues;
+import org.apache.seata.config.Configuration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class JsonUtilTest {
 
@@ -27,7 +32,7 @@ public class JsonUtilTest {
     void setUp() {}
 
     @Test
-    public void testToJSONString_basicObject() {
+    public void testToJSONStringBasicObject() {
         TestObject obj = new TestObject("test", 123);
         String json = JsonUtil.toJSONString(obj);
 
@@ -37,7 +42,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_basicObject() {
+    public void testParseObjectBasicObject() {
         String json = "{\"name\":\"test\",\"value\":123}";
         TestObject obj = JsonUtil.parseObject(json, TestObject.class);
 
@@ -47,7 +52,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testToJSONString_and_parseObject_apple() {
+    public void testToJSONStringAndParseObjectApple() {
         TestObject original = new TestObject("apple", 456);
         String json = JsonUtil.toJSONString(original);
         TestObject restored = JsonUtil.parseObject(json, TestObject.class);
@@ -57,7 +62,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_nullInputs() {
+    public void testParseObjectNullInputs() {
         TestObject obj1 = JsonUtil.parseObject(null, TestObject.class);
         assertThat(obj1).isNull();
 
@@ -66,7 +71,7 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testParseObject_prefixLogic() {
+    public void testParseObjectPrefixLogic() {
         String normalJson = "{\"name\":\"normalTest\",\"value\":888}";
         TestObject obj = JsonUtil.parseObject(normalJson, TestObject.class);
         assertThat(obj).isNotNull();
@@ -75,13 +80,13 @@ public class JsonUtilTest {
     }
 
     @Test
-    public void testToJSONString_nullObject() {
+    public void testToJSONStringNullObject() {
         String json = JsonUtil.toJSONString(null);
         assertThat(json).isEqualTo("null");
     }
 
     @Test
-    public void testParseObject_complexObject() {
+    public void testParseObjectComplexObject() {
         ComplexTestObject complexObj = new ComplexTestObject();
         complexObj.setName("complex");
         complexObj.setValue(789);
@@ -96,6 +101,45 @@ public class JsonUtilTest {
         assertThat(restored.getNested()).isNotNull();
         assertThat(restored.getNested().getName()).isEqualTo("nested");
         assertThat(restored.getNested().getValue()).isEqualTo(1);
+    }
+
+    @Test
+    public void testResolveJsonSerializerNamePrefersNewConfig() {
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn("gson");
+
+        assertThat(JsonUtil.resolveJsonSerializerName(configuration)).isEqualTo("gson");
+    }
+
+    @Test
+    public void testResolveJsonSerializerNameFallsBackToDeprecatedConfig() {
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(null);
+        when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
+                .thenReturn("fastjson2");
+
+        assertThat(JsonUtil.resolveJsonSerializerName(configuration)).isEqualTo("fastjson2");
+    }
+
+    @Test
+    public void testResolveJsonSerializerNameReturnsDefaultWhenConfigMissing() {
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(null);
+        when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
+                .thenReturn(null);
+
+        assertThat(JsonUtil.resolveJsonSerializerName(configuration))
+                .isEqualTo(DefaultValues.BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+    }
+
+    @Test
+    public void testResolveJsonSerializerNameIgnoresBlankNewConfigAndFallsBackToDeprecatedConfig() {
+        Configuration configuration = mock(Configuration.class);
+        when(configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE)).thenReturn(" ");
+        when(configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME))
+                .thenReturn("fastjson2");
+
+        assertThat(JsonUtil.resolveJsonSerializerName(configuration)).isEqualTo("fastjson2");
     }
 
     public static class TestObject {

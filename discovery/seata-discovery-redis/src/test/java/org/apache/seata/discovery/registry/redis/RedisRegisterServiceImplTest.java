@@ -90,9 +90,9 @@ public class RedisRegisterServiceImplTest {
         Field field = RedisRegistryServiceImpl.class.getDeclaredField("CLUSTER_ADDRESS_MAP");
         field.setAccessible(true);
 
-        ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP =
+        ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap =
                 (ConcurrentMap<String, Set<InetSocketAddress>>) field.get(null);
-        CLUSTER_ADDRESS_MAP.put("cluster", Sets.newSet(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
+        clusterAddressMap.put("cluster", Sets.newSet(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
 
         Method method = RedisRegistryServiceImpl.class.getDeclaredMethod(
                 "removeServerAddressByPushEmptyProtection", String.class, String.class);
@@ -100,7 +100,7 @@ public class RedisRegisterServiceImplTest {
         method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
 
         // test the push empty protection situation
-        Assertions.assertEquals(1, CLUSTER_ADDRESS_MAP.get("cluster").size());
+        Assertions.assertEquals(1, clusterAddressMap.get("cluster").size());
 
         when(configuration.getConfig(anyString())).thenReturn("mycluster");
 
@@ -108,7 +108,7 @@ public class RedisRegisterServiceImplTest {
         configurationFactoryMockedStatic.close();
 
         // test the normal remove situation
-        Assertions.assertEquals(0, CLUSTER_ADDRESS_MAP.get("cluster").size());
+        Assertions.assertEquals(0, clusterAddressMap.get("cluster").size());
     }
 
     @Test

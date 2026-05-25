@@ -20,7 +20,7 @@ import io.netty.channel.Channel;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.store.SessionMode;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -180,22 +180,22 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
     private final ScheduledThreadPoolExecutor retryRollbacking =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_ROLLBACKING, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(RETRY_ROLLBACKING, 1);
 
     private final ScheduledThreadPoolExecutor retryCommitting =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(RETRY_COMMITTING, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(RETRY_COMMITTING, 1);
 
     private final ScheduledThreadPoolExecutor asyncCommitting =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(ASYNC_COMMITTING, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(ASYNC_COMMITTING, 1);
 
     private final ScheduledThreadPoolExecutor timeoutCheck =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(TX_TIMEOUT_CHECK, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(TX_TIMEOUT_CHECK, 1);
 
     private final ScheduledThreadPoolExecutor undoLogDelete =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(UNDOLOG_DELETE, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(UNDOLOG_DELETE, 1);
 
     private final ScheduledThreadPoolExecutor syncProcessing =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory(SYNC_PROCESSING, 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(SYNC_PROCESSING, 1);
 
     private final GlobalStatus[] retryRollbackingStatuses = new GlobalStatus[] {
         GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying
@@ -232,14 +232,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
         // create branchRemoveExecutor
         if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
-            branchRemoveExecutor = new ThreadPoolExecutor(
+            branchRemoveExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    "branchSessionRemove",
                     BRANCH_ASYNC_POOL_SIZE,
                     BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE,
                     TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(CONFIG.getInt(
                             ConfigurationKeys.SESSION_BRANCH_ASYNC_QUEUE_SIZE, DEFAULT_BRANCH_ASYNC_QUEUE_SIZE)),
-                    new NamedThreadFactory("branchSessionRemove", BRANCH_ASYNC_POOL_SIZE),
                     new ThreadPoolExecutor.CallerRunsPolicy());
         } else {
             branchRemoveExecutor = null;

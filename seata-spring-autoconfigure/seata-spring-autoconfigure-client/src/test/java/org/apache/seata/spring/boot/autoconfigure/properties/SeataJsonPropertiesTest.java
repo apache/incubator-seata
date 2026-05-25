@@ -32,9 +32,12 @@ public class SeataJsonPropertiesTest {
     public void testSeataJsonProperties() {
         SeataJsonProperties props = new SeataJsonProperties();
 
+        String serializerType = "jackson";
         String allowlist = "com.test.model.,com.test.dto.,com.test.SpecialBean";
+        props.setSerializerType(serializerType);
         props.setAllowlist(allowlist);
 
+        Assertions.assertEquals(serializerType, props.getSerializerType());
         Assertions.assertEquals(allowlist, props.getAllowlist());
     }
 

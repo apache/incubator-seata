@@ -16,7 +16,7 @@
  */
 package org.apache.seata.core.event;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -44,13 +43,14 @@ public class GuavaEventBus implements EventBus {
         if (!async) {
             this.eventBus = new com.google.common.eventbus.EventBus(identifier);
         } else {
-            final ExecutorService eventExecutor = new ThreadPoolExecutor(
+            final ExecutorService eventExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    identifier,
                     1,
                     1,
                     Integer.MAX_VALUE,
                     TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(2048),
-                    new NamedThreadFactory(identifier, 1, true),
+                    true,
                     (r, executor) -> {
                         LOGGER.warn(
                                 "eventBus executor queue is full, size:{}",

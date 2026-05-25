@@ -450,6 +450,19 @@
 
     <profiles>
         <profile>
+            <id>JDK21Plus</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>${project.groupId}</groupId>
+                    <artifactId>seata-threadpool-loom</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
             <id>release-seata</id>
             <properties>
                 <mysql.jdbc.version>5.1.42</mysql.jdbc.version>

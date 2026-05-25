@@ -75,6 +75,7 @@ public class CorePropertiesTest {
         assertTrue(context.getBean(TransportProperties.class).isHeartbeat());
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
+        assertEquals("auto", context.getBean(TransportProperties.class).getThreadpool());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
         assertFalse(context.getBean(TransportProperties.class).isEnableClientSharedEventLoop());
     }
