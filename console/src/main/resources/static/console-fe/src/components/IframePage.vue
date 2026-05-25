@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,46 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <div class="iframe-container">
+    <iframe
+      :src="src"
+      :title="title"
+      class="iframe-content"
+      frameborder="0"
+      @load="onLoad"
+    />
+  </div>
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+interface Props {
+  src: string
+  title?: string
+}
 
-export default requestV2
+defineProps<Props>()
+
+const emit = defineEmits<{
+  (e: 'load'): void
+}>()
+
+function onLoad() {
+  emit('load')
+}
+</script>
+
+<style scoped lang="scss">
+.iframe-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+
+.iframe-content {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>

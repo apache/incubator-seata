@@ -14,8 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+import { createRouter, createWebHistory } from 'vue-router'
+import { appRoutes } from './routes'
 
-const requestV2 = createRequest('/api/v2')
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: appRoutes,
+})
 
-export default requestV2
+export default router

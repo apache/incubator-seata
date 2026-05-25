@@ -14,62 +14,103 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { Message } from '@alifd/next';
-import { get } from 'lodash';
-import { AUTHORIZATION_HEADER } from '@/contants';
-import { getCurrentLocaleObj } from '@/reducers/locale';
+import axios, {
+  type AxiosError,
+  type AxiosInstance,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import { ElMessage } from 'element-plus'
+import 'element-plus/theme-chalk/el-message.css';
+import i18n from '@/i18n'
+import router from '@/router'
+import { useAppStore } from '@/stores/app'
 
-const createRequest = (baseURL: string, generalErrorMessage: string = 'Request error, please try again later!') => {
-  const instance: AxiosInstance = axios.create({
+const AUTHORIZATION_HEADER = 'Authorization'
+const DEFAULT_GENERAL_ERROR_MESSAGE = 'Request error, please try again later!'
+
+type LocaleMessages = {
+  codeMessage?: Record<string, string>
+}
+
+type ResponseBody = {
+  code?: string | number
+  message?: string
+  errorMsg?: string
+}
+
+function getCurrentLocaleMessages(): LocaleMessages {
+  const locale = i18n.global.locale.value
+  return i18n.global.getLocaleMessage(locale) as LocaleMessages
+}
+
+function setAuthorizationHeader(config: InternalAxiosRequestConfig, token: string | null) {
+  if (config.headers && typeof config.headers.set === 'function') {
+    config.headers.set(AUTHORIZATION_HEADER, token ?? '')
+    return
+  }
+
+  config.headers = {
+    ...config.headers,
+    [AUTHORIZATION_HEADER]: token,
+  }
+}
+
+const createRequest = (
+  baseURL: string,
+  generalErrorMessage: string = DEFAULT_GENERAL_ERROR_MESSAGE,
+): AxiosInstance => {
+  const instance = axios.create({
     baseURL,
     method: 'get',
-  });
+  })
 
-  instance.interceptors.request.use((config: any) => {
-    let authHeader: string | null = localStorage.getItem(AUTHORIZATION_HEADER);
-    // add jwt header
-    if (config.headers) {
-      config.headers[AUTHORIZATION_HEADER] = authHeader;
-    }
-    return config;
-  });
+  instance.interceptors.request.use((config) => {
+    const appStore = useAppStore()
+    const authHeader = appStore.getToken()
+    setAuthorizationHeader(config, authHeader)
+    return config
+  })
 
   instance.interceptors.response.use(
-    (response: AxiosResponse): Promise<any> => {
-      const code = get(response, 'data.code');
+    (response: AxiosResponse<ResponseBody>) => {
+      const code = response.data?.code
+
       if (response.status === 200 && String(code) === '200') {
-        return Promise.resolve(get(response, 'data'));
-      } else {
-        const currentLocale = getCurrentLocaleObj();
-        const errorText =
-          (currentLocale.codeMessage as any)[code] ||
-          get(response, 'data.message') ||
-          get(response, 'data.errorMsg') ||
-          response.statusText;
-        Message.error(errorText || `Request error ${code}: ${get(response, 'config.url', '')}`);
-        return Promise.reject(response);
+        return Promise.resolve(response.data)
       }
+
+      const currentLocale = getCurrentLocaleMessages()
+      const errorText =
+        currentLocale.codeMessage?.[String(code)] ||
+        response.data?.message ||
+        response.data?.errorMsg ||
+        response.statusText
+
+      ElMessage.error(errorText || `Request error ${code}: ${response.config.url ?? ''}`)
+      return Promise.reject(response)
     },
-    error => {
+    (error: AxiosError<ResponseBody>) => {
       if (error.response) {
-        const { status } = error.response;
+        const { status } = error.response
+
         if (status === 403 || status === 401) {
-          (window as any).globalHistory.replace('/login');
-          return;
+          window.location.replace('/login')
+          return Promise.reject(error)
         }
-        Message.error(`HTTP ERROR: ${status}`);
+        ElMessage.error(`HTTP ERROR: ${status}`)
       } else {
-        Message.error(generalErrorMessage);
+        ElMessage.error(generalErrorMessage)
       }
-      return Promise.reject(error);
-    }
-  );
 
-  return instance;
-};
+      return Promise.reject(error)
+    },
+  )
 
-const request = createRequest('/api/v1');
+  return instance
+}
 
-export { createRequest };
-export default request;
+const request = createRequest('/api/v1')
+
+export { AUTHORIZATION_HEADER, createRequest }
+export default request

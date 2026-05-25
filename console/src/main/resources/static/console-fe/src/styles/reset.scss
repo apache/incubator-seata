@@ -14,8 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request'
+// Pure CSS reset, independent of SCSS variables (Sass @use module isolation prevents child modules from inheriting additionalData injection)
+// Theme-related styles (body/a/heading) are defined via variables in global.scss
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-const requestV2 = createRequest('/api/v2')
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+}
 
-export default requestV2
+body {
+  height: 100%;
+}
+
+#app {
+  height: 100%;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}

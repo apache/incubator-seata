@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <el-config-provider :locale="elLocale">
+    <router-view />
+  </el-config-provider>
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useAppStore } from '@/stores/app'
+import zhCn from 'element-plus/es/locale/lang/zh-cn'
+import en from 'element-plus/es/locale/lang/en'
 
-export default requestV2
+const appStore = useAppStore()
+const elLocale = computed(() => (appStore.locale === 'zh-CN' ? zhCn : en))
+</script>

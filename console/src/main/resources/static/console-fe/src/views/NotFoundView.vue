@@ -1,4 +1,4 @@
-/*
+<!--
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -13,9 +13,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
-import { createRequest } from './request'
+-->
+<template>
+  <el-container class="not-found-container">
+    <el-result icon="404" :title="t('notFound.title')" :sub-title="t('notFound.description')">
+      <template #extra>
+        <el-button type="primary" size="large" @click="router.push('/')">
+          <el-icon><House /></el-icon>
+          {{ t('notFound.backHome') }}
+        </el-button>
+      </template>
+    </el-result>
+  </el-container>
+</template>
 
-const requestV2 = createRequest('/api/v2')
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { House } from '@element-plus/icons-vue'
 
-export default requestV2
+const { t } = useI18n()
+const router = useRouter()
+</script>
+
+<style lang="scss" scoped>
+.not-found-container {
+  height: 100vh;
+  @include flex-center;
+}
+</style>
