@@ -14,41 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.dubbo.alibaba;
+package org.apache.seata.integration.motan;
 
-import com.alibaba.dubbo.common.extension.Activate;
-import com.alibaba.dubbo.rpc.Filter;
-import com.alibaba.dubbo.rpc.Invocation;
-import com.alibaba.dubbo.rpc.Invoker;
-import com.alibaba.dubbo.rpc.Result;
-import com.alibaba.dubbo.rpc.RpcContext;
-import com.alibaba.dubbo.rpc.RpcException;
-import org.apache.seata.core.constants.DubboConstants;
+import com.weibo.api.motan.common.MotanConstants;
+import com.weibo.api.motan.core.extension.Activation;
+import com.weibo.api.motan.core.extension.Scope;
+import com.weibo.api.motan.core.extension.Spi;
+import com.weibo.api.motan.filter.Filter;
+import com.weibo.api.motan.rpc.Caller;
+import com.weibo.api.motan.rpc.Request;
+import com.weibo.api.motan.rpc.Response;
 import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
 import java.util.Map;
 
-@Activate(
-        group = {DubboConstants.CONSUMER},
-        order = 100)
-public class AlibabaDubboTransactionConsumerFilter implements Filter {
+@Spi(scope = Scope.SINGLETON)
+@Activation(
+        key = {MotanConstants.NODE_TYPE_REFERER},
+        sequence = 100)
+public class MotanTransactionConsumerFilter implements Filter {
 
     @Override
-    public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        if (!DubboConstants.ALIBABADUBBO) {
-            return invoker.invoke(invocation);
-        }
+    public Response filter(final Caller<?> caller, final Request request) {
         Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
         if (!context.isEmpty()) {
-            for (Map.Entry<String, String> entry : context.entrySet()) {
-                RpcContext.getContext().setAttachment(entry.getKey(), entry.getValue());
-            }
+            request.getAttachments().putAll(context);
         }
         try {
-            return invoker.invoke(invocation);
+            return caller.call(request);
         } finally {
             for (String key : context.keySet()) {
-                RpcContext.getContext().removeAttachment(key);
+                request.getAttachments().remove(key);
             }
         }
     }
