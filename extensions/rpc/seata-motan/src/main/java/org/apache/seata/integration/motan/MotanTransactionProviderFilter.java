@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.sofa.rpc;
+package org.apache.seata.integration.motan;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.filter.AutoActive;
-import com.alipay.sofa.rpc.filter.Filter;
-import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.weibo.api.motan.common.MotanConstants;
+import com.weibo.api.motan.core.extension.Activation;
+import com.weibo.api.motan.core.extension.Scope;
+import com.weibo.api.motan.core.extension.Spi;
+import com.weibo.api.motan.filter.Filter;
+import com.weibo.api.motan.rpc.Caller;
+import com.weibo.api.motan.rpc.Request;
+import com.weibo.api.motan.rpc.Response;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
-@Extension(value = "transactionContextProvider")
-@AutoActive(providerSide = true)
-public class TransactionContextProviderFilter extends Filter {
+@Spi(scope = Scope.SINGLETON)
+@Activation(
+        key = {MotanConstants.NODE_TYPE_SERVICE},
+        sequence = 100)
+public class MotanTransactionProviderFilter implements Filter {
 
     @Override
-    public SofaResponse invoke(FilterInvoker filterInvoker, SofaRequest sofaRequest) throws SofaRpcException {
-        String rpcXid = getRpcXid(sofaRequest);
-        String rpcBranchType = (String) sofaRequest.getRequestProp(RootContext.KEY_BRANCH_TYPE);
+    public Response filter(final Caller<?> caller, final Request request) {
+        String rpcXid = getRpcXid(request);
+        String rpcBranchType = request.getAttachments().get(RootContext.KEY_BRANCH_TYPE);
         boolean bound = TransactionPropagationHandler.bindProviderContext(rpcXid, rpcBranchType);
         try {
-            return filterInvoker.invoke(sofaRequest);
+            return caller.call(request);
         } finally {
             if (bound) {
                 TransactionPropagationHandler.unbindProviderContext(rpcXid);
@@ -44,10 +47,10 @@ public class TransactionContextProviderFilter extends Filter {
         }
     }
 
-    private String getRpcXid(SofaRequest sofaRequest) {
-        String rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID);
+    private String getRpcXid(Request request) {
+        String rpcXid = request.getAttachments().get(RootContext.KEY_XID);
         if (rpcXid == null) {
-            rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID.toLowerCase());
+            rpcXid = request.getAttachments().get(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
     }

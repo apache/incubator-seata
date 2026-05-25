@@ -26,6 +26,9 @@ import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
+
+import java.util.Map;
 
 public class ClientTransactionInterceptor implements ClientInterceptor {
 
@@ -33,16 +36,20 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
             MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
 
-        String xid = RootContext.getXID();
+        Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
 
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                if (xid != null) {
-                    headers.put(GrpcHeaderKey.XID_HEADER_KEY, xid);
-                    headers.put(
-                            GrpcHeaderKey.BRANCH_HEADER_KEY,
-                            RootContext.getBranchType().name());
+                if (!context.isEmpty()) {
+                    String xid = context.get(RootContext.KEY_XID);
+                    if (xid != null) {
+                        headers.put(GrpcHeaderKey.XID_HEADER_KEY, xid);
+                    }
+                    String branchType = context.get(RootContext.KEY_BRANCH_TYPE);
+                    if (branchType != null) {
+                        headers.put(GrpcHeaderKey.BRANCH_HEADER_KEY, branchType);
+                    }
                 }
                 super.start(
                         new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
