@@ -53,8 +53,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -100,7 +103,7 @@ public class EtcdRegistryServiceImplMockTest {
     private static final String CLUSTER_NAME = "default";
 
     @BeforeEach
-    public void setUp() throws NoSuchFieldException, IllegalAccessException {
+    public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         registryService = (EtcdRegistryServiceImpl) spy(new EtcdRegistryProvider().provide());
 
@@ -109,16 +112,62 @@ public class EtcdRegistryServiceImplMockTest {
         when(mockClient.getWatchClient()).thenReturn(mockWatchClient);
         when(mockClient.getKVClient()).thenReturn(mockKVClient);
 
-        // inject spy executorService
+        // cancel any running lifeKeeper from previous tests
+        Field lifeKeeperFutureField = EtcdRegistryServiceImpl.class.getDeclaredField("lifeKeeperFuture");
+        lifeKeeperFutureField.setAccessible(true);
+        Future<?> oldFuture = (Future<?>) lifeKeeperFutureField.get(registryService);
+        if (oldFuture != null) {
+            oldFuture.cancel(true);
+        }
+        lifeKeeperFutureField.set(registryService, null);
+
+        // reset lifeKeeper
+        Field lifeKeeperField = EtcdRegistryServiceImpl.class.getDeclaredField("lifeKeeper");
+        lifeKeeperField.setAccessible(true);
+        lifeKeeperField.set(registryService, null);
+
+        // reset static leaseId
+        Field leaseIdField = EtcdRegistryServiceImpl.class.getDeclaredField("leaseId");
+        leaseIdField.setAccessible(true);
+        leaseIdField.set(null, 0L);
+
+        // shutdown old executor and create a fresh one
         Field executorServiceField = EtcdRegistryServiceImpl.class.getDeclaredField("executorService");
         executorServiceField.setAccessible(true);
-        executorService = spy((ExecutorService) executorServiceField.get(registryService));
+        ExecutorService oldExecutor = (ExecutorService) executorServiceField.get(registryService);
+        if (oldExecutor != null && !oldExecutor.isShutdown()) {
+            oldExecutor.shutdownNow();
+        }
+        ExecutorService freshExecutor = new java.util.concurrent.ThreadPoolExecutor(
+                2, 2, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+        executorService = spy(freshExecutor);
         executorServiceField.set(registryService, executorService);
+
+        // clear internal maps
+        Field clusterAddressMapField = EtcdRegistryServiceImpl.class.getDeclaredField("clusterAddressMap");
+        clusterAddressMapField.setAccessible(true);
+        clusterAddressMapField.set(registryService, new ConcurrentHashMap<>());
+        Field listenerMapField = EtcdRegistryServiceImpl.class.getDeclaredField("listenerMap");
+        listenerMapField.setAccessible(true);
+        listenerMapField.set(registryService, new ConcurrentHashMap<>());
+        Field watcherMapField = EtcdRegistryServiceImpl.class.getDeclaredField("watcherMap");
+        watcherMapField.setAccessible(true);
+        watcherMapField.set(registryService, new ConcurrentHashMap<>());
 
         // inject mock client
         Field clientField = EtcdRegistryServiceImpl.class.getDeclaredField("client");
         clientField.setAccessible(true);
         clientField.set(registryService, mockClient);
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    public void tearDown() throws Exception {
+        Field executorServiceField = EtcdRegistryServiceImpl.class.getDeclaredField("executorService");
+        executorServiceField.setAccessible(true);
+        ExecutorService executor = (ExecutorService) executorServiceField.get(registryService);
+        if (executor != null && !executor.isShutdown()) {
+            executor.shutdownNow();
+        }
     }
 
     @BeforeAll
