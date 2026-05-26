@@ -321,6 +321,18 @@ public interface ConfigurationKeys {
     String DISTRIBUTED_LOCK_DB_TABLE = STORE_DB_PREFIX + "distributedLockTable";
 
     /**
+     * The constant DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED.
+     *
+     * <p>When enabled, the {@code DataBaseDistributedLocker} acquires the row
+     * lock with {@code FOR UPDATE NOWAIT} (or the dialect equivalent) to fail
+     * fast on contention instead of waiting for the database lock-wait
+     * timeout. Defaults to {@code false} so existing deployments keep their
+     * legacy blocking behaviour; flip to {@code true} on databases that
+     * support NOWAIT (MySQL 8.0+, PostgreSQL, Oracle).
+     */
+    String DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED = STORE_DB_PREFIX + "distributedLockNoWaitEnabled";
+
+    /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
     String STORE_DB_DATASOURCE_TYPE = STORE_DB_PREFIX + "datasource";

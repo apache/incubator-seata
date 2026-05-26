@@ -16,3 +16,6 @@
 #
 org.apache.seata.core.store.db.sql.distributed.lock.BaseDistributedLockSql
 org.apache.seata.core.store.db.sql.distributed.lock.BaseDistributedLockSqlServer
+org.apache.seata.core.store.db.sql.distributed.lock.MysqlDistributedLockSql
+org.apache.seata.core.store.db.sql.distributed.lock.PostgresqlDistributedLockSql
+org.apache.seata.core.store.db.sql.distributed.lock.OracleDistributedLockSql
