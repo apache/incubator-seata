@@ -518,7 +518,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
             throws BeansException {
-        return new Object[] {interceptor};
+        return interceptor == null ? DO_NOT_PROXY : new Object[] {interceptor};
     }
 
     @Override
