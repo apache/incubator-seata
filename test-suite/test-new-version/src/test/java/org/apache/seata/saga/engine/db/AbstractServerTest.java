@@ -19,6 +19,7 @@ package org.apache.seata.saga.engine.db;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
@@ -28,6 +29,7 @@ import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +39,18 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public abstract class AbstractServerTest {
+
+    static {
+        System.setProperty("config.type", "file");
+        System.setProperty("config.file.name", "file.conf");
+        try {
+            Method method = ConfigurationFactory.class.getDeclaredMethod("reload");
+            method.setAccessible(true);
+            method.invoke(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
