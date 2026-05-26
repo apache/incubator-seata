@@ -35,7 +35,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
@@ -43,7 +42,6 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.protocol.ProtocolConstants;
@@ -136,8 +134,9 @@ public abstract class AbstractMultiVersionCompatibilityTest {
 
     @BeforeEach
     public void setUp() {
-        originalTransportProtocol = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.SEATA.value);
+        originalTransportProtocol = System.getProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.SEATA.value);
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup();
         clientGroup = new NioEventLoopGroup();
@@ -169,14 +168,15 @@ public abstract class AbstractMultiVersionCompatibilityTest {
             serverWorkingThreads.shutdown();
         }
 
-        bossGroup.shutdownGracefully().sync();
-        workerGroup.shutdownGracefully().sync();
-        clientGroup.shutdownGracefully().sync();
+        bossGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
+        workerGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
+        clientGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
         if (StringUtils.isBlank(originalTransportProtocol)) {
-            ConfigurationTestHelper.removeConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
+            System.clearProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
         } else {
-            ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);
+            System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);
         }
+        System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
     }
 
     // ==================== V1 Server Methods (manual, for legacy simulation) ====================

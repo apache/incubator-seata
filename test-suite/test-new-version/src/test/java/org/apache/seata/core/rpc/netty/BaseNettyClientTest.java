@@ -17,7 +17,6 @@
 package org.apache.seata.core.rpc.netty;
 
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -119,6 +118,7 @@ public abstract class BaseNettyClientTest {
         serverConfig.setServerListenPort(port);
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads, serverConfig);
 
+        AtomicBoolean serverStatus = new AtomicBoolean();
         new Thread(() -> {
                     SessionHolder.init(null);
                     nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
@@ -128,10 +128,18 @@ public abstract class BaseNettyClientTest {
                     // init snowflake for transactionId, branchId
                     UUIDGenerator.init(1L);
                     nettyRemotingServer.init();
+                    serverStatus.set(true);
                 })
                 .start();
 
-        Thread.sleep(3000); // Simple wait
+        long start = System.nanoTime();
+        long maxWaitNanoTime = 10_000_000_000L;
+        while (System.nanoTime() - start < maxWaitNanoTime) {
+            Thread.sleep(100);
+            if (serverStatus.get()) {
+                break;
+            }
+        }
         return new ServerInstance(nettyRemotingServer, port);
     }
 
@@ -139,16 +147,18 @@ public abstract class BaseNettyClientTest {
      * Configure client to use the specified port
      */
     protected void configureClient(int port) {
-        ConfigurationTestHelper.putConfig("service.default.grouplist", "127.0.0.1:" + port);
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
+        System.setProperty("service.default.grouplist", "127.0.0.1:" + port);
+        System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
     }
 
     /**
      * Clean up client configuration
      */
     protected void cleanupClientConfig() {
-        ConfigurationTestHelper.removeConfig("service.default.grouplist");
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty("service.default.grouplist");
+        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
     }
 
     /**
