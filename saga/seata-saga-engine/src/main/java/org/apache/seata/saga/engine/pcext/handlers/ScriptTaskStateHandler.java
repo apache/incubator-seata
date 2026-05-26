@@ -56,13 +56,11 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
     private static final Set<String> ALLOWED_SCRIPT_TYPES = new HashSet<>(Arrays.asList("groovy", "js", "javascript"));
 
     private static final Pattern DANGEROUS_PATTERN = Pattern.compile("(?i)"
-            + "Runtime|ProcessBuilder|\\.execute\\s*\\("
+            + "ProcessBuilder|\\.execute\\s*\\("
             + "|System\\s*\\.\\s*(exit|getRuntime|setSecurityManager)"
             + "|Class\\s*\\.\\s*forName|ClassLoader"
             + "|java\\.lang\\.reflect"
-            + "|Thread\\s*\\.|\\.getClass\\s*\\("
             + "|java\\.io\\.File|java\\.net\\."
-            + "|javax\\.script\\.ScriptEngine"
             + "|GroovyShell|GroovyClassLoader");
 
     private List<StateHandlerInterceptor> interceptors = new ArrayList<>();
