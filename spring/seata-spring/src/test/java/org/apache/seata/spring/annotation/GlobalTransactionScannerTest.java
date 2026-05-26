@@ -17,6 +17,7 @@
 package org.apache.seata.spring.annotation;
 
 import org.aopalliance.aop.Advice;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
@@ -36,11 +37,15 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -278,16 +283,6 @@ class GlobalTransactionScannerTest {
 
         // FactoryBean should not be wrapped
         Assertions.assertEquals(factoryBean, result);
-    }
-
-    @Test
-    void testGetAdvicesAndAdvisorsForBean() {
-        // Test getAdvicesAndAdvisorsForBean method
-        GlobalTransactionScanner scanner = new GlobalTransactionScanner("test-app", "test-tx-group");
-
-        Object[] result = scanner.getAdvicesAndAdvisorsForBean(TestService.class, "testService", null);
-
-        Assertions.assertNotNull(result);
     }
 
     @Test
@@ -915,5 +910,30 @@ class GlobalTransactionScannerTest {
         Object result = scanner.wrapIfNecessary(proxyBean, beanName, cacheKey);
 
         Assertions.assertNotNull(result);
+    }
+
+    @Test
+    void testGetAdvicesAndAdvisorsForBeanWithNullInterceptor() {
+        GlobalTransactionScanner scanner = new GlobalTransactionScanner("test-app", "test-tx-group");
+
+        Object[] result = scanner.getAdvicesAndAdvisorsForBean(TestService.class, "testService", null);
+
+        assertNull(result, "Should return DO_NOT_PROXY (null) when interceptor is not initialized");
+    }
+
+    @Test
+    void testGetAdvicesAndAdvisorsForBeanWithInitializedInterceptor() throws Exception {
+        GlobalTransactionScanner scanner = new GlobalTransactionScanner("test-app", "test-tx-group");
+
+        Field interceptorField = GlobalTransactionScanner.class.getDeclaredField("interceptor");
+        interceptorField.setAccessible(true);
+        MethodInterceptor mockInterceptor = mock(MethodInterceptor.class);
+        interceptorField.set(scanner, mockInterceptor);
+
+        Object[] result = scanner.getAdvicesAndAdvisorsForBean(TestService.class, "testService", null);
+
+        assertNotNull(result, "Should not return null when interceptor is initialized");
+        assertEquals(1, result.length, "Should return an array of length 1");
+        assertEquals(mockInterceptor, result[0], "The array should contain the injected interceptor");
     }
 }
