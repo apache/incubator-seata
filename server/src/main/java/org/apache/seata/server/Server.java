@@ -18,7 +18,7 @@ package org.apache.seata.server;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -68,13 +68,13 @@ public class Server {
         // initialize the metrics
         MetricsManager.get().init();
 
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
+        ThreadPoolExecutor workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "ServerHandlerThread",
                 NettyServerConfig.getMinServerPoolSize(),
                 NettyServerConfig.getMaxServerPoolSize(),
                 NettyServerConfig.getKeepAliveTime(),
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()),
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
         // 127.0.0.1 and 0.0.0.0 are not valid here.

@@ -56,6 +56,7 @@ header:
     - '**/.babelrc' #json format
     - '**/.eslintrc' #json format
     - '**/.prettierrc' #json format
+    - '**/.mvn/jvm.config'
   comment: on-failure
 dependency:
   files:

@@ -125,7 +125,9 @@ class ConsulConfigurationTest {
         long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(3); // Max ~3 seconds
         do {
             value = newInstance.getLatestConfig("key1", null, 1000);
-            if ("val1".equals(value)) break;
+            if ("val1".equals(value)) {
+                break;
+            }
             Thread.sleep(100);
         } while (System.nanoTime() < deadline);
 

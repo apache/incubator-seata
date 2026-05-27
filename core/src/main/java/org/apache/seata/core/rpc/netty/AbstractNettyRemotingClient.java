@@ -27,7 +27,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -132,13 +132,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 SCHEDULE_INTERVAL_MILLS,
                 TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
-            mergeSendExecutorService = new ThreadPoolExecutor(
+            mergeSendExecutorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    getThreadPrefix(),
                     MAX_MERGE_SEND_THREAD,
                     MAX_MERGE_SEND_THREAD,
                     KEEP_ALIVE_TIME,
                     TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+                    new LinkedBlockingQueue<>());
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
@@ -696,7 +696,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             timerExecutor.execute(() -> {
                 try {
-                    clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
+                    String serverAddress = getAddressFromChannel(ctx.channel());
+                    clientChannelManager.releaseChannel(ctx.channel(), serverAddress);
+                    clientChannelManager.cleanupDisconnectedChannelMetadata(serverAddress);
                 } catch (Throwable throwable) {
                     LOGGER.error("release channel error: {}", throwable.getMessage(), throwable);
                 }

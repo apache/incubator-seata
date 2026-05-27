@@ -19,6 +19,7 @@ package org.apache.seata.benchmark;
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.config.BenchmarkConfigLoader;
 import org.apache.seata.benchmark.constant.BenchmarkConstants;
+import org.apache.seata.core.model.BranchType;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -44,7 +45,7 @@ public class BenchmarkApplication implements Callable<Integer> {
 
     @Option(
             names = {"-m", "--mode"},
-            description = "Transaction mode: AT, TCC, or SAGA",
+            description = "Transaction mode: AT, TCC, SAGA, XA, or SAGA_ANNOTATION",
             required = false)
     private String mode;
 
@@ -92,6 +93,36 @@ public class BenchmarkApplication implements Callable<Integer> {
             names = {"--branches"},
             description = "Number of branch transactions (0=empty mode, >=1=real mode with actual execution)")
     private Integer branches;
+
+    @Option(
+            names = {"--saga-shape"},
+            description = "Select SAGA state machine shape: simple or order")
+    private String sagaShape;
+
+    @Option(
+            names = {"--saga-workload"},
+            description = "Select SAGA workload implementation: mock or db")
+    private String sagaWorkload;
+
+    @Option(
+            names = {"--saga-fail-step"},
+            description = "Force SAGA forward failure at a specific step: inventory, payment, or order")
+    private String sagaFailStep;
+
+    @Option(
+            names = {"--saga-random-seed"},
+            description = "Seed for reproducible SAGA failure injection")
+    private Long sagaRandomSeed;
+
+    @Option(
+            names = {"--saga-timeout-step"},
+            description = "Simulate SAGA timeout at a specific forward step: inventory, payment, or order")
+    private String sagaTimeoutStep;
+
+    @Option(
+            names = {"--saga-timeout-ms"},
+            description = "Simulated timeout delay in milliseconds for SAGA timeout injection (default: 3000)")
+    private Integer sagaTimeoutMs;
 
     public static void main(String[] args) {
         // Parse server address from args before any Seata class loading
@@ -143,7 +174,13 @@ public class BenchmarkApplication implements Callable<Integer> {
                 applicationId,
                 txServiceGroup,
                 rollbackPercentage,
-                branches);
+                branches,
+                sagaShape,
+                sagaWorkload,
+                sagaFailStep,
+                sagaRandomSeed,
+                sagaTimeoutStep,
+                sagaTimeoutMs);
     }
 
     private void printConfiguration(BenchmarkConfig config) {
@@ -159,6 +196,28 @@ public class BenchmarkApplication implements Callable<Integer> {
         System.out.println("  Rollback %:   " + config.getRollbackPercentage() + "%");
         System.out.println("  Branches:     " + config.getBranches()
                 + (config.getBranches() == 0 ? " (empty mode)" : " (real mode)"));
+        if (config.getMode() == BranchType.SAGA
+                && config.getSagaWorkload() != null
+                && !config.getSagaWorkload().isEmpty()) {
+            System.out.println("  Saga Workload:" + padValue(config.getSagaWorkload()));
+        }
+        if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+            System.out.println("  Saga Shape:   " + config.getSagaShape());
+        }
+        if (config.getSagaFailStep() != null && !config.getSagaFailStep().isEmpty()) {
+            System.out.println("  Saga Fail:    " + config.getSagaFailStep());
+        }
+        if (config.getSagaRandomSeed() != null) {
+            System.out.println("  Saga Seed:    " + config.getSagaRandomSeed());
+        }
+        if (config.getSagaTimeoutStep() != null && !config.getSagaTimeoutStep().isEmpty()) {
+            System.out.println("  Saga Timeout: " + config.getSagaTimeoutStep());
+            System.out.println("  Timeout Ms:   " + config.getSagaTimeoutMs());
+        }
         System.out.println();
+    }
+
+    private String padValue(String value) {
+        return value == null ? "" : "   " + value;
     }
 }

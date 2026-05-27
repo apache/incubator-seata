@@ -27,6 +27,7 @@ import org.apache.seata.mcp.exception.ServiceCallException;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -35,23 +36,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.seata.mcp.core.utils.UrlUtils.buildUrl;
 import static org.apache.seata.mcp.core.utils.UrlUtils.objectToQueryParamMap;
 
 @ConditionalOnMissingBean(name = "consoleLocalServiceImpl")
 @Service
+@SuppressWarnings("null")
 public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
 
     private final JwtTokenUtils jwtTokenUtils;
 
-    private final RestTemplate restTemplate;
+    private final RestClient restClient;
 
     private final ObjectMapper objectMapper;
 
@@ -59,11 +65,11 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     public ConsoleRemoteServiceImpl(
             JwtTokenUtils jwtTokenUtils,
-            RestTemplate restTemplate,
+            @Qualifier("consoleRestClient") RestClient restClient,
             ObjectMapper objectMapper,
             NamingServerProperties namingServerProperties) {
         this.jwtTokenUtils = jwtTokenUtils;
-        this.restTemplate = restTemplate;
+        this.restClient = restClient;
         this.objectMapper = objectMapper;
         this.namingServerProperties = namingServerProperties;
         LOGGER.info("ConsoleRemoteServiceImpl initialized.");
@@ -103,7 +109,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = executeRequest(url, HttpMethod.GET, entity);
 
             responseBody = response.getBody();
 
@@ -143,7 +149,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> response = executeRequest(url, HttpMethod.GET, entity);
 
             responseBody = response.getBody();
 
@@ -183,7 +189,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
+            ResponseEntity<String> response = executeRequest(url, HttpMethod.DELETE, entity);
 
             responseBody = response.getBody();
 
@@ -223,7 +229,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+            ResponseEntity<String> response = executeRequest(url, HttpMethod.PUT, entity);
 
             responseBody = response.getBody();
 
@@ -240,5 +246,20 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             LOGGER.error(errorMsg, e);
             throw new ServiceCallException(errorMsg);
         }
+    }
+
+    private ResponseEntity<String> executeRequest(String url, HttpMethod httpMethod, HttpEntity<String> entity)
+            throws RestClientException {
+        return restClient
+                .method(Objects.requireNonNull(httpMethod))
+                .uri(Objects.requireNonNull(url))
+                .headers(headers -> headers.addAll(entity.getHeaders()))
+                .exchange((request, response) -> new ResponseEntity<>(
+                        readResponseBody(response), response.getHeaders(), response.getStatusCode()));
+    }
+
+    private String readResponseBody(RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse response)
+            throws IOException {
+        return response.getBody() == null ? "" : StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8);
     }
 }

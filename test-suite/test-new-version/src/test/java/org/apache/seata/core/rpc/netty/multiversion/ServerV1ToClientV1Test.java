@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * - Server: Manual V1 construction with TestServerHandler
  * - Client: Manual V1 construction with ProtocolEncoderV1
  */
-public class ServerV1ToClientV1Test extends MultiVersionCompatibilityTest {
+public class ServerV1ToClientV1Test extends AbstractMultiVersionCompatibilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerV1ToClientV1Test.class);
 
