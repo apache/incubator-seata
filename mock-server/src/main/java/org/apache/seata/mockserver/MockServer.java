@@ -48,6 +48,7 @@ public class MockServer {
     private static MockNettyRemotingServer nettyRemotingServer;
 
     private static volatile boolean inited = false;
+    private static volatile int actualPort;
 
     public static final int MOCK_DEFAULT_PORT = 10091;
     public static String MOCK_SEATA_PORT_KEY = "SEATA_MOCK_PORT";
@@ -114,10 +115,15 @@ public class MockServer {
                     }));
                     LOGGER.info(
                             "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    actualPort = port;
                     LOGGER.info("MockServer started on port: {}", port);
                 }
             }
         }
+    }
+
+    public static int getPort() {
+        return actualPort;
     }
 
     public static void close() {

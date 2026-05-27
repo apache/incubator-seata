@@ -29,7 +29,9 @@ import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.ServerSocket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -40,9 +42,12 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractServerTest {
 
+    private static final int SERVER_PORT = findAvailablePort();
+
     static {
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
+        System.setProperty("service.default.grouplist", "127.0.0.1:" + SERVER_PORT);
         try {
             Method method = ConfigurationFactory.class.getDeclaredMethod("reload");
             method.setAccessible(true);
@@ -55,6 +60,15 @@ public abstract class AbstractServerTest {
     private static NettyRemotingServer nettyServer;
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
             100, 500, 500, TimeUnit.SECONDS, new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+
+    private static int findAvailablePort() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            socket.setReuseAddress(true);
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            return 8091;
+        }
+    }
 
     protected static void startSeataServer() throws InterruptedException {
         (new Thread(new Runnable() {
@@ -70,7 +84,7 @@ public abstract class AbstractServerTest {
                         MetricsManager.get().init();
 
                         NettyServerConfig nettyServerConfig = new NettyServerConfig();
-                        nettyServerConfig.setServerListenPort(8091);
+                        nettyServerConfig.setServerListenPort(SERVER_PORT);
                         nettyServer = new NettyRemotingServer(workingThreads, nettyServerConfig);
                         UUIDGenerator.init(parameterParser.getServerNode());
                         // log store mode : file、db
