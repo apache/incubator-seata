@@ -45,9 +45,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <forkCount>2</forkCount>
+                    <forkCount>1</forkCount>
                     <reuseForks>true</reuseForks>
-                    <runOrder>filesystem</runOrder>
                 </configuration>
             </plugin>
             <plugin>
