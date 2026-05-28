@@ -23,6 +23,7 @@ import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -118,10 +119,17 @@ public abstract class AbstractConnectionProxy implements Connection {
                                     getTargetConnection(),
                                     sqlRecognizer.getTableName(),
                                     getDataSourceProxy().getResourceId());
-                    String[] pkNameArray =
-                            new String[tableMeta.getPrimaryKeyOnlyName().size()];
-                    tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
-                    targetPreparedStatement = getTargetConnection().prepareStatement(sql, pkNameArray);
+                    // Fix: SQL Server does not support array of column names for getGeneratedKeys, use
+                    // RETURN_GENERATED_KEYS instead.
+                    if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                        targetPreparedStatement =
+                                getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                    } else {
+                        String[] pkNameArray =
+                                new String[tableMeta.getPrimaryKeyOnlyName().size()];
+                        tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
+                        targetPreparedStatement = getTargetConnection().prepareStatement(sql, pkNameArray);
+                    }
                 }
             }
         }

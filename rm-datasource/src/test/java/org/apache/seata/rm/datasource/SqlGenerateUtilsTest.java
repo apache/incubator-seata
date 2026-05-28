@@ -64,4 +64,48 @@ class SqlGenerateUtilsTest {
                 "select id,name from t_order where  (id,name) in ( (?,?),(?,?) ) union select id,name from t_order where  (id,name) in ( (?,?),(?,?) )",
                 sqlJoiner.toString());
     }
+
+    @Test
+    void testBuildWhereConditionListByPKsForSqlServer() {
+        List<String> pkNameList = new ArrayList<>();
+        pkNameList.add("id");
+        pkNameList.add("name");
+
+        // Test SQL Server composite primary key syntax
+        List<SqlGenerateUtils.WhereSql> results =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 4, "sqlserver", 2);
+
+        Assertions.assertEquals(2, results.size());
+        // SQL Server should use AND/OR syntax instead of tuple IN
+        results.forEach(result -> {
+            Assertions.assertEquals("(id=? AND name=?) OR (id=? AND name=?)", result.getSql());
+            Assertions.assertEquals(2, result.getRowSize());
+            Assertions.assertEquals(2, result.getPkSize());
+        });
+
+        // Test with odd row size
+        List<SqlGenerateUtils.WhereSql> resultsOdd =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 5, "sqlserver", 2);
+        Assertions.assertEquals(3, resultsOdd.size());
+        Assertions.assertEquals(
+                "(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(0).getSql());
+        Assertions.assertEquals(
+                "(id=? AND name=?) OR (id=? AND name=?)", resultsOdd.get(1).getSql());
+        Assertions.assertEquals("(id=? AND name=?)", resultsOdd.get(2).getSql());
+        Assertions.assertEquals(1, resultsOdd.get(2).getRowSize());
+    }
+
+    @Test
+    void testBuildWhereConditionListByPKsForSqlServerWithSinglePk() {
+        List<String> pkNameList = new ArrayList<>();
+        pkNameList.add("id");
+
+        // Single PK should use the common tuple IN syntax, not SQL Server special branch
+        List<SqlGenerateUtils.WhereSql> results =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 3, "sqlserver", 2);
+
+        Assertions.assertEquals(2, results.size());
+        Assertions.assertEquals("(id) in ( (?),(?) )", results.get(0).getSql());
+        Assertions.assertEquals("(id) in ( (?) )", results.get(1).getSql());
+    }
 }
