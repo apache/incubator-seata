@@ -41,7 +41,7 @@ import java.util.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AbstractUndoExecutorTest extends BaseH2Test {
+public class BaseUndoExecutorTest extends BaseH2Test {
 
     @Test
     public void dataValidationUpdate() throws SQLException {
