@@ -25,6 +25,7 @@ import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,13 +107,9 @@ public class MockServer {
                     coordinator.setRemotingServer(nettyRemotingServer);
                     nettyRemotingServer.setHandler(coordinator);
                     nettyRemotingServer.init();
-                    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            LOGGER.info("system is closing , pid info: "
-                                    + ManagementFactory.getRuntimeMXBean().getName());
-                        }
-                    }));
+                    ShutdownHook.getInstance()
+                            .addDisposable(() -> LOGGER.info("system is closing , pid info: "
+                                    + ManagementFactory.getRuntimeMXBean().getName()));
                     LOGGER.info(
                             "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
                     actualPort = port;
