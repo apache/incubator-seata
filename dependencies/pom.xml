@@ -84,14 +84,13 @@
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.52</fastjson2.version>
-        <groovy.version>2.4.4</groovy.version>
+        <groovy.version>4.0.31</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
         <jackson3.version>3.1.1</jackson3.version>
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -134,7 +133,7 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
+        <tomcat-embed.version>9.0.117</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
@@ -767,9 +766,10 @@
                 <version>${kotlin-coroutines.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
+                <type>pom</type>
                 <exclusions>
                     <exclusion>
                         <groupId>org.junit.jupiter</groupId>
