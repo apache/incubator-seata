@@ -58,7 +58,7 @@ public abstract class AbstractServerTest {
     }
 
     private static NettyRemotingServer nettyServer;
-    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
+    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(
             100, 500, 500, TimeUnit.SECONDS, new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     private static int findAvailablePort() {
@@ -85,7 +85,7 @@ public abstract class AbstractServerTest {
 
                         NettyServerConfig nettyServerConfig = new NettyServerConfig();
                         nettyServerConfig.setServerListenPort(SERVER_PORT);
-                        nettyServer = new NettyRemotingServer(workingThreads, nettyServerConfig);
+                        nettyServer = new NettyRemotingServer(WORKING_THREADS, nettyServerConfig);
                         UUIDGenerator.init(parameterParser.getServerNode());
                         // log store mode : file、db
                         SessionHolder.init();

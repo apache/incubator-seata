@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class AbstractMultiVersionCompatibilityTestTest extends AbstractMultiVersionCompatibilityTest {
+public class MultiVersionCompatibilityCoverageTest extends AbstractMultiVersionCompatibilityTest {
 
     @AfterEach
     @Override
