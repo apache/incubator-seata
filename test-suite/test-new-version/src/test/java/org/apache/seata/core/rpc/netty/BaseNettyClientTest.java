@@ -17,10 +17,10 @@
 package org.apache.seata.core.rpc.netty;
 
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -41,6 +41,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class BaseNettyClientTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseNettyClientTest.class);
+
+    private String originalGroupList;
+    private String originalServerPort;
+    private String originalShutdownWait;
 
     /**
      * Get a dynamic available port
@@ -119,19 +123,34 @@ public abstract class BaseNettyClientTest {
         serverConfig.setServerListenPort(port);
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads, serverConfig);
 
+        AtomicBoolean serverStatus = new AtomicBoolean();
         new Thread(() -> {
-                    SessionHolder.init(null);
-                    nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-                    // set registry
-                    XID.setIpAddress(NetUtil.getLocalIp());
-                    XID.setPort(port);
-                    // init snowflake for transactionId, branchId
-                    UUIDGenerator.init(1L);
-                    nettyRemotingServer.init();
+                    try {
+                        SessionHolder.init(null);
+                        nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+                        XID.setIpAddress(NetUtil.getLocalIp());
+                        XID.setPort(port);
+                        UUIDGenerator.init(1L);
+                        nettyRemotingServer.init();
+                        serverStatus.set(true);
+                    } catch (Throwable t) {
+                        serverStatus.set(false);
+                        LOGGER.error("The seata-server failed to start", t);
+                    }
                 })
                 .start();
 
-        Thread.sleep(3000); // Simple wait
+        long start = System.nanoTime();
+        long maxWaitNanoTime = 10_000_000_000L;
+        while (System.nanoTime() - start < maxWaitNanoTime) {
+            Thread.sleep(100);
+            if (serverStatus.get()) {
+                break;
+            }
+        }
+        if (!serverStatus.get()) {
+            throw new RuntimeException("Waiting for a while, but the seata-server did not start successfully.");
+        }
         return new ServerInstance(nettyRemotingServer, port);
     }
 
@@ -139,16 +158,31 @@ public abstract class BaseNettyClientTest {
      * Configure client to use the specified port
      */
     protected void configureClient(int port) {
-        ConfigurationTestHelper.putConfig("service.default.grouplist", "127.0.0.1:" + port);
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
+        originalGroupList = System.getProperty("service.default.grouplist");
+        originalServerPort = System.getProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        originalShutdownWait = System.getProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        System.setProperty("service.default.grouplist", "127.0.0.1:" + port);
+        System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
+        ConfigurationCache.clear();
     }
 
     /**
      * Clean up client configuration
      */
     protected void cleanupClientConfig() {
-        ConfigurationTestHelper.removeConfig("service.default.grouplist");
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        restoreProperty("service.default.grouplist", originalGroupList);
+        restoreProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, originalServerPort);
+        restoreProperty(ConfigurationKeys.SHUTDOWN_WAIT, originalShutdownWait);
+        ConfigurationCache.clear();
+    }
+
+    private static void restoreProperty(String key, String originalValue) {
+        if (originalValue == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, originalValue);
+        }
     }
 
     /**
