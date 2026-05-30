@@ -22,8 +22,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.EvaluationException;
 import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.TypeLocator;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelMessage;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -43,9 +46,22 @@ public class SpringELExpressionFactory implements ExpressionFactory {
     @Override
     public Expression createExpression(String expression) {
         org.springframework.expression.Expression defaultExpression = parser.parseExpression(expression);
-        EvaluationContext evaluationContext = ((SpelExpression) defaultExpression).getEvaluationContext();
-        ((StandardEvaluationContext) evaluationContext).setBeanResolver(new AppContextBeanResolver());
-        return new SpringELExpression(defaultExpression);
+        StandardEvaluationContext evaluationContext = createRestrictedEvaluationContext();
+        return new SpringELExpression(defaultExpression, evaluationContext);
+    }
+
+    private StandardEvaluationContext createRestrictedEvaluationContext() {
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        context.setTypeLocator(new DenyAllTypeLocator());
+        context.setBeanResolver(new AppContextBeanResolver());
+        return context;
+    }
+
+    private static class DenyAllTypeLocator implements TypeLocator {
+        @Override
+        public Class<?> findType(String typeName) throws EvaluationException {
+            throw new SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);
+        }
     }
 
     private class AppContextBeanResolver implements BeanResolver {
