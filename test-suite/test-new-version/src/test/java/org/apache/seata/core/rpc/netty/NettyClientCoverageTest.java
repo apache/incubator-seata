@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class BaseNettyClientCoverageTest extends BaseNettyClientTest {
+public class NettyClientCoverageTest extends BaseNettyClientTest {
 
     @BeforeEach
     public void saveProperties() {
