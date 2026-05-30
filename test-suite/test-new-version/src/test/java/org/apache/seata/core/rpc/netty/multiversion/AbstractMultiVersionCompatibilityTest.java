@@ -175,7 +175,7 @@ public abstract class AbstractMultiVersionCompatibilityTest {
         bossGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
         workerGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
         clientGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
-        if (StringUtils.isBlank(originalTransportProtocol)) {
+        if (originalTransportProtocol == null) {
             System.clearProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
         } else {
             System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);

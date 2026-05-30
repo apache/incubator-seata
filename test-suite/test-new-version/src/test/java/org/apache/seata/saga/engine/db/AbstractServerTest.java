@@ -19,6 +19,7 @@ package org.apache.seata.saga.engine.db;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
@@ -30,7 +31,6 @@ import org.apache.seata.server.session.SessionHolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,17 +44,19 @@ public abstract class AbstractServerTest {
 
     private static final int SERVER_PORT = findAvailablePort();
 
+    private static String originalConfigType;
+    private static String originalConfigFileName;
+    private static String originalGroupList;
+
     static {
+        originalConfigType = System.getProperty("config.type");
+        originalConfigFileName = System.getProperty("config.file.name");
+        originalGroupList = System.getProperty("service.default.grouplist");
         System.setProperty("config.type", "file");
         System.setProperty("config.file.name", "file.conf");
         System.setProperty("service.default.grouplist", "127.0.0.1:" + SERVER_PORT);
-        try {
-            Method method = ConfigurationFactory.class.getDeclaredMethod("reload");
-            method.setAccessible(true);
-            method.invoke(null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        ConfigurationFactory.reload();
+        ConfigurationCache.clear();
     }
 
     private static NettyRemotingServer nettyServer;
@@ -66,7 +68,7 @@ public abstract class AbstractServerTest {
             socket.setReuseAddress(true);
             return socket.getLocalPort();
         } catch (IOException e) {
-            return 8091;
+            throw new RuntimeException("Failed to allocate an available port", e);
         }
     }
 
@@ -116,6 +118,18 @@ public abstract class AbstractServerTest {
         if (nettyServer != null) {
             nettyServer.destroy();
             Thread.sleep(5000);
+        }
+        restoreProperty("config.type", originalConfigType);
+        restoreProperty("config.file.name", originalConfigFileName);
+        restoreProperty("service.default.grouplist", originalGroupList);
+        ConfigurationCache.clear();
+    }
+
+    private static void restoreProperty(String key, String originalValue) {
+        if (originalValue == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, originalValue);
         }
     }
 }
