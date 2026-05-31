@@ -25,8 +25,8 @@ import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -284,19 +284,7 @@ public class BaseUndoExecutorTest extends BaseH2Test {
         idColMeta.setDataType(java.sql.Types.INTEGER);
         when(tableMeta.getColumnMeta("id")).thenReturn(idColMeta);
 
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
-
-        List<Row> rows = new ArrayList<>();
-        Row row = new Row();
-        Field pkField = new Field();
-        pkField.setName("id");
-        pkField.setType(java.sql.Types.INTEGER);
-        pkField.setValue(12345);
-        row.add(pkField);
-        rows.add(row);
-        beforeImage.setRows(rows);
+        TableRecords beforeImage = getTableRecords(tableMeta);
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.UPDATE);
@@ -330,30 +318,35 @@ public class BaseUndoExecutorTest extends BaseH2Test {
         String executedSql = sqlCaptor.getValue();
 
         Assertions.assertTrue(
-                executedSql.contains("\"id\", \"name\", \"invisible_col\""),
-                "The query did not explicitly project the expected columns.");
+                executedSql.contains("\"id\", \"name\"") && !executedSql.contains("\"invisible_col\""),
+                "The query should explicitly project ONLY the columns from the undo log, ignoring hidden columns in tableMeta.");
         Assertions.assertTrue(
-                executedSql.startsWith("SELECT \"id\", \"name\", \"invisible_col\" FROM table_name WHERE"),
+                executedSql.startsWith("SELECT \"id\", \"name\" FROM table_name WHERE"),
                 "The query format was incorrect. Captured SQL: " + executedSql);
     }
 
-    @BeforeEach
-    public void setupTableMetaColumns() {
-        Map<String, ColumnMeta> allColumns = new LinkedHashMap<>();
+    private static @NonNull TableRecords getTableRecords(TableMeta tableMeta) {
+        TableRecords beforeImage = new TableRecords();
+        beforeImage.setTableName("table_name");
+        beforeImage.setTableMeta(tableMeta);
 
-        ColumnMeta idCol = new ColumnMeta();
-        idCol.setColumnName("id");
-        allColumns.put("id", idCol);
+        List<Row> rows = new ArrayList<>();
+        Row row = new Row();
+        Field pkField = new Field();
+        pkField.setName("id");
+        pkField.setType(java.sql.Types.INTEGER);
+        pkField.setValue(12345);
+        row.add(pkField);
 
-        ColumnMeta nameCol = new ColumnMeta();
-        nameCol.setColumnName("name");
-        allColumns.put("name", nameCol);
+        Field nameField = new Field();
+        nameField.setName("name");
+        nameField.setType(java.sql.Types.VARCHAR);
+        nameField.setValue("aaa");
+        row.add(nameField);
 
-        if (Mockito.mockingDetails(tableMeta).isMock()) {
-            when(tableMeta.getAllColumns()).thenReturn(allColumns);
-        } else {
-            tableMeta.getAllColumns().putAll(allColumns);
-        }
+        rows.add(row);
+        beforeImage.setRows(rows);
+        return beforeImage;
     }
 }
 
