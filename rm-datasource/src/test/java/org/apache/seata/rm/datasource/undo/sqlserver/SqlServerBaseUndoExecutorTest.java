@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BaseSqlServerUndoExecutorTest {
+public class SqlServerBaseUndoExecutorTest {
 
     private TestBaseSqlServerUndoExecutor executor;
     private SQLUndoLog sqlUndoLog;
