@@ -99,7 +99,7 @@
     "@babel/runtime": "^7.27.0",
     "braces": "3.0.3",
     "micromatch": "4.0.8",
-    "serialize-javascript": "^7.0.5",
+    "serialize-javascript": "6.0.2",
     "node-forge": "1.4.0",
     "min-document": "^2.19.1",
     "js-yaml": "^3.14.2",
@@ -111,6 +111,7 @@
     "bn.js": "^4.12.3",
     "picomatch": "^4.0.4",
     "yaml": "^1.10.3",
-    "@tootallnate/once": "^3.0.1"
+    "@tootallnate/once": "^3.0.1",
+    "@peculiar/x509": "1.12.4"
   }
 }
