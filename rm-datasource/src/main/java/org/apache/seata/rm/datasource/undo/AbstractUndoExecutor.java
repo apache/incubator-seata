@@ -307,7 +307,6 @@ public abstract class AbstractUndoExecutor {
         List<SqlGenerateUtils.WhereSql> sqlConditions =
                 SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowSize, connectionProxy.getDbType());
 
-        List<Row> rows = undoRecords.getRows();
         String selectColumns = undoRecords.getRows().get(0).getFields().stream()
                 .map(field -> ColumnUtils.addEscape(field.getName(), connectionProxy.getDbType()))
                 .collect(Collectors.joining(", "));
