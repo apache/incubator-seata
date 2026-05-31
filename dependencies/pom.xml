@@ -133,7 +133,7 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.117</tomcat-embed.version>
+        <tomcat-embed.version>9.0.118</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
