@@ -46,14 +46,16 @@ public class FileLoaderTest {
     @Test
     public void testLoadWhenDirectPath() throws Exception {
         Path tempFile = Paths.get("direct-test-file.txt");
-        Files.createFile(tempFile);
-
-        File result = FileLoader.load("direct-test-file.txt");
-
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.exists());
-
         Files.deleteIfExists(tempFile);
+        Files.createFile(tempFile);
+        try {
+            File result = FileLoader.load("direct-test-file.txt");
+
+            Assertions.assertNotNull(result);
+            Assertions.assertTrue(result.exists());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
     }
 
     @Test
@@ -62,14 +64,16 @@ public class FileLoaderTest {
         String decodedName = "测试 文件.txt";
 
         Path tempFile = Paths.get(decodedName);
-        Files.createFile(tempFile);
-
-        File result = FileLoader.load(encodedName);
-
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.exists());
-
         Files.deleteIfExists(tempFile);
+        Files.createFile(tempFile);
+        try {
+            File result = FileLoader.load(encodedName);
+
+            Assertions.assertNotNull(result);
+            Assertions.assertTrue(result.exists());
+        } finally {
+            Files.deleteIfExists(tempFile);
+        }
     }
 
     @Test

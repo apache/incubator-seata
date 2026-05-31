@@ -21,7 +21,6 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -46,6 +45,16 @@ public class ProtocolV1Server {
 
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
+
+    public ProtocolV1Server() {}
+
+    public ProtocolV1Server(int port) {
+        this.port = port;
+    }
+
+    public int getPort() {
+        return port;
+    }
 
     public void start() {
 
@@ -75,16 +84,14 @@ public class ProtocolV1Server {
         String host = "0.0.0.0";
 
         ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(host, port));
-        ChannelFuture channelFuture = future.addListener((ChannelFutureListener) future1 -> {
-            if (!future1.isSuccess()) {
-                throw new RuntimeException("Server start fail !", future1.cause());
-            }
-        });
-
         try {
-            channelFuture.await(5000, TimeUnit.MILLISECONDS);
+            future.await(5000, TimeUnit.MILLISECONDS);
+            if (!future.isSuccess()) {
+                throw new RuntimeException("Server start fail!", future.cause());
+            }
+            this.port = ((InetSocketAddress) future.channel().localAddress()).getPort();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 

@@ -45,11 +45,12 @@ public class ProtocolV1SerializerTest {
 
     @Test
     public void testAll() {
-        ProtocolV1Server server = new ProtocolV1Server();
+        ProtocolV1Server server = new ProtocolV1Server(0);
         ProtocolV1Client client = new ProtocolV1Client();
         try {
             server.start();
-            client.connect("127.0.0.1", 8811, 500);
+            int port = server.getPort();
+            client.connect("127.0.0.1", port, 5000);
 
             Assertions.assertTrue(client.channel.isActive());
 

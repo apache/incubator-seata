@@ -20,6 +20,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -150,6 +151,7 @@ public abstract class BaseNettyClientTest {
         System.setProperty("service.default.grouplist", "127.0.0.1:" + port);
         System.setProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(port));
         System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
+        ConfigurationCache.clear();
     }
 
     /**
@@ -159,6 +161,7 @@ public abstract class BaseNettyClientTest {
         System.clearProperty("service.default.grouplist");
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        ConfigurationCache.clear();
     }
 
     /**
