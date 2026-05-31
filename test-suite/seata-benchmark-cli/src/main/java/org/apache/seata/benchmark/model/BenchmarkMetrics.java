@@ -32,10 +32,14 @@ public class BenchmarkMetrics {
     private final AtomicLong totalCount = new AtomicLong(0);
     private final AtomicLong successCount = new AtomicLong(0);
     private final AtomicLong failedCount = new AtomicLong(0);
+    private final AtomicLong committedCount = new AtomicLong(0);
+    private final AtomicLong compensatedCount = new AtomicLong(0);
+    private final AtomicLong compensationFailedCount = new AtomicLong(0);
+    private final AtomicLong unknownCount = new AtomicLong(0);
     private final List<Long> latencies =
             Collections.synchronizedList(new ArrayList<>(BenchmarkConstants.MAX_LATENCY_SAMPLES));
     private final AtomicLong totalSamples = new AtomicLong(0);
-    private final long startTime = System.currentTimeMillis();
+    private volatile long startTime = System.currentTimeMillis();
 
     private volatile long lastCountSnapshot = 0;
     private volatile long lastSnapshotTime = System.currentTimeMillis();
@@ -52,6 +56,29 @@ public class BenchmarkMetrics {
     public void recordFailure(long latencyMs) {
         totalCount.incrementAndGet();
         failedCount.incrementAndGet();
+        addLatencySample(latencyMs);
+    }
+
+    public void recordTransaction(String status, long latencyMs) {
+        totalCount.incrementAndGet();
+
+        if (BenchmarkConstants.STATUS_COMMITTED.equals(status)) {
+            successCount.incrementAndGet();
+            committedCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_COMPENSATED.equals(status)) {
+            compensatedCount.incrementAndGet();
+            successCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_COMPENSATION_FAILED.equals(status)) {
+            compensationFailedCount.incrementAndGet();
+            failedCount.incrementAndGet();
+        } else if (BenchmarkConstants.STATUS_FAILED.equals(status)
+                || BenchmarkConstants.STATUS_ROLLBACKED.equals(status)) {
+            failedCount.incrementAndGet();
+        } else {
+            unknownCount.incrementAndGet();
+            failedCount.incrementAndGet();
+        }
+
         addLatencySample(latencyMs);
     }
 
@@ -80,12 +107,56 @@ public class BenchmarkMetrics {
         return failedCount.get();
     }
 
+    public long getCommittedCount() {
+        return committedCount.get();
+    }
+
+    public long getCompensatedCount() {
+        return compensatedCount.get();
+    }
+
+    public long getExecutionFailedCount() {
+        return failedCount.get() - compensationFailedCount.get() - unknownCount.get();
+    }
+
+    public long getCompensationFailedCount() {
+        return compensationFailedCount.get();
+    }
+
+    public long getUnknownCount() {
+        return unknownCount.get();
+    }
+
     public double getSuccessRate() {
         long total = totalCount.get();
         if (total == 0) {
             return 0.0;
         }
         return (double) successCount.get() / total * 100;
+    }
+
+    public double getCommittedRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) committedCount.get() / total * 100;
+    }
+
+    public double getCompensatedRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) compensatedCount.get() / total * 100;
+    }
+
+    public double getEndStateSuccessRate() {
+        long total = totalCount.get();
+        if (total == 0) {
+            return 0.0;
+        }
+        return (double) (committedCount.get() + compensatedCount.get()) / total * 100;
     }
 
     public double getAverageTps() {
@@ -121,14 +192,14 @@ public class BenchmarkMetrics {
             return cachedStats;
         }
 
-        synchronized (this) {
+        synchronized (latencies) {
             // Double-check
             if (cachedStats != null && (now - lastStatsUpdateTime) < BenchmarkConstants.LATENCY_STATS_CACHE_MS) {
                 return cachedStats;
             }
 
             if (latencies.isEmpty()) {
-                cachedStats = new LatencyStats(0, 0, 0, 0);
+                cachedStats = new LatencyStats(0, 0, 0, 0, 0);
             } else {
                 List<Long> sortedLatencies = new ArrayList<>(latencies);
                 Collections.sort(sortedLatencies);
@@ -137,9 +208,10 @@ public class BenchmarkMetrics {
                 long p50 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.5) - 1));
                 long p95 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.95) - 1));
                 long p99 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.99) - 1));
+                long p999 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.999) - 1));
                 long max = sortedLatencies.get(size - 1);
 
-                cachedStats = new LatencyStats(p50, p95, p99, max);
+                cachedStats = new LatencyStats(p50, p95, p99, p999, max);
             }
 
             lastStatsUpdateTime = now;
@@ -148,24 +220,34 @@ public class BenchmarkMetrics {
     }
 
     public void reset() {
+        startTime = System.currentTimeMillis();
         totalCount.set(0);
         successCount.set(0);
         failedCount.set(0);
+        committedCount.set(0);
+        compensatedCount.set(0);
+        compensationFailedCount.set(0);
+        unknownCount.set(0);
+        totalSamples.set(0);
         latencies.clear();
         lastCountSnapshot = 0;
         lastSnapshotTime = System.currentTimeMillis();
+        cachedStats = null;
+        lastStatsUpdateTime = 0;
     }
 
     public static class LatencyStats {
         private final long p50;
         private final long p95;
         private final long p99;
+        private final long p999;
         private final long max;
 
-        public LatencyStats(long p50, long p95, long p99, long max) {
+        public LatencyStats(long p50, long p95, long p99, long p999, long max) {
             this.p50 = p50;
             this.p95 = p95;
             this.p99 = p99;
+            this.p999 = p999;
             this.max = max;
         }
 
@@ -179,6 +261,10 @@ public class BenchmarkMetrics {
 
         public long getP99() {
             return p99;
+        }
+
+        public long getP999() {
+            return p999;
         }
 
         public long getMax() {

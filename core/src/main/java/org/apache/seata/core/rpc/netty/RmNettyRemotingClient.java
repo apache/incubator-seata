@@ -17,10 +17,11 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -31,8 +32,12 @@ import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.MessageType;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.UnregisterRMRequest;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
@@ -42,6 +47,8 @@ import org.apache.seata.core.rpc.processor.client.RmUndoLogProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -159,15 +166,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             synchronized (RmNettyRemotingClient.class) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    final ThreadPoolExecutor messageExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads(),
                             nettyClientConfig.getClientWorkerThreads(),
                             KEEP_ALIVE_TIME,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(
-                                    nettyClientConfig.getRmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()),
                             new ThreadPoolExecutor.CallerRunsPolicy());
                     instance = new RmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
@@ -216,6 +221,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                     channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel, registerRMRequest.getVersion());
+        getClientChannelManager().putServerVersion(serverAddress, registerRMResponse.getVersion());
         String dbKey = getMergedResourceKeys();
         if (registerRMRequest.getResourceIds() != null) {
             if (!registerRMRequest.getResourceIds().equals(dbKey)) {
@@ -292,6 +298,59 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
     }
 
+    public void unregisterResource(String resourceGroupId, String resourceId) {
+        if (StringUtils.isBlank(transactionServiceGroup) || StringUtils.isBlank(resourceId)) {
+            return;
+        }
+        sendUnregisterToServers(resourceId);
+    }
+
+    private static final long UNREGISTER_FLUSH_TIMEOUT_MS = 1000;
+
+    private List<ChannelFuture> sendUnregisterToServers(String resourceIds) {
+        List<ChannelFuture> futures = new ArrayList<>();
+        try {
+            for (Map.Entry<String, Channel> entry :
+                    getClientChannelManager().getChannels().entrySet()) {
+                String serverAddress = entry.getKey();
+                Channel channel = entry.getValue();
+                if (!channel.isActive()) {
+                    continue;
+                }
+                String serverVersion = getClientChannelManager().getServerVersion(serverAddress);
+                if (serverVersion == null || !Version.isAboveOrEqualVersion260(serverVersion)) {
+                    LOGGER.warn(
+                            "Server {} does not support UnregisterRMRequest (version: {})",
+                            serverAddress,
+                            serverVersion);
+                    continue;
+                }
+                UnregisterRMRequest message = new UnregisterRMRequest(applicationId, transactionServiceGroup);
+                message.setResourceIds(resourceIds);
+                try {
+                    if (!channel.isWritable()) {
+                        throw new FrameworkException(
+                                "msg:" + message.toString(), FrameworkErrorCode.ChannelIsNotWritable);
+                    }
+                    RpcMessage rpcMessage = buildRequestMessage(message, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+                    futures.add(channel.writeAndFlush(rpcMessage));
+                } catch (FrameworkException e) {
+                    if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && serverAddress != null) {
+                        getClientChannelManager().releaseChannel(channel, serverAddress);
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("remove not writable channel:{}", channel);
+                        }
+                    } else {
+                        LOGGER.error("unregister resource failed, channel:{},resourceIds:{}", channel, resourceIds, e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to send unregister request for resource {}", resourceIds, e);
+        }
+        return futures;
+    }
+
     public String getMergedResourceKeys() {
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
@@ -317,6 +376,21 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     @Override
     public void destroy() {
+        if (resourceManager != null && StringUtils.isNotBlank(transactionServiceGroup)) {
+            String allResourceIds = getMergedResourceKeys();
+            if (StringUtils.isNotBlank(allResourceIds)) {
+                List<ChannelFuture> futures = sendUnregisterToServers(allResourceIds);
+                for (ChannelFuture future : futures) {
+                    try {
+                        future.await(UNREGISTER_FLUSH_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }
+        getClientChannelManager().clearServerVersions();
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
@@ -371,6 +445,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_LOCK_QUERY_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
+        super.registerProcessor(MessageType.TYPE_UNREG_RM_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BATCH_RESULT_MSG, onResponseProcessor, null);
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();

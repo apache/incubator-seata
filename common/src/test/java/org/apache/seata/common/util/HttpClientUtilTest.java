@@ -16,6 +16,7 @@
  */
 package org.apache.seata.common.util;
 
+import com.sun.net.httpserver.HttpServer;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -27,9 +28,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -592,14 +596,37 @@ public class HttpClientUtilTest {
 
     @Test
     void testHttpSendRes() throws IOException {
-        Response response = HttpClientUtil.doGet("http:www.baidu.com", null, null, 3000);
-        Response postResponse = HttpClientUtil.doPost("http:www.baidu.com", new HashMap<>(), new HashMap<>(), 3000);
-        Response postResponse2 = HttpClientUtil.doPost("http:www.baidu.com", "", new HashMap<>(), 3000);
-        Response nonjsonResponse = HttpClientUtil.doPostJson("http:www.baidu.com", "nonjson", new HashMap<>(), 3000);
-        assertNotNull(response);
-        assertNotNull(postResponse);
-        assertNotNull(postResponse2);
-        assertNotNull(nonjsonResponse);
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/test", exchange -> {
+            byte[] responseBody = "ok".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, responseBody.length);
+            try (OutputStream outputStream = exchange.getResponseBody()) {
+                outputStream.write(responseBody);
+            }
+        });
+        server.start();
+
+        String url = "http://127.0.0.1:" + server.getAddress().getPort() + "/test";
+
+        try {
+            try (Response response = HttpClientUtil.doGet(url, null, null, 3000);
+                    Response postResponse = HttpClientUtil.doPost(url, new HashMap<>(), new HashMap<>(), 3000);
+                    Response postResponse2 = HttpClientUtil.doPost(url, "", new HashMap<>(), 3000);
+                    Response nonjsonResponse = HttpClientUtil.doPostJson(url, "nonjson", new HashMap<>(), 3000)) {
+
+                assertNotNull(response);
+                assertNotNull(postResponse);
+                assertNotNull(postResponse2);
+                assertNotNull(nonjsonResponse);
+
+                assertEquals(200, response.code());
+                assertEquals(200, postResponse.code());
+                assertEquals(200, postResponse2.code());
+                assertEquals(200, nonjsonResponse.code());
+            }
+        } finally {
+            server.stop(0);
+        }
     }
 
     @Test

@@ -73,6 +73,11 @@ dependency-reduced-pom.xml
 .DS_Store
 Thumbs.db
 *.orig
+.github/agents/**
+.github/instructions/**
+.github/prompts/**
+.github/skills/**
+.github/copilot-instructions.md
 
 #h2
 *.db

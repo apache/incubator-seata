@@ -18,6 +18,7 @@ package org.apache.seata.saga.engine.pcext.interceptors;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -60,6 +61,8 @@ import java.util.Map;
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskHandlerInterceptor.class);
+
+    private final ResourceLock STATUS_LOCK = new ResourceLock();
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
@@ -325,7 +328,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
                 if (statusEvaluators == null) {
-                    synchronized (state) {
+                    try (ResourceLock ignored = STATUS_LOCK.obtain()) {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());

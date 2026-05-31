@@ -17,7 +17,7 @@
 package org.apache.seata.server.instance;
 
 import org.apache.seata.common.metadata.Instance;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
@@ -34,7 +34,6 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -75,7 +74,7 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
             VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
-            EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
+            EXECUTOR_SERVICE = ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("scheduledExecutor", 1, true);
             EXECUTOR_SERVICE.scheduleAtFixedRate(
                     () -> {
                         try {

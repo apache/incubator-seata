@@ -35,12 +35,12 @@
         <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
         <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>11.0.12</tomcat-embed.version>
+        <tomcat-embed.version>11.0.18</tomcat-embed.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot -->
+            <!-- Spring Boot  -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -48,7 +48,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- spring-framework-->
+            <!-- spring-framework  -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
@@ -98,6 +98,7 @@
             <version>${tomcat-embed.version}</version>
         </dependency>
 
+        <!-- Force override explicit versions for key dependencies to bypass BOM conflict -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -129,7 +130,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -168,10 +168,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
         </dependency>
     </dependencies>
 

@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.AsyncCallback;
@@ -44,6 +45,8 @@ import java.util.concurrent.Semaphore;
 public class EngineUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
+
+    private static final ResourceLock EXCEPTION_LOCK = new ResourceLock();
 
     /**
      * generate parent id
@@ -198,7 +201,7 @@ public class EngineUtils {
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
                 if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
-                        synchronized (exceptionMatch) {
+                        try (ResourceLock ignored = EXCEPTION_LOCK.obtain()) {
                             exceptionClasses = exceptionMatch.getExceptionClasses();
                             if (exceptionClasses == null) {
 

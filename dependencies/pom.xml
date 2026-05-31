@@ -47,7 +47,7 @@
         <config.version>1.2.1</config.version>
         <commons-logging.version>1.2</commons-logging.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <commons-io.version>2.8.0</commons-io.version>
+        <commons-io.version>2.21.0</commons-io.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
@@ -57,7 +57,7 @@
         <eureka-clients.version>1.10.18</eureka-clients.version>
         <jettison.version>1.5.4</jettison.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.6</nacos-client.version>
+        <nacos-client.version>2.0.4</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>32.1.3-jre</guava.version>
@@ -72,7 +72,7 @@
         <bucket4j.version>8.1.0</bucket4j.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <ant.version>1.10.12</ant.version>
-        <lz4.version>1.9.0</lz4.version>
+        <lz4.version>1.10.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <netty.version>4.1.101.Final</netty.version>
@@ -84,13 +84,13 @@
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.52</fastjson2.version>
-        <groovy.version>2.4.4</groovy.version>
+        <groovy.version>4.0.31</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
+        <jackson3.version>3.1.1</jackson3.version>
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -110,13 +110,13 @@
         <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <dm.version>8.1.2.192</dm.version>
-        <postgresql.version>42.3.8</postgresql.version>
+        <postgresql.version>42.3.10</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <kingbase.version>9.0.0</kingbase.version>
         <oscar.version>4.1.152</oscar.version>
         <!-- db connection pool -->
-        <druid.version>1.2.25</druid.version>
+        <druid.version>1.2.28</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <caffeine.version>2.9.3</caffeine.version>
@@ -133,12 +133,12 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
+        <tomcat-embed.version>9.0.117</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
         <mockito-inline.version>4.11.0</mockito-inline.version>
-        <assertj-core.version>3.12.2</assertj-core.version>
+        <assertj-core.version>3.27.7</assertj-core.version>
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
@@ -151,6 +151,23 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- Jackson 3.x -->
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Jackson 2.x BOM -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>
@@ -259,6 +276,12 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>druid</artifactId>
                 <version>${druid.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -743,9 +766,10 @@
                 <version>${kotlin-coroutines.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
+                <type>pom</type>
                 <exclusions>
                     <exclusion>
                         <groupId>org.junit.jupiter</groupId>
@@ -906,21 +930,6 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>cn.com.kingbase</groupId>

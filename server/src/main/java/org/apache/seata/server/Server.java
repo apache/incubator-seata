@@ -18,7 +18,7 @@ package org.apache.seata.server;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -43,6 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_IGNORED_INTERFACES;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERRED_NETWORKS;
 
 /**
@@ -68,24 +69,39 @@ public class Server {
         // initialize the metrics
         MetricsManager.get().init();
 
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
+        ThreadPoolExecutor workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "ServerHandlerThread",
                 NettyServerConfig.getMinServerPoolSize(),
                 NettyServerConfig.getMaxServerPoolSize(),
                 NettyServerConfig.getKeepAliveTime(),
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()),
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
         // 127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
         } else {
+            // Get preferred network patterns from configuration (regex or prefix match)
+            // Used to select specific network interfaces when multiple are available
             String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
+
+            // Get ignored interface patterns from configuration (regex supported)
+            // Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
+            // Example: "VMware.*,VirtualBox.*,bridge.*,docker.*,veth.*"
+            String ignoredInterfaces = ConfigurationFactory.getInstance().getConfig(REGISTRY_IGNORED_INTERFACES);
+            String[] ignoredInterfacesSplit = null;
+            if (ignoredInterfaces != null) {
+                ignoredInterfacesSplit = ignoredInterfaces.split(",");
+            }
+
+            // Get local IP address with interface filtering
+            // Priority: ignored interfaces filter -> preferred networks match -> first valid IP
             if (StringUtils.isNotBlank(preferredNetworks)) {
-                XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
+                XID.setIpAddress(NetUtil.getIgnoredInterfacesLocalIp(
+                        ignoredInterfacesSplit, preferredNetworks.split(REGEX_SPLIT_CHAR)));
             } else {
-                XID.setIpAddress(NetUtil.getLocalIp());
+                XID.setIpAddress(NetUtil.getIgnoredInterfacesLocalIp(ignoredInterfacesSplit));
             }
         }
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);

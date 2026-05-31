@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource;
 import com.alibaba.druid.mock.MockResultSet;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -115,10 +114,7 @@ public class StatementProxyTest {
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
 
-        Connection targetConnection = connectionProxy.getTargetConnection();
-        if (targetConnection instanceof DruidStatementConnection) {
-            targetConnection = ((DruidStatementConnection) targetConnection).getConnection();
-        }
+        Connection targetConnection = connectionProxy.getTargetConnection().unwrap(Connection.class);
 
         Statement statement = mockDriver.createMockStatement((MockConnection) targetConnection);
 
@@ -139,10 +135,7 @@ public class StatementProxyTest {
 
     private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection().getConnection();
-        if (connection instanceof DruidStatementConnection) {
-            return ((DruidStatementConnection) connection).getConnection();
-        }
-        return connection;
+        return connection.unwrap(Connection.class);
     }
 
     @AfterEach

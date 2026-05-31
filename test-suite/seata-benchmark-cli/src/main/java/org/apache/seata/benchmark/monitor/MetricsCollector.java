@@ -16,7 +16,9 @@
  */
 package org.apache.seata.benchmark.monitor;
 
+import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
+import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,19 +35,38 @@ public class MetricsCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsCollector.class);
 
+    private final BenchmarkConfig config;
     private final BenchmarkMetrics metrics;
 
-    public MetricsCollector(BenchmarkMetrics metrics) {
+    public MetricsCollector(BenchmarkConfig config, BenchmarkMetrics metrics) {
+        this.config = config;
         this.metrics = metrics;
     }
 
     public void exportToCsv(String filename) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
             writer.println("Metric,Value");
+            writer.println("Mode," + config.getMode());
+            if (config.getMode() == BranchType.SAGA
+                    && config.getSagaWorkload() != null
+                    && !config.getSagaWorkload().isEmpty()) {
+                writer.println("Saga Workload," + config.getSagaWorkload());
+            }
+            if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+                writer.println("Saga Shape," + config.getSagaShape());
+            }
             writer.println("Total Transactions," + metrics.getTotalCount());
             writer.println("Success Count," + metrics.getSuccessCount());
             writer.println("Failed Count," + metrics.getFailedCount());
+            writer.println("Committed Count," + metrics.getCommittedCount());
+            writer.println("Compensated Count," + metrics.getCompensatedCount());
+            writer.println("Execution Failed Count," + metrics.getExecutionFailedCount());
+            writer.println("Compensation Failed Count," + metrics.getCompensationFailedCount());
+            writer.println("Unknown Count," + metrics.getUnknownCount());
             writer.println("Success Rate (%)," + String.format("%.2f", metrics.getSuccessRate()));
+            writer.println("Committed Rate (%)," + String.format("%.2f", metrics.getCommittedRate()));
+            writer.println("Compensated Rate (%)," + String.format("%.2f", metrics.getCompensatedRate()));
+            writer.println("End-State Success Rate (%)," + String.format("%.2f", metrics.getEndStateSuccessRate()));
             writer.println("Average TPS," + String.format("%.2f", metrics.getAverageTps()));
             writer.println("Elapsed Time (s)," + metrics.getElapsedTimeSeconds());
 
@@ -53,6 +74,7 @@ public class MetricsCollector {
             writer.println("Latency P50 (ms)," + latency.getP50());
             writer.println("Latency P95 (ms)," + latency.getP95());
             writer.println("Latency P99 (ms)," + latency.getP99());
+            writer.println("Latency P99.9 (ms)," + latency.getP999());
             writer.println("Latency Max (ms)," + latency.getMax());
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -70,10 +92,27 @@ public class MetricsCollector {
         report.append("===================================================\n");
         report.append("           Seata Benchmark Final Report\n");
         report.append("===================================================\n");
+        report.append(String.format("Mode:                  %s\n", config.getMode()));
+        if (config.getMode() == BranchType.SAGA
+                && config.getSagaWorkload() != null
+                && !config.getSagaWorkload().isEmpty()) {
+            report.append(String.format("Saga Workload:         %s\n", config.getSagaWorkload()));
+        }
+        if (config.getSagaShape() != null && !config.getSagaShape().isEmpty()) {
+            report.append(String.format("Saga Shape:            %s\n", config.getSagaShape()));
+        }
         report.append(String.format("Total Transactions:    %,d\n", metrics.getTotalCount()));
         report.append(String.format("Success Count:         %,d\n", metrics.getSuccessCount()));
         report.append(String.format("Failed Count:          %,d\n", metrics.getFailedCount()));
         report.append(String.format("Success Rate:          %.2f%%\n", metrics.getSuccessRate()));
+        report.append(String.format("Committed Count:       %,d\n", metrics.getCommittedCount()));
+        report.append(String.format("Compensated Count:     %,d\n", metrics.getCompensatedCount()));
+        report.append(String.format("Execution Failed Count: %,d\n", metrics.getExecutionFailedCount()));
+        report.append(String.format("Compensation Failed Count: %,d\n", metrics.getCompensationFailedCount()));
+        report.append(String.format("Unknown Count:         %,d\n", metrics.getUnknownCount()));
+        report.append(String.format("Committed Rate:        %.2f%%\n", metrics.getCommittedRate()));
+        report.append(String.format("Compensated Rate:      %.2f%%\n", metrics.getCompensatedRate()));
+        report.append(String.format("End-State Success Rate: %.2f%%\n", metrics.getEndStateSuccessRate()));
         report.append(String.format("Average TPS:           %.2f\n", metrics.getAverageTps()));
         report.append(String.format("Elapsed Time:          %d seconds\n", metrics.getElapsedTimeSeconds()));
         report.append("\n");
@@ -83,6 +122,7 @@ public class MetricsCollector {
         report.append(String.format("  P50:                 %d ms\n", latency.getP50()));
         report.append(String.format("  P95:                 %d ms\n", latency.getP95()));
         report.append(String.format("  P99:                 %d ms\n", latency.getP99()));
+        report.append(String.format("  P99.9:               %d ms\n", latency.getP999()));
         report.append(String.format("  Max:                 %d ms\n", latency.getMax()));
         report.append("===================================================\n");
 
