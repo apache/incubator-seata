@@ -16,11 +16,17 @@
  */
 package io.seata.core.rpc.netty;
 
+import org.apache.seata.mockserver.MockServer;
+
 /**
  * Mock Constants
  **/
 public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "mock_tx_app_id_061";
     public static final String SERVICE_GROUP = "mock_tx_group";
-    public static final int MOCK_SERVER_PORT = 8077;
+    public static final int MOCK_SERVER_PORT = MockServer.findAvailablePort();
+
+    static {
+        System.setProperty("service.mock.grouplist", "127.0.0.1:" + MOCK_SERVER_PORT);
+    }
 }

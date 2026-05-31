@@ -27,7 +27,6 @@ import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +37,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class BaseH2Test {
+
+    private static final AtomicInteger DB_COUNTER = new AtomicInteger(0);
 
     static BasicDataSource dataSource = null;
 
@@ -53,7 +55,7 @@ public abstract class BaseH2Test {
     public static void start() throws SQLException {
         dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:./db_store/test_undo");
+        dataSource.setUrl("jdbc:h2:mem:test_undo_" + DB_COUNTER.incrementAndGet() + ";DB_CLOSE_DELAY=-1");
         dataSource.setUsername("sa");
         dataSource.setPassword("");
         dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
@@ -72,8 +74,6 @@ public abstract class BaseH2Test {
             } catch (SQLException e) {
             }
         }
-
-        FileUtils.deleteRecursive("db_store", true);
     }
 
     @BeforeEach

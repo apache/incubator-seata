@@ -52,12 +52,12 @@ public class MockTest {
 
     @BeforeAll
     public static void before() {
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
+        MockServer.startDefault(ProtocolTestConstants.MOCK_SERVER_PORT);
     }
 
     @AfterAll
     public static void after() {
-        MockServer.close();
+        MockServer.closeDefault();
         TmRpcClient.getInstance().destroy();
         RmRpcClient.getInstance().destroy();
     }
