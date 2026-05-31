@@ -25,7 +25,7 @@
   },
   "homepage": "https://seata.apache.org/",
   "dependencies": {
-    "@bpmn-io/properties-panel": "^3.8.0",
+    "@bpmn-io/properties-panel": "~3.24.1",
     "bpmn-font": "^0.12.1",
     "diagram-js": "^12.3.0",
     "diagram-js-grid": "^0.2.0",
@@ -55,14 +55,15 @@
     "webpack-dev-server": "^5.2.2"
   },
   "overrides": {
-    "@babel/runtime": "7.26.10",
-    "node-forge": "1.4.0",
     "js-yaml": "^4.1.1",
     "qs": "^6.14.2",
     "lodash": "^4.17.23",
     "flatted": "3.4.2",
     "minimatch": "3.1.4",
     "picomatch": "^2.3.2",
-    "serialize-javascript": "^7.0.5"
+    "serialize-javascript": "6.0.2",
+    "@peculiar/x509": "1.14.0",
+    "feelers": "1.4.0",
+    "domify": "2.0.0"
   }
 }
