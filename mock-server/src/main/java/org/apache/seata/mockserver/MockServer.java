@@ -19,6 +19,7 @@ package org.apache.seata.mockserver;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -83,7 +84,8 @@ public class MockServer {
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         System.clearProperty("server.port");
 
-        workingThreads = new ThreadPoolExecutor(
+        workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "mockServerWorker",
                 50,
                 50,
                 500,
