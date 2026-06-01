@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BaseSqlServerUndoExecutorTest {
+public class SqlServerBaseUndoExecutorTest {
 
     private TestBaseSqlServerUndoExecutor executor;
     private SQLUndoLog sqlUndoLog;
@@ -305,5 +305,24 @@ public class BaseSqlServerUndoExecutorTest {
         Assertions.assertTrue(checkSql2.contains("table2"));
         Assertions.assertTrue(checkSql1.contains("id = 1"));
         Assertions.assertTrue(checkSql2.contains("id = 2"));
+    }
+
+    @Test
+    public void testBuildCheckSqlWithExplicitColumns() {
+        String tableName = "test_table";
+        String whereCondition = "id = ?";
+        String selectColumns = "id, name, status";
+
+        String checkSql = executor.buildCheckSql(tableName, whereCondition, selectColumns);
+
+        Assertions.assertNotNull(checkSql);
+        Assertions.assertTrue(checkSql.contains("SELECT id, name, status FROM"));
+        Assertions.assertTrue(checkSql.contains(tableName));
+        Assertions.assertTrue(checkSql.contains("WITH(UPDLOCK)"));
+        Assertions.assertTrue(checkSql.contains("WHERE"));
+        Assertions.assertTrue(checkSql.contains(whereCondition));
+
+        String expectedSql = "SELECT id, name, status FROM test_table WITH(UPDLOCK) WHERE id = ?";
+        Assertions.assertEquals(expectedSql, checkSql);
     }
 }
