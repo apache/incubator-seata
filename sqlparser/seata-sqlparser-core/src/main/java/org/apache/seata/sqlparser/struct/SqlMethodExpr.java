@@ -22,7 +22,7 @@ package org.apache.seata.sqlparser.struct;
  */
 public class SqlMethodExpr {
 
-    private static final SqlMethodExpr instance = new SqlMethodExpr(0);
+    private static final SqlMethodExpr INSTANCE = new SqlMethodExpr(0);
 
     private final int placeholderCount;
 
@@ -32,7 +32,7 @@ public class SqlMethodExpr {
      * @return the SqlMethodExpr
      */
     public static SqlMethodExpr get() {
-        return instance;
+        return INSTANCE;
     }
 
     /**
