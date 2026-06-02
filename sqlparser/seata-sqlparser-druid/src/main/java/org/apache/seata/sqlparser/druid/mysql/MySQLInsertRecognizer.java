@@ -131,7 +131,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                     expr.accept(new SQLASTVisitorAdapter() {
                         @Override
                         public boolean visit(SQLVariantRefExpr x) {
-                            placeholderCount[0]++;
+                            if ("?".equals(x.getName())) {
+                                placeholderCount[0]++;
+                            }
                             return true;
                         }
                     });
