@@ -31,15 +31,14 @@ import java.util.Set;
 
 public class LowerCaseLinkHashMapTest {
 
-    private static final Map<String, Object> lowerCaseLinkHashMap = new LowerCaseLinkHashMap<>();
+    private Map<String, Object> lowerCaseLinkHashMap;
 
-    public LowerCaseLinkHashMapTest() {
+    @BeforeEach
+    void setUp() {
+        lowerCaseLinkHashMap = new LowerCaseLinkHashMap<>();
         lowerCaseLinkHashMap.put("Key", "Value");
         lowerCaseLinkHashMap.put("Key2", "Value2");
     }
-
-    @BeforeEach
-    void setUp() {}
 
     @AfterEach
     void tearDown() {}

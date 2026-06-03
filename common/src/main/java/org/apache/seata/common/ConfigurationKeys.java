@@ -167,6 +167,11 @@ public interface ConfigurationKeys {
     String TRANSPORT_PREFIX = "transport.";
 
     /**
+     * The transport thread pool type configuration key.
+     */
+    String TRANSPORT_THREADPOOL = TRANSPORT_PREFIX + "threadpool";
+
+    /**
      * The constant CLIENT_RM_PREFIX.
      */
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";
@@ -963,6 +968,11 @@ public interface ConfigurationKeys {
     String TCC_PREFIX = "tcc.";
 
     /**
+     * The constant JSON_PREFIX
+     */
+    String JSON_PREFIX = "json.";
+
+    /**
      * The constant TCC_FENCE_PREFIX
      */
     String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
@@ -978,8 +988,14 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
+     * The constant JSON_SERIALIZER_TYPE
+     */
+    String JSON_SERIALIZER_TYPE = JSON_PREFIX + "serializerType";
+
+    /**
      * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
      */
+    @Deprecated
     String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
 
     /**

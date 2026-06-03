@@ -17,56 +17,32 @@
 package org.apache.seata.integration.grpc.interceptor.server;
 
 import io.grpc.ServerCall;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
-    private ServerCall.Listener<ReqT> target;
-    private final String xid;
 
-    private final Map<String, String> context;
+    private final ServerCall.Listener<ReqT> target;
+    private final String rpcXid;
+    private final String rpcBranchType;
 
-    /**
-     * Constructs a ServerListenerProxy.
-     *
-     * @param xid     the global transaction id to bind
-     * @param context the context map containing metadata such as branch type
-     * @param target  the original ServerCall.Listener to delegate calls to
-     */
-    public ServerListenerProxy(String xid, Map<String, String> context, ServerCall.Listener<ReqT> target) {
-        super();
+    public ServerListenerProxy(String rpcXid, String rpcBranchType, ServerCall.Listener<ReqT> target) {
         Objects.requireNonNull(target);
         this.target = target;
-        this.xid = xid;
-        this.context = context;
+        this.rpcXid = rpcXid;
+        this.rpcBranchType = rpcBranchType;
     }
 
-    /**
-     * Delegates onMessage call to the target listener.
-     */
     @Override
     public void onMessage(ReqT message) {
         target.onMessage(message);
     }
 
-    /**
-     * Cleans up previous transaction context and binds new XID and branch type (if applicable)
-     * before delegating onHalfClose call to the target listener.
-     */
     @Override
     public void onHalfClose() {
-        cleanContext();
-        if (StringUtils.isNotBlank(xid)) {
-            RootContext.bind(xid);
-            String branchType = context.get(RootContext.KEY_BRANCH_TYPE);
-            if (StringUtils.equals(BranchType.TCC.name(), branchType)) {
-                RootContext.bindBranchType(BranchType.TCC);
-            }
-        }
+        TransactionPropagationHandler.unbindProviderContext(null);
+        TransactionPropagationHandler.bindProviderContext(rpcXid, rpcBranchType);
         target.onHalfClose();
     }
 
@@ -83,17 +59,5 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     @Override
     public void onReady() {
         target.onReady();
-    }
-
-    /**
-     * Cleans up the transaction context from RootContext to avoid thread context pollution.
-     * Unbinds XID and branch type if previously set.
-     */
-    private void cleanContext() {
-        RootContext.unbind();
-        BranchType previousBranchType = RootContext.getBranchType();
-        if (BranchType.TCC == previousBranchType) {
-            RootContext.unbindBranchType();
-        }
     }
 }

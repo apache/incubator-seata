@@ -18,10 +18,12 @@ package org.apache.seata.benchmark;
 
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.executor.ATModeExecutor;
+import org.apache.seata.benchmark.executor.SagaAnnotationModeExecutor;
 import org.apache.seata.benchmark.executor.SagaModeExecutor;
 import org.apache.seata.benchmark.executor.TCCModeExecutor;
 import org.apache.seata.benchmark.executor.TransactionExecutor;
 import org.apache.seata.benchmark.executor.WorkloadGenerator;
+import org.apache.seata.benchmark.executor.XAModeExecutor;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
 import org.apache.seata.benchmark.monitor.MetricsCollector;
 import org.apache.seata.core.model.BranchType;
@@ -69,7 +71,7 @@ public class BenchmarkRunner {
             executor.init();
 
             BenchmarkMetrics metrics = new BenchmarkMetrics();
-            MetricsCollector metricsCollector = new MetricsCollector(metrics);
+            MetricsCollector metricsCollector = new MetricsCollector(config, metrics);
             workloadGenerator = new WorkloadGenerator(config, executor, metrics);
 
             System.out.println("Starting benchmark...\n");
@@ -126,15 +128,24 @@ public class BenchmarkRunner {
                 System.out.println("Creating AT mode executor" + atMode + "\n");
                 return new ATModeExecutor(config);
             case TCC:
-                System.out.println("Creating TCC mode executor (mock implementation)\n");
+                String tccMode = isRealMode ? " (try/confirm/cancel)" : " (empty transaction)";
+                System.out.println("Creating TCC mode executor" + tccMode + "\n");
                 return new TCCModeExecutor(config);
             case SAGA:
                 String sagaMode = isRealMode ? " (state machine engine)" : " (empty transaction)";
                 System.out.println("Creating Saga mode executor" + sagaMode + "\n");
                 return new SagaModeExecutor(config);
+            case XA:
+                String xaMode = isRealMode ? " (MySQL XA via Testcontainers)" : " (empty transaction)";
+                System.out.println("Creating XA mode executor" + xaMode + "\n");
+                return new XAModeExecutor(config);
+            case SAGA_ANNOTATION:
+                String sagaAnnotationMode = isRealMode ? " (annotation-based compensation)" : " (empty transaction)";
+                System.out.println("Creating SAGA_ANNOTATION mode executor" + sagaAnnotationMode + "\n");
+                return new SagaAnnotationModeExecutor(config);
             default:
-                throw new IllegalArgumentException(
-                        "Unsupported mode: " + branchType + ". Only AT, TCC, and SAGA are supported.");
+                throw new IllegalArgumentException("Unsupported mode: " + branchType
+                        + ". Only AT, TCC, SAGA, XA, and SAGA_ANNOTATION are supported.");
         }
     }
 }
