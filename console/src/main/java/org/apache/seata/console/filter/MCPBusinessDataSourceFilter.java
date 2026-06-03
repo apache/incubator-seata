@@ -41,7 +41,8 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
 
     public MCPBusinessDataSourceFilter(BusinessDataSourcesProperties properties, List<String> mcpEndpoints) {
         this.businessDataSourcesProperties = properties;
-        this.mcpEndpointMatchers = mcpEndpoints.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList());
+        this.mcpEndpointMatchers =
+                mcpEndpoints.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList());
     }
 
     @Override

@@ -60,9 +60,8 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper) {
         this.env = env;
         this.objectMapper = objectMapper;
-        this.maxDynamicDataSources =
-                env.getProperty("seata.businessDataSources.max-dynamic-size", Integer.class,
-                        DEFAULT_MAX_DYNAMIC_DATA_SOURCES);
+        this.maxDynamicDataSources = env.getProperty(
+                "seata.businessDataSources.max-dynamic-size", Integer.class, DEFAULT_MAX_DYNAMIC_DATA_SOURCES);
     }
 
     @Override
