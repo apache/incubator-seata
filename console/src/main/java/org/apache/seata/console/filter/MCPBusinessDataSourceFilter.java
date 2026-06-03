@@ -76,8 +76,8 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
                                 HttpStatus.BAD_REQUEST.value(),
                                 "The business database parameter in the request header is incorrect: "
                                         + e.getMessage());
-                        return;
                     }
+                    return;
                 }
             }
         }
