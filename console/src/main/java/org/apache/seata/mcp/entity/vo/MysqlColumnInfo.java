@@ -14,22 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.core.constant;
+package org.apache.seata.mcp.entity.vo;
 
-public class SqlConstant {
+public class MysqlColumnInfo {
 
-    public static final String LIST_SCHEMA_SQL =
-            "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA ORDER BY SCHEMA_NAME";
+    private String columnName;
+    private String dataType;
+    private String columnComment;
 
-    public static final String GET_TABLE_NAME_SQL =
-            "SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? "
-                    + "ORDER BY TABLE_NAME";
+    public String getColumnName() {
+        return columnName;
+    }
 
-    public static final String GET_SCHEMA_SQL =
-            "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS "
-                    + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION";
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
 
-    public static final String MYSQL_VALIDATION_SQL = "SELECT 1";
+    public String getDataType() {
+        return dataType;
+    }
 
-    public static final String MYSQL_EXPLAIN_PREFIX = "EXPLAIN ";
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    public String getColumnComment() {
+        return columnComment;
+    }
+
+    public void setColumnComment(String columnComment) {
+        this.columnComment = columnComment;
+    }
 }

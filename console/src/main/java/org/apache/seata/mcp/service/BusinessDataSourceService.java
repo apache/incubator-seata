@@ -16,13 +16,40 @@
  */
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
+import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
+import org.apache.seata.mcp.entity.vo.MysqlColumnInfo;
+import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
+import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
+import org.apache.seata.mcp.entity.vo.MysqlTableInfo;
+
 import java.util.List;
 import java.util.Map;
 
 public interface BusinessDataSourceService {
-    List<String> getTableNamesBySchema(String resourceId);
+    List<MysqlDataSourceInfo> getMysqlDataSources();
 
-    List<Map<String, Object>> getTableSchemaByTableName(String resourceId, String tableName);
+    String registerMysqlDataSource(MysqlDataSourceRegisterRequest request);
 
-    List<Map<String, Object>> runSql(String sql, String resourceId);
+    String unregisterMysqlDataSource(String name);
+
+    MysqlDataSourceTestResult testMysqlDataSource(MysqlDataSourceRegisterRequest request);
+
+    List<String> listMysqlSchemas(String resourceId);
+
+    List<MysqlTableInfo> getMysqlTableNames(String resourceId, String schemaName);
+
+    List<MysqlColumnInfo> getMysqlTableSchema(String resourceId, String schemaName, String tableName);
+
+    BusinessQueryResult runSql(String sql, String resourceId);
+
+    BusinessQueryResult queryMysqlTable(
+            String resourceId,
+            String schemaName,
+            String tableName,
+            List<String> columns,
+            Map<String, Object> filters,
+            Integer limit);
+
+    BusinessQueryResult explainMysqlSql(String resourceId, String sql);
 }

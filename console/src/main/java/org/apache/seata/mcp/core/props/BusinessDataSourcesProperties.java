@@ -16,9 +16,11 @@
  */
 package org.apache.seata.mcp.core.props;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.core.secret.SecretResolver;
+import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
+import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -28,10 +30,18 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
@@ -41,9 +51,18 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private final Environment env;
 
+    @SuppressWarnings("unused")
     private final ObjectMapper objectMapper;
 
+    private final SecretResolver secretResolver;
+
     private final int maxDynamicDataSources;
+
+    private final boolean dynamicRegistrationEnabled;
+
+    private final boolean allowPlainPassword;
+
+    private final Set<String> allowedHosts;
 
     private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
 
@@ -53,47 +72,167 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
+    private static final String MYSQL_DB_TYPE = "mysql";
+
+    private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
+
+    private static final String RESOURCE_ID_PREFIX = "business-ds://";
+
     private static final int DEFAULT_MAX_DYNAMIC_DATA_SOURCES = 100;
+
+    private static final Pattern DATASOURCE_NAME_PATTERN = Pattern.compile("[A-Za-z0-9_.-]+");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourcesProperties.class);
 
-    public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper) {
+    public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper, SecretResolver secretResolver) {
         this.env = env;
         this.objectMapper = objectMapper;
+        this.secretResolver = secretResolver;
         this.maxDynamicDataSources = env.getProperty(
                 "seata.businessDataSources.max-dynamic-size", Integer.class, DEFAULT_MAX_DYNAMIC_DATA_SOURCES);
+        this.dynamicRegistrationEnabled =
+                env.getProperty("seata.businessDataSources.dynamic-registration.enabled", Boolean.class, false);
+        this.allowPlainPassword = env.getProperty(
+                "seata.businessDataSources.dynamic-registration.allow-plain-password", Boolean.class, false);
+        this.allowedHosts =
+                parseAllowedHosts(env.getProperty("seata.businessDataSources.dynamic-registration.allowed-hosts", ""));
     }
 
     @Override
     public void afterPropertiesSet() {
-
         Set<String> dataSourceNames = getDataSourceNames();
-
         for (String name : dataSourceNames) {
             DataSourceProperties props = new DataSourceProperties();
             String prefix = BASE_PREFIX + name + ".";
+            props.setName(name);
+            props.setResourceId(buildResourceId(name));
             props.setEnabled(env.getProperty(prefix + "enabled", Boolean.class, true));
-            props.setDbType(env.getProperty(prefix + "dbType", "mysql"));
-            props.setDriverClassName(env.getProperty(prefix + "driverClassName", "com.mysql.cj.jdbc.Driver"));
+            props.setDynamic(false);
+            props.setDbType(env.getProperty(prefix + "dbType", MYSQL_DB_TYPE));
+            props.setDriverClassName(env.getProperty(prefix + "driverClassName", MYSQL_DRIVER_CLASS_NAME));
             props.setUrl(env.getProperty(prefix + "url"));
             props.setUsername(env.getProperty(prefix + "username"));
             props.setPassword(env.getProperty(prefix + "password"));
+            props.setPasswordSecretRef(env.getProperty(prefix + "passwordSecretRef"));
+            if (!StringUtils.hasText(props.getPassword()) && StringUtils.hasText(props.getPasswordSecretRef())) {
+                props.setPassword(secretResolver.resolve(props.getPasswordSecretRef()));
+            }
             props.setDatasource(env.getProperty(prefix + "datasource", "druid"));
             props.setMinConn(env.getProperty(prefix + "minConn", Integer.class, DEFAULT_DB_MIN_CONN));
             props.setMaxConn(env.getProperty(prefix + "maxConn", Integer.class, DEFAULT_DB_MAX_CONN));
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
-
+            props.setAllowedSchemas(parseAllowedSchemas(env.getProperty(prefix + "allowedSchemas", "")));
             if (!validateDataSourceProperties(props, name)) {
                 continue;
             }
-
-            String resourceId = getOriginUrl(props.getUrl());
-
             if (props.enabled) {
-                datasources.put(resourceId, props);
-                dataSourcesNamesAndResourceIds.put(name, resourceId);
+                datasources.put(props.getResourceId(), props);
+                dataSourcesNamesAndResourceIds.put(name, props.getResourceId());
             }
         }
+    }
+
+    public synchronized String registerMysqlDataSource(MysqlDataSourceRegisterRequest request) {
+        if (!dynamicRegistrationEnabled) {
+            throw new IllegalArgumentException("Dynamic business data source registration is disabled");
+        }
+        DataSourceProperties props = buildDynamicMysqlProperties(request);
+        String name = props.getName();
+        String resourceId = props.getResourceId();
+        if (dataSourcesNamesAndResourceIds.containsKey(name) || datasources.containsKey(resourceId)) {
+            throw new IllegalArgumentException("The data source name has already been registered: " + name);
+        }
+        if (dynamicResourceIds.size() >= maxDynamicDataSources) {
+            throw new IllegalArgumentException(
+                    "The number of dynamic business data sources exceeds the limit: " + maxDynamicDataSources);
+        }
+        datasources.put(resourceId, props);
+        dataSourcesNamesAndResourceIds.put(name, resourceId);
+        dynamicResourceIds.add(resourceId);
+        return resourceId;
+    }
+
+    public synchronized DataSourceProperties buildDynamicMysqlProperties(MysqlDataSourceRegisterRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Data source registration request cannot be null");
+        }
+        DataSourceProperties props = new DataSourceProperties();
+        props.setName(request.getName());
+        props.setResourceId(buildResourceId(request.getName()));
+        props.setEnabled(true);
+        props.setDynamic(true);
+        props.setDbType(MYSQL_DB_TYPE);
+        props.setDriverClassName(MYSQL_DRIVER_CLASS_NAME);
+        props.setUrl(request.getUrl());
+        props.setUsername(request.getUsername());
+        props.setPasswordSecretRef(request.getPasswordSecretRef());
+        props.setPassword(resolvePassword(request));
+        props.setDatasource(StringUtils.hasText(request.getDatasource()) ? request.getDatasource() : "druid");
+        props.setMinConn(request.getMinConn() <= 0 ? DEFAULT_DB_MIN_CONN : request.getMinConn());
+        props.setMaxConn(request.getMaxConn() <= 0 ? DEFAULT_DB_MAX_CONN : request.getMaxConn());
+        props.setMaxWait(request.getMaxWait() == null ? 5000L : request.getMaxWait());
+        props.setAllowedSchemas(request.getAllowedSchemas());
+        if (!validateDataSourceProperties(props, props.getName())) {
+            throw new IllegalArgumentException("Business DataSource Properties has failure");
+        }
+        validateDynamicMysqlProperties(props);
+        return props;
+    }
+
+    public synchronized String unregisterMysqlDataSource(String name) {
+        if (!dynamicRegistrationEnabled) {
+            throw new IllegalArgumentException("Dynamic business data source registration is disabled");
+        }
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("The data source name cannot be empty");
+        }
+        String resourceId = dataSourcesNamesAndResourceIds.get(name);
+        if (!StringUtils.hasText(resourceId) || !dynamicResourceIds.contains(resourceId)) {
+            throw new IllegalArgumentException("Dynamic data source is not registered: " + name);
+        }
+        datasources.remove(resourceId);
+        dataSourcesNamesAndResourceIds.remove(name);
+        dynamicResourceIds.remove(resourceId);
+        return resourceId;
+    }
+
+    public List<MysqlDataSourceInfo> getMysqlDataSourceInfos() {
+        return dataSourcesNamesAndResourceIds.entrySet().stream()
+                .map(entry -> toInfo(entry.getKey(), datasources.get(entry.getValue())))
+                .filter(info -> info != null)
+                .collect(Collectors.toList());
+    }
+
+    public boolean isAllowedSchema(String resourceId, String schemaName) {
+        DataSourceProperties props = datasources.get(resourceId);
+        if (props == null || props.getAllowedSchemas().isEmpty()) {
+            return true;
+        }
+        return props.getAllowedSchemas().stream().anyMatch(schema -> schema.equalsIgnoreCase(schemaName));
+    }
+
+    private MysqlDataSourceInfo toInfo(String name, DataSourceProperties props) {
+        if (props == null) {
+            return null;
+        }
+        MysqlDataSourceInfo info = new MysqlDataSourceInfo();
+        info.setName(name);
+        info.setResourceId(props.getResourceId());
+        info.setDatasource(props.getDatasource());
+        info.setDynamic(props.isDynamic());
+        info.setEnabled(props.isEnabled());
+        info.setAllowedSchemas(props.getAllowedSchemas());
+        return info;
+    }
+
+    private String resolvePassword(MysqlDataSourceRegisterRequest request) {
+        if (StringUtils.hasText(request.getPassword())) {
+            if (!allowPlainPassword) {
+                throw new IllegalArgumentException("Plain password is not allowed, use passwordSecretRef");
+            }
+            return request.getPassword();
+        }
+        return secretResolver.resolve(request.getPasswordSecretRef());
     }
 
     private boolean validateDataSourceProperties(DataSourceProperties props, String dataSourceName) {
@@ -101,175 +240,122 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             LOGGER.error("DataSource configuration cannot be null for: {}", dataSourceName);
             return false;
         }
-
+        if (!StringUtils.hasText(props.getName())) {
+            LOGGER.error("DataSource name cannot be empty");
+            return false;
+        }
+        if (!DATASOURCE_NAME_PATTERN.matcher(props.getName()).matches()) {
+            LOGGER.error("DataSource name contains unsupported characters");
+            return false;
+        }
         if (!StringUtils.hasText(props.getUrl())) {
             LOGGER.error("Database URL cannot be empty for datasource: {}", dataSourceName);
             return false;
         }
-
         if (!StringUtils.hasText(props.getUsername())) {
             LOGGER.error("Database username cannot be empty for datasource: {}", dataSourceName);
             return false;
         }
-
         if (!StringUtils.hasText(props.getPassword())) {
             LOGGER.error("Database password cannot be empty for datasource: {}", dataSourceName);
             return false;
         }
-
-        if (!StringUtils.hasText(props.getDriverClassName())) {
-            LOGGER.error("Database driver class name cannot be empty for datasource: {}", dataSourceName);
+        if (!MYSQL_DB_TYPE.equalsIgnoreCase(props.getDbType())) {
+            LOGGER.error("Only MySQL business data source is supported: {}", dataSourceName);
             return false;
         }
-
-        if (!StringUtils.hasText(props.getDbType())) {
-            LOGGER.error("Database type cannot be empty for datasource: {}", dataSourceName);
+        if (!MYSQL_DRIVER_CLASS_NAME.equals(props.getDriverClassName())) {
+            LOGGER.error("Only MySQL 8 driver is supported for datasource: {}", dataSourceName);
             return false;
         }
-
         if (props.getMinConn() < 0) {
             LOGGER.error("Minimum connection count cannot be negative for datasource: {}", dataSourceName);
             return false;
         }
-
         if (props.getMaxConn() <= 0) {
             LOGGER.error("Maximum connection count must be positive for datasource: {}", dataSourceName);
             return false;
         }
-
         if (props.getMinConn() > props.getMaxConn()) {
             LOGGER.error(
                     "Minimum connection count cannot be greater than maximum connection count for datasource: {}",
                     dataSourceName);
             return false;
         }
-
         if (props.getMaxWait() != null && props.getMaxWait() < 0) {
             LOGGER.error("Maximum wait time cannot be negative for datasource: {}", dataSourceName);
-            return false;
-        }
-
-        if (!props.getUrl().toLowerCase().startsWith("jdbc:")) {
-            LOGGER.error("Invalid JDBC URL format for datasource: {}. URL should start with 'jdbc:'", dataSourceName);
             return false;
         }
         return true;
     }
 
-    private DataSourceProperties parseDBPropertyFromJson(JsonNode jsonNode) {
-        if (jsonNode == null || jsonNode.isEmpty()) {
-            throw new IllegalArgumentException("JSON configuration cannot be null");
+    private void validateDynamicMysqlProperties(DataSourceProperties props) {
+        if (!props.getUrl().toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
+            throw new IllegalArgumentException("Only jdbc:mysql:// URL is supported");
         }
-        DataSourceProperties props = new DataSourceProperties();
-
-        props.setDbType(jsonNode.has("dbType") ? jsonNode.get("dbType").asText() : "mysql");
-
-        String driverClassName = getDefaultDriverClassName(props.getDbType());
-        props.setDriverClassName(driverClassName);
-
-        if (!jsonNode.has("url")) {
-            throw new IllegalArgumentException("The database URL cannot be empty");
+        String host = parseMysqlHost(props.getUrl());
+        if (!allowedHosts.isEmpty() && !allowedHosts.contains(host.toLowerCase(Locale.ROOT))) {
+            throw new IllegalArgumentException("MySQL host is not allowed: " + host);
         }
-        props.setUrl(jsonNode.get("url").asText());
-
-        if (!jsonNode.has("username")) {
-            throw new IllegalArgumentException("The database username cannot be empty");
-        }
-        props.setUsername(jsonNode.get("username").asText());
-
-        if (!jsonNode.has("password")) {
-            throw new IllegalArgumentException("The database password cannot be empty");
-        }
-        props.setPassword(jsonNode.get("password").asText());
-
-        props.setDatasource(
-                jsonNode.has("datasource") ? jsonNode.get("datasource").asText() : "druid");
-        props.setMinConn(jsonNode.has("minConn") ? jsonNode.get("minConn").asInt() : DEFAULT_DB_MIN_CONN);
-        props.setMaxConn(jsonNode.has("maxConn") ? jsonNode.get("maxConn").asInt() : DEFAULT_DB_MAX_CONN);
-        props.setMaxWait(jsonNode.has("maxWait") ? jsonNode.get("maxWait").asLong() : 5000L);
-
-        return props;
     }
 
-    public synchronized void registerDataSourceFromJson(String jsonConfig) throws Exception {
-        JsonNode jsonNode = objectMapper.readTree(jsonConfig);
-        if (jsonNode == null || jsonNode.isEmpty()) {
-            throw new IllegalArgumentException("JSON configuration cannot be null");
+    private String parseMysqlHost(String url) {
+        try {
+            URI uri = URI.create(url.substring("jdbc:".length()));
+            if (!StringUtils.hasText(uri.getHost())) {
+                throw new IllegalArgumentException("MySQL host cannot be empty");
+            }
+            return uri.getHost();
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid MySQL JDBC URL");
         }
-        String name = jsonNode.get("dbName").asText();
+    }
+
+    private Set<String> parseAllowedHosts(String hosts) {
+        if (!StringUtils.hasText(hosts)) {
+            return Collections.emptySet();
+        }
+        return Arrays.stream(hosts.split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .map(host -> host.toLowerCase(Locale.ROOT))
+                .collect(Collectors.toSet());
+    }
+
+    private List<String> parseAllowedSchemas(String schemas) {
+        if (!StringUtils.hasText(schemas)) {
+            return Collections.emptyList();
+        }
+        return Arrays.stream(schemas.split(","))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.toList());
+    }
+
+    private String buildResourceId(String name) {
         if (!StringUtils.hasText(name)) {
             throw new IllegalArgumentException("The data source name cannot be empty");
         }
-
-        DataSourceProperties props = parseDBPropertyFromJson(jsonNode);
-        if (!validateDataSourceProperties(props, name)) {
-            throw new IllegalArgumentException("Business DataSource Properties has failure");
-        }
-        String resourceId = getOriginUrl(props.getUrl());
-        String existingResourceId = dataSourcesNamesAndResourceIds.get(name);
-        if (StringUtils.hasText(existingResourceId) && !existingResourceId.equals(resourceId)) {
-            throw new IllegalArgumentException("The data source name has already been registered: " + name);
-        }
-        if (datasources.containsKey(resourceId)) {
-            dataSourcesNamesAndResourceIds.putIfAbsent(name, resourceId);
-            return;
-        }
-        if (dynamicResourceIds.size() >= maxDynamicDataSources) {
-            throw new IllegalArgumentException(
-                    "The number of dynamic business data sources exceeds the limit: " + maxDynamicDataSources);
-        }
-
-        datasources.put(resourceId, props);
-        dynamicResourceIds.add(resourceId);
-        dataSourcesNamesAndResourceIds.put(name, resourceId);
-    }
-
-    private static String getDefaultDriverClassName(String dbType) {
-        switch (dbType.toLowerCase()) {
-            case "postgresql":
-                return "org.postgresql.Driver";
-            case "oracle":
-                return "oracle.jdbc.driver.OracleDriver";
-            case "sqlserver":
-                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-            case "h2":
-                return "org.h2.Driver";
-            case "mysql":
-            default:
-                return "com.mysql.cj.jdbc.Driver";
-        }
-    }
-
-    private String getOriginUrl(String url) {
-        int index = url.indexOf("?");
-        if (index != -1) {
-            url = url.substring(0, index);
-        }
-        return url;
+        return RESOURCE_ID_PREFIX + name.trim();
     }
 
     private Set<String> getDataSourceNames() {
         Set<String> names = new HashSet<>();
-
         if (env instanceof ConfigurableEnvironment) {
             ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
-
             Set<String> processedNames = new HashSet<>();
-
             for (PropertySource<?> propertySource : configEnv.getPropertySources()) {
                 if (propertySource instanceof EnumerablePropertySource) {
                     EnumerablePropertySource<?> enumSource = (EnumerablePropertySource<?>) propertySource;
-
                     for (String propertyName : enumSource.getPropertyNames()) {
                         if (propertyName.startsWith(BASE_PREFIX)) {
                             String[] parts = propertyName.split("\\.");
                             if (parts.length > 3) {
                                 String dsName = parts[2];
-                                if (!processedNames.contains(dsName)) {
-                                    if (env.containsProperty(BASE_PREFIX + dsName + ".url")) {
-                                        names.add(dsName);
-                                        processedNames.add(dsName);
-                                    }
+                                if (!processedNames.contains(dsName)
+                                        && env.containsProperty(BASE_PREFIX + dsName + ".url")) {
+                                    names.add(dsName);
+                                    processedNames.add(dsName);
                                 }
                             }
                         }
@@ -292,17 +378,32 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         return datasources.keySet();
     }
 
+    public static Set<String> getDynamicResourceIds() {
+        return dynamicResourceIds;
+    }
+
+    static void clear() {
+        datasources.clear();
+        dataSourcesNamesAndResourceIds.clear();
+        dynamicResourceIds.clear();
+    }
+
     public static class DataSourceProperties {
         private boolean enabled = true;
-        private String dbType = "mysql";
-        private String driverClassName = "com.mysql.cj.jdbc.Driver";
+        private boolean dynamic;
+        private String name;
+        private String resourceId;
+        private String dbType = MYSQL_DB_TYPE;
+        private String driverClassName = MYSQL_DRIVER_CLASS_NAME;
         private String url = "";
-        private String username = "mysql";
-        private String password = "mysql";
+        private String username = "";
+        private String password = "";
+        private String passwordSecretRef = "";
         private String datasource = "druid";
         private int minConn = DEFAULT_DB_MIN_CONN;
         private int maxConn = DEFAULT_DB_MAX_CONN;
         private Long maxWait = 5000L;
+        private List<String> allowedSchemas = new ArrayList<>();
 
         public boolean isEnabled() {
             return enabled;
@@ -310,6 +411,30 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public boolean isDynamic() {
+            return dynamic;
+        }
+
+        public void setDynamic(boolean dynamic) {
+            this.dynamic = dynamic;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getResourceId() {
+            return resourceId;
+        }
+
+        public void setResourceId(String resourceId) {
+            this.resourceId = resourceId;
         }
 
         public Long getMaxWait() {
@@ -360,6 +485,14 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             this.password = password;
         }
 
+        public String getPasswordSecretRef() {
+            return passwordSecretRef;
+        }
+
+        public void setPasswordSecretRef(String passwordSecretRef) {
+            this.passwordSecretRef = passwordSecretRef;
+        }
+
         public String getDatasource() {
             return datasource;
         }
@@ -382,6 +515,14 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
         public void setMaxConn(int maxConn) {
             this.maxConn = maxConn;
+        }
+
+        public List<String> getAllowedSchemas() {
+            return allowedSchemas;
+        }
+
+        public void setAllowedSchemas(List<String> allowedSchemas) {
+            this.allowedSchemas = allowedSchemas == null ? Collections.emptyList() : allowedSchemas;
         }
     }
 }

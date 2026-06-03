@@ -42,15 +42,7 @@ public class DataSourceFactory {
 
     @PreDestroy
     public void destroy() {
-        dataSourceMap.forEach((resourceId, dataSource) -> {
-            if (dataSource instanceof AutoCloseable) {
-                try {
-                    ((AutoCloseable) dataSource).close();
-                } catch (Exception e) {
-                    LOGGER.warn("Close Business DataSource failed, resourceId: {}", resourceId, e);
-                }
-            }
-        });
+        dataSourceMap.forEach(DataSourceFactory::closeDataSource);
         dataSourceMap.clear();
     }
 
@@ -73,10 +65,24 @@ public class DataSourceFactory {
     }
 
     public static void removeErrorDataSource(String resourceId, Exception e) {
-        dataSourceMap.remove(resourceId);
+        closeDataSource(resourceId, dataSourceMap.remove(resourceId));
         LOGGER.info("Delete Business DataSource, resourceId: {}", resourceId);
-        throw new StoreException(
-                "The Business DataSource: " + resourceId + " can't be connected due to: " + e.getMessage());
+        throw new StoreException("The Business DataSource: " + resourceId + " can't be connected");
+    }
+
+    public static void removeDataSource(String resourceId) {
+        closeDataSource(resourceId, dataSourceMap.remove(resourceId));
+        LOGGER.info("Delete Business DataSource, resourceId: {}", resourceId);
+    }
+
+    private static void closeDataSource(String resourceId, DataSource dataSource) {
+        if (dataSource instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) dataSource).close();
+            } catch (Exception e) {
+                LOGGER.warn("Close Business DataSource failed, resourceId: {}", resourceId, e);
+            }
+        }
     }
 
     public static DataSource createDataSource(

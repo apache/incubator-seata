@@ -17,73 +17,141 @@
 package org.apache.seata.mcp.core.props;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.mcp.core.secret.EnvSecretResolver;
+import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
-import java.lang.reflect.Field;
-import java.util.Set;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BusinessDataSourcesPropertiesTest {
 
     @BeforeEach
-    void setUp() throws Exception {
-        clearStaticState();
+    void setUp() {
+        BusinessDataSourcesProperties.clear();
     }
 
     @AfterEach
-    void tearDown() throws Exception {
-        clearStaticState();
+    void tearDown() {
+        BusinessDataSourcesProperties.clear();
     }
 
     @Test
-    void shouldRegisterDynamicDataSourceAndRejectSameNameWithDifferentUrl() throws Exception {
+    void shouldRejectDynamicRegistrationWhenDisabledByDefault() {
         BusinessDataSourcesProperties properties =
-                new BusinessDataSourcesProperties(new MockEnvironment(), new ObjectMapper());
-        String config = config("biz", "jdbc:h2:mem:biz");
-
-        properties.registerDataSourceFromJson(config);
-        properties.registerDataSourceFromJson(config);
-
-        assertEquals(
-                "jdbc:h2:mem:biz",
-                BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
-                        .get("biz"));
-        assertEquals(1, BusinessDataSourcesProperties.getDatasources().size());
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> properties.registerDataSourceFromJson(config("biz", "jdbc:h2:mem:other")));
-    }
-
-    @Test
-    void shouldLimitDynamicDataSourceCount() throws Exception {
-        MockEnvironment env = new MockEnvironment().withProperty("seata.businessDataSources.max-dynamic-size", "1");
-        BusinessDataSourcesProperties properties = new BusinessDataSourcesProperties(env, new ObjectMapper());
-
-        properties.registerDataSourceFromJson(config("biz1", "jdbc:h2:mem:biz1"));
+                newProperties(new MockEnvironment().withProperty("MYSQL_PASS", "pwd"));
 
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> properties.registerDataSourceFromJson(config("biz2", "jdbc:h2:mem:biz2")));
-        assertEquals("The number of dynamic business data sources exceeds the limit: 1", exception.getMessage());
+                IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request("biz", "localhost")));
+
+        assertEquals("Dynamic business data source registration is disabled", exception.getMessage());
     }
 
-    private String config(String name, String url) {
-        return "{\"dbName\":\"" + name
-                + "\",\"dbType\":\"h2\",\"url\":\"" + url
-                + "\",\"username\":\"sa\",\"password\":\"pwd\",\"minConn\":1,\"maxConn\":2}";
+    @Test
+    void shouldResolvePasswordSecretRefAndRegisterMysqlResourceId() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+
+        String resourceId = properties.registerMysqlDataSource(request("biz", "localhost"));
+
+        assertEquals("business-ds://biz", resourceId);
+        BusinessDataSourcesProperties.DataSourceProperties props =
+                BusinessDataSourcesProperties.getDatasources().get(resourceId);
+        assertEquals("pwd", props.getPassword());
+        assertEquals("MYSQL_PASS", props.getPasswordSecretRef());
+        assertEquals(
+                "business-ds://biz",
+                BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
+                        .get("biz"));
+        assertEquals(1, properties.getMysqlDataSourceInfos().size());
     }
 
-    @SuppressWarnings("unchecked")
-    private void clearStaticState() throws Exception {
-        BusinessDataSourcesProperties.getDatasources().clear();
-        BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds().clear();
-        Field field = BusinessDataSourcesProperties.class.getDeclaredField("dynamicResourceIds");
-        field.setAccessible(true);
-        ((Set<String>) field.get(null)).clear();
+    @Test
+    void shouldRejectPlainPasswordByDefault() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv());
+        MysqlDataSourceRegisterRequest request = request("biz", "localhost");
+        request.setPassword("pwd");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
+
+        assertEquals("Plain password is not allowed, use passwordSecretRef", exception.getMessage());
+    }
+
+    @Test
+    void shouldRejectNonMysqlJdbcUrl() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+        MysqlDataSourceRegisterRequest request = request("biz", "localhost");
+        request.setUrl("jdbc:postgresql://localhost:5432/app");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
+
+        assertEquals("Only jdbc:mysql:// URL is supported", exception.getMessage());
+    }
+
+    @Test
+    void shouldApplyHostAllowlist() {
+        MockEnvironment env = enabledEnv()
+                .withProperty("MYSQL_PASS", "pwd")
+                .withProperty("seata.businessDataSources.dynamic-registration.allowed-hosts", "db.example.com");
+        BusinessDataSourcesProperties properties = newProperties(env);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request("biz", "localhost")));
+
+        assertEquals("MySQL host is not allowed: localhost", exception.getMessage());
+        assertEquals("business-ds://biz2", properties.registerMysqlDataSource(request("biz2", "db.example.com")));
+    }
+
+    @Test
+    void shouldRejectDuplicateDataSourceName() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+
+        properties.registerMysqlDataSource(request("biz", "localhost"));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request("biz", "localhost")));
+
+        assertEquals("The data source name has already been registered: biz", exception.getMessage());
+    }
+
+    @Test
+    void shouldUnregisterDynamicDataSourceAndCleanConfig() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+        properties.registerMysqlDataSource(request("biz", "localhost"));
+
+        String resourceId = properties.unregisterMysqlDataSource("biz");
+
+        assertEquals("business-ds://biz", resourceId);
+        assertFalse(BusinessDataSourcesProperties.getDatasources().containsKey(resourceId));
+        assertFalse(BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
+                .containsKey("biz"));
+        assertFalse(BusinessDataSourcesProperties.getDynamicResourceIds().contains(resourceId));
+    }
+
+    private BusinessDataSourcesProperties newProperties(MockEnvironment env) {
+        return new BusinessDataSourcesProperties(env, new ObjectMapper(), new EnvSecretResolver(env));
+    }
+
+    private MockEnvironment enabledEnv() {
+        return new MockEnvironment().withProperty("seata.businessDataSources.dynamic-registration.enabled", "true");
+    }
+
+    private MysqlDataSourceRegisterRequest request(String name, String host) {
+        MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
+        request.setName(name);
+        request.setUrl("jdbc:mysql://" + host + ":3306/app");
+        request.setUsername("readonly");
+        request.setPasswordSecretRef("MYSQL_PASS");
+        request.setMinConn(1);
+        request.setMaxConn(2);
+        request.setAllowedSchemas(Collections.singletonList("app"));
+        return request;
     }
 }

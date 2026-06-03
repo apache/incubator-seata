@@ -17,9 +17,10 @@
 package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.sql.DataSource;
@@ -30,46 +31,70 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 @Service
 public class SqlExecutionTemplate {
 
-    private static final Pattern SELECT_PATTERN =
-            Pattern.compile("^\\s*SELECT\\b.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionTemplate.class);
+
+    private final SqlSafetyValidator sqlSafetyValidator;
+
+    @Value("${seata.mcp.query.max-rows:500}")
+    private int maxRows = 500;
+
+    @Value("${seata.mcp.query.timeout-seconds:30}")
+    private int timeoutSeconds = 30;
+
+    @Value("${seata.mcp.query.fetch-size:100}")
+    private int fetchSize = 100;
+
+    public SqlExecutionTemplate(SqlSafetyValidator sqlSafetyValidator) {
+        this.sqlSafetyValidator = sqlSafetyValidator;
+    }
 
     private DataSource getDataSource(String resourceId) {
         try {
             return DataSourceFactory.getDataSource(resourceId);
         } catch (Exception e) {
-            LOGGER.error("Failed to get the data source, resourceId: {}", resourceId, e);
+            LOGGER.error("Failed to get the data source, resourceId: {}", resourceId);
             throw new StoreException("Unable to get the data source: " + resourceId);
         }
     }
 
-    private boolean validateQuerySql(String sql) {
-        if (sql == null || StringUtils.isBlank(sql)) {
-            return false;
-        }
-        return SELECT_PATTERN.matcher(sql).matches();
+    public BusinessQueryResult query(String resourceId, String sql, Object... params) {
+        sqlSafetyValidator.validateMysqlSelect(sql);
+        return doQuery(resourceId, sql, maxRows, true, params);
     }
 
-    public List<Map<String, Object>> query(String resourceId, String sql, Object... params) {
+    public BusinessQueryResult queryWithMaxRows(String resourceId, String sql, int queryMaxRows, Object... params) {
+        sqlSafetyValidator.validateMysqlSelect(sql);
+        int effectiveMaxRows = queryMaxRows <= 0 ? maxRows : Math.min(queryMaxRows, maxRows);
+        return doQuery(resourceId, sql, effectiveMaxRows, true, params);
+    }
+
+    public BusinessQueryResult trustedQuery(String resourceId, String sql, Object... params) {
+        return doQuery(resourceId, sql, maxRows, false, params);
+    }
+
+    private BusinessQueryResult doQuery(
+            String resourceId, String sql, int effectiveMaxRows, boolean limitRows, Object... params) {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        long start = System.currentTimeMillis();
 
         try {
-            if (!validateQuerySql(sql)) {
-                throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
-            }
             conn = getConnection(resourceId);
+            conn.setReadOnly(true);
             ps = conn.prepareStatement(sql);
+            ps.setQueryTimeout(timeoutSeconds);
+            ps.setFetchSize(fetchSize);
+            if (limitRows) {
+                ps.setMaxRows(effectiveMaxRows + 1);
+            }
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
                     ps.setObject(i + 1, params[i]);
@@ -79,31 +104,55 @@ public class SqlExecutionTemplate {
             rs = ps.executeQuery();
             ResultSetMetaData metaData = rs.getMetaData();
             int columnCount = metaData.getColumnCount();
+            List<String> columns = new ArrayList<>();
+            for (int i = 1; i <= columnCount; i++) {
+                columns.add(metaData.getColumnLabel(i));
+            }
 
             List<Map<String, Object>> results = new ArrayList<>();
             while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
+                if (limitRows && results.size() >= effectiveMaxRows) {
+                    return buildResult(resourceId, columns, results, effectiveMaxRows, true, start);
+                }
+                Map<String, Object> row = new LinkedHashMap<>();
                 for (int i = 1; i <= columnCount; i++) {
-                    String columnName = metaData.getColumnLabel(i);
+                    String columnName = columns.get(i - 1);
                     Object value = rs.getObject(i);
                     row.put(columnName, value);
                 }
                 results.add(row);
             }
 
-            return results;
+            return buildResult(resourceId, columns, results, effectiveMaxRows, false, start);
         } catch (SQLException e) {
-            LOGGER.error("The query failed, resourceId: {}, sql: {}", resourceId, sql, e);
-            throw new StoreException("The query execution failed: " + e.getMessage());
+            LOGGER.error("The query failed, resourceId: {}", resourceId);
+            throw new StoreException("The query execution failed");
         } finally {
-            LOGGER.info("User query business datasource with sql: {}", sql);
             closeResources(rs, ps, conn);
         }
     }
 
     public Map<String, Object> queryForObject(String resourceId, String sql, Object... params) {
-        List<Map<String, Object>> results = query(resourceId, sql, params);
+        List<Map<String, Object>> results = query(resourceId, sql, params).getRows();
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    private BusinessQueryResult buildResult(
+            String resourceId,
+            List<String> columns,
+            List<Map<String, Object>> rows,
+            int effectiveMaxRows,
+            boolean truncated,
+            long start) {
+        BusinessQueryResult result = new BusinessQueryResult();
+        result.setResourceId(resourceId);
+        result.setColumns(columns);
+        result.setRows(rows);
+        result.setRowCount(rows.size());
+        result.setTruncated(truncated);
+        result.setMaxRows(effectiveMaxRows);
+        result.setExecutionTimeMs(System.currentTimeMillis() - start);
+        return result;
     }
 
     private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
@@ -140,7 +189,7 @@ public class SqlExecutionTemplate {
         try {
             return getDataSource(resourceId).getConnection();
         } catch (Exception e) {
-            LOGGER.error("Get The Business DataSource Connection: {} failed due to: {}", resourceId, e.getMessage());
+            LOGGER.error("Get The Business DataSource Connection: {} failed", resourceId);
             DataSourceFactory.removeErrorDataSource(resourceId, e);
             throw new StoreException(e);
         }

@@ -18,11 +18,9 @@ package org.apache.seata.console.config;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
-import org.apache.seata.console.filter.MCPBusinessDataSourceFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
-import org.apache.seata.mcp.core.props.BusinessDataSourcesProperties;
 import org.apache.seata.mcp.core.props.MCPProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,9 +86,6 @@ public class WebSecurityConfig {
     @Autowired
     private MCPProperties mcpProperties;
 
-    @Autowired
-    private BusinessDataSourcesProperties businessDataSourcesProperties;
-
     @Value("${seata.security.ignore.urls:/**}")
     String ignoreURLs;
 
@@ -141,9 +136,6 @@ public class WebSecurityConfig {
                 })
                 .addFilterBefore(
                         new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(
-                        new MCPBusinessDataSourceFilter(businessDataSourcesProperties, mcpEndpoints),
-                        JwtAuthenticationTokenFilter.class)
                 .headers(headers -> headers.cacheControl(cache -> {}));
 
         return http.build();
