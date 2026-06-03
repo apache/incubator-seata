@@ -22,20 +22,35 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.mcp.core.props.BusinessDataSourcesProperties;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
 
     private final BusinessDataSourcesProperties businessDataSourcesProperties;
 
+    private final List<RequestMatcher> mcpEndpointMatchers;
+
     private final Set<String> processedConfigs = ConcurrentHashMap.newKeySet();
 
-    public MCPBusinessDataSourceFilter(BusinessDataSourcesProperties properties) {
+    public MCPBusinessDataSourceFilter(BusinessDataSourcesProperties properties, List<String> mcpEndpoints) {
         this.businessDataSourcesProperties = properties;
+        this.mcpEndpointMatchers = mcpEndpoints.stream().map(AntPathRequestMatcher::new).collect(Collectors.toList());
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return mcpEndpointMatchers.stream().noneMatch(matcher -> matcher.matches(request));
     }
 
     @Override
@@ -43,6 +58,10 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String combinedHeader = request.getHeader("X-DB-Config");
         if (combinedHeader != null && !combinedHeader.isEmpty()) {
+            if (!isAuthenticated()) {
+                response.sendError(HttpStatus.UNAUTHORIZED.value(), "Authentication is required");
+                return;
+            }
             String[] jsonConfigs = combinedHeader.split(";");
             for (String jsonDBConfig : jsonConfigs) {
                 if (processedConfigs.contains(jsonDBConfig.trim())) {
@@ -63,5 +82,12 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isAuthenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
     }
 }

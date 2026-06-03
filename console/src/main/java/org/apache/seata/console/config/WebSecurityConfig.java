@@ -141,8 +141,8 @@ public class WebSecurityConfig {
                 })
                 .addFilterBefore(
                         new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(
-                        new MCPBusinessDataSourceFilter(businessDataSourcesProperties),
+                .addFilterAfter(
+                        new MCPBusinessDataSourceFilter(businessDataSourcesProperties, mcpEndpoints),
                         JwtAuthenticationTokenFilter.class)
                 .headers(headers -> headers.cacheControl(cache -> {}));
 
