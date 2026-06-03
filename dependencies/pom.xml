@@ -124,7 +124,7 @@
         <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
         <mysql5.version>${mysql.version}</mysql5.version>
-        <mysql8.version>8.0.27</mysql8.version>
+        <mysql8.version>8.0.33</mysql8.version>
         <!-- rocketmq -->
         <rocketmq-version>5.0.0</rocketmq-version>
 
@@ -302,6 +302,11 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql8.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>

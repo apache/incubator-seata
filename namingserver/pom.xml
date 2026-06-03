@@ -36,7 +36,6 @@
         <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
         <tomcat-embed.version>11.0.22</tomcat-embed.version>
-        <mysql8.version>8.0.27</mysql8.version>
     </properties>
 
     <dependencyManagement>
@@ -175,9 +174,8 @@
             <artifactId>okhttp</artifactId>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql8.version}</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
     </dependencies>
 
