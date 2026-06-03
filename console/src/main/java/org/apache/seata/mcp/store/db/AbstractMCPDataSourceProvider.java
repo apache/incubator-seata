@@ -40,9 +40,6 @@ public abstract class AbstractMCPDataSourceProvider {
 
     private String resourceId;
 
-    protected static final Map<String, BusinessDataSourcesProperties.DataSourceProperties> DATASOURCE_PROPERTIES =
-            BusinessDataSourcesProperties.getDatasources();
-
     private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
     private static final String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
@@ -113,13 +110,15 @@ public abstract class AbstractMCPDataSourceProvider {
     }
 
     protected BusinessDataSourcesProperties.DataSourceProperties getDataSourceProperties() {
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasourceProperties =
+                BusinessDataSourcesProperties.getDatasources();
         if (StringUtils.isBlank(resourceId)) {
-            if (DATASOURCE_PROPERTIES.size() == 1) {
-                return DATASOURCE_PROPERTIES.values().iterator().next();
+            if (datasourceProperties.size() == 1) {
+                return datasourceProperties.values().iterator().next();
             }
             throw new StoreException("resourceId is not specified and there are multiple datasource properties");
         }
-        return DATASOURCE_PROPERTIES.get(resourceId);
+        return datasourceProperties.get(resourceId);
     }
 
     protected String getDriverClassName() {
