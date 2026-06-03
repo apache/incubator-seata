@@ -55,7 +55,7 @@ public class BusinessDataSourceTools {
         return dataSourceService.getTableNamesBySchema(resourceId);
     }
 
-    @McpTool(description = "Obtained by table nameSchema")
+    @McpTool(description = "Get the schema (columns) of a table by its name")
     public List<Map<String, Object>> getTableSchema(
             @McpToolParam(description = "Table Name") String tableName,
             @McpToolParam(description = "The identity of the data source, start with jdbc://", required = true)
@@ -64,7 +64,9 @@ public class BusinessDataSourceTools {
         return dataSourceService.getTableSchemaByTableName(resourceId, tableName);
     }
 
-    @McpTool(description = "Execute the SQL query result, It can only be used to query business data!!!")
+    @McpTool(
+            description =
+                    "Execute a SQL SELECT query against a business data source. Read-only: only SELECT queries are allowed.")
     public List<Map<String, Object>> runSql(
             @McpToolParam(description = "SQL statement, String type") String sql,
             @McpToolParam(description = "The identity of the data source, start with jdbc://", required = true)
