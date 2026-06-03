@@ -67,7 +67,7 @@ public class DataSourceFactory {
     public static DataSource createDataSource(
             BusinessDataSourcesProperties.DataSourceProperties dataSourceProperties, String resourceId) {
         if (dataSourceProperties == null) {
-            throw new StoreException("Cannot find datasource properties:" + dataSourceProperties);
+            throw new StoreException("Cannot find datasource properties:" + resourceId);
         }
 
         String type = dataSourceProperties.getDatasource();
