@@ -58,6 +58,7 @@ public abstract class AbstractMCPDataSourceProvider {
     }
 
     public DataSource generate() {
+        validate();
         return doGenerate();
     }
 
