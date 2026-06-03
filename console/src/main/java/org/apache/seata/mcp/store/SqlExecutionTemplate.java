@@ -69,12 +69,6 @@ public class SqlExecutionTemplate {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
             conn = getConnection(resourceId);
-            if (params == null || params.length == 0) {
-                if ((sql.contains("where") || sql.contains("WHERE"))) {
-                    throw new StoreException(
-                            "Query contains WHERE clause but no parameters were provided. This may lead to unintended full table scans and is not allowed.");
-                }
-            }
             ps = conn.prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
