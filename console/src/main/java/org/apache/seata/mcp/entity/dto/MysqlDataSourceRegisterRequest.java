@@ -40,7 +40,9 @@ public class MysqlDataSourceRegisterRequest {
             required = true)
     private String passwordSecretRef;
 
-    @McpToolParam(description = "Connection pool type. Supported values depend on the local provider, default is druid")
+    @McpToolParam(
+            description = "Connection pool type. Supported values depend on the local provider, default is druid",
+            required = false)
     private String datasource = "druid";
 
     @McpToolParam(description = "Minimum connection pool size, default is 10", required = false)
