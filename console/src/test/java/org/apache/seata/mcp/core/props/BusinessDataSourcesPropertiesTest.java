@@ -71,15 +71,15 @@ class BusinessDataSourcesPropertiesTest {
     }
 
     @Test
-    void shouldRejectPlainPasswordByDefault() {
+    void shouldRequirePasswordSecretRefForDynamicRegistration() {
         BusinessDataSourcesProperties properties = newProperties(enabledEnv());
         MysqlDataSourceRegisterRequest request = request("biz", "localhost");
-        request.setPassword("pwd");
+        request.setPasswordSecretRef("");
 
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
 
-        assertEquals("Plain password is not allowed, use passwordSecretRef", exception.getMessage());
+        assertEquals("passwordSecretRef cannot be empty", exception.getMessage());
     }
 
     @Test

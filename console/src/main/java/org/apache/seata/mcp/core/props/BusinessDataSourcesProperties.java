@@ -59,8 +59,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private final boolean dynamicRegistrationEnabled;
 
-    private final boolean allowPlainPassword;
-
     private final Set<String> allowedHosts;
 
     private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
@@ -94,8 +92,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                 "seata.businessDataSources.max-dynamic-size", Integer.class, DEFAULT_MAX_DYNAMIC_DATA_SOURCES);
         this.dynamicRegistrationEnabled =
                 env.getProperty("seata.businessDataSources.dynamic-registration.enabled", Boolean.class, false);
-        this.allowPlainPassword = env.getProperty(
-                "seata.businessDataSources.dynamic-registration.allow-plain-password", Boolean.class, false);
         this.allowedHosts =
                 parseAllowedHosts(env.getProperty("seata.businessDataSources.dynamic-registration.allowed-hosts", ""));
     }
@@ -226,12 +222,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     }
 
     private String resolvePassword(MysqlDataSourceRegisterRequest request) {
-        if (StringUtils.hasText(request.getPassword())) {
-            if (!allowPlainPassword) {
-                throw new IllegalArgumentException("Plain password is not allowed, use passwordSecretRef");
-            }
-            return request.getPassword();
-        }
         return secretResolver.resolve(request.getPasswordSecretRef());
     }
 

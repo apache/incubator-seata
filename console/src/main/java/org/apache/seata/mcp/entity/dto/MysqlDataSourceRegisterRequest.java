@@ -22,7 +22,6 @@ public class MysqlDataSourceRegisterRequest {
     private String url;
     private String username;
     private String passwordSecretRef;
-    private String password;
     private String datasource = "druid";
     private int minConn = 10;
     private int maxConn = 100;
@@ -58,14 +57,6 @@ public class MysqlDataSourceRegisterRequest {
 
     public void setPasswordSecretRef(String passwordSecretRef) {
         this.passwordSecretRef = passwordSecretRef;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getDatasource() {
