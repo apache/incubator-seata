@@ -49,29 +49,23 @@ public class MysqlMetadataService {
         this.businessDataSourcesProperties = businessDataSourcesProperties;
     }
 
-    public List<String> listSchemas(String resourceId) {
-        return sqlExecutionTemplate.trustedQuery(resourceId, SqlConstant.LIST_SCHEMA_SQL).getRows().stream()
-                .map(row -> String.valueOf(row.get("SCHEMA_NAME")))
-                .collect(Collectors.toList());
-    }
-
-    public List<MysqlTableInfo> listTables(String resourceId, String schemaName) {
-        validateAllowedSchema(resourceId, schemaName);
+    public List<MysqlTableInfo> listTables(String resourceId) {
+        String databaseName = businessDataSourcesProperties.getDatabaseName(resourceId);
         return sqlExecutionTemplate
-                .trustedQuery(resourceId, SqlConstant.GET_TABLE_NAME_SQL, schemaName)
+                .trustedQuery(resourceId, SqlConstant.GET_TABLE_NAME_SQL, databaseName)
                 .getRows()
                 .stream()
                 .map(this::toTableInfo)
                 .collect(Collectors.toList());
     }
 
-    public List<MysqlColumnInfo> describeTable(String resourceId, String schemaName, String tableName) {
-        validateAllowedSchema(resourceId, schemaName);
+    public List<MysqlColumnInfo> describeTable(String resourceId, String tableName) {
+        String databaseName = businessDataSourcesProperties.getDatabaseName(resourceId);
         if (!StringUtils.hasText(tableName)) {
             throw new StoreException("tableName cannot be empty");
         }
         return sqlExecutionTemplate
-                .trustedQuery(resourceId, SqlConstant.GET_SCHEMA_SQL, schemaName, tableName)
+                .trustedQuery(resourceId, SqlConstant.GET_SCHEMA_SQL, databaseName, tableName)
                 .getRows()
                 .stream()
                 .map(this::toColumnInfo)
@@ -79,17 +73,8 @@ public class MysqlMetadataService {
     }
 
     public BusinessQueryResult explainSql(String resourceId, String sql) {
-        sqlSafetyValidator.validateMysqlSelect(sql);
+        sqlSafetyValidator.validateMysqlSelect(sql, businessDataSourcesProperties.getDatabaseName(resourceId));
         return sqlExecutionTemplate.trustedQuery(resourceId, SqlConstant.MYSQL_EXPLAIN_PREFIX + sql);
-    }
-
-    private void validateAllowedSchema(String resourceId, String schemaName) {
-        if (!StringUtils.hasText(schemaName)) {
-            throw new StoreException("schemaName cannot be empty");
-        }
-        if (!businessDataSourcesProperties.isAllowedSchema(resourceId, schemaName)) {
-            throw new StoreException("schemaName is not allowed: " + schemaName);
-        }
     }
 
     private MysqlTableInfo toTableInfo(Map<String, Object> row) {

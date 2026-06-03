@@ -92,63 +92,43 @@ public class BusinessDataSourceTools {
         return dataSourceService.getMysqlDataSources();
     }
 
-    @McpTool(name = "listSchemas", description = "List MySQL schemas in a business data source")
-    public List<String> listSchemas(
-            @McpToolParam(
-                            description = "The identity of the data source, for example business-ds://biz",
-                            required = true)
-                    String resourceId) {
-        LOGGER.info("User tries to list MySQL schemas, resourceId: {}", resourceId);
-        return dataSourceService.listMysqlSchemas(resourceId);
-    }
-
-    @McpTool(name = "getTableNames", description = "Get MySQL table names in a schema")
+    @McpTool(name = "getTableNames", description = "Get table names in the data source database")
     public List<MysqlTableInfo> getTableNames(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
-                    String resourceId,
-            @McpToolParam(description = "MySQL schema name", required = true) String schemaName) {
-        LOGGER.info("User tries to get MySQL table names, resourceId: {}, schemaName: {}", resourceId, schemaName);
-        return dataSourceService.getMysqlTableNames(resourceId, schemaName);
+                    String resourceId) {
+        LOGGER.info("User tries to get MySQL table names, resourceId: {}", resourceId);
+        return dataSourceService.getMysqlTableNames(resourceId);
     }
 
-    @McpTool(name = "getTableSchema", description = "Get MySQL table columns in a schema")
+    @McpTool(name = "getTableSchema", description = "Get table columns in the data source database")
     public List<MysqlColumnInfo> getTableSchema(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
                     String resourceId,
-            @McpToolParam(description = "MySQL schema name", required = true) String schemaName,
             @McpToolParam(description = "MySQL table name", required = true) String tableName) {
-        LOGGER.info(
-                "User tries to get MySQL table schema, resourceId: {}, schemaName: {}, tableName: {}",
-                resourceId,
-                schemaName,
-                tableName);
-        return dataSourceService.getMysqlTableSchema(resourceId, schemaName, tableName);
+        LOGGER.info("User tries to get MySQL table schema, resourceId: {}, tableName: {}", resourceId, tableName);
+        return dataSourceService.getMysqlTableSchema(resourceId, tableName);
     }
 
     @McpTool(
             name = "queryTable",
-            description = "Query a MySQL table with optional column list, equality filters, and row limit")
+            description =
+                    "Query a table in the data source database with optional column list, equality filters, and row limit")
     public BusinessQueryResult queryTable(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
                     String resourceId,
-            @McpToolParam(description = "MySQL schema name", required = true) String schemaName,
             @McpToolParam(description = "MySQL table name", required = true) String tableName,
             @McpToolParam(description = "Column names to select", required = false) List<String> columns,
             @McpToolParam(description = "Equality filters keyed by column name", required = false)
                     Map<String, Object> filters,
             @McpToolParam(description = "Maximum rows to return", required = false) Integer limit) {
-        LOGGER.info(
-                "User tries to query MySQL table, resourceId: {}, schemaName: {}, tableName: {}",
-                resourceId,
-                schemaName,
-                tableName);
-        return dataSourceService.queryMysqlTable(resourceId, schemaName, tableName, columns, filters, limit);
+        LOGGER.info("User tries to query MySQL table, resourceId: {}, tableName: {}", resourceId, tableName);
+        return dataSourceService.queryMysqlTable(resourceId, tableName, columns, filters, limit);
     }
 
     @McpTool(name = "explainSql", description = "Explain a safe MySQL SELECT SQL statement")
@@ -184,33 +164,23 @@ public class BusinessDataSourceTools {
     }
 
     @McpResource(
-            name = "mysqlSchemas",
-            title = "MySQL schemas",
-            uri = "mysql-db://{resourceId}/schemas",
-            description = "MySQL schema list for a business data source",
-            mimeType = "application/json")
-    public String mysqlSchemasResource(String resourceId) {
-        return toJson(dataSourceService.listMysqlSchemas(resourceId));
-    }
-
-    @McpResource(
             name = "mysqlTables",
             title = "MySQL tables",
-            uri = "mysql-db://{resourceId}/{schemaName}/tables",
-            description = "MySQL table list for a business schema",
+            uri = "mysql-db://{resourceId}/tables",
+            description = "MySQL table list for a business data source database",
             mimeType = "application/json")
-    public String mysqlTablesResource(String resourceId, String schemaName) {
-        return toJson(dataSourceService.getMysqlTableNames(resourceId, schemaName));
+    public String mysqlTablesResource(String resourceId) {
+        return toJson(dataSourceService.getMysqlTableNames(resourceId));
     }
 
     @McpResource(
             name = "mysqlTableSchema",
             title = "MySQL table schema",
-            uri = "mysql-db://{resourceId}/{schemaName}/{tableName}/schema",
+            uri = "mysql-db://{resourceId}/{tableName}/schema",
             description = "MySQL column list for a business table",
             mimeType = "application/json")
-    public String mysqlTableSchemaResource(String resourceId, String schemaName, String tableName) {
-        return toJson(dataSourceService.getMysqlTableSchema(resourceId, schemaName, tableName));
+    public String mysqlTableSchemaResource(String resourceId, String tableName) {
+        return toJson(dataSourceService.getMysqlTableSchema(resourceId, tableName));
     }
 
     private void requireAdmin() {

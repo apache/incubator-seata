@@ -85,7 +85,6 @@ class BusinessDataSourceToolsTest {
                         "unregisterDataSource",
                         "testDataSource",
                         "getDataSources",
-                        "listSchemas",
                         "getTableNames",
                         "getTableSchema",
                         "queryTable",

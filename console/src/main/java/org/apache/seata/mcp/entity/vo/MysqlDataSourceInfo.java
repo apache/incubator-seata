@@ -16,17 +16,14 @@
  */
 package org.apache.seata.mcp.entity.vo;
 
-import java.util.Collections;
-import java.util.List;
-
 public class MysqlDataSourceInfo {
 
     private String name;
     private String resourceId;
+    private String databaseName;
     private String datasource;
     private boolean dynamic;
     private boolean enabled;
-    private List<String> allowedSchemas = Collections.emptyList();
 
     public String getName() {
         return name;
@@ -42,6 +39,14 @@ public class MysqlDataSourceInfo {
 
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     public String getDatasource() {
@@ -66,13 +71,5 @@ public class MysqlDataSourceInfo {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public List<String> getAllowedSchemas() {
-        return allowedSchemas;
-    }
-
-    public void setAllowedSchemas(List<String> allowedSchemas) {
-        this.allowedSchemas = allowedSchemas == null ? Collections.emptyList() : allowedSchemas;
     }
 }

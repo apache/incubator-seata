@@ -18,9 +18,6 @@ package org.apache.seata.mcp.core.constant;
 
 public class SqlConstant {
 
-    public static final String LIST_SCHEMA_SQL =
-            "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA ORDER BY SCHEMA_NAME";
-
     public static final String GET_TABLE_NAME_SQL =
             "SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? "
                     + "ORDER BY TABLE_NAME";

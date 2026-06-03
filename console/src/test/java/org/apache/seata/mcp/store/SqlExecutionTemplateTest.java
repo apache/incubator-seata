@@ -143,4 +143,22 @@ class SqlExecutionTemplateTest {
 
         assertEquals("Querying undo_log is not allowed", exception.getMessage());
     }
+
+    @Test
+    void shouldRejectCrossDatabaseSelect() {
+        SqlSafetyValidator validator = new SqlSafetyValidator();
+
+        StoreException exception = assertThrows(
+                StoreException.class, () -> validator.validateMysqlSelect("select * from other_db.users", "app"));
+
+        assertEquals("Cross-database query is not allowed", exception.getMessage());
+    }
+
+    @Test
+    void shouldAllowDefaultOrSameDatabaseSelect() {
+        SqlSafetyValidator validator = new SqlSafetyValidator();
+
+        validator.validateMysqlSelect("select * from users", "app");
+        validator.validateMysqlSelect("select * from app.users", "app");
+    }
 }

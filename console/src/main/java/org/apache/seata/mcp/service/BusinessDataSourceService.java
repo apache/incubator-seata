@@ -35,21 +35,14 @@ public interface BusinessDataSourceService {
 
     MysqlDataSourceTestResult testMysqlDataSource(MysqlDataSourceRegisterRequest request);
 
-    List<String> listMysqlSchemas(String resourceId);
+    List<MysqlTableInfo> getMysqlTableNames(String resourceId);
 
-    List<MysqlTableInfo> getMysqlTableNames(String resourceId, String schemaName);
-
-    List<MysqlColumnInfo> getMysqlTableSchema(String resourceId, String schemaName, String tableName);
+    List<MysqlColumnInfo> getMysqlTableSchema(String resourceId, String tableName);
 
     BusinessQueryResult runSql(String sql, String resourceId);
 
     BusinessQueryResult queryMysqlTable(
-            String resourceId,
-            String schemaName,
-            String tableName,
-            List<String> columns,
-            Map<String, Object> filters,
-            Integer limit);
+            String resourceId, String tableName, List<String> columns, Map<String, Object> filters, Integer limit);
 
     BusinessQueryResult explainMysqlSql(String resourceId, String sql);
 }

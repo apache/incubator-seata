@@ -17,11 +17,16 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.mcp.core.props.BusinessDataSourcesProperties;
+import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
 import org.apache.seata.mcp.service.MysqlMetadataService;
 import org.apache.seata.mcp.store.DataSourceFactory;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
+import org.apache.seata.mcp.store.SqlSafetyValidator;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -36,8 +41,8 @@ class BusinessDataSourceServiceImplTest {
         SqlExecutionTemplate sqlExecutionTemplate = mock(SqlExecutionTemplate.class);
         BusinessDataSourcesProperties properties = mock(BusinessDataSourcesProperties.class);
         MysqlMetadataService metadataService = mock(MysqlMetadataService.class);
-        BusinessDataSourceServiceImpl service =
-                new BusinessDataSourceServiceImpl(sqlExecutionTemplate, properties, metadataService);
+        BusinessDataSourceServiceImpl service = new BusinessDataSourceServiceImpl(
+                sqlExecutionTemplate, properties, metadataService, new SqlSafetyValidator());
         when(properties.unregisterMysqlDataSource("biz")).thenReturn("business-ds://biz");
 
         try (MockedStatic<DataSourceFactory> dataSourceFactory = mockStatic(DataSourceFactory.class)) {
@@ -47,5 +52,25 @@ class BusinessDataSourceServiceImplTest {
             dataSourceFactory.verify(() -> DataSourceFactory.removeDataSource("business-ds://biz"));
         }
         verify(properties).unregisterMysqlDataSource("biz");
+    }
+
+    @Test
+    void shouldQueryTableWithinUrlDatabase() {
+        SqlExecutionTemplate sqlExecutionTemplate = mock(SqlExecutionTemplate.class);
+        BusinessDataSourcesProperties properties = mock(BusinessDataSourcesProperties.class);
+        MysqlMetadataService metadataService = mock(MysqlMetadataService.class);
+        BusinessQueryResult result = new BusinessQueryResult();
+        BusinessDataSourceServiceImpl service = new BusinessDataSourceServiceImpl(
+                sqlExecutionTemplate, properties, metadataService, new SqlSafetyValidator());
+        when(properties.getDatabaseName("business-ds://biz")).thenReturn("app");
+        when(sqlExecutionTemplate.queryWithMaxRows("business-ds://biz", "SELECT `id`, `name` FROM `app`.`users`", 10))
+                .thenReturn(result);
+
+        BusinessQueryResult actual = service.queryMysqlTable(
+                "business-ds://biz", "users", Arrays.asList("id", "name"), Collections.emptyMap(), 10);
+
+        assertEquals(result, actual);
+        verify(sqlExecutionTemplate)
+                .queryWithMaxRows("business-ds://biz", "SELECT `id`, `name` FROM `app`.`users`", 10);
     }
 }

@@ -63,6 +63,12 @@ public class SqlSafetyValidator {
         return selectStatement;
     }
 
+    public SQLSelectStatement validateMysqlSelect(String sql, String databaseName) {
+        SQLSelectStatement selectStatement = validateMysqlSelect(sql);
+        validateDatabaseScope(selectStatement, databaseName);
+        return selectStatement;
+    }
+
     private boolean hasLockClause(SQLSelectStatement statement) {
         final boolean[] result = new boolean[] {false};
         statement.accept(new SQLASTVisitorAdapter() {
@@ -89,6 +95,26 @@ public class SqlSafetyValidator {
         return false;
     }
 
+    private void validateDatabaseScope(SQLSelectStatement statement, String databaseName) {
+        if (StringUtils.isBlank(databaseName)) {
+            throw new StoreException("Database name cannot be empty");
+        }
+        SchemaStatVisitor visitor = SQLUtils.createSchemaStatVisitor(DbType.mysql);
+        statement.accept(visitor);
+        String normalizedDatabase = normalizeIdentifier(databaseName);
+        for (TableStat.Name name : visitor.getTables().keySet()) {
+            String tableName = name.getName();
+            int index = tableName.lastIndexOf('.');
+            if (index < 0) {
+                continue;
+            }
+            String queriedDatabaseName = normalizeIdentifier(tableName.substring(0, index));
+            if (!normalizedDatabase.equals(queriedDatabaseName)) {
+                throw new StoreException("Cross-database query is not allowed");
+            }
+        }
+    }
+
     private String normalizeTableName(String tableName) {
         String normalized = tableName;
         int index = normalized.lastIndexOf('.');
@@ -96,5 +122,9 @@ public class SqlSafetyValidator {
             normalized = normalized.substring(index + 1);
         }
         return normalized.replace("`", "").replace("\"", "").toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeIdentifier(String identifier) {
+        return identifier.replace("`", "").replace("\"", "").toLowerCase(Locale.ROOT);
     }
 }

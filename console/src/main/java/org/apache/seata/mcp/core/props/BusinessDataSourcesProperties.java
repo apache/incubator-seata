@@ -31,7 +31,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -82,6 +81,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private static final Pattern DATASOURCE_NAME_PATTERN = Pattern.compile("[A-Za-z0-9_.-]+");
 
+    private static final Set<String> SYSTEM_DATABASES =
+            new HashSet<>(Arrays.asList("information_schema", "mysql", "performance_schema", "sys"));
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourcesProperties.class);
 
     public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper, SecretResolver secretResolver) {
@@ -121,7 +123,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setMinConn(env.getProperty(prefix + "minConn", Integer.class, DEFAULT_DB_MIN_CONN));
             props.setMaxConn(env.getProperty(prefix + "maxConn", Integer.class, DEFAULT_DB_MAX_CONN));
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
-            props.setAllowedSchemas(parseAllowedSchemas(env.getProperty(prefix + "allowedSchemas", "")));
             if (!validateDataSourceProperties(props, name)) {
                 continue;
             }
@@ -171,11 +172,10 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         props.setMinConn(request.getMinConn() <= 0 ? DEFAULT_DB_MIN_CONN : request.getMinConn());
         props.setMaxConn(request.getMaxConn() <= 0 ? DEFAULT_DB_MAX_CONN : request.getMaxConn());
         props.setMaxWait(request.getMaxWait() == null ? 5000L : request.getMaxWait());
-        props.setAllowedSchemas(request.getAllowedSchemas());
+        validateDynamicMysqlProperties(props);
         if (!validateDataSourceProperties(props, props.getName())) {
             throw new IllegalArgumentException("Business DataSource Properties has failure");
         }
-        validateDynamicMysqlProperties(props);
         return props;
     }
 
@@ -203,12 +203,12 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                 .collect(Collectors.toList());
     }
 
-    public boolean isAllowedSchema(String resourceId, String schemaName) {
+    public String getDatabaseName(String resourceId) {
         DataSourceProperties props = datasources.get(resourceId);
-        if (props == null || props.getAllowedSchemas().isEmpty()) {
-            return true;
+        if (props == null) {
+            throw new IllegalArgumentException("Cannot find datasource properties: " + resourceId);
         }
-        return props.getAllowedSchemas().stream().anyMatch(schema -> schema.equalsIgnoreCase(schemaName));
+        return props.getDatabaseName();
     }
 
     private MysqlDataSourceInfo toInfo(String name, DataSourceProperties props) {
@@ -218,10 +218,10 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         MysqlDataSourceInfo info = new MysqlDataSourceInfo();
         info.setName(name);
         info.setResourceId(props.getResourceId());
+        info.setDatabaseName(props.getDatabaseName());
         info.setDatasource(props.getDatasource());
         info.setDynamic(props.isDynamic());
         info.setEnabled(props.isEnabled());
-        info.setAllowedSchemas(props.getAllowedSchemas());
         return info;
     }
 
@@ -268,6 +268,12 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             LOGGER.error("Only MySQL 8 driver is supported for datasource: {}", dataSourceName);
             return false;
         }
+        try {
+            props.setDatabaseName(parseMysqlDatabaseName(props.getUrl()));
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Invalid MySQL JDBC URL for datasource: {}", dataSourceName);
+            return false;
+        }
         if (props.getMinConn() < 0) {
             LOGGER.error("Minimum connection count cannot be negative for datasource: {}", dataSourceName);
             return false;
@@ -297,6 +303,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         if (!allowedHosts.isEmpty() && !allowedHosts.contains(host.toLowerCase(Locale.ROOT))) {
             throw new IllegalArgumentException("MySQL host is not allowed: " + host);
         }
+        props.setDatabaseName(parseMysqlDatabaseName(props.getUrl()));
     }
 
     private String parseMysqlHost(String url) {
@@ -311,6 +318,34 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
     }
 
+    private String parseMysqlDatabaseName(String url) {
+        if (!StringUtils.hasText(url) || !url.toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
+            throw new IllegalArgumentException("Only jdbc:mysql:// URL is supported");
+        }
+        try {
+            URI uri = URI.create(url.substring("jdbc:".length()));
+            String path = uri.getPath();
+            if (!StringUtils.hasText(path) || "/".equals(path)) {
+                throw new IllegalArgumentException("MySQL JDBC URL must include a database name");
+            }
+            String databaseName = path.startsWith("/") ? path.substring(1) : path;
+            int slashIndex = databaseName.indexOf('/');
+            if (slashIndex >= 0) {
+                databaseName = databaseName.substring(0, slashIndex);
+            }
+            if (!StringUtils.hasText(databaseName)) {
+                throw new IllegalArgumentException("MySQL JDBC URL must include a database name");
+            }
+            String normalized = databaseName.toLowerCase(Locale.ROOT);
+            if (SYSTEM_DATABASES.contains(normalized)) {
+                throw new IllegalArgumentException("MySQL JDBC URL database is not allowed: " + databaseName);
+            }
+            return databaseName;
+        } catch (IllegalArgumentException e) {
+            throw e;
+        }
+    }
+
     private Set<String> parseAllowedHosts(String hosts) {
         if (!StringUtils.hasText(hosts)) {
             return Collections.emptySet();
@@ -320,16 +355,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                 .filter(StringUtils::isNotBlank)
                 .map(host -> host.toLowerCase(Locale.ROOT))
                 .collect(Collectors.toSet());
-    }
-
-    private List<String> parseAllowedSchemas(String schemas) {
-        if (!StringUtils.hasText(schemas)) {
-            return Collections.emptyList();
-        }
-        return Arrays.stream(schemas.split(","))
-                .map(String::trim)
-                .filter(StringUtils::isNotBlank)
-                .collect(Collectors.toList());
     }
 
     private String buildResourceId(String name) {
@@ -393,6 +418,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private boolean dynamic;
         private String name;
         private String resourceId;
+        private String databaseName;
         private String dbType = MYSQL_DB_TYPE;
         private String driverClassName = MYSQL_DRIVER_CLASS_NAME;
         private String url = "";
@@ -403,7 +429,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private int minConn = DEFAULT_DB_MIN_CONN;
         private int maxConn = DEFAULT_DB_MAX_CONN;
         private Long maxWait = 5000L;
-        private List<String> allowedSchemas = new ArrayList<>();
 
         public boolean isEnabled() {
             return enabled;
@@ -435,6 +460,14 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
         public void setResourceId(String resourceId) {
             this.resourceId = resourceId;
+        }
+
+        public String getDatabaseName() {
+            return databaseName;
+        }
+
+        public void setDatabaseName(String databaseName) {
+            this.databaseName = databaseName;
         }
 
         public Long getMaxWait() {
@@ -515,14 +548,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
         public void setMaxConn(int maxConn) {
             this.maxConn = maxConn;
-        }
-
-        public List<String> getAllowedSchemas() {
-            return allowedSchemas;
-        }
-
-        public void setAllowedSchemas(List<String> allowedSchemas) {
-            this.allowedSchemas = allowedSchemas == null ? Collections.emptyList() : allowedSchemas;
         }
     }
 }

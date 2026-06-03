@@ -37,19 +37,18 @@ import static org.mockito.Mockito.when;
 class MysqlMetadataServiceTest {
 
     @Test
-    void shouldQueryTablesWithSchemaParameter() {
+    void shouldQueryTablesWithUrlDatabaseName() {
         SqlExecutionTemplate sqlExecutionTemplate = mock(SqlExecutionTemplate.class);
         BusinessDataSourcesProperties properties = mock(BusinessDataSourcesProperties.class);
         BusinessQueryResult result = result(row("TABLE_NAME", "orders", "TABLE_COMMENT", "business orders"));
-        when(properties.isAllowedSchema("business-ds://biz", "app")).thenReturn(true);
+        when(properties.getDatabaseName("business-ds://biz")).thenReturn("app");
         when(sqlExecutionTemplate.trustedQuery("business-ds://biz", SqlConstant.GET_TABLE_NAME_SQL, "app"))
                 .thenReturn(result);
 
         MysqlMetadataService service =
                 new MysqlMetadataService(sqlExecutionTemplate, new SqlSafetyValidator(), properties);
 
-        assertEquals(
-                "orders", service.listTables("business-ds://biz", "app").get(0).getTableName());
+        assertEquals("orders", service.listTables("business-ds://biz").get(0).getTableName());
         verify(sqlExecutionTemplate).trustedQuery("business-ds://biz", SqlConstant.GET_TABLE_NAME_SQL, "app");
     }
 

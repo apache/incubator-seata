@@ -30,6 +30,7 @@ import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.service.MysqlMetadataService;
 import org.apache.seata.mcp.store.DataSourceFactory;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
+import org.apache.seata.mcp.store.SqlSafetyValidator;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
@@ -51,13 +52,17 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     private final MysqlMetadataService mysqlMetadataService;
 
+    private final SqlSafetyValidator sqlSafetyValidator;
+
     public BusinessDataSourceServiceImpl(
             SqlExecutionTemplate sqlExecutionTemplate,
             BusinessDataSourcesProperties businessDataSourcesProperties,
-            MysqlMetadataService mysqlMetadataService) {
+            MysqlMetadataService mysqlMetadataService,
+            SqlSafetyValidator sqlSafetyValidator) {
         this.sqlExecutionTemplate = sqlExecutionTemplate;
         this.businessDataSourcesProperties = businessDataSourcesProperties;
         this.mysqlMetadataService = mysqlMetadataService;
+        this.sqlSafetyValidator = sqlSafetyValidator;
     }
 
     @Override
@@ -103,35 +108,26 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     }
 
     @Override
-    public List<String> listMysqlSchemas(String resourceId) {
-        return mysqlMetadataService.listSchemas(resourceId);
+    public List<MysqlTableInfo> getMysqlTableNames(String resourceId) {
+        return mysqlMetadataService.listTables(resourceId);
     }
 
     @Override
-    public List<MysqlTableInfo> getMysqlTableNames(String resourceId, String schemaName) {
-        return mysqlMetadataService.listTables(resourceId, schemaName);
-    }
-
-    @Override
-    public List<MysqlColumnInfo> getMysqlTableSchema(String resourceId, String schemaName, String tableName) {
-        return mysqlMetadataService.describeTable(resourceId, schemaName, tableName);
+    public List<MysqlColumnInfo> getMysqlTableSchema(String resourceId, String tableName) {
+        return mysqlMetadataService.describeTable(resourceId, tableName);
     }
 
     @Override
     public BusinessQueryResult runSql(String sql, String resourceId) {
+        sqlSafetyValidator.validateMysqlSelect(sql, businessDataSourcesProperties.getDatabaseName(resourceId));
         return sqlExecutionTemplate.query(resourceId, sql);
     }
 
     @Override
     public BusinessQueryResult queryMysqlTable(
-            String resourceId,
-            String schemaName,
-            String tableName,
-            List<String> columns,
-            Map<String, Object> filters,
-            Integer limit) {
-        validateAllowedSchema(resourceId, schemaName);
-        validateIdentifier("schemaName", schemaName);
+            String resourceId, String tableName, List<String> columns, Map<String, Object> filters, Integer limit) {
+        String databaseName = businessDataSourcesProperties.getDatabaseName(resourceId);
+        validateIdentifier("databaseName", databaseName);
         validateIdentifier("tableName", tableName);
 
         StringBuilder sql = new StringBuilder("SELECT ");
@@ -140,7 +136,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         } else {
             sql.append(buildColumnList(columns));
         }
-        sql.append(" FROM ").append(quote(schemaName)).append(".").append(quote(tableName));
+        sql.append(" FROM ").append(quote(databaseName)).append(".").append(quote(tableName));
 
         List<Object> params = new ArrayList<>();
         if (filters != null && !filters.isEmpty()) {
@@ -164,12 +160,6 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     @Override
     public BusinessQueryResult explainMysqlSql(String resourceId, String sql) {
         return mysqlMetadataService.explainSql(resourceId, sql);
-    }
-
-    private void validateAllowedSchema(String resourceId, String schemaName) {
-        if (!businessDataSourcesProperties.isAllowedSchema(resourceId, schemaName)) {
-            throw new StoreException("schemaName is not allowed: " + schemaName);
-        }
     }
 
     private String buildColumnList(List<String> columns) {

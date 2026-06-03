@@ -16,9 +16,6 @@
  */
 package org.apache.seata.mcp.entity.dto;
 
-import java.util.Collections;
-import java.util.List;
-
 public class MysqlDataSourceRegisterRequest {
 
     private String name;
@@ -30,7 +27,6 @@ public class MysqlDataSourceRegisterRequest {
     private int minConn = 10;
     private int maxConn = 100;
     private Long maxWait = 5000L;
-    private List<String> allowedSchemas = Collections.emptyList();
 
     public String getName() {
         return name;
@@ -102,13 +98,5 @@ public class MysqlDataSourceRegisterRequest {
 
     public void setMaxWait(Long maxWait) {
         this.maxWait = maxWait;
-    }
-
-    public List<String> getAllowedSchemas() {
-        return allowedSchemas;
-    }
-
-    public void setAllowedSchemas(List<String> allowedSchemas) {
-        this.allowedSchemas = allowedSchemas == null ? Collections.emptyList() : allowedSchemas;
     }
 }

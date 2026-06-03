@@ -24,8 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,6 +62,7 @@ class BusinessDataSourcesPropertiesTest {
                 BusinessDataSourcesProperties.getDatasources().get(resourceId);
         assertEquals("pwd", props.getPassword());
         assertEquals("MYSQL_PASS", props.getPasswordSecretRef());
+        assertEquals("app", props.getDatabaseName());
         assertEquals(
                 "business-ds://biz",
                 BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
@@ -93,6 +92,30 @@ class BusinessDataSourcesPropertiesTest {
                 assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
 
         assertEquals("Only jdbc:mysql:// URL is supported", exception.getMessage());
+    }
+
+    @Test
+    void shouldRejectMysqlJdbcUrlWithoutDatabaseName() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+        MysqlDataSourceRegisterRequest request = request("biz", "localhost");
+        request.setUrl("jdbc:mysql://localhost:3306");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
+
+        assertEquals("MySQL JDBC URL must include a database name", exception.getMessage());
+    }
+
+    @Test
+    void shouldRejectSystemDatabaseInMysqlJdbcUrl() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
+        MysqlDataSourceRegisterRequest request = request("biz", "localhost");
+        request.setUrl("jdbc:mysql://localhost:3306/information_schema");
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request));
+
+        assertEquals("MySQL JDBC URL database is not allowed: information_schema", exception.getMessage());
     }
 
     @Test
@@ -151,7 +174,6 @@ class BusinessDataSourcesPropertiesTest {
         request.setPasswordSecretRef("MYSQL_PASS");
         request.setMinConn(1);
         request.setMaxConn(2);
-        request.setAllowedSchemas(Collections.singletonList("app"));
         return request;
     }
 }
