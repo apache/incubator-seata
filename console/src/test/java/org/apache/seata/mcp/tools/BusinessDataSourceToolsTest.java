@@ -22,12 +22,19 @@ import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -48,8 +55,7 @@ class BusinessDataSourceToolsTest {
         TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", "pwd", "ROLE_USER");
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        assertThrows(
-                AccessDeniedException.class, () -> tools.registerMysqlDataSource(new MysqlDataSourceRegisterRequest()));
+        assertThrows(AccessDeniedException.class, () -> tools.registerDataSource(new MysqlDataSourceRegisterRequest()));
     }
 
     @Test
@@ -61,9 +67,31 @@ class BusinessDataSourceToolsTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         when(service.registerMysqlDataSource(request)).thenReturn("business-ds://biz");
 
-        tools.registerMysqlDataSource(request);
+        tools.registerDataSource(request);
 
         verify(service).registerMysqlDataSource(request);
+    }
+
+    @Test
+    void shouldExposeToolNamesWithoutMysqlPrefix() {
+        Set<String> toolNames = Arrays.stream(BusinessDataSourceTools.class.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(McpTool.class))
+                .map(this::toolName)
+                .collect(Collectors.toSet());
+
+        assertEquals(
+                new HashSet<>(Arrays.asList(
+                        "registerDataSource",
+                        "unregisterDataSource",
+                        "testDataSource",
+                        "getDataSources",
+                        "listSchemas",
+                        "getTableNames",
+                        "getTableSchema",
+                        "queryTable",
+                        "explainSql",
+                        "runSql")),
+                toolNames);
     }
 
     @Test
@@ -81,5 +109,10 @@ class BusinessDataSourceToolsTest {
         assertFalse(json.contains("jdbc:mysql://"));
         assertFalse(json.contains("username"));
         assertFalse(json.contains("password"));
+    }
+
+    private String toolName(Method method) {
+        McpTool annotation = method.getAnnotation(McpTool.class);
+        return annotation.name().isEmpty() ? method.getName() : annotation.name();
     }
 }

@@ -56,8 +56,8 @@ public class BusinessDataSourceTools {
         this.objectMapper = objectMapper;
     }
 
-    @McpTool(description = "Register a dynamic MySQL business data source. Admin only.")
-    public String registerMysqlDataSource(
+    @McpTool(name = "registerDataSource", description = "Register a dynamic MySQL business data source. Admin only.")
+    public String registerDataSource(
             @McpToolParam(description = "MySQL data source registration request", required = true)
                     MysqlDataSourceRegisterRequest request) {
         requireAdmin();
@@ -65,16 +65,20 @@ public class BusinessDataSourceTools {
         return dataSourceService.registerMysqlDataSource(request);
     }
 
-    @McpTool(description = "Unregister a dynamic MySQL business data source. Admin only.")
-    public String unregisterMysqlDataSource(
+    @McpTool(
+            name = "unregisterDataSource",
+            description = "Unregister a dynamic MySQL business data source. Admin only.")
+    public String unregisterDataSource(
             @McpToolParam(description = "The data source name", required = true) String name) {
         requireAdmin();
         LOGGER.info("User tries to unregister MySQL business data source: {}", name);
         return dataSourceService.unregisterMysqlDataSource(name);
     }
 
-    @McpTool(description = "Test a MySQL business data source registration request. Admin only.")
-    public MysqlDataSourceTestResult testMysqlDataSource(
+    @McpTool(
+            name = "testDataSource",
+            description = "Test a MySQL business data source registration request. Admin only.")
+    public MysqlDataSourceTestResult testDataSource(
             @McpToolParam(description = "MySQL data source registration request", required = true)
                     MysqlDataSourceRegisterRequest request) {
         requireAdmin();
@@ -82,14 +86,14 @@ public class BusinessDataSourceTools {
         return dataSourceService.testMysqlDataSource(request);
     }
 
-    @McpTool(description = "Get all MySQL business data sources without sensitive fields")
-    public List<MysqlDataSourceInfo> getMysqlDataSources() {
+    @McpTool(name = "getDataSources", description = "Get all MySQL business data sources without sensitive fields")
+    public List<MysqlDataSourceInfo> getDataSources() {
         LOGGER.info("User tries to get MySQL business data sources");
         return dataSourceService.getMysqlDataSources();
     }
 
-    @McpTool(description = "List MySQL schemas in a business data source")
-    public List<String> listMysqlSchemas(
+    @McpTool(name = "listSchemas", description = "List MySQL schemas in a business data source")
+    public List<String> listSchemas(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
@@ -98,8 +102,8 @@ public class BusinessDataSourceTools {
         return dataSourceService.listMysqlSchemas(resourceId);
     }
 
-    @McpTool(description = "Get MySQL table names in a schema")
-    public List<MysqlTableInfo> getMysqlTableNames(
+    @McpTool(name = "getTableNames", description = "Get MySQL table names in a schema")
+    public List<MysqlTableInfo> getTableNames(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
@@ -109,8 +113,8 @@ public class BusinessDataSourceTools {
         return dataSourceService.getMysqlTableNames(resourceId, schemaName);
     }
 
-    @McpTool(description = "Get MySQL table columns in a schema")
-    public List<MysqlColumnInfo> getMysqlTableSchema(
+    @McpTool(name = "getTableSchema", description = "Get MySQL table columns in a schema")
+    public List<MysqlColumnInfo> getTableSchema(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
@@ -125,8 +129,10 @@ public class BusinessDataSourceTools {
         return dataSourceService.getMysqlTableSchema(resourceId, schemaName, tableName);
     }
 
-    @McpTool(description = "Query a MySQL table with optional column list, equality filters, and row limit")
-    public BusinessQueryResult queryMysqlTable(
+    @McpTool(
+            name = "queryTable",
+            description = "Query a MySQL table with optional column list, equality filters, and row limit")
+    public BusinessQueryResult queryTable(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
@@ -145,8 +151,8 @@ public class BusinessDataSourceTools {
         return dataSourceService.queryMysqlTable(resourceId, schemaName, tableName, columns, filters, limit);
     }
 
-    @McpTool(description = "Explain a safe MySQL SELECT SQL statement")
-    public BusinessQueryResult explainMysqlSql(
+    @McpTool(name = "explainSql", description = "Explain a safe MySQL SELECT SQL statement")
+    public BusinessQueryResult explainSql(
             @McpToolParam(
                             description = "The identity of the data source, for example business-ds://biz",
                             required = true)
@@ -156,7 +162,7 @@ public class BusinessDataSourceTools {
         return dataSourceService.explainMysqlSql(resourceId, sql);
     }
 
-    @McpTool(description = "Execute a safe MySQL SELECT query against a business data source")
+    @McpTool(name = "runSql", description = "Execute a safe MySQL SELECT query against a business data source")
     public BusinessQueryResult runSql(
             @McpToolParam(description = "MySQL SELECT SQL statement", required = true) String sql,
             @McpToolParam(
