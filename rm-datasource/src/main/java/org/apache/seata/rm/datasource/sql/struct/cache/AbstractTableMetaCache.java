@@ -97,8 +97,8 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
                 try {
                     // Reuse tableNameForKey directly, no need to check again
                     TableMeta tableMeta = fetchSchema(connection, tableNameForKey);
+                    TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                     if (!tableMeta.equals(entry.getValue())) {
-                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                         LOGGER.info("table meta change was found, update table meta cache automatically.");
                     }
                 } catch (SQLException e) {
