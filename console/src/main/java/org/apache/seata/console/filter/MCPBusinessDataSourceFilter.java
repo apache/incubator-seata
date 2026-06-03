@@ -31,8 +31,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
@@ -40,8 +38,6 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
     private final BusinessDataSourcesProperties businessDataSourcesProperties;
 
     private final List<RequestMatcher> mcpEndpointMatchers;
-
-    private final Set<String> processedConfigs = ConcurrentHashMap.newKeySet();
 
     public MCPBusinessDataSourceFilter(BusinessDataSourcesProperties properties, List<String> mcpEndpoints) {
         this.businessDataSourcesProperties = properties;
@@ -64,12 +60,8 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
             }
             String[] jsonConfigs = combinedHeader.split(";");
             for (String jsonDBConfig : jsonConfigs) {
-                if (processedConfigs.contains(jsonDBConfig.trim())) {
-                    continue;
-                }
                 try {
                     businessDataSourcesProperties.registerDataSourceFromJson(jsonDBConfig.trim());
-                    processedConfigs.add(jsonDBConfig.trim());
                 } catch (Exception e) {
                     if (!response.isCommitted()) {
                         response.sendError(

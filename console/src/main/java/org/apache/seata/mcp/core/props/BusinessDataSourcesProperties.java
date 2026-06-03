@@ -39,22 +39,31 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 @Component
 public class BusinessDataSourcesProperties implements InitializingBean {
 
-    public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper) {
-        this.env = env;
-        this.objectMapper = objectMapper;
-    }
-
     private final Environment env;
 
     private final ObjectMapper objectMapper;
+
+    private final int maxDynamicDataSources;
 
     private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
 
     private static final Map<String, String> dataSourcesNamesAndResourceIds = new ConcurrentHashMap<>();
 
+    private static final Set<String> dynamicResourceIds = ConcurrentHashMap.newKeySet();
+
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
+    private static final int DEFAULT_MAX_DYNAMIC_DATA_SOURCES = 100;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourcesProperties.class);
+
+    public BusinessDataSourcesProperties(Environment env, ObjectMapper objectMapper) {
+        this.env = env;
+        this.objectMapper = objectMapper;
+        this.maxDynamicDataSources =
+                env.getProperty("seata.businessDataSources.max-dynamic-size", Integer.class,
+                        DEFAULT_MAX_DYNAMIC_DATA_SOURCES);
+    }
 
     @Override
     public void afterPropertiesSet() {
@@ -191,7 +200,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         return props;
     }
 
-    public void registerDataSourceFromJson(String jsonConfig) throws Exception {
+    public synchronized void registerDataSourceFromJson(String jsonConfig) throws Exception {
         JsonNode jsonNode = objectMapper.readTree(jsonConfig);
         if (jsonNode == null || jsonNode.isEmpty()) {
             throw new IllegalArgumentException("JSON configuration cannot be null");
@@ -206,8 +215,21 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             throw new IllegalArgumentException("Business DataSource Properties has failure");
         }
         String resourceId = getOriginUrl(props.getUrl());
+        String existingResourceId = dataSourcesNamesAndResourceIds.get(name);
+        if (StringUtils.hasText(existingResourceId) && !existingResourceId.equals(resourceId)) {
+            throw new IllegalArgumentException("The data source name has already been registered: " + name);
+        }
+        if (datasources.containsKey(resourceId)) {
+            dataSourcesNamesAndResourceIds.putIfAbsent(name, resourceId);
+            return;
+        }
+        if (dynamicResourceIds.size() >= maxDynamicDataSources) {
+            throw new IllegalArgumentException(
+                    "The number of dynamic business data sources exceeds the limit: " + maxDynamicDataSources);
+        }
 
         datasources.put(resourceId, props);
+        dynamicResourceIds.add(resourceId);
         dataSourcesNamesAndResourceIds.put(name, resourceId);
     }
 
