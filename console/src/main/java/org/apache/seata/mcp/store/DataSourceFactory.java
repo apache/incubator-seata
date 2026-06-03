@@ -17,6 +17,7 @@
 package org.apache.seata.mcp.store;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.mcp.core.props.BusinessDataSourcesProperties;
 import org.slf4j.Logger;
@@ -37,6 +38,20 @@ public class DataSourceFactory {
     @PostConstruct
     public void init() {
         DataSourceFactory.initAllDataSources();
+    }
+
+    @PreDestroy
+    public void destroy() {
+        dataSourceMap.forEach((resourceId, dataSource) -> {
+            if (dataSource instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) dataSource).close();
+                } catch (Exception e) {
+                    LOGGER.warn("Close Business DataSource failed, resourceId: {}", resourceId, e);
+                }
+            }
+        });
+        dataSourceMap.clear();
     }
 
     public static void initAllDataSources() {
