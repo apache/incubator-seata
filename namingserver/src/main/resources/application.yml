@@ -77,7 +77,7 @@ seata:
       driverClassName: com.mysql.cj.jdbc.Driver # Currently, only mysql is supported
       url:
       username: root
-      password: Il02mayi
+      password:
       datasource: druid # Optional connection pool type (druid/hikari/dbcp)
       minConn: 5
       maxConn: 50
@@ -88,7 +88,7 @@ seata:
       driverClassName: com.mysql.cj.jdbc.Driver
       url:
       username: root
-      password: root
+      password:
       datasource: dbcp
       minConn: 5
       maxConn: 50
