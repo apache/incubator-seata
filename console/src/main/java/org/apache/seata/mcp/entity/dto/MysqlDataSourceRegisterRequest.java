@@ -16,15 +16,42 @@
  */
 package org.apache.seata.mcp.entity.dto;
 
+import org.springaicommunity.mcp.annotation.McpToolParam;
+
 public class MysqlDataSourceRegisterRequest {
 
+    @McpToolParam(
+            description = "Unique data source name, used to build resourceId business-ds://{name}",
+            required = true)
     private String name;
+
+    @McpToolParam(
+            description =
+                    "MySQL JDBC URL that must include a database name, for example jdbc:mysql://host:3306/student",
+            required = true)
     private String url;
+
+    @McpToolParam(description = "MySQL username. Use a read-only database account for query tools", required = true)
     private String username;
+
+    @McpToolParam(
+            description =
+                    "Server-side secret reference used to resolve the MySQL password, for example STUDENT_DB_PASSWORD",
+            required = true)
     private String passwordSecretRef;
+
+    @McpToolParam(description = "Connection pool type. Supported values depend on the local provider, default is druid")
     private String datasource = "druid";
+
+    @McpToolParam(description = "Minimum connection pool size, default is 10", required = false)
     private int minConn = 10;
+
+    @McpToolParam(description = "Maximum connection pool size, default is 100", required = false)
     private int maxConn = 100;
+
+    @McpToolParam(
+            description = "Maximum time in milliseconds to wait for a connection, default is 5000",
+            required = false)
     private Long maxWait = 5000L;
 
     public String getName() {
