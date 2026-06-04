@@ -19,11 +19,9 @@ package org.apache.seata.mcp.tools;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
 import org.apache.seata.mcp.entity.vo.MysqlColumnInfo;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
-import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
 import org.apache.seata.mcp.entity.vo.MysqlTableInfo;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.slf4j.Logger;
@@ -31,14 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpResource;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -54,36 +46,6 @@ public class BusinessDataSourceTools {
     public BusinessDataSourceTools(BusinessDataSourceService dataSourceService, ObjectMapper objectMapper) {
         this.dataSourceService = dataSourceService;
         this.objectMapper = objectMapper;
-    }
-
-    @McpTool(name = "registerDataSource", description = "Register a dynamic MySQL business data source. Admin only.")
-    public String registerDataSource(
-            @McpToolParam(description = "MySQL data source registration request", required = true)
-                    MysqlDataSourceRegisterRequest request) {
-        requireAdmin();
-        LOGGER.info("User tries to register MySQL business data source");
-        return dataSourceService.registerMysqlDataSource(request);
-    }
-
-    @McpTool(
-            name = "unregisterDataSource",
-            description = "Unregister a dynamic MySQL business data source. Admin only.")
-    public String unregisterDataSource(
-            @McpToolParam(description = "The data source name", required = true) String name) {
-        requireAdmin();
-        LOGGER.info("User tries to unregister MySQL business data source: {}", name);
-        return dataSourceService.unregisterMysqlDataSource(name);
-    }
-
-    @McpTool(
-            name = "testDataSource",
-            description = "Test a MySQL business data source registration request. Admin only.")
-    public MysqlDataSourceTestResult testDataSource(
-            @McpToolParam(description = "MySQL data source registration request", required = true)
-                    MysqlDataSourceRegisterRequest request) {
-        requireAdmin();
-        LOGGER.info("User tries to test MySQL business data source");
-        return dataSourceService.testMysqlDataSource(request);
     }
 
     @McpTool(name = "getDataSources", description = "Get all MySQL business data sources without sensitive fields")
@@ -181,25 +143,6 @@ public class BusinessDataSourceTools {
             mimeType = "application/json")
     public String mysqlTableSchemaResource(String resourceId, String tableName) {
         return toJson(dataSourceService.getMysqlTableSchema(resourceId, tableName));
-    }
-
-    private void requireAdmin() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null
-                || !authentication.isAuthenticated()
-                || authentication instanceof AnonymousAuthenticationToken) {
-            throw new AccessDeniedException("Admin authority is required");
-        }
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        if (authorities == null || authorities.isEmpty()) {
-            return;
-        }
-        boolean admin = authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(authority -> "ADMIN".equals(authority) || "ROLE_ADMIN".equals(authority));
-        if (!admin) {
-            throw new AccessDeniedException("Admin authority is required");
-        }
     }
 
     private String toJson(Object value) {

@@ -17,15 +17,10 @@
 package org.apache.seata.mcp.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springaicommunity.mcp.annotation.McpTool;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -36,41 +31,10 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class BusinessDataSourceToolsTest {
-
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
-
-    @Test
-    void shouldRejectDynamicRegistrationForNonAdminAuthority() {
-        BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceTools tools = new BusinessDataSourceTools(service, new ObjectMapper());
-        TestingAuthenticationToken authentication = new TestingAuthenticationToken("user", "pwd", "ROLE_USER");
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        assertThrows(AccessDeniedException.class, () -> tools.registerDataSource(new MysqlDataSourceRegisterRequest()));
-    }
-
-    @Test
-    void shouldAllowDynamicRegistrationForAdminAuthority() {
-        BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceTools tools = new BusinessDataSourceTools(service, new ObjectMapper());
-        MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
-        TestingAuthenticationToken authentication = new TestingAuthenticationToken("admin", "pwd", "ROLE_ADMIN");
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        when(service.registerMysqlDataSource(request)).thenReturn("business-ds://biz");
-
-        tools.registerDataSource(request);
-
-        verify(service).registerMysqlDataSource(request);
-    }
 
     @Test
     void shouldExposeToolNamesWithoutMysqlPrefix() {
@@ -81,15 +45,7 @@ class BusinessDataSourceToolsTest {
 
         assertEquals(
                 new HashSet<>(Arrays.asList(
-                        "registerDataSource",
-                        "unregisterDataSource",
-                        "testDataSource",
-                        "getDataSources",
-                        "getTableNames",
-                        "getTableSchema",
-                        "queryTable",
-                        "explainSql",
-                        "runSql")),
+                        "getDataSources", "getTableNames", "getTableSchema", "queryTable", "explainSql", "runSql")),
                 toolNames);
     }
 

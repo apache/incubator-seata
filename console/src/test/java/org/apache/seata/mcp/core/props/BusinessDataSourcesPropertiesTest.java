@@ -52,6 +52,27 @@ class BusinessDataSourcesPropertiesTest {
     }
 
     @Test
+    void shouldResolvePlainPasswordAndRegisterMysqlResourceId() {
+        BusinessDataSourcesProperties properties = newProperties(enabledEnv());
+        MysqlDataSourceRegisterRequest request = request("biz", "localhost");
+        request.setPassword("pwd");
+        request.setPasswordSecretRef("");
+
+        String resourceId = properties.registerMysqlDataSource(request);
+
+        assertEquals("business-ds://biz", resourceId);
+        BusinessDataSourcesProperties.DataSourceProperties props =
+                BusinessDataSourcesProperties.getDatasources().get(resourceId);
+        assertEquals("pwd", props.getPassword());
+        assertEquals("app", props.getDatabaseName());
+        assertEquals(
+                "business-ds://biz",
+                BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
+                        .get("biz"));
+        assertEquals(1, properties.getMysqlDataSourceInfos().size());
+    }
+
+    @Test
     void shouldResolvePasswordSecretRefAndRegisterMysqlResourceId() {
         BusinessDataSourcesProperties properties = newProperties(enabledEnv().withProperty("MYSQL_PASS", "pwd"));
 

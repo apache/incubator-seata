@@ -222,6 +222,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     }
 
     private String resolvePassword(MysqlDataSourceRegisterRequest request) {
+        if (StringUtils.hasText(request.getPassword())) {
+            return request.getPassword();
+        }
         return secretResolver.resolve(request.getPasswordSecretRef());
     }
 
