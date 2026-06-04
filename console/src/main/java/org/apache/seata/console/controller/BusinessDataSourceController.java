@@ -55,7 +55,7 @@ public class BusinessDataSourceController {
     @PostMapping
     public SingleResult<String> registerDataSource(@RequestBody MysqlDataSourceRegisterRequest request) {
         try {
-            decryptPassword(request);
+            preparePassword(request);
             return SingleResult.success(dataSourceService.registerMysqlDataSource(request));
         } catch (Exception e) {
             return SingleResult.failure(e.getMessage());
@@ -65,7 +65,7 @@ public class BusinessDataSourceController {
     @PostMapping("/test")
     public SingleResult<MysqlDataSourceTestResult> testDataSource(@RequestBody MysqlDataSourceRegisterRequest request) {
         try {
-            decryptPassword(request);
+            preparePassword(request);
             return SingleResult.success(dataSourceService.testMysqlDataSource(request));
         } catch (Exception e) {
             MysqlDataSourceTestResult result = new MysqlDataSourceTestResult();
@@ -84,11 +84,16 @@ public class BusinessDataSourceController {
         }
     }
 
-    private void decryptPassword(MysqlDataSourceRegisterRequest request) {
-        if (request == null || StringUtils.isBlank(request.getEncryptedPassword())) {
+    private void preparePassword(MysqlDataSourceRegisterRequest request) {
+        if (request == null) {
             return;
         }
-        request.setPassword(passwordCipher.decrypt(request.getEncryptedPassword()));
-        request.setEncryptedPassword("");
+        if (!passwordCipher.isEnabled()) {
+            return;
+        }
+        if (StringUtils.isBlank(request.getPassword())) {
+            return;
+        }
+        request.setPassword(passwordCipher.decrypt(request.getPassword()));
     }
 }

@@ -42,13 +42,22 @@ public class DataSourcePasswordCipher {
 
     private final SecretKeySpec secretKeySpec;
 
+    private final boolean enabled;
+
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public DataSourcePasswordCipher(@Value("${seata.security.secretKey}") String secretKey) {
+    public DataSourcePasswordCipher(
+            @Value("${seata.security.secretKey}") String secretKey,
+            @Value("${seata.businessDataSources.encryption.enabled:true}") boolean enabled) {
         if (StringUtils.isBlank(secretKey)) {
             throw new IllegalArgumentException("seata.security.secretKey cannot be empty");
         }
         this.secretKeySpec = new SecretKeySpec(sha256(secretKey), AES_ALGORITHM);
+        this.enabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
     }
 
     public String decrypt(String encryptedPassword) {
