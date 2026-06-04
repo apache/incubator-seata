@@ -15,17 +15,17 @@
  * limitations under the License.
  */
 
-export interface ILocaleMap {
-    [key: string]: string
+.business-datasource-toolbar {
+  margin-bottom: 16px;
 }
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ClusterManager: ILocaleMap;
-  BusinessDataSource: ILocaleMap;
-  codeMessage: ILocaleMap;
+
+.business-datasource-dialog-form {
+  .next-form-item {
+    margin-bottom: 16px;
+  }
+
+  .next-input,
+  .next-select {
+    width: 360px;
+  }
 }

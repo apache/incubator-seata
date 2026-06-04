@@ -54,7 +54,7 @@ const createRequest = (baseURL: string, generalErrorMessage: string = 'Request e
     error => {
       if (error.response) {
         const { status } = error.response;
-        if (status === 403 || status === 401) {
+        if (status === 401) {
           (window as any).globalHistory.replace('/login');
           return;
         }

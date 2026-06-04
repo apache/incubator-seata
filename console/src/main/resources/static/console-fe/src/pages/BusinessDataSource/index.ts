@@ -14,18 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import BusinessDataSource from './BusinessDataSource';
 
-export interface ILocaleMap {
-    [key: string]: string
-}
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ClusterManager: ILocaleMap;
-  BusinessDataSource: ILocaleMap;
-  codeMessage: ILocaleMap;
-}
+export default BusinessDataSource;

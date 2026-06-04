@@ -18,6 +18,7 @@ package org.apache.seata.console.controller;
 
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.security.DataSourcePasswordCipher;
+import org.apache.seata.console.security.DataSourcePasswordTransportCipher;
 import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
@@ -40,8 +41,7 @@ class BusinessDataSourceControllerTest {
     @Test
     void shouldListDataSourcesWithoutSensitiveFields() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", true));
+        BusinessDataSourceController controller = newController(service, true);
         MysqlDataSourceInfo info = new MysqlDataSourceInfo();
         info.setName("shopDemo");
         info.setResourceId("business-ds://shopDemo");
@@ -58,7 +58,8 @@ class BusinessDataSourceControllerTest {
     void shouldRegisterDataSourceThroughConsoleApiWithEncryptedPasswordValue() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
         DataSourcePasswordCipher cipher = new DataSourcePasswordCipher("test-secret-key", true);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service, cipher);
+        BusinessDataSourceController controller =
+                new BusinessDataSourceController(service, cipher, new DataSourcePasswordTransportCipher());
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         request.setPassword(cipher.encrypt("pwd"));
         when(service.registerMysqlDataSource(org.mockito.ArgumentMatchers.any()))
@@ -75,10 +76,40 @@ class BusinessDataSourceControllerTest {
     }
 
     @Test
+    void shouldExposePasswordPublicKey() {
+        BusinessDataSourceService service = mock(BusinessDataSourceService.class);
+        BusinessDataSourceController controller = newController(service, true);
+
+        SingleResult<String> result = controller.getPasswordPublicKey();
+
+        assertTrue(result.isSuccess());
+        assertTrue(result.getData().length() > 0);
+    }
+
+    @Test
+    void shouldRegisterDataSourceThroughConsoleApiWithTransportEncryptedPasswordValue() {
+        BusinessDataSourceService service = mock(BusinessDataSourceService.class);
+        DataSourcePasswordTransportCipher transportCipher = new DataSourcePasswordTransportCipher();
+        BusinessDataSourceController controller = new BusinessDataSourceController(
+                service, new DataSourcePasswordCipher("test-secret-key", false), transportCipher);
+        MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
+        request.setPassword(transportCipher.encrypt("pwd"));
+        when(service.registerMysqlDataSource(org.mockito.ArgumentMatchers.any()))
+                .thenReturn("business-ds://shopDemo");
+
+        SingleResult<String> result = controller.registerDataSource(request);
+
+        assertTrue(result.isSuccess());
+        ArgumentCaptor<MysqlDataSourceRegisterRequest> captor =
+                ArgumentCaptor.forClass(MysqlDataSourceRegisterRequest.class);
+        verify(service).registerMysqlDataSource(captor.capture());
+        assertEquals("pwd", captor.getValue().getPassword());
+    }
+
+    @Test
     void shouldReturnFailureWhenPasswordCannotBeDecrypted() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", true));
+        BusinessDataSourceController controller = newController(service, true);
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         request.setPassword("pwd");
 
@@ -91,8 +122,7 @@ class BusinessDataSourceControllerTest {
     @Test
     void shouldAllowPlainPasswordWhenEncryptionDisabled() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", false));
+        BusinessDataSourceController controller = newController(service, false);
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         request.setPassword("pwd");
         when(service.registerMysqlDataSource(request)).thenReturn("business-ds://shopDemo");
@@ -107,8 +137,7 @@ class BusinessDataSourceControllerTest {
     @Test
     void shouldReturnFailureWhenRegisterFails() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", true));
+        BusinessDataSourceController controller = newController(service, true);
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         when(service.registerMysqlDataSource(request)).thenThrow(new IllegalArgumentException("bad datasource"));
 
@@ -121,8 +150,7 @@ class BusinessDataSourceControllerTest {
     @Test
     void shouldTestDataSourceThroughConsoleApi() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", true));
+        BusinessDataSourceController controller = newController(service, true);
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         MysqlDataSourceTestResult testResult = new MysqlDataSourceTestResult();
         testResult.setSuccess(true);
@@ -137,8 +165,7 @@ class BusinessDataSourceControllerTest {
     @Test
     void shouldUnregisterDataSourceThroughConsoleApi() {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller =
-                new BusinessDataSourceController(service, new DataSourcePasswordCipher("test-secret-key", true));
+        BusinessDataSourceController controller = newController(service, true);
         when(service.unregisterMysqlDataSource("shopDemo")).thenReturn("business-ds://shopDemo");
 
         SingleResult<String> result = controller.unregisterDataSource("shopDemo");
@@ -146,5 +173,13 @@ class BusinessDataSourceControllerTest {
         assertTrue(result.isSuccess());
         assertEquals("business-ds://shopDemo", result.getData());
         verify(service).unregisterMysqlDataSource("shopDemo");
+    }
+
+    private BusinessDataSourceController newController(
+            BusinessDataSourceService service, boolean passwordCipherEnabled) {
+        return new BusinessDataSourceController(
+                service,
+                new DataSourcePasswordCipher("test-secret-key", passwordCipherEnabled),
+                new DataSourcePasswordTransportCipher());
     }
 }

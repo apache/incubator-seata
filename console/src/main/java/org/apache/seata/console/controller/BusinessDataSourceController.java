@@ -19,6 +19,7 @@ package org.apache.seata.console.controller;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.security.DataSourcePasswordCipher;
+import org.apache.seata.console.security.DataSourcePasswordTransportCipher;
 import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
@@ -41,15 +42,25 @@ public class BusinessDataSourceController {
 
     private final DataSourcePasswordCipher passwordCipher;
 
+    private final DataSourcePasswordTransportCipher passwordTransportCipher;
+
     public BusinessDataSourceController(
-            BusinessDataSourceService dataSourceService, DataSourcePasswordCipher passwordCipher) {
+            BusinessDataSourceService dataSourceService,
+            DataSourcePasswordCipher passwordCipher,
+            DataSourcePasswordTransportCipher passwordTransportCipher) {
         this.dataSourceService = dataSourceService;
         this.passwordCipher = passwordCipher;
+        this.passwordTransportCipher = passwordTransportCipher;
     }
 
     @GetMapping
     public SingleResult<List<MysqlDataSourceInfo>> listDataSources() {
         return SingleResult.success(dataSourceService.getMysqlDataSources());
+    }
+
+    @GetMapping("/password/publicKey")
+    public SingleResult<String> getPasswordPublicKey() {
+        return SingleResult.success(passwordTransportCipher.getPublicKey());
     }
 
     @PostMapping
@@ -88,10 +99,14 @@ public class BusinessDataSourceController {
         if (request == null) {
             return;
         }
-        if (!passwordCipher.isEnabled()) {
+        if (StringUtils.isBlank(request.getPassword())) {
             return;
         }
-        if (StringUtils.isBlank(request.getPassword())) {
+        if (passwordTransportCipher.isEncrypted(request.getPassword())) {
+            request.setPassword(passwordTransportCipher.decrypt(request.getPassword()));
+            return;
+        }
+        if (!passwordCipher.isEnabled()) {
             return;
         }
         request.setPassword(passwordCipher.decrypt(request.getPassword()));
