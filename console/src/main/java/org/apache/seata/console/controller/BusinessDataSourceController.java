@@ -17,6 +17,8 @@
 package org.apache.seata.console.controller;
 
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.console.security.DataSourcePasswordCipher;
 import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
@@ -37,8 +39,17 @@ public class BusinessDataSourceController {
 
     private final BusinessDataSourceService dataSourceService;
 
-    public BusinessDataSourceController(BusinessDataSourceService dataSourceService) {
+    private final DataSourcePasswordCipher passwordCipher;
+
+    public BusinessDataSourceController(
+            BusinessDataSourceService dataSourceService, DataSourcePasswordCipher passwordCipher) {
         this.dataSourceService = dataSourceService;
+        this.passwordCipher = passwordCipher;
+    }
+
+    @GetMapping("/encryption/publicKey")
+    public SingleResult<String> getEncryptionPublicKey() {
+        return SingleResult.success(passwordCipher.getPublicKey());
     }
 
     @GetMapping
@@ -49,6 +60,7 @@ public class BusinessDataSourceController {
     @PostMapping
     public SingleResult<String> registerDataSource(@RequestBody MysqlDataSourceRegisterRequest request) {
         try {
+            decryptPassword(request);
             return SingleResult.success(dataSourceService.registerMysqlDataSource(request));
         } catch (Exception e) {
             return SingleResult.failure(e.getMessage());
@@ -57,7 +69,15 @@ public class BusinessDataSourceController {
 
     @PostMapping("/test")
     public SingleResult<MysqlDataSourceTestResult> testDataSource(@RequestBody MysqlDataSourceRegisterRequest request) {
-        return SingleResult.success(dataSourceService.testMysqlDataSource(request));
+        try {
+            decryptPassword(request);
+            return SingleResult.success(dataSourceService.testMysqlDataSource(request));
+        } catch (Exception e) {
+            MysqlDataSourceTestResult result = new MysqlDataSourceTestResult();
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
+            return SingleResult.success(result);
+        }
     }
 
     @DeleteMapping("/{name}")
@@ -67,5 +87,13 @@ public class BusinessDataSourceController {
         } catch (Exception e) {
             return SingleResult.failure(e.getMessage());
         }
+    }
+
+    private void decryptPassword(MysqlDataSourceRegisterRequest request) {
+        if (request == null || StringUtils.isBlank(request.getEncryptedPassword())) {
+            return;
+        }
+        request.setPassword(passwordCipher.decrypt(request.getEncryptedPassword()));
+        request.setEncryptedPassword("");
     }
 }

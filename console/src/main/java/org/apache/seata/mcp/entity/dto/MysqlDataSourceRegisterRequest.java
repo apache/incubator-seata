@@ -16,12 +16,18 @@
  */
 package org.apache.seata.mcp.entity.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class MysqlDataSourceRegisterRequest {
 
     private String name;
     private String url;
     private String username;
+    private String encryptedPassword;
+
+    @JsonIgnore
     private String password;
+
     private String passwordSecretRef;
     private String datasource = "druid";
     private int minConn = 10;
@@ -50,6 +56,14 @@ public class MysqlDataSourceRegisterRequest {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getEncryptedPassword() {
+        return encryptedPassword;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.encryptedPassword = encryptedPassword;
     }
 
     public String getPassword() {

@@ -17,11 +17,14 @@
 package org.apache.seata.console.controller;
 
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.ConfigTools;
+import org.apache.seata.console.security.DataSourcePasswordCipher;
 import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
 import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,9 +39,22 @@ import static org.mockito.Mockito.when;
 class BusinessDataSourceControllerTest {
 
     @Test
-    void shouldListDataSourcesWithoutSensitiveFields() {
+    void shouldReturnEncryptionPublicKey() throws Exception {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service);
+        DataSourcePasswordCipher cipher = new DataSourcePasswordCipher("", "");
+        BusinessDataSourceController controller = new BusinessDataSourceController(service, cipher);
+
+        SingleResult<String> result = controller.getEncryptionPublicKey();
+
+        assertTrue(result.isSuccess());
+        assertFalse(result.getData().isEmpty());
+    }
+
+    @Test
+    void shouldListDataSourcesWithoutSensitiveFields() throws Exception {
+        BusinessDataSourceService service = mock(BusinessDataSourceService.class);
+        BusinessDataSourceController controller =
+                new BusinessDataSourceController(service, new DataSourcePasswordCipher("", ""));
         MysqlDataSourceInfo info = new MysqlDataSourceInfo();
         info.setName("shopDemo");
         info.setResourceId("business-ds://shopDemo");
@@ -52,24 +68,31 @@ class BusinessDataSourceControllerTest {
     }
 
     @Test
-    void shouldRegisterDataSourceThroughConsoleApi() {
+    void shouldRegisterDataSourceThroughConsoleApiWithEncryptedPassword() throws Exception {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service);
+        DataSourcePasswordCipher cipher = new DataSourcePasswordCipher("", "");
+        BusinessDataSourceController controller = new BusinessDataSourceController(service, cipher);
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
-        request.setPassword("pwd");
-        when(service.registerMysqlDataSource(request)).thenReturn("business-ds://shopDemo");
+        request.setEncryptedPassword(ConfigTools.publicEncrypt("pwd", cipher.getPublicKey()));
+        when(service.registerMysqlDataSource(org.mockito.ArgumentMatchers.any()))
+                .thenReturn("business-ds://shopDemo");
 
         SingleResult<String> result = controller.registerDataSource(request);
 
         assertTrue(result.isSuccess());
         assertEquals("business-ds://shopDemo", result.getData());
-        verify(service).registerMysqlDataSource(request);
+        ArgumentCaptor<MysqlDataSourceRegisterRequest> captor =
+                ArgumentCaptor.forClass(MysqlDataSourceRegisterRequest.class);
+        verify(service).registerMysqlDataSource(captor.capture());
+        assertEquals("pwd", captor.getValue().getPassword());
+        assertEquals("", captor.getValue().getEncryptedPassword());
     }
 
     @Test
-    void shouldReturnFailureWhenRegisterFails() {
+    void shouldReturnFailureWhenRegisterFails() throws Exception {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service);
+        BusinessDataSourceController controller =
+                new BusinessDataSourceController(service, new DataSourcePasswordCipher("", ""));
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         when(service.registerMysqlDataSource(request)).thenThrow(new IllegalArgumentException("bad datasource"));
 
@@ -80,9 +103,10 @@ class BusinessDataSourceControllerTest {
     }
 
     @Test
-    void shouldTestDataSourceThroughConsoleApi() {
+    void shouldTestDataSourceThroughConsoleApi() throws Exception {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service);
+        BusinessDataSourceController controller =
+                new BusinessDataSourceController(service, new DataSourcePasswordCipher("", ""));
         MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
         MysqlDataSourceTestResult testResult = new MysqlDataSourceTestResult();
         testResult.setSuccess(true);
@@ -95,9 +119,10 @@ class BusinessDataSourceControllerTest {
     }
 
     @Test
-    void shouldUnregisterDataSourceThroughConsoleApi() {
+    void shouldUnregisterDataSourceThroughConsoleApi() throws Exception {
         BusinessDataSourceService service = mock(BusinessDataSourceService.class);
-        BusinessDataSourceController controller = new BusinessDataSourceController(service);
+        BusinessDataSourceController controller =
+                new BusinessDataSourceController(service, new DataSourcePasswordCipher("", ""));
         when(service.unregisterMysqlDataSource("shopDemo")).thenReturn("business-ds://shopDemo");
 
         SingleResult<String> result = controller.unregisterDataSource("shopDemo");
