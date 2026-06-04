@@ -44,8 +44,6 @@ export type BusinessDataSourceTestResult = {
   elapsedMs: number;
 };
 
-let passwordPublicKeyPromise: Promise<string> | null = null;
-
 function base64ToArrayBuffer(base64: string): ArrayBuffer {
   const binary = window.atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -65,12 +63,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 async function fetchPasswordPublicKey(): Promise<string> {
-  if (!passwordPublicKeyPromise) {
-    passwordPublicKeyPromise = request('/businessDataSources/password/publicKey', {
-      method: 'get',
-    }).then(result => result.data);
-  }
-  return passwordPublicKeyPromise;
+  const result = await request('/businessDataSources/password/publicKey', {
+    method: 'get',
+  });
+  return result.data;
 }
 
 async function encryptPassword(password: string): Promise<string> {

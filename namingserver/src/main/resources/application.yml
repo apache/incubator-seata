@@ -74,6 +74,7 @@ seata:
       enabled: true
     dynamic-registration:
       enabled: true
+      allowed-hosts: localhost
     dataSource1:
       # Whether this data source is enabled
       enabled: true
