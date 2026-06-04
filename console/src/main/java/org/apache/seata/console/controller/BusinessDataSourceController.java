@@ -47,11 +47,6 @@ public class BusinessDataSourceController {
         this.passwordCipher = passwordCipher;
     }
 
-    @GetMapping("/encryption/publicKey")
-    public SingleResult<String> getEncryptionPublicKey() {
-        return SingleResult.success(passwordCipher.getPublicKey());
-    }
-
     @GetMapping
     public SingleResult<List<MysqlDataSourceInfo>> listDataSources() {
         return SingleResult.success(dataSourceService.getMysqlDataSources());

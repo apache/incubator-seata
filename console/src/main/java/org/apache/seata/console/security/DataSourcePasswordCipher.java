@@ -16,36 +16,39 @@
  */
 package org.apache.seata.console.security;
 
-import org.apache.seata.common.util.ConfigTools;
 import org.apache.seata.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.KeyPair;
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
 
 @Component
 public class DataSourcePasswordCipher {
 
-    private final String publicKey;
+    private static final String AES_ALGORITHM = "AES";
 
-    private final String privateKey;
+    private static final String AES_GCM_TRANSFORMATION = "AES/GCM/NoPadding";
 
-    public DataSourcePasswordCipher(
-            @Value("${seata.businessDataSources.encryption.public-key:}") String configuredPublicKey,
-            @Value("${seata.businessDataSources.encryption.private-key:}") String configuredPrivateKey)
-            throws Exception {
-        if (StringUtils.isNotBlank(configuredPublicKey) && StringUtils.isNotBlank(configuredPrivateKey)) {
-            this.publicKey = configuredPublicKey;
-            this.privateKey = configuredPrivateKey;
-            return;
+    private static final int GCM_IV_LENGTH = 12;
+
+    private static final int GCM_TAG_LENGTH_BITS = 128;
+
+    private final SecretKeySpec secretKeySpec;
+
+    private final SecureRandom secureRandom = new SecureRandom();
+
+    public DataSourcePasswordCipher(@Value("${seata.security.secretKey}") String secretKey) {
+        if (StringUtils.isBlank(secretKey)) {
+            throw new IllegalArgumentException("seata.security.secretKey cannot be empty");
         }
-        KeyPair keyPair = ConfigTools.getKeyPair();
-        this.publicKey = ConfigTools.getPublicKey(keyPair);
-        this.privateKey = ConfigTools.getPrivateKey(keyPair);
-    }
-
-    public String getPublicKey() {
-        return publicKey;
+        this.secretKeySpec = new SecretKeySpec(sha256(secretKey), AES_ALGORITHM);
     }
 
     public String decrypt(String encryptedPassword) {
@@ -53,9 +56,44 @@ public class DataSourcePasswordCipher {
             return "";
         }
         try {
-            return ConfigTools.privateDecrypt(encryptedPassword, privateKey);
+            byte[] payload = Base64.getDecoder().decode(encryptedPassword);
+            if (payload.length <= GCM_IV_LENGTH) {
+                throw new IllegalArgumentException("Invalid datasource password ciphertext");
+            }
+            byte[] iv = Arrays.copyOfRange(payload, 0, GCM_IV_LENGTH);
+            byte[] ciphertext = Arrays.copyOfRange(payload, GCM_IV_LENGTH, payload.length);
+            Cipher cipher = Cipher.getInstance(AES_GCM_TRANSFORMATION);
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            return new String(cipher.doFinal(ciphertext), StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new IllegalArgumentException("Unable to decrypt datasource password");
+        }
+    }
+
+    public String encrypt(String password) {
+        if (StringUtils.isBlank(password)) {
+            return "";
+        }
+        try {
+            byte[] iv = new byte[GCM_IV_LENGTH];
+            secureRandom.nextBytes(iv);
+            Cipher cipher = Cipher.getInstance(AES_GCM_TRANSFORMATION);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv));
+            byte[] ciphertext = cipher.doFinal(password.getBytes(StandardCharsets.UTF_8));
+            byte[] payload = new byte[iv.length + ciphertext.length];
+            System.arraycopy(iv, 0, payload, 0, iv.length);
+            System.arraycopy(ciphertext, 0, payload, iv.length, ciphertext.length);
+            return Base64.getEncoder().encodeToString(payload);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to encrypt datasource password");
+        }
+    }
+
+    private byte[] sha256(String secretKey) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(secretKey.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Unable to initialize datasource password cipher");
         }
     }
 }
