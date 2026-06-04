@@ -65,7 +65,7 @@ class BusinessDataSourcesPropertiesTest {
                 BusinessDataSourcesProperties.getDatasources().get(resourceId);
         assertEquals("pwd", props.getPassword());
         assertEquals("app", props.getDatabaseName());
-        assertEquals("jdbc:mysql://localhost:3306/app", props.getUrl());
+        assertEquals("jdbc:mysql://localhost:3306", props.getUrl());
         assertEquals(
                 "business-ds://biz",
                 BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()

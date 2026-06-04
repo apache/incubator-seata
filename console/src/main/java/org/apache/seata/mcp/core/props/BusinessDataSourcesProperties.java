@@ -59,7 +59,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private final boolean dynamicRegistrationEnabled;
 
-    private final Set<String> allowedHosts;
+    private final Map<String, MysqlAllowedHost> allowedHosts;
 
     private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
 
@@ -160,7 +160,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         props.setDynamic(true);
         props.setDbType(MYSQL_DB_TYPE);
         props.setDriverClassName(MYSQL_DRIVER_CLASS_NAME);
-        props.setUrl(request.getUrl());
         props.setUsername(request.getUsername());
         props.setPasswordSecretRef(request.getPasswordSecretRef());
         props.setPassword(resolvePassword(request));
@@ -168,7 +167,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         props.setMinConn(request.getMinConn() <= 0 ? DEFAULT_DB_MIN_CONN : request.getMinConn());
         props.setMaxConn(request.getMaxConn() <= 0 ? DEFAULT_DB_MAX_CONN : request.getMaxConn());
         props.setMaxWait(request.getMaxWait() == null ? 5000L : request.getMaxWait());
-        validateDynamicMysqlProperties(props);
+        validateDynamicMysqlProperties(props, request.getUrl());
         if (!validateDataSourceProperties(props, props.getName())) {
             throw new IllegalArgumentException("Business DataSource Properties has failure");
         }
@@ -262,7 +261,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             return false;
         }
         try {
-            props.setDatabaseName(parseMysqlDatabaseName(props.getUrl()));
+            if (!StringUtils.hasText(props.getDatabaseName())) {
+                props.setDatabaseName(parseMysqlDatabaseName(props.getUrl()));
+            }
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid MySQL JDBC URL for datasource: {}", dataSourceName);
             return false;
@@ -288,19 +289,20 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         return true;
     }
 
-    private void validateDynamicMysqlProperties(DataSourceProperties props) {
-        if (!props.getUrl().toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
+    private void validateDynamicMysqlProperties(DataSourceProperties props, String url) {
+        if (StringUtils.isBlank(url) || !url.toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
             throw new IllegalArgumentException("Only jdbc:mysql:// URL is supported");
         }
         if (allowedHosts.isEmpty()) {
             throw new IllegalArgumentException("MySQL host allowlist cannot be empty for dynamic registration");
         }
-        MysqlJdbcUrl mysqlJdbcUrl = parseMysqlJdbcUrl(props.getUrl());
-        if (!allowedHosts.contains(mysqlJdbcUrl.getNormalizedHost())) {
+        MysqlJdbcUrl mysqlJdbcUrl = parseMysqlJdbcUrl(url);
+        MysqlAllowedHost allowedHost = allowedHosts.get(mysqlJdbcUrl.getNormalizedAddress());
+        if (allowedHost == null) {
             throw new IllegalArgumentException("MySQL host is not allowed: " + mysqlJdbcUrl.getHost());
         }
         props.setDatabaseName(mysqlJdbcUrl.getDatabaseName());
-        props.setUrl(mysqlJdbcUrl.toJdbcUrl());
+        props.setUrl(allowedHost.toJdbcBaseUrl());
     }
 
     private String parseMysqlDatabaseName(String url) {
@@ -342,21 +344,43 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             if (port <= 0 || port > 65535) {
                 throw new IllegalArgumentException("MySQL port is invalid");
             }
-            return new MysqlJdbcUrl(uri.getHost(), port, databaseName, uri.getRawQuery());
+            return new MysqlJdbcUrl(uri.getHost(), port, databaseName);
         } catch (IllegalArgumentException e) {
             throw e;
         }
     }
 
-    private Set<String> parseAllowedHosts(String hosts) {
+    private Map<String, MysqlAllowedHost> parseAllowedHosts(String hosts) {
         if (!StringUtils.hasText(hosts)) {
-            return Collections.emptySet();
+            return Collections.emptyMap();
         }
         return Arrays.stream(hosts.split(","))
                 .map(String::trim)
                 .filter(StringUtils::isNotBlank)
-                .map(host -> host.toLowerCase(Locale.ROOT))
-                .collect(Collectors.toSet());
+                .map(this::parseAllowedHost)
+                .collect(Collectors.toMap(MysqlAllowedHost::getNormalizedAddress, host -> host, (left, right) -> left));
+    }
+
+    private MysqlAllowedHost parseAllowedHost(String hostConfig) {
+        String config = hostConfig;
+        if (config.toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
+            MysqlJdbcUrl jdbcUrl = parseMysqlJdbcUrl(config);
+            return new MysqlAllowedHost(jdbcUrl.getHost(), jdbcUrl.getPort());
+        }
+        String host = config;
+        int port = 3306;
+        int portSeparator = config.lastIndexOf(':');
+        if (portSeparator > 0 && portSeparator < config.length() - 1 && config.indexOf(']') < portSeparator) {
+            host = config.substring(0, portSeparator);
+            port = Integer.parseInt(config.substring(portSeparator + 1));
+        }
+        if (host.startsWith("[") && host.endsWith("]")) {
+            host = host.substring(1, host.length() - 1);
+        }
+        if (!StringUtils.hasText(host) || port <= 0 || port > 65535) {
+            throw new IllegalArgumentException("Invalid MySQL host allowlist entry");
+        }
+        return new MysqlAllowedHost(host, port);
     }
 
     private String buildResourceId(String name) {
@@ -419,37 +443,48 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private final String host;
         private final int port;
         private final String databaseName;
-        private final String query;
 
-        MysqlJdbcUrl(String host, int port, String databaseName, String query) {
+        MysqlJdbcUrl(String host, int port, String databaseName) {
             this.host = host;
             this.port = port;
             this.databaseName = databaseName;
-            this.query = query;
         }
 
         String getHost() {
             return host;
         }
 
-        String getNormalizedHost() {
-            return host.toLowerCase(Locale.ROOT);
+        int getPort() {
+            return port;
+        }
+
+        String getNormalizedAddress() {
+            return normalizeAddress(host, port);
         }
 
         String getDatabaseName() {
             return databaseName;
         }
+    }
 
-        String toJdbcUrl() {
+    private static class MysqlAllowedHost {
+        private final String host;
+        private final int port;
+
+        MysqlAllowedHost(String host, int port) {
+            this.host = host;
+            this.port = port;
+        }
+
+        String getNormalizedAddress() {
+            return normalizeAddress(host, port);
+        }
+
+        String toJdbcBaseUrl() {
             StringBuilder builder = new StringBuilder("jdbc:mysql://")
                     .append(formatHost(host))
                     .append(":")
-                    .append(port)
-                    .append("/")
-                    .append(databaseName);
-            if (StringUtils.hasText(query)) {
-                builder.append("?").append(query);
-            }
+                    .append(port);
             return builder.toString();
         }
 
@@ -459,6 +494,10 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             }
             return host;
         }
+    }
+
+    private static String normalizeAddress(String host, int port) {
+        return host.toLowerCase(Locale.ROOT) + ":" + port;
     }
 
     public static class DataSourceProperties {

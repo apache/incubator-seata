@@ -50,6 +50,7 @@ public class HikariDataSourceProvider extends AbstractMCPDataSourceProvider {
         config.setJdbcUrl(getUrl());
         config.setUsername(getUser());
         config.setPassword(getPassword());
+        config.setCatalog(getDatabaseName());
 
         config.setMaximumPoolSize(getMaxConn()); // Maximum size of connection pool
         config.setMinimumIdle(getMinConn()); // Minimum number of idle connections

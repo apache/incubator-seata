@@ -94,6 +94,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             try (Connection connection =
                             DriverManager.getConnection(props.getUrl(), props.getUsername(), props.getPassword());
                     PreparedStatement statement = connection.prepareStatement(SqlConstant.MYSQL_VALIDATION_SQL)) {
+                connection.setCatalog(props.getDatabaseName());
                 statement.setQueryTimeout(5);
                 statement.executeQuery();
             }

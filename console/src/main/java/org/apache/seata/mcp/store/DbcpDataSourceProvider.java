@@ -35,6 +35,7 @@ public class DbcpDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
+        ds.setDefaultCatalog(getDatabaseName());
         ds.setInitialSize(getMinConn());
         ds.setMaxTotal(getMaxConn());
         ds.setMinIdle(getMinConn());

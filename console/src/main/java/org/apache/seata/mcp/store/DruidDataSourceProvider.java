@@ -35,6 +35,7 @@ public class DruidDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
+        ds.setDefaultCatalog(getDatabaseName());
 
         ds.setInitialSize(getMinConn()); // Initial connection pool size
         ds.setMaxActive(getMaxConn()); // Maximum active connections

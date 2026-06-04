@@ -204,6 +204,14 @@ public abstract class AbstractMCPDataSourceProvider {
         return url;
     }
 
+    protected String getDatabaseName() {
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
+        if (properties == null || StringUtils.isBlank(properties.getDatabaseName())) {
+            throw new StoreException("the business datasource database name can't be empty");
+        }
+        return properties.getDatabaseName();
+    }
+
     protected String getUser() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String username = "";
