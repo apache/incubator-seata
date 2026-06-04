@@ -292,31 +292,36 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         if (!props.getUrl().toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
             throw new IllegalArgumentException("Only jdbc:mysql:// URL is supported");
         }
-        String host = parseMysqlHost(props.getUrl());
-        if (!allowedHosts.isEmpty() && !allowedHosts.contains(host.toLowerCase(Locale.ROOT))) {
-            throw new IllegalArgumentException("MySQL host is not allowed: " + host);
+        if (allowedHosts.isEmpty()) {
+            throw new IllegalArgumentException("MySQL host allowlist cannot be empty for dynamic registration");
         }
-        props.setDatabaseName(parseMysqlDatabaseName(props.getUrl()));
-    }
-
-    private String parseMysqlHost(String url) {
-        try {
-            URI uri = URI.create(url.substring("jdbc:".length()));
-            if (!StringUtils.hasText(uri.getHost())) {
-                throw new IllegalArgumentException("MySQL host cannot be empty");
-            }
-            return uri.getHost();
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid MySQL JDBC URL");
+        MysqlJdbcUrl mysqlJdbcUrl = parseMysqlJdbcUrl(props.getUrl());
+        if (!allowedHosts.contains(mysqlJdbcUrl.getNormalizedHost())) {
+            throw new IllegalArgumentException("MySQL host is not allowed: " + mysqlJdbcUrl.getHost());
         }
+        props.setDatabaseName(mysqlJdbcUrl.getDatabaseName());
+        props.setUrl(mysqlJdbcUrl.toJdbcUrl());
     }
 
     private String parseMysqlDatabaseName(String url) {
+        return parseMysqlJdbcUrl(url).getDatabaseName();
+    }
+
+    private MysqlJdbcUrl parseMysqlJdbcUrl(String url) {
         if (!StringUtils.hasText(url) || !url.toLowerCase(Locale.ROOT).startsWith("jdbc:mysql://")) {
             throw new IllegalArgumentException("Only jdbc:mysql:// URL is supported");
         }
         try {
             URI uri = URI.create(url.substring("jdbc:".length()));
+            if (StringUtils.hasText(uri.getUserInfo())) {
+                throw new IllegalArgumentException("MySQL JDBC URL cannot include user info");
+            }
+            if (StringUtils.hasText(uri.getFragment())) {
+                throw new IllegalArgumentException("MySQL JDBC URL cannot include fragment");
+            }
+            if (!StringUtils.hasText(uri.getHost())) {
+                throw new IllegalArgumentException("MySQL host cannot be empty");
+            }
             String path = uri.getPath();
             if (!StringUtils.hasText(path) || "/".equals(path)) {
                 throw new IllegalArgumentException("MySQL JDBC URL must include a database name");
@@ -333,7 +338,11 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             if (SYSTEM_DATABASES.contains(normalized)) {
                 throw new IllegalArgumentException("MySQL JDBC URL database is not allowed: " + databaseName);
             }
-            return databaseName;
+            int port = uri.getPort() < 0 ? 3306 : uri.getPort();
+            if (port <= 0 || port > 65535) {
+                throw new IllegalArgumentException("MySQL port is invalid");
+            }
+            return new MysqlJdbcUrl(uri.getHost(), port, databaseName, uri.getRawQuery());
         } catch (IllegalArgumentException e) {
             throw e;
         }
@@ -404,6 +413,52 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         datasources.clear();
         dataSourcesNamesAndResourceIds.clear();
         dynamicResourceIds.clear();
+    }
+
+    private static class MysqlJdbcUrl {
+        private final String host;
+        private final int port;
+        private final String databaseName;
+        private final String query;
+
+        MysqlJdbcUrl(String host, int port, String databaseName, String query) {
+            this.host = host;
+            this.port = port;
+            this.databaseName = databaseName;
+            this.query = query;
+        }
+
+        String getHost() {
+            return host;
+        }
+
+        String getNormalizedHost() {
+            return host.toLowerCase(Locale.ROOT);
+        }
+
+        String getDatabaseName() {
+            return databaseName;
+        }
+
+        String toJdbcUrl() {
+            StringBuilder builder = new StringBuilder("jdbc:mysql://")
+                    .append(formatHost(host))
+                    .append(":")
+                    .append(port)
+                    .append("/")
+                    .append(databaseName);
+            if (StringUtils.hasText(query)) {
+                builder.append("?").append(query);
+            }
+            return builder.toString();
+        }
+
+        private String formatHost(String host) {
+            if (host.indexOf(':') >= 0 && !host.startsWith("[") && !host.endsWith("]")) {
+                return "[" + host + "]";
+            }
+            return host;
+        }
     }
 
     public static class DataSourceProperties {

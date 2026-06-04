@@ -65,6 +65,7 @@ class BusinessDataSourcesPropertiesTest {
                 BusinessDataSourcesProperties.getDatasources().get(resourceId);
         assertEquals("pwd", props.getPassword());
         assertEquals("app", props.getDatabaseName());
+        assertEquals("jdbc:mysql://localhost:3306/app", props.getUrl());
         assertEquals(
                 "business-ds://biz",
                 BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
@@ -89,6 +90,19 @@ class BusinessDataSourcesPropertiesTest {
                 BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds()
                         .get("biz"));
         assertEquals(1, properties.getMysqlDataSourceInfos().size());
+    }
+
+    @Test
+    void shouldRequireHostAllowlistForDynamicRegistration() {
+        MockEnvironment env = new MockEnvironment()
+                .withProperty("seata.businessDataSources.dynamic-registration.enabled", "true")
+                .withProperty("MYSQL_PASS", "pwd");
+        BusinessDataSourcesProperties properties = newProperties(env);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> properties.registerMysqlDataSource(request("biz", "localhost")));
+
+        assertEquals("MySQL host allowlist cannot be empty for dynamic registration", exception.getMessage());
     }
 
     @Test
@@ -184,7 +198,9 @@ class BusinessDataSourcesPropertiesTest {
     }
 
     private MockEnvironment enabledEnv() {
-        return new MockEnvironment().withProperty("seata.businessDataSources.dynamic-registration.enabled", "true");
+        return new MockEnvironment()
+                .withProperty("seata.businessDataSources.dynamic-registration.enabled", "true")
+                .withProperty("seata.businessDataSources.dynamic-registration.allowed-hosts", "localhost");
     }
 
     private MysqlDataSourceRegisterRequest request(String name, String host) {
