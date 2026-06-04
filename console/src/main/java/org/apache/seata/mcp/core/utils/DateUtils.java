@@ -70,7 +70,9 @@ public class DateUtils {
     }
 
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration) {
-        if (endTime < startTime) throw new IllegalArgumentException("endTime must not be earlier than startTime");
+        if (endTime < startTime) {
+            throw new IllegalArgumentException("endTime must not be earlier than startTime");
+        }
         return endTime - startTime > maxDuration;
     }
 

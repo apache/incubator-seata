@@ -61,11 +61,11 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private final Map<String, MysqlAllowedHost> allowedHosts;
 
-    private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
+    private static final Map<String, DataSourceProperties> DATASOURCES = new ConcurrentHashMap<>();
 
-    private static final Map<String, String> dataSourcesNamesAndResourceIds = new ConcurrentHashMap<>();
+    private static final Map<String, String> DATA_SOURCES_NAMES_AND_RESOURCE_IDS = new ConcurrentHashMap<>();
 
-    private static final Set<String> dynamicResourceIds = ConcurrentHashMap.newKeySet();
+    private static final Set<String> DYNAMIC_RESOURCE_IDS = ConcurrentHashMap.newKeySet();
 
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
@@ -123,8 +123,8 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                 continue;
             }
             if (props.enabled) {
-                datasources.put(props.getResourceId(), props);
-                dataSourcesNamesAndResourceIds.put(name, props.getResourceId());
+                DATASOURCES.put(props.getResourceId(), props);
+                DATA_SOURCES_NAMES_AND_RESOURCE_IDS.put(name, props.getResourceId());
             }
         }
     }
@@ -136,16 +136,16 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         DataSourceProperties props = buildDynamicMysqlProperties(request);
         String name = props.getName();
         String resourceId = props.getResourceId();
-        if (dataSourcesNamesAndResourceIds.containsKey(name) || datasources.containsKey(resourceId)) {
+        if (DATA_SOURCES_NAMES_AND_RESOURCE_IDS.containsKey(name) || DATASOURCES.containsKey(resourceId)) {
             throw new IllegalArgumentException("The data source name has already been registered: " + name);
         }
-        if (dynamicResourceIds.size() >= maxDynamicDataSources) {
+        if (DYNAMIC_RESOURCE_IDS.size() >= maxDynamicDataSources) {
             throw new IllegalArgumentException(
                     "The number of dynamic business data sources exceeds the limit: " + maxDynamicDataSources);
         }
-        datasources.put(resourceId, props);
-        dataSourcesNamesAndResourceIds.put(name, resourceId);
-        dynamicResourceIds.add(resourceId);
+        DATASOURCES.put(resourceId, props);
+        DATA_SOURCES_NAMES_AND_RESOURCE_IDS.put(name, resourceId);
+        DYNAMIC_RESOURCE_IDS.add(resourceId);
         return resourceId;
     }
 
@@ -181,25 +181,25 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         if (!StringUtils.hasText(name)) {
             throw new IllegalArgumentException("The data source name cannot be empty");
         }
-        String resourceId = dataSourcesNamesAndResourceIds.get(name);
-        if (!StringUtils.hasText(resourceId) || !dynamicResourceIds.contains(resourceId)) {
+        String resourceId = DATA_SOURCES_NAMES_AND_RESOURCE_IDS.get(name);
+        if (!StringUtils.hasText(resourceId) || !DYNAMIC_RESOURCE_IDS.contains(resourceId)) {
             throw new IllegalArgumentException("Dynamic data source is not registered: " + name);
         }
-        datasources.remove(resourceId);
-        dataSourcesNamesAndResourceIds.remove(name);
-        dynamicResourceIds.remove(resourceId);
+        DATASOURCES.remove(resourceId);
+        DATA_SOURCES_NAMES_AND_RESOURCE_IDS.remove(name);
+        DYNAMIC_RESOURCE_IDS.remove(resourceId);
         return resourceId;
     }
 
     public List<MysqlDataSourceInfo> getMysqlDataSourceInfos() {
-        return dataSourcesNamesAndResourceIds.entrySet().stream()
-                .map(entry -> toInfo(entry.getKey(), datasources.get(entry.getValue())))
+        return DATA_SOURCES_NAMES_AND_RESOURCE_IDS.entrySet().stream()
+                .map(entry -> toInfo(entry.getKey(), DATASOURCES.get(entry.getValue())))
                 .filter(info -> info != null)
                 .collect(Collectors.toList());
     }
 
     public String getDatabaseName(String resourceId) {
-        DataSourceProperties props = datasources.get(resourceId);
+        DataSourceProperties props = DATASOURCES.get(resourceId);
         if (props == null) {
             throw new IllegalArgumentException("Cannot find datasource properties: " + resourceId);
         }
@@ -418,25 +418,25 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     }
 
     public static Map<String, DataSourceProperties> getDatasources() {
-        return datasources;
+        return DATASOURCES;
     }
 
     public static Map<String, String> getDataSourcesNamesAndResourceIds() {
-        return dataSourcesNamesAndResourceIds;
+        return DATA_SOURCES_NAMES_AND_RESOURCE_IDS;
     }
 
     public static Set<String> getResourceIds() {
-        return datasources.keySet();
+        return DATASOURCES.keySet();
     }
 
     public static Set<String> getDynamicResourceIds() {
-        return dynamicResourceIds;
+        return DYNAMIC_RESOURCE_IDS;
     }
 
     static void clear() {
-        datasources.clear();
-        dataSourcesNamesAndResourceIds.clear();
-        dynamicResourceIds.clear();
+        DATASOURCES.clear();
+        DATA_SOURCES_NAMES_AND_RESOURCE_IDS.clear();
+        DYNAMIC_RESOURCE_IDS.clear();
     }
 
     private static class MysqlJdbcUrl {

@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class DataSourceFactory {
 
-    private static final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
+    private static final Map<String, DataSource> DATA_SOURCE_MAP = new ConcurrentHashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactory.class);
 
@@ -42,19 +42,19 @@ public class DataSourceFactory {
 
     @PreDestroy
     public void destroy() {
-        dataSourceMap.forEach(DataSourceFactory::closeDataSource);
-        dataSourceMap.clear();
+        DATA_SOURCE_MAP.forEach(DataSourceFactory::closeDataSource);
+        DATA_SOURCE_MAP.clear();
     }
 
     public static void initAllDataSources() {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
                 BusinessDataSourcesProperties.getDatasources();
-        datasources.forEach(
-                (resourceId, props) -> dataSourceMap.computeIfAbsent(resourceId, key -> createDataSource(props, key)));
+        datasources.forEach((resourceId, props) ->
+                DATA_SOURCE_MAP.computeIfAbsent(resourceId, key -> createDataSource(props, key)));
     }
 
     public static DataSource getDataSource(String resourceId) {
-        return dataSourceMap.computeIfAbsent(resourceId, key -> {
+        return DATA_SOURCE_MAP.computeIfAbsent(resourceId, key -> {
             BusinessDataSourcesProperties.DataSourceProperties props =
                     BusinessDataSourcesProperties.getDatasources().get(key);
             if (props == null) {
@@ -65,13 +65,13 @@ public class DataSourceFactory {
     }
 
     public static void removeErrorDataSource(String resourceId, Exception e) {
-        closeDataSource(resourceId, dataSourceMap.remove(resourceId));
+        closeDataSource(resourceId, DATA_SOURCE_MAP.remove(resourceId));
         LOGGER.info("Delete Business DataSource, resourceId: {}", resourceId);
         throw new StoreException("The Business DataSource: " + resourceId + " can't be connected");
     }
 
     public static void removeDataSource(String resourceId) {
-        closeDataSource(resourceId, dataSourceMap.remove(resourceId));
+        closeDataSource(resourceId, DATA_SOURCE_MAP.remove(resourceId));
         LOGGER.info("Delete Business DataSource, resourceId: {}", resourceId);
     }
 
