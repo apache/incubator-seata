@@ -17,7 +17,12 @@
 package org.apache.seata.saga.engine.pcext.interceptors;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
+import org.apache.seata.saga.engine.expression.Expression;
+import org.apache.seata.saga.engine.expression.ExpressionFactory;
+import org.apache.seata.saga.engine.expression.ExpressionFactoryManager;
 import org.apache.seata.saga.engine.pcext.InterceptableStateHandler;
 import org.apache.seata.saga.engine.pcext.StateHandlerInterceptor;
 import org.apache.seata.saga.engine.pcext.StateInstruction;
@@ -65,8 +70,12 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
             int loopCounter;
             Loop loop;
+            Collection<?> collection = null;
 
-            // get loop config
+            @SuppressWarnings("unchecked")
+            Map<String, Object> contextVariables =
+                    (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+
             if (context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE)) {
                 // compensate condition should get stateToBeCompensated 's config
                 CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
@@ -78,19 +87,34 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                         .getState(EngineUtils.getOriginStateName(stateToBeCompensated));
                 loop = compensateState.getLoop();
                 loopCounter = LoopTaskUtils.reloadLoopCounter(stateToBeCompensated.getName());
+                StateMachineConfig stateMachineConfig =
+                        (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                ExpressionFactoryManager expressionFactoryManager =
+                        stateMachineConfig != null ? stateMachineConfig.getExpressionFactoryManager() : null;
+
+                if (expressionFactoryManager != null && StringUtils.isNotBlank(loop.getCollection())) {
+                    ExpressionFactory expressionFactory = expressionFactoryManager.getExpressionFactory(
+                            ExpressionFactoryManager.DEFAULT_EXPRESSION_TYPE);
+                    Expression expression = expressionFactory.createExpression(loop.getCollection());
+
+                    Object evaluatedResult = expression.getValue(contextVariables);
+                    if (evaluatedResult instanceof Collection) {
+                        collection = (Collection<?>) evaluatedResult;
+                    }
+                }
             } else {
                 loop = currentState.getLoop();
                 loopCounter = (int) context.getVariable(DomainConstants.LOOP_COUNTER);
+                collection = LoopContextHolder.getCurrent(context, true).getCollection();
             }
 
-            Collection collection = LoopContextHolder.getCurrent(context, true).getCollection();
-            Map<String, Object> contextVariables =
-                    (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-            Map<String, Object> copyContextVariables = new ConcurrentHashMap<>(contextVariables);
-            copyContextVariables.put(loop.getElementIndexName(), loopCounter);
-            copyContextVariables.put(loop.getElementVariableName(), iterator(collection, loopCounter));
-            ((HierarchicalProcessContext) context)
-                    .setVariableLocally(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
+            if (collection != null) {
+                Map<String, Object> copyContextVariables = new ConcurrentHashMap<>(contextVariables);
+                copyContextVariables.put(loop.getElementIndexName(), loopCounter);
+                copyContextVariables.put(loop.getElementVariableName(), iterator(collection, loopCounter));
+                ((HierarchicalProcessContext) context)
+                        .setVariableLocally(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
+            }
         }
     }
 
@@ -131,8 +155,8 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
     }
 
-    private Object iterator(Collection collection, int loopCounter) {
-        Iterator iterator = collection.iterator();
+    private Object iterator(Collection<?> collection, int loopCounter) {
+        Iterator<?> iterator = collection.iterator();
         int index = 0;
         Object value = null;
         while (index <= loopCounter) {
