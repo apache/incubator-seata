@@ -97,11 +97,12 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                     businessDataSourcesProperties.buildDynamicMysqlProperties(request);
             Class.forName(props.getDriverClassName());
             try (Connection connection =
-                            DriverManager.getConnection(props.getUrl(), props.getUsername(), props.getPassword());
-                    PreparedStatement statement = connection.prepareStatement(SqlConstant.MYSQL_VALIDATION_SQL)) {
+                    DriverManager.getConnection(props.getUrl(), props.getUsername(), props.getPassword())) {
                 connection.setCatalog(props.getDatabaseName());
-                statement.setQueryTimeout(5);
-                statement.executeQuery();
+                try (PreparedStatement statement = connection.prepareStatement(SqlConstant.MYSQL_VALIDATION_SQL)) {
+                    statement.setQueryTimeout(5);
+                    statement.executeQuery();
+                }
             }
             result.setSuccess(true);
             result.setMessage("OK");
