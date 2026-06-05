@@ -31,11 +31,14 @@ import org.apache.seata.mcp.service.MysqlMetadataService;
 import org.apache.seata.mcp.store.DataSourceFactory;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.apache.seata.mcp.store.SqlSafetyValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,8 @@ import java.util.regex.Pattern;
 public class BusinessDataSourceServiceImpl implements BusinessDataSourceService {
 
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("[A-Za-z0-9_$]+");
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourceServiceImpl.class);
 
     private final SqlExecutionTemplate sqlExecutionTemplate;
 
@@ -101,11 +106,17 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             result.setSuccess(true);
             result.setMessage("OK");
         } catch (IllegalArgumentException e) {
+            LOGGER.warn("Business datasource connection test validation failed: {}", e.getMessage());
             result.setSuccess(false);
             result.setMessage(e.getMessage());
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            LOGGER.warn("Business datasource connection test failed: {}", sanitizeConnectionTestError(e, request));
             result.setSuccess(false);
-            result.setMessage("Connection test failed");
+            result.setMessage(sanitizeConnectionTestError(e, request));
+        } catch (Exception e) {
+            LOGGER.warn("Business datasource connection test failed: {}", sanitizeConnectionTestError(e, request));
+            result.setSuccess(false);
+            result.setMessage(sanitizeConnectionTestError(e, request));
         }
         result.setElapsedMs(System.currentTimeMillis() - start);
         return result;
@@ -186,5 +197,51 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     private String quote(String identifier) {
         return "`" + identifier + "`";
+    }
+
+    private String sanitizeConnectionTestError(Exception exception, MysqlDataSourceRegisterRequest request) {
+        StringBuilder message = new StringBuilder("Connection test failed");
+        if (exception instanceof SQLException) {
+            SQLException sqlException = (SQLException) exception;
+            if (StringUtils.isNotBlank(sqlException.getSQLState())) {
+                message.append(" [SQLState: ")
+                        .append(sqlException.getSQLState())
+                        .append("]");
+            }
+            if (sqlException.getErrorCode() != 0) {
+                message.append(" [ErrorCode: ")
+                        .append(sqlException.getErrorCode())
+                        .append("]");
+            }
+        } else {
+            message.append(" [").append(exception.getClass().getSimpleName()).append("]");
+        }
+        String detail = sanitizeSensitiveText(exception.getMessage(), request);
+        if (StringUtils.isNotBlank(detail)) {
+            message.append(": ").append(detail);
+        }
+        return message.toString();
+    }
+
+    private String sanitizeSensitiveText(String text, MysqlDataSourceRegisterRequest request) {
+        if (StringUtils.isBlank(text)) {
+            return "";
+        }
+        String sanitized = text.replaceAll("jdbc:mysql://[^\\s,;]+", "jdbc:mysql://***");
+        sanitized = sanitized.replaceAll("(?i)(password\\s*[=:]\\s*)[^\\s,;]+", "$1***");
+        sanitized = sanitized.replaceAll("(?i)(user(name)?\\s*[=:]\\s*)[^\\s,;]+", "$1***");
+        if (request != null) {
+            sanitized = replaceSensitiveValue(sanitized, request.getUrl());
+            sanitized = replaceSensitiveValue(sanitized, request.getUsername());
+            sanitized = replaceSensitiveValue(sanitized, request.getPassword());
+        }
+        return sanitized;
+    }
+
+    private String replaceSensitiveValue(String text, String sensitiveValue) {
+        if (StringUtils.isBlank(text) || StringUtils.isBlank(sensitiveValue)) {
+            return text;
+        }
+        return text.replace(sensitiveValue, "***");
     }
 }
