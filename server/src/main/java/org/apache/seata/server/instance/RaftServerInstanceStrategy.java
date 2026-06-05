@@ -70,7 +70,7 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         instance.setTerm(term);
         instance.setRole(stateMachine.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         // load node Endpoint
-        instance.setControl(new Node.Endpoint(XID.getIpAddress(), serverProperties.getPort(), "http"));
+        instance.setControl(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "http"));
 
         PeerId peerId =
                 RaftServerManager.getRaftServer(raftProperties.getGroup()).getServerId();

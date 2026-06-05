@@ -57,7 +57,7 @@ public class GeneralInstanceStrategy extends AbstractSeataInstanceStrategy {
         instance.setTerm(System.currentTimeMillis());
 
         // load node Endpoint
-        instance.setControl(new Node.Endpoint(XID.getIpAddress(), serverProperties.getPort(), "http"));
+        instance.setControl(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "http"));
 
         // load metadata
         for (PropertySource<?> propertySource : environment.getPropertySources()) {

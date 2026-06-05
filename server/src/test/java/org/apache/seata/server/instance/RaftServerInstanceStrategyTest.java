@@ -113,6 +113,7 @@ class RaftServerInstanceStrategyTest extends BaseSpringBootTest {
                     .thenReturn(raftServer);
             storeConfigMock.when(StoreConfig::getSessionMode).thenReturn(SessionMode.RAFT);
             xidMock.when(XID::getIpAddress).thenReturn("10.0.0.1");
+            xidMock.when(XID::getPort).thenReturn(7091);
 
             Instance instance = strategy.serverInstanceInit();
 
@@ -124,7 +125,7 @@ class RaftServerInstanceStrategyTest extends BaseSpringBootTest {
             Node.Endpoint control = instance.getControl();
             assertNotNull(control);
             assertEquals("10.0.0.1", control.getHost());
-            assertEquals(8088, control.getPort());
+            assertEquals(7091, control.getPort());
             Node.Endpoint internal = instance.getInternal();
             assertNotNull(internal);
             assertEquals("127.0.0.1", internal.getHost());
