@@ -17,8 +17,9 @@
 package io.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.mysql.jdbc.JDBC4MySQLConnection;
-import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
+import com.alibaba.druid.util.MySqlUtils;
+import com.mysql.cj.jdbc.JdbcConnection;
+import com.mysql.cj.jdbc.MysqlXAConnection;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
@@ -30,6 +31,7 @@ import org.mockito.Mockito;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -57,8 +59,9 @@ public class DataSourceProxyXATest {
     public void testGetConnection() throws SQLException {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
-        JDBC4MySQLConnection connection = Mockito.mock(JDBC4MySQLConnection.class);
+        JdbcConnection connection = Mockito.mock(JdbcConnection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        Mockito.when(connection.unwrap(Connection.class)).thenReturn(connection);
         DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
@@ -71,21 +74,24 @@ public class DataSourceProxyXATest {
         RootContext.unbind();
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        RootContext.bind("test");
-        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-        Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
 
-        Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
-        Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
+        MysqlXAConnection xaConnection = Mockito.mock(MysqlXAConnection.class);
+        Mockito.when(xaConnection.getConnection()).thenReturn(connection);
+        Mockito.when(xaConnection.getXAResource()).thenReturn(Mockito.mock(XAResource.class));
 
-        Connection wrappedPhysicalConn = wrappedConnection.unwrap(Connection.class);
-        Assertions.assertSame(wrappedPhysicalConn, connection);
-
-        XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
-        Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
-        tearDown();
+        try (org.mockito.MockedStatic<MySqlUtils> mySqlUtilsMock = Mockito.mockStatic(MySqlUtils.class)) {
+            mySqlUtilsMock
+                    .when(() -> MySqlUtils.createXAConnection(any(), any()))
+                    .thenReturn(xaConnection);
+            RootContext.bind("test");
+            connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+            Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+            ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
+            Assertions.assertSame(
+                    connection, connectionProxyXA.getWrappedConnection().unwrap(Connection.class));
+            Assertions.assertSame(xaConnection, connectionProxyXA.getWrappedXAConnection());
+            Assertions.assertSame(connection, xaConnection.getConnection());
+        }
     }
 
     @Test

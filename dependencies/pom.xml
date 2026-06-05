@@ -107,7 +107,7 @@
 
         <!-- # for database -->
         <!-- db -->
-        <mysql.version>5.1.42</mysql.version>
+        <mysql.version>8.2.0</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <dm.version>8.1.2.192</dm.version>
         <postgresql.version>42.3.10</postgresql.version>
@@ -122,9 +122,6 @@
         <caffeine.version>2.9.3</caffeine.version>
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
-        <!-- for jdbc driver when package -->
-        <mysql5.version>${mysql.version}</mysql5.version>
-        <mysql8.version>8.0.27</mysql8.version>
         <!-- rocketmq -->
         <rocketmq-version>5.0.0</rocketmq-version>
 
@@ -299,8 +296,8 @@
                 <version>${h2.version}</version>
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
                 <version>${mysql.version}</version>
             </dependency>
             <dependency>

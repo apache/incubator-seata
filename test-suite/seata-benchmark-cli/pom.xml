@@ -171,7 +171,6 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.2.0</version>
         </dependency>
 
         <!-- Commons IO, Compress and Codec (required by Testcontainers) -->

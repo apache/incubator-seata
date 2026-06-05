@@ -15,7 +15,7 @@
     limitations under the License.
 -->
 Due to license compatibility issues, we cannot include jar dependencies such as mysql, mariadb, oracle, etc., in the distribution package.
-Please copy database driver dependencies, such as `mysql-connector-java.jar`, to this directory. The following is an example of a directory structure:
+Please copy database driver dependencies, such as `mysql-connector-j.jar`, to this directory. The following is an example of a directory structure:
 
 ```aidl
 .
@@ -1173,7 +1173,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 ---
 
 由于license兼容性问题，我们不能将mysql、mariadb、oracle等jar依赖包含在发布包中。
-请将数据库driver相关依赖例如：`mysql-connector-java.jar`，拷贝到此目录下。目录结构示例如下：
+请将数据库driver相关依赖例如：`mysql-connector-j.jar`，拷贝到此目录下。目录结构示例如下：
 ```aidl
 .
 ├── DISCLAIMER

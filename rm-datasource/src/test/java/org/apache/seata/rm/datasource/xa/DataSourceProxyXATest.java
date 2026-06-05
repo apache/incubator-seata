@@ -17,10 +17,10 @@
 package org.apache.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.MySqlUtils;
 import com.kingbase8.xa.KBXAConnection;
-import com.mysql.jdbc.JDBC4MySQLConnection;
-import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
-import com.mysql.jdbc.jdbc2.optional.MysqlXAConnection;
+import com.mysql.cj.jdbc.JdbcConnection;
+import com.mysql.cj.jdbc.MysqlXAConnection;
 import com.oscar.xa.Jdbc3XAConnection;
 import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.context.RootContext;
@@ -38,6 +38,7 @@ import org.mockito.Mockito;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
+import javax.transaction.xa.XAResource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -72,11 +73,40 @@ public class DataSourceProxyXATest {
 
     @Test
     public void testGetConnection() throws SQLException, ClassNotFoundException {
-        XAConnection xaConnection =
-                testGetXaConnection(MysqlXAConnection.class, "jdbc:mysql:xxx", JDBC4MySQLConnection.class.getName());
-        Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
-        tearDown();
+        Driver driver = mock(Driver.class);
+        JdbcConnection connection = mock(JdbcConnection.class);
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        Mockito.when(connection.unwrap(Connection.class)).thenReturn(connection);
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+        Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
+        Mockito.when(connection.getMetaData()).thenReturn(metaData);
+        Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setDriver(driver);
+        druidDataSource.setUrl("jdbc:mysql:xxx");
+        DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        Assertions.assertTrue(dataSourceProxyXA.isShouldBeHeld());
+
+        MysqlXAConnection xaConnection = mock(MysqlXAConnection.class);
+        Mockito.when(xaConnection.getConnection()).thenReturn(connection);
+        Mockito.when(xaConnection.getXAResource()).thenReturn(mock(XAResource.class));
+
+        try (MockedStatic<MySqlUtils> mySqlUtilsMock = Mockito.mockStatic(MySqlUtils.class)) {
+            mySqlUtilsMock
+                    .when(() -> MySqlUtils.createXAConnection(any(), any()))
+                    .thenReturn(xaConnection);
+            Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+            Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+            RootContext.bind("test");
+            connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+            Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+            ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
+            Assertions.assertSame(
+                    connection, connectionProxyXA.getWrappedConnection().unwrap(Connection.class));
+            Assertions.assertSame(xaConnection, connectionProxyXA.getWrappedXAConnection());
+            Assertions.assertSame(connection, xaConnection.getConnection());
+        }
     }
 
     @Test
@@ -166,7 +196,7 @@ public class DataSourceProxyXATest {
                     .when(() -> CombineConnectionHolder.get(any(DataSource.class)))
                     .thenReturn(combineConn);
             Driver driver = mock(Driver.class);
-            JDBC4MySQLConnection connection = mock(JDBC4MySQLConnection.class);
+            JdbcConnection connection = mock(JdbcConnection.class);
             Mockito.when(connection.getAutoCommit()).thenReturn(true);
             DatabaseMetaData metaData = mock(DatabaseMetaData.class);
             Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
