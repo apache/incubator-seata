@@ -100,6 +100,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             }
             result.setSuccess(true);
             result.setMessage("OK");
+        } catch (IllegalArgumentException e) {
+            result.setSuccess(false);
+            result.setMessage(e.getMessage());
         } catch (Exception e) {
             result.setSuccess(false);
             result.setMessage("Connection test failed");

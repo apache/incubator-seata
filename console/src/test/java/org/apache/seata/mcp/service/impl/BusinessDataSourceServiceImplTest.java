@@ -17,7 +17,9 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.mcp.core.props.BusinessDataSourcesProperties;
+import org.apache.seata.mcp.entity.dto.MysqlDataSourceRegisterRequest;
 import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
+import org.apache.seata.mcp.entity.vo.MysqlDataSourceTestResult;
 import org.apache.seata.mcp.service.MysqlMetadataService;
 import org.apache.seata.mcp.store.DataSourceFactory;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
@@ -72,5 +74,21 @@ class BusinessDataSourceServiceImplTest {
         assertEquals(result, actual);
         verify(sqlExecutionTemplate)
                 .queryWithMaxRows("business-ds://biz", "SELECT `id`, `name` FROM `app`.`users`", 10);
+    }
+
+    @Test
+    void shouldExposeValidationMessageWhenTestingDataSource() {
+        SqlExecutionTemplate sqlExecutionTemplate = mock(SqlExecutionTemplate.class);
+        BusinessDataSourcesProperties properties = mock(BusinessDataSourcesProperties.class);
+        MysqlMetadataService metadataService = mock(MysqlMetadataService.class);
+        BusinessDataSourceServiceImpl service = new BusinessDataSourceServiceImpl(
+                sqlExecutionTemplate, properties, metadataService, new SqlSafetyValidator());
+        MysqlDataSourceRegisterRequest request = new MysqlDataSourceRegisterRequest();
+        when(properties.buildDynamicMysqlProperties(request))
+                .thenThrow(new IllegalArgumentException("MySQL host is not allowed: 127.0.0.1"));
+
+        MysqlDataSourceTestResult result = service.testMysqlDataSource(request);
+
+        assertEquals("MySQL host is not allowed: 127.0.0.1", result.getMessage());
     }
 }
