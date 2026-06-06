@@ -35,6 +35,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,9 +46,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GeneralInstanceStrategyTest extends BaseSpringBootTest {
 
     private GeneralInstanceStrategy strategy;
+    private Instance previousInstance;
+    private Object previousEnvironment;
 
     @BeforeEach
     void setUp() {
+        previousInstance = copyInstance(Instance.getInstance());
+        previousEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
         strategy = new GeneralInstanceStrategy();
         RegistryNamingServerProperties namingProps = new RegistryNamingServerProperties();
         namingProps.setNamespace("public");
@@ -62,7 +67,8 @@ class GeneralInstanceStrategyTest extends BaseSpringBootTest {
 
     @AfterEach
     void tearDown() {
-        resetInstance();
+        restoreInstance(previousInstance);
+        restoreEnvironment(previousEnvironment);
     }
 
     @Test
@@ -105,20 +111,46 @@ class GeneralInstanceStrategyTest extends BaseSpringBootTest {
         return environment;
     }
 
-    private void resetInstance() {
+    private Instance copyInstance(Instance instance) {
+        Instance snapshot = instance.clone();
+        snapshot.setRole(instance.getRole());
+        snapshot.setMetadata(new HashMap<>(instance.getMetadata()));
+        return snapshot;
+    }
+
+    private void restoreInstance(Instance snapshot) {
         Instance instance = Instance.getInstance();
-        instance.setNamespace(null);
-        instance.setClusterName(null);
-        instance.setUnit(null);
-        instance.setControl(null);
-        instance.setTransaction(null);
-        instance.setInternal(null);
-        instance.setHealthy(true);
-        instance.setWeight(1.0);
-        instance.setTerm(0L);
-        instance.setTimestamp(0L);
-        instance.setMetadata(new HashMap<>());
-        instance.setRole(ClusterRole.MEMBER);
-        instance.setVersion(null);
+        instance.setNamespace(snapshot.getNamespace());
+        instance.setClusterName(snapshot.getClusterName());
+        instance.setUnit(snapshot.getUnit());
+        instance.setControl(snapshot.getControl());
+        instance.setTransaction(snapshot.getTransaction());
+        instance.setInternal(snapshot.getInternal());
+        instance.setHealthy(snapshot.isHealthy());
+        instance.setWeight(snapshot.getWeight());
+        instance.setTerm(snapshot.getTerm());
+        instance.setTimestamp(snapshot.getTimestamp());
+        instance.setMetadata(new HashMap<>(snapshot.getMetadata()));
+        instance.setRole(snapshot.getRole());
+        instance.setVersion(snapshot.getVersion());
+    }
+
+    private void restoreEnvironment(Object environment) {
+        if (environment != null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+            return;
+        }
+        removeObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void removeObject(String objectKey) {
+        try {
+            Field objectMapField = ObjectHolder.class.getDeclaredField("OBJECT_MAP");
+            objectMapField.setAccessible(true);
+            ((Map<String, Object>) objectMapField.get(null)).remove(objectKey);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -98,9 +98,7 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
     public void tearDown() {
         StoreConfig.setStartupParameter("file", "file", "file");
         RouteTable.getInstance().removeGroup(TEST_GROUP);
-        if (previousEnvironment != null) {
-            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, previousEnvironment);
-        }
+        restoreEnvironment(previousEnvironment);
     }
 
     @Test
@@ -1003,5 +1001,24 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
         ConfigurableEnvironment environment = new StandardEnvironment();
         environment.getPropertySources().addFirst(new MapPropertySource("testServerPort", properties));
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+    }
+
+    private void restoreEnvironment(Object environment) {
+        if (environment != null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+            return;
+        }
+        removeObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void removeObject(String objectKey) {
+        try {
+            Field objectMapField = ObjectHolder.class.getDeclaredField("OBJECT_MAP");
+            objectMapField.setAccessible(true);
+            ((Map<String, Object>) objectMapField.get(null)).remove(objectKey);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
