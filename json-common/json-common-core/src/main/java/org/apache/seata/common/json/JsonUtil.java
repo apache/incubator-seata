@@ -20,7 +20,11 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
@@ -29,13 +33,32 @@ import java.util.Objects;
  */
 public final class JsonUtil {
 
-    private static final String CONFIG_JSON_PARSER_NAME = ConfigurationFactory.getInstance()
-            .getConfig(
-                    ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
-                    DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
+
+    private static final String CONFIG_JSON_SERIALIZER_NAME =
+            resolveJsonSerializerName(ConfigurationFactory.getInstance());
 
     private static final JsonSerializer DEFAULT_SERIALIZER =
-            JsonSerializerFactory.getSerializer(CONFIG_JSON_PARSER_NAME);
+            JsonSerializerFactory.getSerializer(CONFIG_JSON_SERIALIZER_NAME);
+
+    static String resolveJsonSerializerName(Configuration configuration) {
+        String serializerType = configuration.getConfig(ConfigurationKeys.JSON_SERIALIZER_TYPE);
+        if (StringUtils.isNotBlank(serializerType)) {
+            return serializerType;
+        }
+
+        String deprecatedSerializerType =
+                configuration.getConfig(ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME);
+        if (StringUtils.isNotBlank(deprecatedSerializerType)) {
+            LOGGER.warn(
+                    "The config '{}' is deprecated since 2.7.0 and will be removed in a future version. Please use '{}' instead.",
+                    ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
+                    ConfigurationKeys.JSON_SERIALIZER_TYPE);
+            return deprecatedSerializerType;
+        }
+
+        return DefaultValues.BUSINESS_ACTION_CONTEXT_JSON_PARSER;
+    }
 
     /**
      * Serialize the given object to JSON string
@@ -63,7 +86,7 @@ public final class JsonUtil {
         }
         String jsonParseName = text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX)
                 ? Constants.JACKSON_JSON_PARSER_NAME
-                : CONFIG_JSON_PARSER_NAME;
+                : CONFIG_JSON_SERIALIZER_NAME;
         return JsonSerializerFactory.getSerializer(jsonParseName).parseObject(text, clazz);
     }
 }

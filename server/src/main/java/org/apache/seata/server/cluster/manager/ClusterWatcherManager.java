@@ -36,7 +36,7 @@ import org.apache.seata.common.Constants;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.rpc.http.HttpContext;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
@@ -84,7 +84,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     private static final Map<Watcher<HttpContext>, Boolean> HTTP2_HEADERS_SENT = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("long-polling", 1);
 
     @PostConstruct
     public void init() {

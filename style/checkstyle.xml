@@ -46,6 +46,39 @@
         <property name="checks" value="ConstantName"/>
         <property name="files" value="MySqlLexer\.java$"/>
     </module>
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="LocalVariableName|MemberName|NeedBraces|EmptyBlock|ConstantName"/>
+        <property name="files" value="Echo\.java$"/>
+    </module>
+
+    <!-- MethodName: source files (no underscores) vs test files (underscores allowed) -->
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="MethodNameSource"/>
+        <property name="files" value=".*[\\/]test[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="MethodNameTest"/>
+        <property name="files" value="^(?!.*[\\/]test[\\/].*).*$"/>
+    </module>
+
+    <module name="SuppressionSingleFilter">
+        <!-- new Thread() -->
+        <property name="id" value="DirectThreadCreation"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <!-- Executors.new -->
+        <property name="id" value="ExecutorsUsage"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <!-- new ThreadPoolExecutor -->
+        <property name="id" value="DirectThreadPoolExecutorCreation"/>
+        <property name="files"
+                  value=".*[\\/]test[\\/].*|.*[\\/]org/apache/seata/config[\\/].*|.*[\\/]io/seata/config[\\/].*"/>
+    </module>
 
     <!-- Allow using @SuppressWarnings("checkstyle:...") in code -->
     <module name="SuppressWarningsFilter"/>
@@ -63,7 +96,14 @@
         <module name="MemberName"/>
         <module name="LocalVariableName"/>
         <module name="ParameterName"/>
-        <module name="MethodName"/>
+        <module name="MethodName">
+            <property name="id" value="MethodNameSource"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MethodName">
+            <property name="id" value="MethodNameTest"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-zA-Z0-9]+)*$"/>
+        </module>
         <module name="PackageName"/>
         <module name="ArrayTypeStyle"/>
 
@@ -78,5 +118,27 @@
 
         <!-- Constant -->
         <module name="UpperEll"/>
+
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DirectThreadCreation"/>
+            <property name="format" value="new\s+Thread\s*\("/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Direct thread creation is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="ExecutorsUsage"/>
+            <property name="format" value="Executors\s*\.\s*new"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Using Executors factory methods is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="DirectThreadPoolExecutorCreation"/>
+            <property name="format" value="new\s+ThreadPoolExecutor\s*\("/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message"
+                      value="Direct ThreadPoolExecutor creation is not allowed. Use ThreadPoolExecutorFactory instead."/>
+        </module>
     </module>
 </module>

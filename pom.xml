@@ -39,6 +39,7 @@
         <module>bom</module>
         <module>common</module>
         <module>config</module>
+        <module>threadpool</module>
 <!--        <module>console</module>-->
         <module>core</module>
         <module>compatible</module>
@@ -53,8 +54,6 @@
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
-        <module>seata-spring-boot-starter</module>
-        <module>seata-spring-autoconfigure</module>
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
@@ -130,6 +129,16 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: onlyBuildOnJDK21+ -->
+        <profile>
+            <id>JDK21Plus</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <modules>
+                <module>threadpool-loom</module>
+            </modules>
+        </profile>
         <!-- profile: onlyBuildOnJDK25+ -->
         <profile>
             <id>JDK25Plus</id>
@@ -320,8 +329,6 @@
                 <module>tm</module>
                 <module>metrics</module>
                 <module>serializer</module>
-                <module>seata-spring-boot-starter</module>
-                <module>seata-spring-autoconfigure</module>
                 <module>compressor</module>
                 <module>saga</module>
                 <module>sqlparser</module>
@@ -407,6 +414,7 @@
                     <configLocation>style/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
                     <detail>true</detail>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <skip>${checkstyle.skip}</skip>
                 </configuration>
                 <executions>

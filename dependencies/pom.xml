@@ -57,7 +57,7 @@
         <eureka-clients.version>1.10.18</eureka-clients.version>
         <jettison.version>1.5.4</jettison.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>1.4.6</nacos-client.version>
+        <nacos-client.version>2.0.4</nacos-client.version>
         <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>32.1.3-jre</guava.version>
@@ -84,14 +84,13 @@
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.52</fastjson2.version>
-        <groovy.version>2.4.4</groovy.version>
+        <groovy.version>4.0.31</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
         <jackson3.version>3.1.1</jackson3.version>
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -111,13 +110,13 @@
         <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <dm.version>8.1.2.192</dm.version>
-        <postgresql.version>42.3.8</postgresql.version>
+        <postgresql.version>42.3.10</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <kingbase.version>9.0.0</kingbase.version>
         <oscar.version>4.1.152</oscar.version>
         <!-- db connection pool -->
-        <druid.version>1.2.25</druid.version>
+        <druid.version>1.2.28</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <caffeine.version>2.9.3</caffeine.version>
@@ -134,7 +133,7 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
+        <tomcat-embed.version>9.0.118</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
@@ -767,9 +766,10 @@
                 <version>${kotlin-coroutines.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.codehaus.groovy</groupId>
+                <groupId>org.apache.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
                 <version>${groovy.version}</version>
+                <type>pom</type>
                 <exclusions>
                     <exclusion>
                         <groupId>org.junit.jupiter</groupId>
