@@ -18,16 +18,22 @@ package org.apache.seata.server.cluster.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
+import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.rpc.RpcClient;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.raft.execute.RaftMsgExecute;
+import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
@@ -40,14 +46,22 @@ import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+import org.springframework.core.env.StandardEnvironment;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,8 +70,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -69,16 +85,22 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
     private RaftStateMachine raftStateMachine;
     private static final String TEST_GROUP = "test-group";
+    private Object previousEnvironment;
 
     @BeforeEach
     public void setUp() {
         StoreConfig.setStartupParameter("file", "file", "file");
+        previousEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
         raftStateMachine = new RaftStateMachine(TEST_GROUP);
     }
 
     @AfterEach
     public void tearDown() {
         StoreConfig.setStartupParameter("file", "file", "file");
+        RouteTable.getInstance().removeGroup(TEST_GROUP);
+        if (previousEnvironment != null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, previousEnvironment);
+        }
     }
 
     @Test
@@ -186,6 +208,88 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
         RaftClusterMetadata retrieved = raftStateMachine.getRaftLeaderMetadata();
         assertEquals(100L, retrieved.getTerm());
+    }
+
+    @Test
+    public void testChangeOrInitRaftClusterMetadataUsesServicePortForControlEndpoint() {
+        bindEnvironmentWithServerPort(8088);
+        raftStateMachine.onLeaderStart(7L);
+
+        RaftServer raftServer = mock(RaftServer.class);
+        when(raftServer.getServerId()).thenReturn(new PeerId("10.0.0.1", 9091));
+
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<XID> xidMock = Mockito.mockStatic(XID.class)) {
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(raftServer);
+            xidMock.when(XID::getPort).thenReturn(7091);
+
+            RaftClusterMetadata metadata = raftStateMachine.changeOrInitRaftClusterMetadata();
+
+            assertNotNull(metadata.getLeader());
+            assertEquals(7091, metadata.getLeader().getTransaction().getPort());
+            assertEquals(7091, metadata.getLeader().getControl().getPort());
+            assertEquals(9091, metadata.getLeader().getInternal().getPort());
+        }
+    }
+
+    @Test
+    public void testSyncCurrentNodeInfoUsesServicePortForControlEndpoint() throws Exception {
+        bindEnvironmentWithServerPort(8088);
+
+        PeerId currentPeerId = new PeerId("10.0.0.2", 9092);
+        PeerId leaderPeerId = new PeerId("10.0.0.1", 9091);
+        Configuration configuration = new Configuration();
+        configuration.addPeer(currentPeerId);
+        RouteTable.getInstance().updateConfiguration(TEST_GROUP, configuration);
+
+        RaftClusterMetadata metadata = new RaftClusterMetadata(1L);
+        Node leader = new Node();
+        leader.setVersion("2.1.0");
+        metadata.setLeader(leader);
+        raftStateMachine.setRaftLeaderMetadata(metadata);
+
+        RaftServer raftServer = mock(RaftServer.class);
+        when(raftServer.getServerId()).thenReturn(currentPeerId);
+
+        CliClientServiceImpl cliClientService = mock(CliClientServiceImpl.class);
+        RpcClient rpcClient = mock(RpcClient.class);
+        when(cliClientService.getRpcClient()).thenReturn(rpcClient);
+
+        AtomicReference<PutNodeMetadataRequest> capturedRequest = new AtomicReference<>();
+        doAnswer(invocation -> {
+                    capturedRequest.set(invocation.getArgument(1));
+                    return null;
+                })
+                .when(rpcClient)
+                .invokeAsync(any(), any(), any(), any(), anyLong());
+
+        java.lang.reflect.Method method = RaftStateMachine.class.getDeclaredMethod("syncCurrentNodeInfo", PeerId.class);
+        method.setAccessible(true);
+
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<XID> xidMock = Mockito.mockStatic(XID.class)) {
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(raftServer);
+            raftServerManagerMock
+                    .when(RaftServerManager::getCliClientServiceInstance)
+                    .thenReturn(cliClientService);
+            xidMock.when(XID::getPort).thenReturn(7091);
+
+            assertDoesNotThrow(() -> {
+                try {
+                    method.invoke(raftStateMachine, leaderPeerId);
+                } catch (java.lang.reflect.InvocationTargetException e) {
+                    throw new RuntimeException(e.getCause());
+                }
+            });
+        }
+
+        assertNotNull(capturedRequest.get());
+        assertEquals(7091, capturedRequest.get().getNode().getTransaction().getPort());
+        assertEquals(7091, capturedRequest.get().getNode().getControl().getPort());
     }
 
     @Test
@@ -891,5 +995,13 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
         Node resultNode = updatedMetadata.getLearner().get(0);
         assertEquals("2.0.0", resultNode.getVersion());
         assertEquals(1, updatedMetadata.getLearner().size()); // Should still be 1, not 2
+    }
+
+    private void bindEnvironmentWithServerPort(int serverPort) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("server.port", serverPort);
+        ConfigurableEnvironment environment = new StandardEnvironment();
+        environment.getPropertySources().addFirst(new MapPropertySource("testServerPort", properties));
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
     }
 }
