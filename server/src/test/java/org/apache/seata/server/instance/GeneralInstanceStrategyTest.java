@@ -18,7 +18,6 @@ package org.apache.seata.server.instance;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
-import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.store.SessionMode;
