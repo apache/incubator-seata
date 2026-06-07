@@ -48,6 +48,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
+                <artifactId>seata-jdk17</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-jdk21</artifactId>
                 <version>${project.version}</version>
             </dependency>

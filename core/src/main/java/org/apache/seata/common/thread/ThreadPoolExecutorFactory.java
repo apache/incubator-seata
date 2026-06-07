@@ -166,7 +166,7 @@ public final class ThreadPoolExecutorFactory {
             // decision so that operators can correlate the missing-provider startup message
             // with the actual thread-pool mode that is in effect.
             LOGGER.warn(
-                    "Virtual thread pool was selected but the virtual-thread SPI provider (seata-threadpool-virtual) "
+                    "Virtual thread pool was selected but the virtual-thread SPI provider (seata-jdk21) "
                             + "is not present on the classpath. Falling back to platform threads.");
         }
         return ThreadPoolProviderHolder.PLATFORM_THREAD_POOL_PROVIDER;
