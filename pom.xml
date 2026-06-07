@@ -39,7 +39,6 @@
         <module>bom</module>
         <module>common</module>
         <module>config</module>
-        <module>threadpool</module>
 <!--        <module>console</module>-->
         <module>core</module>
         <module>compatible</module>
@@ -63,7 +62,6 @@
         <module>test-suite/test-new-version</module>
         <module>test-suite/test-old-version</module>
         <module>test-suite/seata-benchmark-cli</module>
-        <module>json-common</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 
@@ -129,6 +127,16 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: onlyBuildOnJDK17+ -->
+        <profile>
+            <id>JDK17Plus</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>jdk17</module>
+            </modules>
+        </profile>
         <!-- profile: onlyBuildOnJDK21+ -->
         <profile>
             <id>JDK21Plus</id>
@@ -136,7 +144,7 @@
                 <jdk>[21,)</jdk>
             </activation>
             <modules>
-                <module>threadpool-loom</module>
+                <module>jdk21</module>
             </modules>
         </profile>
         <!-- profile: onlyBuildOnJDK25+ -->

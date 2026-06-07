@@ -16,7 +16,7 @@
  */
 package org.apache.seata.discovery.registry;
 
-import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
+import org.apache.seata.common.thread.PlatformThreadPoolProvider;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,8 +43,8 @@ public class RegistryHeartBeats {
     private static final long DEFAULT_HEARTBEAT_PERIOD = 60 * 1000;
     private static final boolean DEFAULT_HEARTBEAT_ENABLED = Boolean.TRUE;
 
-    private static final ScheduledExecutorService HEARTBEAT_SCHEDULED =
-            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("seata-discovery-heartbeat", 1, true);
+    private static final ScheduledExecutorService HEARTBEAT_SCHEDULED = new PlatformThreadPoolProvider()
+            .newScheduledThreadPoolExecutor("seata-discovery-heartbeat", 1, true, new ThreadPoolExecutor.AbortPolicy());
 
     public static void addHeartBeat(String registryType, InetSocketAddress serverAddress, ReRegister reRegister) {
         addHeartBeat(registryType, serverAddress, getHeartbeatPeriod(registryType), reRegister);

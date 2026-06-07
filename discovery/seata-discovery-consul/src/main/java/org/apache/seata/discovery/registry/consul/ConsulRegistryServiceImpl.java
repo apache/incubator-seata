@@ -22,7 +22,7 @@ import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
-import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
+import org.apache.seata.common.thread.PlatformThreadPoolProvider;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -96,13 +96,16 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-        notifierExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                "services-consul-notifier",
-                THREAD_POOL_NUM,
-                THREAD_POOL_NUM,
-                Integer.MAX_VALUE,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+        notifierExecutor = new PlatformThreadPoolProvider()
+                .newThreadPoolExecutor(
+                        "services-consul-notifier",
+                        THREAD_POOL_NUM,
+                        THREAD_POOL_NUM,
+                        Integer.MAX_VALUE,
+                        TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(),
+                        true,
+                        new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
