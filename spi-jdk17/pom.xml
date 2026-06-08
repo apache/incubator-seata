@@ -26,26 +26,28 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>json-common</artifactId>
-    <packaging>pom</packaging>
-    <name>json-common ${project.version}</name>
-    <description>json-common top parent for Seata built with Maven</description>
+    <artifactId>seata-spi-jdk17</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-spi-jdk17 ${project.version}</name>
+    <description>JDK 17+ SPI extensions for Seata (Jackson 3 JSON serializer)</description>
 
-    <modules>
-        <module>json-common-core</module>
-    </modules>
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
 
-    <profiles>
-        <!-- Jackson 3 requires JDK 17+: only build the jackson3 submodule on JDK 17+ -->
-        <profile>
-            <id>JDK17Plus</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <modules>
-                <module>json-common-jackson3</module>
-            </modules>
-        </profile>
-    </profiles>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
 </project>

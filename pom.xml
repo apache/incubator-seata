@@ -134,7 +134,7 @@
                 <jdk>[17,)</jdk>
             </activation>
             <modules>
-                <module>jdk17</module>
+                <module>spi-jdk17</module>
             </modules>
         </profile>
         <!-- profile: onlyBuildOnJDK21+ -->
@@ -144,7 +144,7 @@
                 <jdk>[21,)</jdk>
             </activation>
             <modules>
-                <module>jdk21</module>
+                <module>spi-jdk21</module>
             </modules>
         </profile>
         <!-- profile: onlyBuildOnJDK25+ -->

@@ -486,7 +486,7 @@
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>seata-jdk21</artifactId>
+                    <artifactId>seata-spi-jdk21</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>

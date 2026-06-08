@@ -48,12 +48,12 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
-                <artifactId>seata-jdk17</artifactId>
+                <artifactId>seata-spi-jdk17</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
-                <artifactId>seata-jdk21</artifactId>
+                <artifactId>seata-spi-jdk21</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
