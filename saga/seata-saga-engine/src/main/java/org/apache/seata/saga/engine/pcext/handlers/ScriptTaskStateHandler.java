@@ -37,9 +37,13 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.SimpleBindings;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * ScriptTaskState Handler
@@ -48,6 +52,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ScriptTaskStateHandler implements StateHandler, InterceptableStateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptTaskStateHandler.class);
+
+    private static final Set<String> ALLOWED_SCRIPT_TYPES = new HashSet<>(Arrays.asList("groovy", "js", "javascript"));
+
+    private static final Pattern DANGEROUS_PATTERN = Pattern.compile("(?i)"
+            + "ProcessBuilder|\\.execute\\s*\\("
+            + "|System\\s*\\.\\s*(exit|getRuntime|setSecurityManager)"
+            + "|Class\\s*\\.\\s*forName|ClassLoader"
+            + "|java\\.lang\\.reflect"
+            + "|java\\.io\\.File|java\\.net\\."
+            + "|GroovyShell|GroovyClassLoader");
 
     private List<StateHandlerInterceptor> interceptors = new ArrayList<>();
 
@@ -104,6 +118,8 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
                     }
                 }
             }
+            validateScriptSecurity(scriptType, scriptContent);
+
             if (bindings != null) {
                 result = scriptEngine.eval(scriptContent, bindings);
             } else {
@@ -134,6 +150,17 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
             ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
             EngineUtils.handleException(context, state, e);
+        }
+    }
+
+    static void validateScriptSecurity(String scriptType, String scriptContent) {
+        if (scriptType != null && !ALLOWED_SCRIPT_TYPES.contains(scriptType.toLowerCase())) {
+            throw new EngineExecutionException(
+                    "Disallowed script type: " + scriptType, FrameworkErrorCode.ParameterRequired);
+        }
+        if (scriptContent != null && DANGEROUS_PATTERN.matcher(scriptContent).find()) {
+            throw new EngineExecutionException(
+                    "Script content contains disallowed dangerous code pattern", FrameworkErrorCode.ParameterRequired);
         }
     }
 

@@ -16,7 +16,7 @@
  */
 package org.apache.seata.core.rpc.processor.server;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,13 +48,14 @@ public class BatchLogHandler {
     private static final long BUSY_SLEEP_MILLS = 5L;
 
     static {
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(
+        ExecutorService mergeSendExecutorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                THREAD_PREFIX,
                 MAX_LOG_SEND_THREAD,
                 MAX_LOG_SEND_THREAD,
                 KEEP_ALIVE_TIME,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
+                true);
         mergeSendExecutorService.submit(new BatchLogRunnable());
     }
 

@@ -56,10 +56,10 @@ seata:
       enabled: true
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
+    tokenValidityInMilliseconds: 14400000
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/**/*.woff,/**/*.woff2,/**/*.ttf,/api/v1/auth/login,/version.json,/naming/v1/health,/error,/saga-statemachine-designer/**
 management:
   endpoints:
     web:

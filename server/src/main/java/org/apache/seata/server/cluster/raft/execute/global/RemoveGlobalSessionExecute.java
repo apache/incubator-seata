@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.cluster.raft.execute.global;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
@@ -33,13 +33,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class RemoveGlobalSessionExecute extends AbstractRaftMsgExecute {
 
-    private static final ThreadPoolExecutor EXECUTOR = new ThreadPoolExecutor(
+    private static final ThreadPoolExecutor EXECUTOR = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+            "RemoveGlobalSessionExecute",
             1,
             1,
             Integer.MAX_VALUE,
             TimeUnit.MILLISECONDS,
             new ArrayBlockingQueue<>(2048),
-            new NamedThreadFactory("RemoveGlobalSessionExecute", 1),
             new ThreadPoolExecutor.CallerRunsPolicy());
 
     @Override
