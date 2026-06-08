@@ -126,9 +126,12 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptableState
                     methodName,
                     e);
 
-            ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
+            Exception ex = (e instanceof Exception)
+                    ? (Exception) e
+                    : new EngineExecutionException(e, e.getMessage(), FrameworkErrorCode.UnknownAppError);
+            ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, ex);
 
-            EngineUtils.handleException(context, state, e);
+            EngineUtils.handleException(context, state, ex);
         }
     }
 
