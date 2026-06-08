@@ -20,6 +20,10 @@ on:
   pull_request:
       branches: [ 2.x, develop, master ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check-license:
     runs-on: ubuntu-latest
