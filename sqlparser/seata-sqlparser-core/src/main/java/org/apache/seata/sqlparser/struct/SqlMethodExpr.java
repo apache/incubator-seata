@@ -22,7 +22,9 @@ package org.apache.seata.sqlparser.struct;
  */
 public class SqlMethodExpr {
 
-    private static SqlMethodExpr instance = new SqlMethodExpr();
+    private static final SqlMethodExpr INSTANCE = new SqlMethodExpr(0);
+
+    private final int placeholderCount;
 
     /**
      * Get SqlMethodExpr.
@@ -30,13 +32,41 @@ public class SqlMethodExpr {
      * @return the SqlMethodExpr
      */
     public static SqlMethodExpr get() {
-        return instance;
+        return INSTANCE;
     }
 
-    private SqlMethodExpr() {}
+    /**
+     * Instantiates a new SqlMethodExpr with a specific placeholder count.
+     *
+     * @param placeholderCount the number of placeholders inside the method
+     */
+    public SqlMethodExpr(int placeholderCount) {
+        this.placeholderCount = placeholderCount;
+    }
+
+    public int getPlaceholderCount() {
+        return placeholderCount;
+    }
 
     @Override
     public String toString() {
         return "SQL_METHOD";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof SqlMethodExpr)) {
+            return false;
+        }
+        SqlMethodExpr other = (SqlMethodExpr) obj;
+        return placeholderCount == other.placeholderCount;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(placeholderCount);
     }
 }
