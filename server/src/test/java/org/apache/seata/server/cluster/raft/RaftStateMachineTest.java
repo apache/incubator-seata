@@ -31,6 +31,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.raft.execute.RaftMsgExecute;
 import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
@@ -1014,11 +1015,10 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
     @SuppressWarnings("unchecked")
     private void removeObject(String objectKey) {
         try {
-            Field objectMapField = ObjectHolder.class.getDeclaredField("OBJECT_MAP");
-            objectMapField.setAccessible(true);
+            Field objectMapField = ReflectionUtil.getField(ObjectHolder.class, "OBJECT_MAP");
             ((Map<String, Object>) objectMapField.get(null)).remove(objectKey);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+        } catch (ReflectiveOperationException | SecurityException e) {
+            throw new RuntimeException("Failed to remove ObjectHolder entry: " + objectKey, e);
         }
     }
 }

@@ -21,6 +21,7 @@ import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
 import org.junit.jupiter.api.AfterEach;
@@ -145,11 +146,10 @@ class GeneralInstanceStrategyTest extends BaseSpringBootTest {
     @SuppressWarnings("unchecked")
     private void removeObject(String objectKey) {
         try {
-            Field objectMapField = ObjectHolder.class.getDeclaredField("OBJECT_MAP");
-            objectMapField.setAccessible(true);
+            Field objectMapField = ReflectionUtil.getField(ObjectHolder.class, "OBJECT_MAP");
             ((Map<String, Object>) objectMapField.get(null)).remove(objectKey);
-        } catch (ReflectiveOperationException e) {
-            throw new RuntimeException(e);
+        } catch (ReflectiveOperationException | SecurityException e) {
+            throw new RuntimeException("Failed to remove ObjectHolder entry: " + objectKey, e);
         }
     }
 }
