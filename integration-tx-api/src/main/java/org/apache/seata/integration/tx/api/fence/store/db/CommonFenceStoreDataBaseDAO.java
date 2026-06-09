@@ -180,7 +180,7 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
     }
 
     @Override
-    public int deleteTCCFenceDO(Connection conn, List<String> xids) {
+    public int deleteTCCFenceDO(Connection conn, List<String> xids, Date datetime) {
         PreparedStatement ps = null;
         try {
             String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", xids.size());
@@ -189,6 +189,8 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
             for (int i = 0; i < xids.size(); i++) {
                 ps.setString(i + 1, xids.get(i));
             }
+            // gmt_modified threshold, bound after the xid placeholders
+            ps.setTimestamp(xids.size() + 1, new Timestamp(datetime.getTime()));
             return ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);

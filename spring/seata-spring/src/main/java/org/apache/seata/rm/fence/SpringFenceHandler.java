@@ -397,7 +397,7 @@ public class SpringFenceHandler implements FenceHandler {
                 if (xidSet.isEmpty()) {
                     break;
                 }
-                total += COMMON_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet));
+                total += COMMON_FENCE_DAO.deleteTCCFenceDO(connection, new ArrayList<>(xidSet), datetime);
                 if (xidSet.size() < LIMIT_DELETE) {
                     break;
                 }
