@@ -322,7 +322,8 @@ public class BusinessActionContext implements Serializable {
 
         @Override
         public void putAll(Map<? extends String, ? extends Object> m) {
-            if (m == null || m.isEmpty()) {
+            Objects.requireNonNull(m, "m");
+            if (m.isEmpty()) {
                 return;
             }
             for (Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
