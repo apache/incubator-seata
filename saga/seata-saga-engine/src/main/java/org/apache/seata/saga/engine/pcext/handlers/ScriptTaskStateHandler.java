@@ -147,9 +147,13 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
                     scriptType,
                     e);
 
-            ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
+            Exception exceptionToStore = (e instanceof Exception)
+                    ? (Exception) e
+                    : new RuntimeException("Script execution failed: " + e.getMessage(), e);
+            ((HierarchicalProcessContext) context)
+                    .setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, exceptionToStore);
 
-            EngineUtils.handleException(context, state, e);
+            EngineUtils.handleException(context, state, exceptionToStore);
         }
     }
 
