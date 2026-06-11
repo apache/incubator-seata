@@ -160,10 +160,9 @@ public class BusinessActionContext implements Serializable {
      */
     public void setActionContext(Map<String, Object> actionContext) {
         if (actionContextTrackingEnabled) {
-            this.actionContext =
-                    actionContext == null
-                            ? new TrackedActionContextMap(this)
-                            : new TrackedActionContextMap(this, actionContext);
+            this.actionContext = actionContext == null
+                    ? new TrackedActionContextMap(this)
+                    : new TrackedActionContextMap(this, actionContext);
             return;
         }
         this.actionContext = actionContext;
@@ -354,7 +353,8 @@ public class BusinessActionContext implements Serializable {
             return new AbstractSet<Entry<String, Object>>() {
                 @Override
                 public Iterator<Entry<String, Object>> iterator() {
-                    Iterator<Entry<String, Object>> iterator = delegate.entrySet().iterator();
+                    Iterator<Entry<String, Object>> iterator =
+                            delegate.entrySet().iterator();
                     return new Iterator<Entry<String, Object>>() {
                         private boolean canRemove;
 

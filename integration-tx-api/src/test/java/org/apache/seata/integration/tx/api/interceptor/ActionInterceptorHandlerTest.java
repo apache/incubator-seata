@@ -94,7 +94,9 @@ public class ActionInterceptorHandlerTest {
         org.mockito.Mockito.doReturn(BranchType.TCC).when(businessActionParam).getBranchType();
         org.mockito.Mockito.doReturn(false).when(businessActionParam).getDelayReport();
         org.mockito.Mockito.doReturn(false).when(businessActionParam).getUseCommonFence();
-        org.mockito.Mockito.doReturn(Collections.emptyMap()).when(businessActionParam).getBusinessActionContext();
+        org.mockito.Mockito.doReturn(Collections.emptyMap())
+                .when(businessActionParam)
+                .getBusinessActionContext();
 
         DefaultResourceManager resourceManager = mock(DefaultResourceManager.class);
         AtomicReference<BusinessActionContext> observedContext = new AtomicReference<>();
@@ -102,7 +104,9 @@ public class ActionInterceptorHandlerTest {
 
         try (MockedStatic<DefaultResourceManager> mocked = mockStatic(DefaultResourceManager.class)) {
             mocked.when(DefaultResourceManager::get).thenReturn(resourceManager);
-            when(resourceManager.branchRegister(eq(BranchType.TCC), eq("prepare"), isNull(), eq("test-xid"), anyString(), isNull()))
+            when(resourceManager.branchRegister(
+                            eq(BranchType.TCC), eq("prepare"), isNull(), eq("test-xid"),
+                            anyString(), isNull()))
                     .thenReturn(1L);
 
             Callback<Object> callback = () -> {
