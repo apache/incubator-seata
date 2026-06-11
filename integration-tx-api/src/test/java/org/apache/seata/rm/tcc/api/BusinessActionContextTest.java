@@ -19,6 +19,7 @@ package org.apache.seata.rm.tcc.api;
 import org.apache.seata.core.model.BranchType;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -70,6 +71,44 @@ public class BusinessActionContextTest {
         assertEquals(
                 "payload-name",
                 context.getActionContext("payload", Payload.class).getName());
+    }
+
+    @Test
+    public void testTrackedActionContextMarksUpdatedOnMutationOperations() {
+        BusinessActionContext context = new BusinessActionContext("xid", "4", new HashMap<>());
+        context.enableActionContextTracking();
+        context.setActionContext(new HashMap<>());
+
+        context.getActionContext().put("name", "seata");
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().putAll(Collections.singletonMap("status", "prepared"));
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().remove("name");
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().put("name", "seata");
+        context.getActionContext().replace("name", "seata-updated");
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().computeIfAbsent("branch", key -> "branch-1");
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().merge("branch", "branch-2", (oldValue, newValue) -> newValue);
+        assertTrue(context.getUpdated());
+
+        context.setUpdated(null);
+        context.getActionContext().replaceAll((key, value) -> value);
+        assertNull(context.getUpdated());
+
+        context.getActionContext().clear();
+        assertTrue(context.getUpdated());
     }
 
     @Test

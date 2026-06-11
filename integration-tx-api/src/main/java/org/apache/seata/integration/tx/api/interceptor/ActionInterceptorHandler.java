@@ -91,6 +91,9 @@ public class ActionInterceptorHandler {
         // MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
+        // enable mutation tracking only after framework initialization is complete
+        actionContext.enableActionContextTracking();
+
         // save the previous action context
         BusinessActionContext previousActionContext = BusinessActionContextUtil.getContext();
         try {
