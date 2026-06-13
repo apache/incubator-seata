@@ -356,8 +356,6 @@ public class BusinessActionContext implements Serializable {
                     Iterator<Entry<String, Object>> iterator =
                             delegate.entrySet().iterator();
                     return new Iterator<Entry<String, Object>>() {
-                        private boolean canRemove;
-
                         @Override
                         public boolean hasNext() {
                             return iterator.hasNext();
@@ -366,17 +364,13 @@ public class BusinessActionContext implements Serializable {
                         @Override
                         public Entry<String, Object> next() {
                             Entry<String, Object> current = iterator.next();
-                            canRemove = true;
                             return new TrackingEntry(current);
                         }
 
                         @Override
                         public void remove() {
                             iterator.remove();
-                            if (canRemove) {
-                                owner.markUpdatedOnActionContextMutation();
-                            }
-                            canRemove = false;
+                            owner.markUpdatedOnActionContextMutation();
                         }
                     };
                 }

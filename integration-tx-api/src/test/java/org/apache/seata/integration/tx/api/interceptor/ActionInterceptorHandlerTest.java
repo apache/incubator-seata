@@ -105,8 +105,7 @@ public class ActionInterceptorHandlerTest {
         try (MockedStatic<DefaultResourceManager> mocked = mockStatic(DefaultResourceManager.class)) {
             mocked.when(DefaultResourceManager::get).thenReturn(resourceManager);
             when(resourceManager.branchRegister(
-                            eq(BranchType.TCC), eq("prepare"), isNull(), eq("test-xid"),
-                            anyString(), isNull()))
+                            eq(BranchType.TCC), eq("prepare"), isNull(), eq("test-xid"), anyString(), isNull()))
                     .thenReturn(1L);
 
             Callback<Object> callback = () -> {
@@ -119,13 +118,8 @@ public class ActionInterceptorHandlerTest {
                 return null;
             };
 
-            Object result =
-                    actionInterceptorHandler.proceed(
-                            prepareMethod,
-                            new Object[] {null, 10, list, tccParam},
-                            "test-xid",
-                            businessActionParam,
-                            callback);
+            Object result = actionInterceptorHandler.proceed(
+                    prepareMethod, new Object[] {null, 10, list, tccParam}, "test-xid", businessActionParam, callback);
 
             Assertions.assertNull(result);
         }
