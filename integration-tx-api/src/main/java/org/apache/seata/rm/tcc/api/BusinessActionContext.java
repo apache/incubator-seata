@@ -381,7 +381,7 @@ public class BusinessActionContext implements Serializable {
                     };
                 }
 
-                // The following are read-only methods that delegate directly to the native Map.
+                // The following methods delegate directly to the underlying Map.
                 @Override
                 public int size() {
                     return delegate.size();
