@@ -169,11 +169,10 @@ public class TransactionalTemplate {
      *
      * @param business the business executor containing logic and transaction configuration
      * @return the result returned by business logic execution
-     * @throws Throwable any exception thrown by business logic (after transaction handling)
+     * @throws Throwable                                any exception thrown by business logic (after transaction handling)
      * @throws TransactionalExecutor.ExecutionException for transaction infrastructure failures
-     * @throws TransactionException for transaction operation failures
-     * @throws IllegalStateException for invalid transaction states
-     *
+     * @throws TransactionException                     for transaction operation failures
+     * @throws IllegalStateException                    for invalid transaction states
      * @see TransactionalExecutor#execute()
      * @see TransactionalExecutor#getTransactionInfo()
      * @see org.apache.seata.tm.api.transaction.Propagation
@@ -284,7 +283,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo          the transaction info
+     * @param txInfo    the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -362,6 +361,9 @@ public class TransactionalTemplate {
                 case Finished:
                     code = TransactionalExecutor.Code.CommitFailure;
                     break;
+                case RollbackRetrying:
+                    code = TransactionalExecutor.Code.Rollbacking;
+                    break;
                 default:
             }
             Exception statusException = null;
@@ -373,9 +375,15 @@ public class TransactionalTemplate {
                 statusException = new TmTransactionException(
                         TransactionExceptionCode.TransactionTimeout,
                         String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
+            } else if (GlobalStatus.isOnePhasePrepareFailed(afterCommitStatus)) {
+                statusException = new TmTransactionException(
+                        TransactionExceptionCode.BranchPrepareFailed,
+                        String.format(
+                                "Global transaction[%s] is branch prepare failure and will be rollback[TC].",
+                                tx.getXid()));
             }
             if (null != statusException) {
-                throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
+                throw new TransactionalExecutor.ExecutionException(tx, statusException, code, statusException);
             }
             triggerAfterCommit();
         } catch (TransactionException txe) {
