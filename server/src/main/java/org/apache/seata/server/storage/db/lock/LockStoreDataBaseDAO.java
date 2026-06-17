@@ -390,7 +390,18 @@ public class LockStoreDataBaseDAO implements LockStore {
                 ps.setInt(8, lockDO.getStatus());
                 ps.addBatch();
             }
-            return ps.executeBatch().length == lockDOs.size();
+            // Do not rely on executeBatch().length == size: per the JDBC spec the length is
+            // not guaranteed to equal the number of statements, and some drivers (e.g. Dameng/DM)
+            // aggregate the per-statement results, returning an array of a different length.
+            // Detect failure via EXECUTE_FAILED instead; real conflicts (duplicate row_key) still
+            // throw SQLIntegrityConstraintViolationException and are handled by the catch block below.
+            int[] result = ps.executeBatch();
+            for (int updated : result) {
+                if (updated == java.sql.Statement.EXECUTE_FAILED) {
+                    return false;
+                }
+            }
+            return true;
         } catch (SQLIntegrityConstraintViolationException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
             // return false,let the caller go to conn.rollback()
