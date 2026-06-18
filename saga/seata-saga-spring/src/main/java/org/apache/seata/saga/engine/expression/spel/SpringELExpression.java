@@ -17,6 +17,8 @@
 package org.apache.seata.saga.engine.expression.spel;
 
 import org.apache.seata.saga.engine.expression.ELExpression;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
  * Expression base on Spring EL
@@ -25,18 +27,34 @@ import org.apache.seata.saga.engine.expression.ELExpression;
 public class SpringELExpression implements ELExpression {
 
     private org.springframework.expression.Expression expression;
+    private EvaluationContext evaluationContext;
 
     public SpringELExpression(org.springframework.expression.Expression expression) {
         this.expression = expression;
     }
 
+    public SpringELExpression(
+            org.springframework.expression.Expression expression, EvaluationContext evaluationContext) {
+        this.expression = expression;
+        this.evaluationContext = evaluationContext;
+    }
+
     @Override
     public Object getValue(Object elContext) {
+        if (evaluationContext instanceof StandardEvaluationContext) {
+            ((StandardEvaluationContext) evaluationContext).setRootObject(elContext);
+            return expression.getValue(evaluationContext);
+        }
         return expression.getValue(elContext);
     }
 
     @Override
     public void setValue(Object value, Object elContext) {
+        if (evaluationContext instanceof StandardEvaluationContext) {
+            ((StandardEvaluationContext) evaluationContext).setRootObject(elContext);
+            expression.setValue(evaluationContext, value);
+            return;
+        }
         expression.setValue(elContext, value);
     }
 

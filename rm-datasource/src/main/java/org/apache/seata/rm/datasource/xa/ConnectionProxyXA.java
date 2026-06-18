@@ -243,6 +243,10 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void rollback() throws SQLException {
+        rollback(BranchStatus.PhaseOne_Failed);
+    }
+
+    private void rollback(BranchStatus branchStatus) throws SQLException {
         if (combine) {
             return;
         }
@@ -250,7 +254,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             // Ignore the committing on an autocommit session and read-only transaction.
             return;
         }
-        if (!xaActive || this.xaBranchXid == null) {
+        if ((!xaActive && branchStatus != BranchStatus.PhaseOne_PrepareFailed) || this.xaBranchXid == null) {
             throw new SQLException("should NOT rollback on an inactive session");
         }
         try {
@@ -260,7 +264,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
-            reportStatusToTC(BranchStatus.PhaseOne_Failed);
+            reportStatusToTC(branchStatus);
             LOGGER.info("{} was rollbacked", xaBranchXid);
         } catch (XAException xe) {
             throw new SQLException(
@@ -311,7 +315,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void checkTimeout(Long now) throws XAException {
         if (now - branchRegisterTime > TIMEOUT) {
-            xaRollback(xaBranchXid);
             throw new XAException("XA branch timeout error");
         }
     }
@@ -322,6 +325,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (combine) {
                 return;
             }
+            boolean isException = false;
             try {
                 if (xaActive && this.xaBranchXid != null) {
                     // XA End: Success
@@ -330,7 +334,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                     } catch (SQLException sqle) {
                         // Rollback immediately before the XA Branch Context is deleted.
                         String xaBranchXid = this.xaBranchXid.toString();
-                        rollback();
                         throw new SQLException(
                                 "Branch " + xaBranchXid + " was rollbacked on committing since " + sqle.getMessage(),
                                 SQLSTATE_XA_NOT_END,
@@ -348,19 +351,24 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                         reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
                     }
                 }
+            } catch (SQLException xe) {
+                isException = true;
+                // Rollback and Branch Report to TC: Exception
+                rollback(BranchStatus.PhaseOne_PrepareFailed);
+                throw xe;
             } catch (XAException xe) {
-                // Branch Report to TC: Failed
-                reportStatusToTC(BranchStatus.PhaseOne_Failed);
+                isException = true;
+                long branchId = xaBranchXid.getBranchId();
+                // Rollback and Branch Report to TC: Exception
+                rollback(BranchStatus.PhaseOne_PrepareFailed);
                 throw new SQLException(
-                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId()
-                                + " since " + xe.getMessage(),
+                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + branchId + " since "
+                                + xe.getMessage(),
                         xe);
             } finally {
                 cleanXABranchContext();
                 rollBacked = false;
-                if (isHeld() && shouldBeHeld()) {
-                    // if kept by a keeper, just hold the connection.
-                } else {
+                if (!(isHeld() && shouldBeHeld() && !isException)) {
                     originalConnection.close();
                 }
             }

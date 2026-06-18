@@ -35,7 +35,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
@@ -43,7 +42,7 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.protocol.ProtocolConstants;
@@ -130,14 +129,18 @@ public abstract class AbstractMultiVersionCompatibilityTest {
     protected final AtomicReference<Object> responseRef = new AtomicReference<>();
     protected CountDownLatch responseLatch;
     private String originalTransportProtocol;
+    private String originalShutdownWait;
 
     // Helper for creating MultiProtocolDecoder with specific version (for V1 tests)
     private final MultiProtocolDecoderTest decoderTestHelper = new MultiProtocolDecoderTest();
 
     @BeforeEach
     public void setUp() {
-        originalTransportProtocol = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.SEATA.value);
+        originalTransportProtocol = System.getProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        originalShutdownWait = System.getProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.SEATA.value);
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
+        ConfigurationCache.clear();
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup();
         clientGroup = new NioEventLoopGroup();
@@ -169,14 +172,20 @@ public abstract class AbstractMultiVersionCompatibilityTest {
             serverWorkingThreads.shutdown();
         }
 
-        bossGroup.shutdownGracefully().sync();
-        workerGroup.shutdownGracefully().sync();
-        clientGroup.shutdownGracefully().sync();
-        if (StringUtils.isBlank(originalTransportProtocol)) {
-            ConfigurationTestHelper.removeConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        bossGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
+        workerGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
+        clientGroup.shutdownGracefully(0, 2, TimeUnit.SECONDS).sync();
+        if (originalTransportProtocol == null) {
+            System.clearProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
         } else {
-            ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);
+            System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, originalTransportProtocol);
         }
+        if (originalShutdownWait == null) {
+            System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        } else {
+            System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, originalShutdownWait);
+        }
+        ConfigurationCache.clear();
     }
 
     // ==================== V1 Server Methods (manual, for legacy simulation) ====================

@@ -16,21 +16,32 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
+import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
-public class AbstractUndoExecutorTest extends BaseH2Test {
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+public class BaseUndoExecutorTest extends BaseH2Test {
 
     @Test
     public void dataValidationUpdate() throws SQLException {
@@ -238,6 +249,105 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
                 pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
         Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
     }
+
+    @Test
+    public void testBuildCheckSql() {
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, false);
+
+        String tableName = "table_name";
+        String whereCondition = "(id) in ( (?) )";
+
+        String sqlWithStar = executor.getCheckSql(tableName, whereCondition);
+        Assertions.assertEquals("SELECT * FROM table_name WHERE (id) in ( (?) ) FOR UPDATE", sqlWithStar);
+
+        String selectColumns = "id, name, invisible_col";
+        String sqlWithExplicitColumns = executor.getCheckSql(tableName, whereCondition, selectColumns);
+        Assertions.assertEquals(
+                "SELECT id, name, invisible_col FROM table_name WHERE (id) in ( (?) ) FOR UPDATE",
+                sqlWithExplicitColumns);
+    }
+
+    @Test
+    public void testQueryCurrentRecordsSqlGeneration() throws SQLException {
+        TableMeta tableMeta = mock(TableMeta.class);
+        when(tableMeta.getTableName()).thenReturn("table_name");
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
+
+        Map<String, ColumnMeta> allColumns = new LinkedHashMap<>();
+        allColumns.put("id", new ColumnMeta());
+        allColumns.put("name", new ColumnMeta());
+        allColumns.put("invisible_col", new ColumnMeta());
+        when(tableMeta.getAllColumns()).thenReturn(allColumns);
+
+        ColumnMeta idColMeta = new ColumnMeta();
+        idColMeta.setDataType(java.sql.Types.INTEGER);
+        when(tableMeta.getColumnMeta("id")).thenReturn(idColMeta);
+
+        TableRecords beforeImage = getTableRecords(tableMeta);
+
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(SQLType.UPDATE);
+        sqlUndoLog.setTableMeta(tableMeta);
+        sqlUndoLog.setTableName("table_name");
+        sqlUndoLog.setBeforeImage(beforeImage);
+
+        TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
+
+        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
+
+        Connection connection = mock(Connection.class);
+        when(connectionProxy.getTargetConnection()).thenReturn(connection);
+
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        ResultSet resultSet = mock(ResultSet.class);
+
+        ResultSetMetaData metaData = mock(ResultSetMetaData.class);
+        when(metaData.getColumnCount()).thenReturn(0);
+        when(resultSet.getMetaData()).thenReturn(metaData);
+        when(resultSet.next()).thenReturn(false);
+
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        when(connection.prepareStatement(sqlCaptor.capture())).thenReturn(preparedStatement);
+
+        executor.queryCurrentRecords(connectionProxy);
+
+        String executedSql = sqlCaptor.getValue();
+
+        Assertions.assertTrue(
+                executedSql.contains("\"id\", \"name\"") && !executedSql.contains("\"invisible_col\""),
+                "The query should explicitly project ONLY the columns from the undo log, ignoring hidden columns in tableMeta.");
+        Assertions.assertTrue(
+                executedSql.startsWith("SELECT \"id\", \"name\" FROM table_name WHERE"),
+                "The query format was incorrect. Captured SQL: " + executedSql);
+    }
+
+    private static @NonNull TableRecords getTableRecords(TableMeta tableMeta) {
+        TableRecords beforeImage = new TableRecords();
+        beforeImage.setTableName("table_name");
+        beforeImage.setTableMeta(tableMeta);
+
+        List<Row> rows = new ArrayList<>();
+        Row row = new Row();
+        Field pkField = new Field();
+        pkField.setName("id");
+        pkField.setType(java.sql.Types.INTEGER);
+        pkField.setValue(12345);
+        row.add(pkField);
+
+        Field nameField = new Field();
+        nameField.setName("name");
+        nameField.setType(java.sql.Types.VARCHAR);
+        nameField.setValue("aaa");
+        row.add(nameField);
+
+        rows.add(row);
+        beforeImage.setRows(rows);
+        return beforeImage;
+    }
 }
 
 class TestUndoExecutor extends AbstractUndoExecutor {
@@ -256,5 +366,13 @@ class TestUndoExecutor extends AbstractUndoExecutor {
     @Override
     protected TableRecords getUndoRows() {
         return isDelete ? sqlUndoLog.getBeforeImage() : sqlUndoLog.getAfterImage();
+    }
+
+    public String getCheckSql(String tableName, String whereCondition) {
+        return super.buildCheckSql(tableName, whereCondition);
+    }
+
+    public String getCheckSql(String tableName, String whereCondition, String selectColumns) {
+        return super.buildCheckSql(tableName, whereCondition, selectColumns);
     }
 }
