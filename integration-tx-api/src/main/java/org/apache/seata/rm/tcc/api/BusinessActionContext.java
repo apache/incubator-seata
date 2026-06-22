@@ -22,7 +22,14 @@ import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * The type Business action context.
@@ -61,6 +68,11 @@ public class BusinessActionContext implements Serializable {
      * action context
      */
     private Map<String, Object> actionContext;
+
+    /**
+     * whether the action context should stay tracked on mutation
+     */
+    private transient boolean actionContextTrackingEnabled;
 
     /**
      * Instantiates a new Business action context.
@@ -147,7 +159,25 @@ public class BusinessActionContext implements Serializable {
      * @param actionContext the action context
      */
     public void setActionContext(Map<String, Object> actionContext) {
+        if (actionContextTrackingEnabled) {
+            this.actionContext = actionContext == null
+                    ? new TrackedActionContextMap(this)
+                    : new TrackedActionContextMap(this, actionContext);
+            return;
+        }
         this.actionContext = actionContext;
+    }
+
+    /**
+     * Enable automatic updated tracking for action context mutations.
+     */
+    public void enableActionContextTracking() {
+        actionContextTrackingEnabled = true;
+        if (actionContext == null) {
+            actionContext = new TrackedActionContextMap(this);
+        } else if (!(actionContext instanceof TrackedActionContextMap)) {
+            actionContext = new TrackedActionContextMap(this, actionContext);
+        }
     }
 
     /**
@@ -233,6 +263,10 @@ public class BusinessActionContext implements Serializable {
         this.branchType = branchType;
     }
 
+    private void markUpdatedOnActionContextMutation() {
+        setUpdated(true);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -252,5 +286,174 @@ public class BusinessActionContext implements Serializable {
                 .append(actionContext)
                 .append("]");
         return sb.toString();
+    }
+
+    /**
+     * The tracked action context map.
+     */
+    private static final class TrackedActionContextMap extends AbstractMap<String, Object> implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        private final BusinessActionContext owner;
+
+        private final Map<String, Object> delegate;
+
+        private TrackedActionContextMap(BusinessActionContext owner) {
+            this.owner = owner;
+            this.delegate = new HashMap<>(8);
+        }
+
+        private TrackedActionContextMap(BusinessActionContext owner, Map<String, Object> source) {
+            this.owner = owner;
+            this.delegate = new HashMap<>(source);
+        }
+
+        @Override
+        public Object put(String key, Object value) {
+            boolean hadKey = delegate.containsKey(key);
+            Object previousValue = delegate.put(key, value);
+            if (!hadKey || !Objects.equals(previousValue, value)) {
+                owner.markUpdatedOnActionContextMutation();
+            }
+            return previousValue;
+        }
+
+        @Override
+        public void putAll(Map<? extends String, ? extends Object> m) {
+            Objects.requireNonNull(m, "m");
+            if (m.isEmpty()) {
+                return;
+            }
+            for (Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
+                put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        @Override
+        public Object remove(Object key) {
+            boolean hadKey = delegate.containsKey(key);
+            Object previousValue = delegate.remove(key);
+            if (hadKey) {
+                owner.markUpdatedOnActionContextMutation();
+            }
+            return previousValue;
+        }
+
+        @Override
+        public void clear() {
+            if (!delegate.isEmpty()) {
+                delegate.clear();
+                owner.markUpdatedOnActionContextMutation();
+            }
+        }
+
+        @Override
+        public Set<Entry<String, Object>> entrySet() {
+            return new AbstractSet<Entry<String, Object>>() {
+                @Override
+                public Iterator<Entry<String, Object>> iterator() {
+                    Iterator<Entry<String, Object>> iterator =
+                            delegate.entrySet().iterator();
+                    return new Iterator<Entry<String, Object>>() {
+                        @Override
+                        public boolean hasNext() {
+                            return iterator.hasNext();
+                        }
+
+                        @Override
+                        public Entry<String, Object> next() {
+                            Entry<String, Object> current = iterator.next();
+                            return new TrackingEntry(current);
+                        }
+
+                        @Override
+                        public void remove() {
+                            iterator.remove();
+                            owner.markUpdatedOnActionContextMutation();
+                        }
+                    };
+                }
+
+                // The following methods delegate directly to the underlying Map.
+                @Override
+                public int size() {
+                    return delegate.size();
+                }
+
+                @Override
+                public boolean remove(Object o) {
+                    if (!(o instanceof Entry)) {
+                        return false;
+                    }
+                    Entry<?, ?> entry = (Entry<?, ?>) o;
+                    if (!delegate.containsKey(entry.getKey())) {
+                        return false;
+                    }
+                    if (!Objects.equals(delegate.get(entry.getKey()), entry.getValue())) {
+                        return false;
+                    }
+                    TrackedActionContextMap.this.remove(entry.getKey());
+                    return true;
+                }
+            };
+        }
+
+        @Override
+        public int size() {
+            return delegate.size();
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return delegate.containsKey(key);
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return delegate.containsValue(value);
+        }
+
+        @Override
+        public Object get(Object key) {
+            return delegate.get(key);
+        }
+
+        private final class TrackingEntry implements Entry<String, Object> {
+            private final Entry<String, Object> delegateEntry;
+
+            private TrackingEntry(Entry<String, Object> delegateEntry) {
+                this.delegateEntry = delegateEntry;
+            }
+
+            @Override
+            public String getKey() {
+                return delegateEntry.getKey();
+            }
+
+            @Override
+            public Object getValue() {
+                return delegateEntry.getValue();
+            }
+
+            @Override
+            public Object setValue(Object value) {
+                Object previousValue = delegateEntry.setValue(value);
+                if (!Objects.equals(previousValue, value)) {
+                    owner.markUpdatedOnActionContextMutation();
+                }
+                return previousValue;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                return delegateEntry.equals(o);
+            }
+
+            @Override
+            public int hashCode() {
+                return delegateEntry.hashCode();
+            }
+        }
     }
 }
