@@ -16,49 +16,38 @@
  */
 package org.apache.seata.integration.tx.api.fence.store.db.sql;
 
-import org.apache.seata.integration.tx.api.fence.constant.CommonFenceConstant;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CommonFenceStoreSqlsTest {
 
     private static final String TABLE = "tcc_fence_log";
 
-    private static final String END_STATUS_IN = "status in (" + CommonFenceConstant.STATUS_COMMITTED + " , "
-            + CommonFenceConstant.STATUS_ROLLBACKED + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")";
-
     /**
-     * The date-based cleanup must select distinct xids, so a row limit bounds the number of distinct xids
+     * The date-based cleanup selects distinct xids, so a row limit bounds the number of distinct xids
      * (one xid may own multiple branch rows) and the limit comparison in the cleanup loop stays consistent.
      */
     @Test
     public void queryEndStatusByDateSelectsDistinctXids() {
-        String mysql = CommonFenceStoreSqls.getQueryEndStatusSQLByDate(TABLE, false);
-        assertTrue(mysql.contains("select distinct xid"), mysql);
-        assertTrue(mysql.contains("gmt_modified <"), mysql);
-        assertTrue(mysql.contains(END_STATUS_IN), mysql);
-        assertTrue(mysql.contains("limit ?"), mysql);
+        assertEquals(
+                "select distinct xid  from tcc_fence_log where  gmt_modified < ?  and status in (2 , 3 , 4) limit ? ",
+                CommonFenceStoreSqls.getQueryEndStatusSQLByDate(TABLE, false));
 
-        String oracle = CommonFenceStoreSqls.getQueryEndStatusSQLByDate(TABLE, true);
-        assertTrue(oracle.contains("ROWNUM <= ?"), oracle);
+        assertEquals(
+                "select distinct xid  from tcc_fence_log where  gmt_modified < ?  and status in (2 , 3 , 4) and ROWNUM <= ? ",
+                CommonFenceStoreSqls.getQueryEndStatusSQLByDate(TABLE, true));
     }
 
     /**
-     * Core regression: deleting expired fence logs by xid must also be restricted by gmt_modified and end status.
+     * Core regression: deleting expired fence logs by xid is also restricted by gmt_modified and end status.
      * Without these predicates, deleting by xid alone would purge sibling branch rows of the same global
      * transaction that are still in progress (TRIED) or not yet expired.
      */
     @Test
     public void deleteByXidsIsRestrictedByDateAndEndStatus() {
-        String sql = CommonFenceStoreSqls.getDeleteSQLByXids(TABLE, "?, ?");
-
-        assertTrue(sql.contains("xid in (?, ?)"), sql);
-        // must not be a bare delete-by-xid: the date and end-status guards have to be present
-        assertTrue(sql.contains("gmt_modified <"), sql);
-        assertTrue(sql.contains(END_STATUS_IN), sql);
-        // the in-progress status must never be a deletion target
-        assertFalse(sql.contains("status in (" + CommonFenceConstant.STATUS_TRIED), sql);
+        assertEquals(
+                "delete from tcc_fence_log where xid in (?, ?) and gmt_modified < ?  and status in (2 , 3 , 4)",
+                CommonFenceStoreSqls.getDeleteSQLByXids(TABLE, "?, ?"));
     }
 }
