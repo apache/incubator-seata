@@ -139,7 +139,12 @@ public enum TransactionExceptionCode {
     /**
      * Broken transaction exception code.
      */
-    Broken;
+    Broken,
+
+    /**
+     * Branch prepare failed transaction exception code.
+     */
+    BranchPrepareFailed;
 
     /**
      * Get transaction exception code.
