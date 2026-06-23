@@ -106,6 +106,22 @@
             <artifactId>spring-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-el</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>${snakeyaml.version}</version>
@@ -493,6 +509,43 @@
         </profile>
         <profile>
             <id>release-seata</id>
+            <properties>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
+            <build>
+                <finalName>seata-server</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-for-server.version}</version>
+                        <configuration>
+                            <mainClass>org.apache.seata.server.ServerApplication</mainClass>
+                            <layout>ZIP</layout>
+                            <attach>false</attach>
+                            <classifier>exec</classifier>
+                            <includes>
+                                <include>
+                                    <groupId>null</groupId>
+                                    <artifactId>null</artifactId>
+                                </include>
+                            </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release-seata-server</id>
             <properties>
                 <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>

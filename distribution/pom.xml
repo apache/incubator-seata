@@ -80,6 +80,48 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>release-seata-server</id>
+            <properties>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.apache.seata</groupId>
+                    <artifactId>seata-server</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.seata</groupId>
+                    <artifactId>apm-seata-skywalking-plugin</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <finalName>apache-seata-server</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>${maven-assembly-plugin.version}</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>release-seata-server.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-server-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>

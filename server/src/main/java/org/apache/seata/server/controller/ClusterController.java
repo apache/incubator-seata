@@ -20,19 +20,19 @@ import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
-import org.apache.seata.server.cluster.watch.Watcher;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/metadata/v1")
@@ -63,14 +63,23 @@ public class ClusterController {
     }
 
     @PostMapping("/watch")
-    public void watch(
-            HttpContext context,
-            @RequestBody Map<String, Object> groupTerms,
-            @RequestParam(defaultValue = "28000") Integer timeout) {
-        context.setAsync(true);
-        groupTerms.forEach((group, term) -> {
-            Watcher<HttpContext> watcher = new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
-            clusterWatcherManager.registryWatcher(watcher);
-        });
+    public ResponseEntity<Void> watch(
+            @RequestParam Map<String, String> groupTerms, @RequestParam(defaultValue = "28000") Integer timeout)
+            throws InterruptedException {
+        long deadline = System.currentTimeMillis() + timeout;
+        while (System.currentTimeMillis() < deadline) {
+            for (Map.Entry<String, String> entry : groupTerms.entrySet()) {
+                if ("timeout".equals(entry.getKey())) {
+                    continue;
+                }
+                long clientTerm = Long.parseLong(entry.getValue());
+                MetadataResponse metadataResponse = clusterWatcherManager.getMetadataResponse(entry.getKey());
+                if (metadataResponse.getTerm() > clientTerm) {
+                    return ResponseEntity.ok().build();
+                }
+            }
+            TimeUnit.MILLISECONDS.sleep(200L);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
     }
 }
