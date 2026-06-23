@@ -30,6 +30,7 @@ public class StoreFilePropertiesTest {
         storeFileProperties.setMaxBranchSessionSize(1);
         storeFileProperties.setMaxGlobalSessionSize(1);
         storeFileProperties.setSessionReloadReadSize(1);
+        storeFileProperties.setEngine("rocksdb");
 
         Assertions.assertEquals("dir", storeFileProperties.getDir());
         Assertions.assertEquals("disk", storeFileProperties.getFlushDiskMode());
@@ -37,5 +38,6 @@ public class StoreFilePropertiesTest {
         Assertions.assertEquals(1, storeFileProperties.getMaxGlobalSessionSize());
         Assertions.assertEquals(1, storeFileProperties.getMaxBranchSessionSize());
         Assertions.assertEquals(1, storeFileProperties.getSessionReloadReadSize());
+        Assertions.assertEquals("rocksdb", storeFileProperties.getEngine());
     }
 }
