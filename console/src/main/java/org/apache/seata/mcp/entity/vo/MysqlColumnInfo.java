@@ -14,18 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.seata.mcp.entity.vo;
 
-export interface ILocaleMap {
-    [key: string]: string
-}
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ClusterManager: ILocaleMap;
-  BusinessDataSource: ILocaleMap;
-  codeMessage: ILocaleMap;
+public class MysqlColumnInfo {
+
+    private String columnName;
+    private String dataType;
+    private String columnComment;
+
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    public String getColumnComment() {
+        return columnComment;
+    }
+
+    public void setColumnComment(String columnComment) {
+        this.columnComment = columnComment;
+    }
 }

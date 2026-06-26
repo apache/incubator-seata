@@ -1,0 +1,155 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.seata.mcp.tools;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.mcp.entity.vo.BusinessQueryResult;
+import org.apache.seata.mcp.entity.vo.MysqlColumnInfo;
+import org.apache.seata.mcp.entity.vo.MysqlDataSourceInfo;
+import org.apache.seata.mcp.entity.vo.MysqlTableInfo;
+import org.apache.seata.mcp.service.BusinessDataSourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springaicommunity.mcp.annotation.McpResource;
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class BusinessDataSourceTools {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourceTools.class);
+
+    private final BusinessDataSourceService dataSourceService;
+
+    private final ObjectMapper objectMapper;
+
+    public BusinessDataSourceTools(BusinessDataSourceService dataSourceService, ObjectMapper objectMapper) {
+        this.dataSourceService = dataSourceService;
+        this.objectMapper = objectMapper;
+    }
+
+    @McpTool(name = "getDataSources", description = "Get all MySQL business data sources without sensitive fields")
+    public List<MysqlDataSourceInfo> getDataSources() {
+        LOGGER.info("User tries to get MySQL business data sources");
+        return dataSourceService.getMysqlDataSources();
+    }
+
+    @McpTool(name = "getTableNames", description = "Get table names in the data source database")
+    public List<MysqlTableInfo> getTableNames(
+            @McpToolParam(
+                            description = "The identity of the data source, for example business-ds://biz",
+                            required = true)
+                    String resourceId) {
+        LOGGER.info("User tries to get MySQL table names, resourceId: {}", resourceId);
+        return dataSourceService.getMysqlTableNames(resourceId);
+    }
+
+    @McpTool(name = "getTableSchema", description = "Get table columns in the data source database")
+    public List<MysqlColumnInfo> getTableSchema(
+            @McpToolParam(
+                            description = "The identity of the data source, for example business-ds://biz",
+                            required = true)
+                    String resourceId,
+            @McpToolParam(description = "MySQL table name", required = true) String tableName) {
+        LOGGER.info("User tries to get MySQL table schema, resourceId: {}, tableName: {}", resourceId, tableName);
+        return dataSourceService.getMysqlTableSchema(resourceId, tableName);
+    }
+
+    @McpTool(
+            name = "queryTable",
+            description =
+                    "Query a table in the data source database with optional column list, equality filters, and row limit")
+    public BusinessQueryResult queryTable(
+            @McpToolParam(
+                            description = "The identity of the data source, for example business-ds://biz",
+                            required = true)
+                    String resourceId,
+            @McpToolParam(description = "MySQL table name", required = true) String tableName,
+            @McpToolParam(description = "Column names to select", required = false) List<String> columns,
+            @McpToolParam(description = "Equality filters keyed by column name", required = false)
+                    Map<String, Object> filters,
+            @McpToolParam(description = "Maximum rows to return", required = false) Integer limit) {
+        LOGGER.info("User tries to query MySQL table, resourceId: {}, tableName: {}", resourceId, tableName);
+        return dataSourceService.queryMysqlTable(resourceId, tableName, columns, filters, limit);
+    }
+
+    @McpTool(name = "explainSql", description = "Explain a safe MySQL SELECT SQL statement")
+    public BusinessQueryResult explainSql(
+            @McpToolParam(
+                            description = "The identity of the data source, for example business-ds://biz",
+                            required = true)
+                    String resourceId,
+            @McpToolParam(description = "MySQL SELECT SQL statement", required = true) String sql) {
+        LOGGER.info("User tries to explain MySQL sql, resourceId: {}", resourceId);
+        return dataSourceService.explainMysqlSql(resourceId, sql);
+    }
+
+    @McpTool(name = "runSql", description = "Execute a safe MySQL SELECT query against a business data source")
+    public BusinessQueryResult runSql(
+            @McpToolParam(description = "MySQL SELECT SQL statement", required = true) String sql,
+            @McpToolParam(
+                            description = "The identity of the data source, for example business-ds://biz",
+                            required = true)
+                    String resourceId) {
+        LOGGER.info("User tries to run MySQL sql, resourceId: {}", resourceId);
+        return dataSourceService.runSql(sql, resourceId);
+    }
+
+    @McpResource(
+            name = "mysqlDataSources",
+            title = "MySQL business data sources",
+            uri = "mysql-db://datasources",
+            description = "MySQL business data source list without sensitive fields",
+            mimeType = "application/json")
+    public String mysqlDataSourcesResource() {
+        return toJson(dataSourceService.getMysqlDataSources());
+    }
+
+    @McpResource(
+            name = "mysqlTables",
+            title = "MySQL tables",
+            uri = "mysql-db://{resourceId}/tables",
+            description = "MySQL table list for a business data source database",
+            mimeType = "application/json")
+    public String mysqlTablesResource(String resourceId) {
+        return toJson(dataSourceService.getMysqlTableNames(resourceId));
+    }
+
+    @McpResource(
+            name = "mysqlTableSchema",
+            title = "MySQL table schema",
+            uri = "mysql-db://{resourceId}/{tableName}/schema",
+            description = "MySQL column list for a business table",
+            mimeType = "application/json")
+    public String mysqlTableSchemaResource(String resourceId, String tableName) {
+        return toJson(dataSourceService.getMysqlTableSchema(resourceId, tableName));
+    }
+
+    private String toJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            throw new StoreException("Unable to serialize MCP resource");
+        }
+    }
+}

@@ -14,18 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.seata.mcp.core.constant;
 
-export interface ILocaleMap {
-    [key: string]: string
-}
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ClusterManager: ILocaleMap;
-  BusinessDataSource: ILocaleMap;
-  codeMessage: ILocaleMap;
+public class SqlConstant {
+
+    public static final String GET_TABLE_NAME_SQL =
+            "SELECT TABLE_NAME, TABLE_COMMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? "
+                    + "ORDER BY TABLE_NAME";
+
+    public static final String GET_SCHEMA_SQL =
+            "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS "
+                    + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION";
+
+    public static final String MYSQL_VALIDATION_SQL = "SELECT 1";
+
+    public static final String MYSQL_EXPLAIN_PREFIX = "EXPLAIN ";
 }

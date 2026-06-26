@@ -32,6 +32,7 @@
     <description>console for Seata built with Maven</description>
 
     <properties>
+        <java.version>25</java.version>
         <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
         <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
@@ -167,6 +168,22 @@
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
             <version>${spring-ai.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-dbcp2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
         </dependency>
     </dependencies>
 

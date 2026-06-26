@@ -19,6 +19,7 @@ import Overview from '@/pages/Overview';
 import TransactionInfo from '@/pages/TransactionInfo';
 import GlobalLockInfo from './pages/GlobalLockInfo';
 import ClusterManager from './pages/ClusterManager';
+import BusinessDataSource from './pages/BusinessDataSource';
 
 export default [
   // { path: '/', exact: true, render: () => <Redirect to="/Overview" /> },
@@ -26,4 +27,5 @@ export default [
   { path: '/transaction/list', component: TransactionInfo },
   { path: '/globallock/list', component: GlobalLockInfo },
   { path: '/cluster/list', component: ClusterManager },
+  { path: '/business-datasource/list', component: BusinessDataSource },
 ];
