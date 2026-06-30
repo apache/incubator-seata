@@ -18,6 +18,7 @@ package org.apache.seata.server.controller;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
+import jakarta.annotation.Resource;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.rpc.http.HttpContext;
@@ -31,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 @RestController

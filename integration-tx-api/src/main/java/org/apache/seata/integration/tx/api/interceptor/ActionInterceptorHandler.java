@@ -91,6 +91,9 @@ public class ActionInterceptorHandler {
         // MDC put branchId
         MDC.put(RootContext.MDC_KEY_BRANCH_ID, branchId);
 
+        // enable mutation tracking only after framework initialization is complete
+        actionContext.enableActionContextTracking();
+
         // save the previous action context
         BusinessActionContext previousActionContext = BusinessActionContextUtil.getContext();
         try {
@@ -232,10 +235,13 @@ public class ActionInterceptorHandler {
 
         Map<String, Object> originContext = actionContext.getActionContext();
         if (CollectionUtils.isNotEmpty(originContext)) {
-            // Merge context and origin context if it exists.
-            // @since: above 1.4.2
-            originContext.putAll(context);
-            context = originContext;
+            // Keep framework-side merge outside the tracked map to avoid false updated flags.
+            // Merge framework context into a fresh map to avoid treating framework-side
+            // initialization as a business mutation when tracking is already enabled.
+            Map<String, Object> mergedContext = new HashMap<>(originContext);
+            mergedContext.putAll(context);
+            actionContext.setActionContext(mergedContext);
+            context = mergedContext;
         } else {
             actionContext.setActionContext(context);
         }

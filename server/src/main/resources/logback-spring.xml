@@ -155,6 +155,12 @@
         </if>
 
     </root>
+    <logger name="org.apache.kafka" level="WARN" additivity="false">
+        <appender-ref ref="ASYNC_CONSOLE"/>
+        <appender-ref ref="ASYNC_FILE_ALL"/>
+        <appender-ref ref="ASYNC_FILE_WARN"/>
+        <appender-ref ref="ASYNC_FILE_ERROR"/>
+    </logger>
     <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
     <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
 </configuration>

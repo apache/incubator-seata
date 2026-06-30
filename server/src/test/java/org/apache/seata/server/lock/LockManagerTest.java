@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.lock;
 
+import jakarta.annotation.Resource;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
@@ -38,7 +39,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
