@@ -30,7 +30,6 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +46,14 @@ import java.util.concurrent.TimeUnit;
  */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty({StarterConstants.SEATA_PREFIX + ".enabled", StarterConstants.SAGA_PREFIX + ".enabled"})
-@AutoConfigureAfter({DataSourceAutoConfiguration.class, SeataAutoConfiguration.class})
+@AutoConfigureAfter(
+        value = {SeataAutoConfiguration.class},
+        name = {
+            // Spring Boot 2.x, 3.x
+            "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration",
+            // Spring Boot 4.x
+            "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration"
+        })
 public class SeataSagaAutoConfiguration {
 
     public static final String SAGA_DATA_SOURCE_BEAN_NAME = "seataSagaDataSource";
