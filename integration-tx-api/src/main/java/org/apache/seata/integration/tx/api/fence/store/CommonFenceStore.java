@@ -74,12 +74,15 @@ public interface CommonFenceStore {
     boolean deleteCommonFenceDO(Connection conn, String xid, Long branchId);
 
     /**
-     * Delete tcc fence do boolean.
+     * Delete tcc fence by the given xids, restricted to expired end-status rows.
+     * The datetime and end-status predicates guard against removing sibling branch rows of the same xid
+     * that are still in progress (TRIED) or not yet expired.
      * @param conn the connection
      * @param xids the global transaction ids
-     * @return the boolean
+     * @param datetime the expiry threshold; only rows with gmt_modified before this are deleted
+     * @return the deleted row count
      */
-    int deleteTCCFenceDO(Connection conn, List<String> xids);
+    int deleteTCCFenceDO(Connection conn, List<String> xids, Date datetime);
 
     /**
      * Set LogTable Name

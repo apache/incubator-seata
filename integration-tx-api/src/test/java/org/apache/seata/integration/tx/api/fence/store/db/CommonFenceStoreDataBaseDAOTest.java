@@ -169,9 +169,12 @@ public class CommonFenceStoreDataBaseDAOTest {
         when(connection.prepareStatement(anyString())).thenReturn(statement);
         when(statement.executeUpdate()).thenReturn(2);
 
-        assertEquals(2, dao.deleteTCCFenceDO(connection, Arrays.asList("xid1", "xid2")));
+        assertEquals(2, dao.deleteTCCFenceDO(connection, Arrays.asList("xid1", "xid2"), new Date(1000L)));
         verify(statement).setString(1, "xid1");
         verify(statement).setString(2, "xid2");
+        // the gmt_modified threshold must be bound right after the xid placeholders,
+        // so the delete only removes expired end-status rows and never a sibling branch row by xid alone
+        verify(statement).setTimestamp(3, new Timestamp(1000L));
     }
 
     @Test
@@ -184,7 +187,9 @@ public class CommonFenceStoreDataBaseDAOTest {
         assertThrows(StoreException.class, () -> dao.insertCommonFenceDO(connection, newFenceDO()));
         assertThrows(StoreException.class, () -> dao.updateCommonFenceDO(connection, "xid", 1L, 2, 1));
         assertThrows(StoreException.class, () -> dao.deleteCommonFenceDO(connection, "xid", 1L));
-        assertThrows(StoreException.class, () -> dao.deleteTCCFenceDO(connection, Arrays.asList("xid1", "xid2")));
+        assertThrows(
+                StoreException.class,
+                () -> dao.deleteTCCFenceDO(connection, Arrays.asList("xid1", "xid2"), new Date(1000L)));
     }
 
     private static CommonFenceDO newFenceDO() {
