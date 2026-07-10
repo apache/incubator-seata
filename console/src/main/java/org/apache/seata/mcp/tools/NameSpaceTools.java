@@ -16,14 +16,14 @@
  */
 package org.apache.seata.mcp.tools;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +50,7 @@ public class NameSpaceTools {
             if (dataNode != null && !dataNode.isNull()) {
                 nameSpacesVo.put("namespaces", dataNode.toString());
             }
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return SingleResult.failure("Get namespace failed:" + e.getMessage());
         }
         return SingleResult.success(nameSpacesVo);
