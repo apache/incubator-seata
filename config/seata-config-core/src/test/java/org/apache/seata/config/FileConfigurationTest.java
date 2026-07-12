@@ -471,4 +471,48 @@ class FileConfigurationTest {
         String path = fileConfig.getConfigFromSys("PATH");
         Assertions.assertNotNull(path);
     }
+
+    @Test
+    void shouldDelegateFileBackedReadsThroughConfigurationFactory() {
+        String dataId = "service.disableGlobalTransaction";
+        String previousValue = System.getProperty(dataId);
+        try {
+            System.clearProperty(dataId);
+            ConfigurationFactory.reload();
+            Configuration fileConfig = ConfigurationFactory.getInstance();
+
+            Assertions.assertEquals("127.0.0.1:8091", fileConfig.getConfig("service.default.grouplist"));
+            Assertions.assertFalse(fileConfig.getBoolean(dataId));
+        } finally {
+            if (previousValue == null) {
+                System.clearProperty(dataId);
+            } else {
+                System.setProperty(dataId, previousValue);
+            }
+            ConfigurationFactory.reload();
+        }
+    }
+
+    @Test
+    void shouldReturnDefaultsForMissingConfigurationThroughConfigurationFactory() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+
+        Assertions.assertNull(fileConfig.getConfig("adopted.missing.key"));
+        Assertions.assertEquals("fallback", fileConfig.getLatestConfig("adopted.missing.key", "fallback", 1000L));
+        Assertions.assertEquals(39, fileConfig.getInt("adopted.missing.int", 39));
+        Assertions.assertEquals((short) 2, fileConfig.getShort("adopted.missing.short", (short) 2));
+    }
+
+    @Test
+    void shouldReportMutationOperationOutcomeThroughConfigurationFactory() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+
+        Assertions.assertTrue(fileConfig.putConfig("adopted.put.key", "value", 1000L));
+        Assertions.assertTrue(fileConfig.putConfigIfAbsent("adopted.put-if-absent.key", "value", 1000L));
+        Assertions.assertTrue(fileConfig.removeConfig("adopted.remove.key", 1000L));
+
+        Assertions.assertFalse(fileConfig.putConfig("adopted.expired.put.key", "value", -1L));
+        Assertions.assertFalse(fileConfig.putConfigIfAbsent("adopted.expired.put-if-absent.key", "value", -1L));
+        Assertions.assertFalse(fileConfig.removeConfig("adopted.expired.remove.key", -1L));
+    }
 }
