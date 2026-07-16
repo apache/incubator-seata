@@ -235,4 +235,17 @@ public enum GlobalStatus {
         }
         return false;
     }
+
+    /**
+     * Is one phase prepare failed boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isOnePhasePrepareFailed(GlobalStatus status) {
+        if (status == GlobalStatus.RollbackRetrying) {
+            return true;
+        }
+        return false;
+    }
 }

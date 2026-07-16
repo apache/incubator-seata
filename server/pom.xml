@@ -18,8 +18,8 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
         <artifactId>seata-parent</artifactId>
@@ -167,7 +167,7 @@
             <artifactId>seata-metrics-all</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--
+        <!--
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -194,13 +194,13 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
+        <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
             <scope>provided</scope>
@@ -527,6 +527,19 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <!-- profile: args-for-client-test -->
+        <profile>
+            <id>args-for-client-test</id>
+            <activation>
+                <property>
+                    <name>args-for-client-test</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
         </profile>
     </profiles>
 </project>

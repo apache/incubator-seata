@@ -89,6 +89,7 @@
         <kafka-clients.version>3.9.2</kafka-clients.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <bucket4j.version>8.1.0</bucket4j.version>
+        <groovy.version>4.0.32</groovy.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -435,14 +436,6 @@
 
                     -Dnet.bytebuddy.experimental=true
                 </maven.surefire.argLine>
-            </properties>
-        </profile>
-
-        <!-- profile: args-for-client-test -->
-        <profile>
-            <id>args-for-client-test</id>
-            <properties>
-                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>

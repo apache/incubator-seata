@@ -39,7 +39,7 @@
         <dubbo-seata.version>1.0.2</dubbo-seata.version>
         <brpc.version>2.5.9</brpc.version>
         <hsf.version>1.8.3</hsf.version>
-        <bytebuddy.version>1.14.15</bytebuddy.version>
+        <bytebuddy.version>1.15.11</bytebuddy.version>
         <dubbo.alibaba.version>2.6.10</dubbo.alibaba.version>
         <sofa.rpc.version>5.6.5</sofa.rpc.version>
         <fastjson.version>1.2.83</fastjson.version>
@@ -84,7 +84,7 @@
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.52</fastjson2.version>
-        <groovy.version>4.0.31</groovy.version>
+        <groovy.version>4.0.32</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
         <jackson3.version>3.1.1</jackson3.version>
@@ -211,6 +211,14 @@
                     <exclusion>
                         <groupId>org.apache.tomcat.embed</groupId>
                         <artifactId>tomcat-embed-el</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.groovy</groupId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
                 <type>pom</type>
