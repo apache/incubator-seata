@@ -236,7 +236,7 @@ public class NetUtilTest {
                 .isEqualTo("2000:0000:0000:0000:0001:2345:6789:abcd");
 
         // a host name is resolved to its ip address
-        assertThat(NetUtil.convertIpIfNecessary("localhost")).isIn("127.0.0.1", "0:0:0:0:0:0:0:1");
+        assertThat(NetUtil.convertIpIfNecessary("localhost")).isIn("127.0.0.1", "::1", "0:0:0:0:0:0:0:1");
 
         // a reserved name from RFC 2606, so it cannot be resolved by a dns search domain
         assertThatThrownBy(() -> {
