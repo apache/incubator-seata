@@ -238,8 +238,9 @@ public class NetUtilTest {
         // a host name is resolved to its ip address
         assertThat(NetUtil.convertIpIfNecessary("localhost")).isIn("127.0.0.1", "0:0:0:0:0:0:0:1");
 
+        // a reserved name from RFC 2606, so it cannot be resolved by a dns search domain
         assertThatThrownBy(() -> {
-                    NetUtil.convertIpIfNecessary("knownHost");
+                    NetUtil.convertIpIfNecessary("unresolvable.invalid");
                 })
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("UnknownHostException");

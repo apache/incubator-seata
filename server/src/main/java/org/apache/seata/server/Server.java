@@ -82,16 +82,15 @@ public class Server {
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
+        // a host name must be resolved to its ip address, otherwise the xid carries the host name and
+        // XIDLoadBalance has to resolve it on every branch register, or fails to match the tc at all.
+        // resolving it once here also keeps the validated value and the stored value the same one.
+        String rawHost = parameterParser.getHost();
+        String host = StringUtils.isNotBlank(rawHost) ? NetUtil.convertIpIfNecessary(rawHost) : rawHost;
         // 127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            // a host name must be converted to its ip address, otherwise the xid carries the host name and
-            // XIDLoadBalance has to resolve it on every branch register, or fails to match the tc at all.
-            String host = NetUtil.convertIpIfNecessary(parameterParser.getHost());
-            if (!host.equals(parameterParser.getHost())) {
-                LOGGER.info(
-                        "the host {} is resolved to {}, which will be used in the xid",
-                        parameterParser.getHost(),
-                        host);
+        if (NetUtil.isValidIp(host, false)) {
+            if (!host.equals(rawHost)) {
+                LOGGER.info("the host {} is resolved to {}, which will be used in the xid", rawHost, host);
             }
             XID.setIpAddress(host);
         } else {
