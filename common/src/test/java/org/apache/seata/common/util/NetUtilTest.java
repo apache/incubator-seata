@@ -228,6 +228,24 @@ public class NetUtilTest {
     }
 
     @Test
+    public void testConvertIpIfNecessary() {
+        // an ip literal is returned as is
+        assertThat(NetUtil.convertIpIfNecessary("127.0.0.1")).isEqualTo("127.0.0.1");
+        assertThat(NetUtil.convertIpIfNecessary("8.210.212.91")).isEqualTo("8.210.212.91");
+        assertThat(NetUtil.convertIpIfNecessary("2000:0000:0000:0000:0001:2345:6789:abcd"))
+                .isEqualTo("2000:0000:0000:0000:0001:2345:6789:abcd");
+
+        // a host name is resolved to its ip address
+        assertThat(NetUtil.convertIpIfNecessary("localhost")).isIn("127.0.0.1", "0:0:0:0:0:0:0:1");
+
+        assertThatThrownBy(() -> {
+                    NetUtil.convertIpIfNecessary("knownHost");
+                })
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("UnknownHostException");
+    }
+
+    @Test
     public void testSplitIPPortStr() {
         String[] ipPort = new String[] {"127.0.0.1", "8080"};
         assertThat(NetUtil.splitIPPortStr("127.0.0.1:8080")).isEqualTo(ipPort);

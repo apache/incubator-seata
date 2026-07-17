@@ -31,6 +31,8 @@ import org.apache.seata.server.instance.SeataInstanceStrategy;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -51,6 +53,8 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  */
 @Component("seataServer")
 public class Server {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     @Resource
     SeataInstanceStrategy seataInstanceStrategy;
@@ -80,7 +84,14 @@ public class Server {
 
         // 127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
+            // a host name must be converted to its ip address, otherwise the xid carries the host name and
+            // XIDLoadBalance has to resolve it on every branch register, or fails to match the tc at all.
+            String host = NetUtil.convertIpIfNecessary(parameterParser.getHost());
+            if (!host.equals(parameterParser.getHost())) {
+                LOGGER.info("the host {} is resolved to {}, which will be used in the xid",
+                        parameterParser.getHost(), host);
+            }
+            XID.setIpAddress(host);
         } else {
             // Get preferred network patterns from configuration (regex or prefix match)
             // Used to select specific network interfaces when multiple are available
