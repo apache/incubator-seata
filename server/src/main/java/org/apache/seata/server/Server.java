@@ -88,8 +88,10 @@ public class Server {
             // XIDLoadBalance has to resolve it on every branch register, or fails to match the tc at all.
             String host = NetUtil.convertIpIfNecessary(parameterParser.getHost());
             if (!host.equals(parameterParser.getHost())) {
-                LOGGER.info("the host {} is resolved to {}, which will be used in the xid",
-                        parameterParser.getHost(), host);
+                LOGGER.info(
+                        "the host {} is resolved to {}, which will be used in the xid",
+                        parameterParser.getHost(),
+                        host);
             }
             XID.setIpAddress(host);
         } else {
