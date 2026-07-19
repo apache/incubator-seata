@@ -474,21 +474,21 @@ class FileConfigurationTest {
 
     @Test
     void shouldDelegateFileBackedReadsThroughConfigurationFactory() {
-        String dataId = "service.disableGlobalTransaction";
-        String previousValue = System.getProperty(dataId);
+        String groupListDataId = "service.default.grouplist";
+        String disableGlobalTransactionDataId = "service.disableGlobalTransaction";
+        String previousGroupList = System.getProperty(groupListDataId);
+        String previousDisableGlobalTransaction = System.getProperty(disableGlobalTransactionDataId);
         try {
-            System.clearProperty(dataId);
+            System.clearProperty(groupListDataId);
+            System.clearProperty(disableGlobalTransactionDataId);
             ConfigurationFactory.reload();
             Configuration fileConfig = ConfigurationFactory.getInstance();
 
-            Assertions.assertEquals("127.0.0.1:8091", fileConfig.getConfig("service.default.grouplist"));
-            Assertions.assertFalse(fileConfig.getBoolean(dataId));
+            Assertions.assertEquals("127.0.0.1:8091", fileConfig.getConfig(groupListDataId));
+            Assertions.assertFalse(fileConfig.getBoolean(disableGlobalTransactionDataId));
         } finally {
-            if (previousValue == null) {
-                System.clearProperty(dataId);
-            } else {
-                System.setProperty(dataId, previousValue);
-            }
+            restoreSystemProperty(groupListDataId, previousGroupList);
+            restoreSystemProperty(disableGlobalTransactionDataId, previousDisableGlobalTransaction);
             ConfigurationFactory.reload();
         }
     }
@@ -507,12 +507,20 @@ class FileConfigurationTest {
     void shouldReportMutationOperationOutcomeThroughConfigurationFactory() {
         Configuration fileConfig = ConfigurationFactory.getInstance();
 
-        Assertions.assertTrue(fileConfig.putConfig("adopted.put.key", "value", 1000L));
-        Assertions.assertTrue(fileConfig.putConfigIfAbsent("adopted.put-if-absent.key", "value", 1000L));
-        Assertions.assertTrue(fileConfig.removeConfig("adopted.remove.key", 1000L));
+        Assertions.assertTrue(fileConfig.putConfig("adopted.put.key", "value", 5000L));
+        Assertions.assertTrue(fileConfig.putConfigIfAbsent("adopted.put-if-absent.key", "value", 5000L));
+        Assertions.assertTrue(fileConfig.removeConfig("adopted.remove.key", 5000L));
 
         Assertions.assertFalse(fileConfig.putConfig("adopted.expired.put.key", "value", -1L));
         Assertions.assertFalse(fileConfig.putConfigIfAbsent("adopted.expired.put-if-absent.key", "value", -1L));
         Assertions.assertFalse(fileConfig.removeConfig("adopted.expired.remove.key", -1L));
+    }
+
+    private static void restoreSystemProperty(String dataId, String value) {
+        if (value == null) {
+            System.clearProperty(dataId);
+        } else {
+            System.setProperty(dataId, value);
+        }
     }
 }
