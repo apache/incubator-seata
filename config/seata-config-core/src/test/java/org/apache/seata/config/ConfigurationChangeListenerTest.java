@@ -19,8 +19,10 @@ package org.apache.seata.config;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -216,12 +218,12 @@ class ConfigurationChangeListenerTest {
     }
 
     @Test
-    void testCachedConfigurationChangeListener() {
-        AtomicBoolean changeEventCalled = new AtomicBoolean(false);
+    void testCachedConfigurationChangeListener() throws InterruptedException {
+        CountDownLatch changeEventCalled = new CountDownLatch(1);
         CachedConfigurationChangeListener listener = new CachedConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                changeEventCalled.set(true);
+                changeEventCalled.countDown();
             }
         };
 
@@ -229,13 +231,8 @@ class ConfigurationChangeListenerTest {
         event.setDataId("test.cached.key");
         event.setNewValue("test-value");
 
-        try {
-            listener.onProcessEvent(event);
-            Assertions.assertTrue(changeEventCalled.get());
-        } catch (Exception e) {
-            // ignore executor service related exceptions
-            // this may be caused by executor service being shutdown
-        }
+        listener.onProcessEvent(event);
+        Assertions.assertTrue(changeEventCalled.await(5, TimeUnit.SECONDS));
     }
 
     @Test
