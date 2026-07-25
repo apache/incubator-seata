@@ -31,6 +31,8 @@ import org.apache.seata.server.instance.SeataInstanceStrategy;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -51,6 +53,8 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  */
 @Component("seataServer")
 public class Server {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     @Resource
     SeataInstanceStrategy seataInstanceStrategy;
@@ -78,32 +82,7 @@ public class Server {
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
                 new ThreadPoolExecutor.CallerRunsPolicy());
 
-        // 127.0.0.1 and 0.0.0.0 are not valid here.
-        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-            XID.setIpAddress(parameterParser.getHost());
-        } else {
-            // Get preferred network patterns from configuration (regex or prefix match)
-            // Used to select specific network interfaces when multiple are available
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
-
-            // Get ignored interface patterns from configuration (regex supported)
-            // Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
-            // Example: "VMware.*,VirtualBox.*,bridge.*,docker.*,veth.*"
-            String ignoredInterfaces = ConfigurationFactory.getInstance().getConfig(REGISTRY_IGNORED_INTERFACES);
-            String[] ignoredInterfacesSplit = null;
-            if (ignoredInterfaces != null) {
-                ignoredInterfacesSplit = ignoredInterfaces.split(",");
-            }
-
-            // Get local IP address with interface filtering
-            // Priority: ignored interfaces filter -> preferred networks match -> first valid IP
-            if (StringUtils.isNotBlank(preferredNetworks)) {
-                XID.setIpAddress(NetUtil.getIgnoredInterfacesLocalIp(
-                        ignoredInterfacesSplit, preferredNetworks.split(REGEX_SPLIT_CHAR)));
-            } else {
-                XID.setIpAddress(NetUtil.getIgnoredInterfacesLocalIp(ignoredInterfacesSplit));
-            }
-        }
+        XID.setIpAddress(resolveXidHost(parameterParser.getHost()));
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
@@ -126,5 +105,44 @@ public class Server {
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
+    }
+
+    /**
+     * Resolve the host stored in the xid. A configured host name is resolved to its ip literal once here, so the
+     * xid never carries a host name; otherwise the local ip is selected according to the configured interface
+     * filters. Resolving the host name here also keeps the validated value and the stored value the same one.
+     *
+     * @param rawHost the configured host, from the {@code --host} arg or the {@code SEATA_IP} env, may be null
+     * @return the ip literal to store in {@link XID}
+     */
+    static String resolveXidHost(String rawHost) {
+        String host = StringUtils.isNotBlank(rawHost) ? NetUtil.convertIpIfNecessary(rawHost) : rawHost;
+        // 127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(host, false)) {
+            if (!host.equals(rawHost)) {
+                LOGGER.info("the host {} is resolved to {}, which will be used in the xid", rawHost, host);
+            }
+            return host;
+        }
+        // Get preferred network patterns from configuration (regex or prefix match)
+        // Used to select specific network interfaces when multiple are available
+        String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
+
+        // Get ignored interface patterns from configuration (regex supported)
+        // Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
+        // Example: "VMware.*,VirtualBox.*,bridge.*,docker.*,veth.*"
+        String ignoredInterfaces = ConfigurationFactory.getInstance().getConfig(REGISTRY_IGNORED_INTERFACES);
+        String[] ignoredInterfacesSplit = null;
+        if (ignoredInterfaces != null) {
+            ignoredInterfacesSplit = ignoredInterfaces.split(",");
+        }
+
+        // Get local IP address with interface filtering
+        // Priority: ignored interfaces filter -> preferred networks match -> first valid IP
+        if (StringUtils.isNotBlank(preferredNetworks)) {
+            return NetUtil.getIgnoredInterfacesLocalIp(
+                    ignoredInterfacesSplit, preferredNetworks.split(REGEX_SPLIT_CHAR));
+        }
+        return NetUtil.getIgnoredInterfacesLocalIp(ignoredInterfacesSplit);
     }
 }

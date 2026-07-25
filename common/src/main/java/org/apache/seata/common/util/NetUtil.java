@@ -411,12 +411,12 @@ public class NetUtil {
     }
 
     /**
-     * convert ip if necessary
+     * Convert a host name to its ip address, an ip literal is returned as is.
      *
-     * @param ip
-     * @return java.lang.String
+     * @param ip the ip literal or host name
+     * @return the ip address
      */
-    private static String convertIpIfNecessary(String ip) {
+    public static String convertIpIfNecessary(String ip) {
         if (isValidIPv4(ip) || isValidIPv6(ip)) {
             return ip;
         } else {
