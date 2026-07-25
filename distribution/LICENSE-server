@@ -228,7 +228,7 @@ Apache-2.0 licenses
     commons-codec:commons-codec 1.15 Apache-2.0
     commons-configuration:commons-configuration 1.10 Apache-2.0
     org.apache.commons:commons-dbcp2 2.9.0 Apache-2.0
-    commons-io:commons-io 2.8.0 Apache-2.0
+    commons-io:commons-io 2.21.0 Apache-2.0
     commons-jxpath:commons-jxpath 1.3 Apache-2.0
     commons-lang:commons-lang 2.6 Apache-2.0
     commons-logging:commons-logging 1.2 Apache-2.0
@@ -243,7 +243,7 @@ Apache-2.0 licenses
     org.apache.curator:curator-test 5.1.0 Apache-2.0
     com.lmax:disruptor 3.3.7 Apache-2.0
     com.dameng:DmJdbcDriver18 8.1.2.192 Apache-2.0
-    com.alibaba:druid 1.2.25 Apache-2.0
+    com.alibaba:druid 1.2.28 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
     com.netflix.eureka:eureka-client 1.10.18 Apache-2.0
     net.jodah:failsafe 2.3.3 Apache-2.0
@@ -277,6 +277,7 @@ Apache-2.0 licenses
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
     javax.inject:javax.inject 1 Apache-2.0
     com.beust:jcommander 1.82 Apache-2.0
+    org.javassist:javassist 3.21.0-GA Apache-2.0
     org.jctools:jctools-core 2.1.1 Apache-2.0
     io.etcd:jetcd-common 0.5.0 Apache-2.0
     io.etcd:jetcd-core 0.5.0 Apache-2.0
@@ -286,12 +287,12 @@ Apache-2.0 licenses
     joda-time:joda-time 2.3 Apache-2.0
     com.alipay.sofa:jraft-core 1.3.14 Apache-2.0
     com.google.code.findbugs:jsr305 3.0.2 Apache-2.0
-    org.apache.kafka:kafka-clients 3.6.1 Apache-2.0
+    org.apache.kafka:kafka-clients 3.9.2 Apache-2.0
     de.javakaffee:kryo-serializers 0.45 Apache-2.0
     com.github.danielwegener:logback-kafka-appender 0.2.0-RC2 Apache-2.0
-    at.yawk.lz4:lz4-java 1.9.0 Apache-2.0
+    at.yawk.lz4:lz4-java 1.10.1 Apache-2.0
     com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
-    com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
+    com.alibaba.nacos:nacos-client 2.0.4 Apache-2.0
     com.alibaba.nacos:nacos-common 1.4.6 Apache-2.0
     com.netflix.netflix-commons:netflix-eventbus 0.3.0 Apache-2.0
     com.netflix.netflix-commons:netflix-infix 0.3.0 Apache-2.0
@@ -394,6 +395,7 @@ BSD-3-Clause licenses
     com.esotericsoftware:kryo 5.4.0 BSD-3-Clause see:licenses/kryo-BSD-3-Clause
     com.esotericsoftware:minlog 1.3.1 BSD-3-Clause see:licenses/minlog-BSD-3-Clause
     com.esotericsoftware:reflectasm 1.11.9 BSD-3-Clause see:licenses/reflectasm-BSD-3-Clause
+    org.reflections:reflections 0.9.11 BSD-3-Clause see:licenses/reflections-BSD-3-Clause
     com.google.protobuf:protobuf-java 3.25.5 BSD-3-Clause see:licenses/protobuf-java-BSD-3-Clause
     com.google.protobuf:protobuf-java-util 3.11.0 BSD-3-Clause see:licenses/protobuf-java-BSD-3-Clause
 

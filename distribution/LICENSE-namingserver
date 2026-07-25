@@ -213,7 +213,7 @@ Apache-2.0 licenses
 
     com.github.ben-manes.caffeine:caffeine 3.2.1 Apache-2.0
     commons-codec:commons-codec 1.18.0 Apache-2.0
-    commons-io:commons-io 2.8.0 Apache-2.0
+    commons-io:commons-io 2.21.0 Apache-2.0
     commons-lang:commons-lang 2.6 Apache-2.0
     org.apache.commons:commons-lang3 3.17.0 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
@@ -284,7 +284,10 @@ Apache-2.0 licenses
     org.springframework:spring-webmvc 6.2.8 Apache-2.0
     org.springframework.boot:spring-boot 3.5.2 Apache-2.0
     org.springframework.boot:spring-boot-autoconfigure 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-actuator 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-actuator-autoconfigure 3.5.2 Apache-2.0
     org.springframework.boot:spring-boot-starter 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-actuator 3.5.2 Apache-2.0
     org.springframework.boot:spring-boot-starter-json 3.5.2 Apache-2.0
     org.springframework.boot:spring-boot-starter-logging 3.5.2 Apache-2.0
     org.springframework.boot:spring-boot-starter-security 3.5.2 Apache-2.0
@@ -299,16 +302,25 @@ Apache-2.0 licenses
     org.springframework.ai:spring-ai-commons 1.1.0 Apache-2.0
     org.springframework.ai:spring-ai-starter-mcp-server-webmvc 1.1.0 Apache-2.0
     org.apache.tomcat:tomcat-annotations-api 10.1.42 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 11.0.12 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 11.0.12 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 11.0.22 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 11.0.22 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 11.0.22 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 11.0.22 Apache-2.0
     org.jetbrains.kotlin:kotlin-stdlib 1.9.25 Apache-2.0
     org.jetbrains.kotlin:kotlin-stdlib-common 1.9.25 Apache-2.0
     io.micrometer:micrometer-core 1.15.1 Apache-2.0
+    io.micrometer:micrometer-jakarta9 1.15.1 Apache-2.0
     io.micrometer:micrometer-observation 1.15.1 Apache-2.0
     io.micrometer:micrometer-commons 1.15.1 Apache-2.0
+    io.micrometer:micrometer-registry-prometheus 1.15.1 Apache-2.0
     io.micrometer:context-propagation 1.1.3 Apache-2.0
+    io.prometheus:prometheus-metrics-config 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-core 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-exposition-formats 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-exposition-formats-no-protobuf 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-exposition-textformats 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-model 1.3.8 Apache-2.0
+    io.prometheus:prometheus-metrics-tracer-common 1.3.8 Apache-2.0
     com.ethlo.time:itu 1.14.0 Apache-2.0
     org.jspecify:jspecify 1.0.0 Apache-2.0
     com.github.victools:jsonschema-module-jackson 4.38.0 Apache-2.0
@@ -342,6 +354,7 @@ BSD-3-Clause licenses
     org.antlr:antlr-runtime 3.5.3 BSD-3-Clause see:licenses/antlr-runtime-BSD-3-Clause
     org.antlr:ST4 4.3.4 BSD-3-Clause see:licenses/antlr-ST4-BSD-3-Clause
     org.antlr:antlr4-runtime 4.13.1 BSD-3-Clause see:licenses/antlr4-runtime-BSD-3-Clause
+    com.google.protobuf:protobuf-java 3.25.5 BSD-3-Clause see:licenses/protobuf-java-BSD-3-Clause
 
     @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
     @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-3-Clause
