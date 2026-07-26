@@ -16,11 +16,12 @@
  */
 package org.apache.seata.server;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  *
@@ -42,10 +43,10 @@ public class LoaderConfTest extends BaseSpringBootTest {
     @Test
     public void checkConf() {
         String nacosServerAddr = environment.resolveRequiredPlaceholders("${seata.config.nacos.serverAddr:localhost}");
-        Assertions.assertEquals(nacosServerAddr, "127.0.0.1:8848");
+        assertEquals("127.0.0.1:8848", nacosServerAddr);
         String nacosNamespace = environment.resolveRequiredPlaceholders("${seata.config.nacos.namespace:seata-group}");
-        Assertions.assertEquals(nacosNamespace, "seata-test");
+        assertEquals("seata-test", nacosNamespace);
         String undologSaveDays = environment.resolveRequiredPlaceholders("${seata.server.undo.log-save-days:7}");
-        Assertions.assertEquals(undologSaveDays, "2");
+        assertEquals("2", undologSaveDays);
     }
 }

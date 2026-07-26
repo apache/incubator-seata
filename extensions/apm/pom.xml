@@ -33,6 +33,18 @@
     <description>APM extensions for Seata built with Maven</description>
 
     <modules>
-        <module>apm-seata-skywalking-plugin</module>
+        <!--<module>apm-seata-skywalking-plugin</module>-->
     </modules>
+    <profiles>
+        <!-- profile: onlyBuildOnJDK17+ -->
+        <profile>
+            <id>JDK17Plus</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>apm-seata-skywalking-plugin</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

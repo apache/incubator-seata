@@ -26,10 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 import redis.clients.jedis.Protocol;
+import redis.clients.jedis.util.Pool;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -47,7 +47,7 @@ public class JedisPooledFactory {
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(JedisPooledFactory.class);
 
-    private static volatile JedisPoolAbstract jedisPool = null;
+    private static volatile Pool<Jedis> jedisPool = null;
 
     private static final String HOST = "127.0.0.1";
 
@@ -63,11 +63,11 @@ public class JedisPooledFactory {
      *
      * @return redisPool
      */
-    public static JedisPoolAbstract getJedisPoolInstance(JedisPoolAbstract... jedisPools) {
+    public static Pool<Jedis> getJedisPoolInstance(Pool<Jedis>... jedisPools) {
         if (jedisPool == null) {
             synchronized (JedisPooledFactory.class) {
                 if (jedisPool == null) {
-                    JedisPoolAbstract tempJedisPool = null;
+                    Pool<Jedis> tempJedisPool = null;
                     if (jedisPools != null && jedisPools.length > 0) {
                         tempJedisPool = jedisPools[0];
                     } else {

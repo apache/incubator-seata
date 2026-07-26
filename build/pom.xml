@@ -102,6 +102,8 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <protobuf-maven-plugin.version>0.6.1</protobuf-maven-plugin.version>
         <kotlin-maven-plugin.version>2.2.20</kotlin-maven-plugin.version>
+        <protobuf.version>3.25.5</protobuf.version>
+        <grpc.version>1.55.1</grpc.version>
         <!-- Check -->
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <license-maven-plugin.version>4.0</license-maven-plugin.version>

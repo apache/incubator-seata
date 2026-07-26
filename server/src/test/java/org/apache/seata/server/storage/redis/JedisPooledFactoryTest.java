@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolAbstract;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.util.Pool;
 
 import java.lang.reflect.Field;
 
@@ -37,7 +37,7 @@ public class JedisPooledFactoryTest extends BaseSpringBootTest {
         // Reset the singleton jedisPool field to null before each test to ensure test isolation
         Field jedisPoolField = JedisPooledFactory.class.getDeclaredField("jedisPool");
         jedisPoolField.setAccessible(true);
-        JedisPoolAbstract existingPool = (JedisPoolAbstract) jedisPoolField.get(null);
+        Pool<Jedis> existingPool = (Pool<Jedis>) jedisPoolField.get(null);
 
         // Close existing pool if present to prevent resource leaks
         if (existingPool != null) {
@@ -53,7 +53,7 @@ public class JedisPooledFactoryTest extends BaseSpringBootTest {
         // Clean up resources after each test
         Field jedisPoolField = JedisPooledFactory.class.getDeclaredField("jedisPool");
         jedisPoolField.setAccessible(true);
-        JedisPoolAbstract pool = (JedisPoolAbstract) jedisPoolField.get(null);
+        Pool<Jedis> pool = (Pool<Jedis>) jedisPoolField.get(null);
 
         if (pool != null) {
             pool.close();
@@ -72,7 +72,7 @@ public class JedisPooledFactoryTest extends BaseSpringBootTest {
 
         JedisPool jedisPool = new JedisPool(poolConfig, "127.0.0.1", 6379, 60000);
 
-        JedisPoolAbstract poolInstance = JedisPooledFactory.getJedisPoolInstance(jedisPool);
+        Pool<Jedis> poolInstance = JedisPooledFactory.getJedisPoolInstance(jedisPool);
 
         Assertions.assertNotNull(poolInstance);
         Assertions.assertEquals(jedisPool, poolInstance);
@@ -86,8 +86,8 @@ public class JedisPooledFactoryTest extends BaseSpringBootTest {
 
         JedisPool jedisPool = new JedisPool(poolConfig, "127.0.0.1", 6379, 60000);
 
-        JedisPoolAbstract instance1 = JedisPooledFactory.getJedisPoolInstance(jedisPool);
-        JedisPoolAbstract instance2 = JedisPooledFactory.getJedisPoolInstance();
+        Pool<Jedis> instance1 = JedisPooledFactory.getJedisPoolInstance(jedisPool);
+        Pool<Jedis> instance2 = JedisPooledFactory.getJedisPoolInstance();
 
         Assertions.assertNotNull(instance1);
         Assertions.assertNotNull(instance2);

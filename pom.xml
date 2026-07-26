@@ -56,10 +56,10 @@
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
-        <module>server</module>
+        <!--<module>server</module>-->
         <module>integration-tx-api</module>
 <!--        <module>namingserver</module>-->
-        <module>test-suite/test-new-version</module>
+        <!--<module>test-suite/test-new-version</module>-->
         <module>test-suite/test-old-version</module>
         <module>test-suite/seata-benchmark-cli</module>
         <!--<module>seata-plugin</module>-->
@@ -135,6 +135,8 @@
             </activation>
             <modules>
                 <module>spi-jdk17</module>
+                <module>server</module>
+                <module>test-suite/test-new-version</module>
             </modules>
         </profile>
         <!-- profile: onlyBuildOnJDK21+ -->
@@ -380,7 +382,7 @@
             </activation>
             <modules>
                 <module>distribution</module>
-                <module>test-suite/test-new-version</module>
+                <!--<module>test-suite/test-new-version</module>-->
                 <module>test-suite/test-old-version</module>
             </modules>
         </profile>
