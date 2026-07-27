@@ -17,13 +17,6 @@
 package org.apache.seata.namingserver.security;
 
 import jakarta.servlet.Filter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.security.HmacSigner;
 import org.apache.seata.common.security.NonceCache;
 import org.apache.seata.common.security.SignatureVerifier;
@@ -36,6 +29,13 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Wires up the security layer only when {@code seata.security.enabled=true}. When disabled
@@ -60,30 +60,32 @@ public class SecurityAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ClusterIdentityRegistry clusterIdentityRegistry(SecurityProperties props,
-                                                           SecretResolver resolver) {
+    public ClusterIdentityRegistry clusterIdentityRegistry(SecurityProperties props, SecretResolver resolver) {
         ClusterIdentityRegistry registry = new ClusterIdentityRegistry();
         List<ClusterIdentity> loaded = new ArrayList<>();
         for (SecurityProperties.ClusterConfig cfg : props.getClusters()) {
             byte[] secret = resolver.resolve(cfg.getSecretRef());
             if (secret.length < HmacSigner.MIN_KEY_LENGTH_BYTES) {
-                throw new IllegalStateException("secret for cluster-id '" + cfg.getId()
-                        + "' is shorter than " + HmacSigner.MIN_KEY_LENGTH_BYTES + " bytes");
+                throw new IllegalStateException("secret for cluster-id '" + cfg.getId() + "' is shorter than "
+                        + HmacSigner.MIN_KEY_LENGTH_BYTES + " bytes");
             }
             List<Pattern> patterns = cfg.getAllowedVgroups() == null
                     ? Collections.emptyList()
                     : cfg.getAllowedVgroups().stream()
-                        .map(SecurityAutoConfiguration::globToRegex)
-                        .collect(Collectors.toList());
+                            .map(SecurityAutoConfiguration::globToRegex)
+                            .collect(Collectors.toList());
             loaded.add(new ClusterIdentity(
                     cfg.getId(),
                     secret,
-                    cfg.getAllowedNamespaces() == null ? Collections.emptySet()
+                    cfg.getAllowedNamespaces() == null
+                            ? Collections.emptySet()
                             : new java.util.HashSet<>(cfg.getAllowedNamespaces()),
-                    cfg.getAllowedClusters() == null ? Collections.emptySet()
+                    cfg.getAllowedClusters() == null
+                            ? Collections.emptySet()
                             : new java.util.HashSet<>(cfg.getAllowedClusters()),
                     patterns,
-                    cfg.getPermissions() == null ? java.util.EnumSet.noneOf(Permission.class)
+                    cfg.getPermissions() == null
+                            ? java.util.EnumSet.noneOf(Permission.class)
                             : java.util.EnumSet.copyOf(cfg.getPermissions())));
         }
         registry.reload(loaded);
@@ -101,9 +103,8 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SignatureVerifier signatureVerifier(NonceCache cache, SecurityProperties props) {
-        return new SignatureVerifier(cache,
-                TimeUnit.SECONDS.toMillis(props.getReplayWindowSeconds()),
-                System::currentTimeMillis);
+        return new SignatureVerifier(
+                cache, TimeUnit.SECONDS.toMillis(props.getReplayWindowSeconds()), System::currentTimeMillis);
     }
 
     @Bean
@@ -113,10 +114,11 @@ public class SecurityAutoConfiguration {
     }
 
     @Bean
-    public FilterRegistrationBean<Filter> seataSecurityFilter(SecurityProperties props,
-                                                              ClusterIdentityRegistry registry,
-                                                              SignatureVerifier verifier,
-                                                              PermissionChecker checker) {
+    public FilterRegistrationBean<Filter> seataSecurityFilter(
+            SecurityProperties props,
+            ClusterIdentityRegistry registry,
+            SignatureVerifier verifier,
+            PermissionChecker checker) {
         SecurityFilter filter = new SecurityFilter(props, registry, verifier, checker);
         FilterRegistrationBean<Filter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
@@ -132,8 +134,8 @@ public class SecurityAutoConfiguration {
         SecurityProperties.OutboundConfig out = props.getOutbound();
         byte[] secret = resolver.resolve(out.getSecretRef());
         if (secret.length < HmacSigner.MIN_KEY_LENGTH_BYTES) {
-            throw new IllegalStateException("outbound secret is shorter than "
-                    + HmacSigner.MIN_KEY_LENGTH_BYTES + " bytes");
+            throw new IllegalStateException(
+                    "outbound secret is shorter than " + HmacSigner.MIN_KEY_LENGTH_BYTES + " bytes");
         }
         return new OutboundSigner(out.getClusterId(), secret);
     }
@@ -154,9 +156,18 @@ public class SecurityAutoConfiguration {
                 case '?':
                     sb.append('.');
                     break;
-                case '.': case '\\': case '+': case '(': case ')':
-                case '[': case ']': case '{': case '}': case '^':
-                case '$': case '|':
+                case '.':
+                case '\\':
+                case '+':
+                case '(':
+                case ')':
+                case '[':
+                case ']':
+                case '{':
+                case '}':
+                case '^':
+                case '$':
+                case '|':
                     sb.append('\\').append(c);
                     break;
                 default:

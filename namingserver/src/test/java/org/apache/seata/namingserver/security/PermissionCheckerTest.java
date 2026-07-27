@@ -16,14 +16,14 @@
  */
 package org.apache.seata.namingserver.security;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,10 +36,8 @@ class PermissionCheckerTest {
 
     @Test
     void register_route_requires_register_permission() {
-        assertEquals(Permission.REGISTER,
-                checker.requiredPermission("POST", "/naming/v1/register"));
-        assertEquals(Permission.REGISTER,
-                checker.requiredPermission("POST", "/naming/v1/batchRegister"));
+        assertEquals(Permission.REGISTER, checker.requiredPermission("POST", "/naming/v1/register"));
+        assertEquals(Permission.REGISTER, checker.requiredPermission("POST", "/naming/v1/batchRegister"));
     }
 
     @Test
@@ -57,9 +55,9 @@ class PermissionCheckerTest {
 
     @Test
     void console_proxy_uses_method_to_pick_read_or_write() {
-        assertEquals(Permission.CONSOLE_READ,
-                checker.requiredPermission("GET", "/api/v1/console/globalSession/query"));
-        assertEquals(Permission.CONSOLE_WRITE,
+        assertEquals(Permission.CONSOLE_READ, checker.requiredPermission("GET", "/api/v1/console/globalSession/query"));
+        assertEquals(
+                Permission.CONSOLE_WRITE,
                 checker.requiredPermission("POST", "/api/v1/console/globalSession/forceCommit"));
     }
 
@@ -82,16 +80,21 @@ class PermissionCheckerTest {
 
     @Test
     void check_denies_namespace_outside_allow_list() {
-        ClusterIdentity id = new ClusterIdentity("t", new byte[32],
+        ClusterIdentity id = new ClusterIdentity(
+                "t",
+                new byte[32],
                 new HashSet<>(Collections.singletonList("staging")),
-                Collections.emptySet(), Collections.emptyList(),
+                Collections.emptySet(),
+                Collections.emptyList(),
                 EnumSet.of(Permission.REGISTER));
         assertFalse(checker.check(id, "POST", "/naming/v1/register", "prod", "cluster-A", null));
     }
 
     @Test
     void check_denies_cluster_outside_allow_list() {
-        ClusterIdentity id = new ClusterIdentity("t", new byte[32],
+        ClusterIdentity id = new ClusterIdentity(
+                "t",
+                new byte[32],
                 Collections.emptySet(),
                 new HashSet<>(Arrays.asList("cluster-A")),
                 Collections.emptyList(),
@@ -102,25 +105,25 @@ class PermissionCheckerTest {
     @Test
     void check_denies_vgroup_outside_pattern() {
         List<Pattern> patterns = Collections.singletonList(Pattern.compile("^tenant_a_.*$"));
-        ClusterIdentity id = new ClusterIdentity("t", new byte[32],
-                Collections.emptySet(), Collections.emptySet(), patterns,
+        ClusterIdentity id = new ClusterIdentity(
+                "t",
+                new byte[32],
+                Collections.emptySet(),
+                Collections.emptySet(),
+                patterns,
                 EnumSet.of(Permission.VGROUP_WRITE));
-        assertFalse(checker.check(id, "POST", "/naming/v1/addGroup",
-                "prod", "cluster-A", "tenant_b_group"));
-        assertTrue(checker.check(id, "POST", "/naming/v1/addGroup",
-                "prod", "cluster-A", "tenant_a_group"));
+        assertFalse(checker.check(id, "POST", "/naming/v1/addGroup", "prod", "cluster-A", "tenant_b_group"));
+        assertTrue(checker.check(id, "POST", "/naming/v1/addGroup", "prod", "cluster-A", "tenant_a_group"));
     }
 
     @Test
     void check_denies_unknown_route_by_default() {
         ClusterIdentity id = identity(EnumSet.allOf(Permission.class));
-        assertFalse(checker.check(id, "GET", "/random", null, null, null),
-                "unknown routes must fail closed");
+        assertFalse(checker.check(id, "GET", "/random", null, null, null), "unknown routes must fail closed");
     }
 
     private static ClusterIdentity identity(java.util.Set<Permission> perms) {
-        return new ClusterIdentity("t", new byte[32],
-                Collections.emptySet(), Collections.emptySet(), Collections.emptyList(),
-                perms);
+        return new ClusterIdentity(
+                "t", new byte[32], Collections.emptySet(), Collections.emptySet(), Collections.emptyList(), perms);
     }
 }

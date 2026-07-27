@@ -16,11 +16,11 @@
  */
 package org.apache.seata.namingserver.security;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,8 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ClusterIdentityRegistryTest {
 
     private static ClusterIdentity id(String name) {
-        return new ClusterIdentity(name, new byte[32],
-                Collections.emptySet(), Collections.emptySet(), Collections.emptyList(),
+        return new ClusterIdentity(
+                name,
+                new byte[32],
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.emptyList(),
                 EnumSet.of(Permission.REGISTER));
     }
 

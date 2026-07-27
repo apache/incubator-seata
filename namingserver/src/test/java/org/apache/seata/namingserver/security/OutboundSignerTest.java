@@ -16,15 +16,15 @@
  */
 package org.apache.seata.namingserver.security;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.seata.common.security.CanonicalRequest;
 import org.apache.seata.common.security.HmacSigner;
 import org.apache.seata.common.security.SecurityConstants;
 import org.apache.seata.common.security.SignatureAlgorithm;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OutboundSignerTest {
 
     private static final byte[] SECRET = new byte[32];
+
     static {
         for (int i = 0; i < 32; i++) {
             SECRET[i] = (byte) i;
@@ -40,10 +41,10 @@ class OutboundSignerTest {
 
     @Test
     void produces_all_required_headers() {
-        OutboundSigner signer = new OutboundSigner(
-                "naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256, () -> 1234L, () -> "fixed");
-        Map<String, String> headers = signer.signHeaders("POST", "/vgroup/v1/addVGroup",
-                singletonQuery("vGroup", "g1"), null);
+        OutboundSigner signer =
+                new OutboundSigner("naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256, () -> 1234L, () -> "fixed");
+        Map<String, String> headers =
+                signer.signHeaders("POST", "/vgroup/v1/addVGroup", singletonQuery("vGroup", "g1"), null);
 
         assertEquals("naming-01", headers.get(SecurityConstants.HEADER_CLUSTER_ID));
         assertEquals("1234", headers.get(SecurityConstants.HEADER_TIMESTAMP));
@@ -54,11 +55,11 @@ class OutboundSignerTest {
 
     @Test
     void signature_verifies_with_same_secret() {
-        OutboundSigner signer = new OutboundSigner(
-                "naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256, () -> 5000L, () -> "n-1");
+        OutboundSigner signer =
+                new OutboundSigner("naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256, () -> 5000L, () -> "n-1");
         byte[] body = "{\"a\":1}".getBytes();
-        Map<String, String> headers = signer.signHeaders("POST", "/vgroup/v1/addVGroup",
-                singletonQuery("vGroup", "g1"), body);
+        Map<String, String> headers =
+                signer.signHeaders("POST", "/vgroup/v1/addVGroup", singletonQuery("vGroup", "g1"), body);
 
         CanonicalRequest req = CanonicalRequest.builder()
                 .method("POST")
@@ -78,8 +79,7 @@ class OutboundSignerTest {
     void nonce_supplier_is_called_per_request() {
         AtomicLong counter = new AtomicLong();
         OutboundSigner signer = new OutboundSigner(
-                "naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256,
-                () -> 0L, () -> "n-" + counter.incrementAndGet());
+                "naming-01", SECRET, SignatureAlgorithm.HMAC_SHA256, () -> 0L, () -> "n-" + counter.incrementAndGet());
 
         Map<String, String> h1 = signer.signHeaders("GET", "/a", null, null);
         Map<String, String> h2 = signer.signHeaders("GET", "/a", null, null);

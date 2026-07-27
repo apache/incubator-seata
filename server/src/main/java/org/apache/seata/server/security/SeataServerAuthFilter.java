@@ -219,7 +219,12 @@ public class SeataServerAuthFilter implements Filter {
             return false;
         }
         if (pattern.endsWith("/**")) {
-            return path.startsWith(pattern.substring(0, pattern.length() - 3));
+            // Trim the trailing "/**" and require an exact match of the parent segment
+            // or a proper descendant. Using a naked startsWith(prefix) would incorrectly
+            // match sibling paths that merely share the same prefix string
+            // (e.g. "/actuator/**" would otherwise match "/actuatorX").
+            String prefix = pattern.substring(0, pattern.length() - 3);
+            return path.equals(prefix) || path.startsWith(prefix + "/");
         }
         return pattern.equals(path);
     }
@@ -282,7 +287,40 @@ public class SeataServerAuthFilter implements Filter {
         if (v == null) {
             return "";
         }
-        return v.replace("\\", "\\\\").replace("\"", "\\\"");
+        StringBuilder sb = new StringBuilder(v.length() + 8);
+        for (int i = 0; i < v.length(); i++) {
+            char c = v.charAt(i);
+            switch (c) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                default:
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
     }
 
     /** Same wrapper idea as on the NamingServer side. See that class for design notes. */

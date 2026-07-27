@@ -16,15 +16,6 @@
  */
 package org.apache.seata.namingserver.security;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -40,15 +31,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SecurityFilterTest {
 
     private static final byte[] SECRET = new byte[32];
+
     static {
         for (int i = 0; i < 32; i++) {
             SECRET[i] = (byte) (i + 1);
@@ -106,9 +106,13 @@ class SecurityFilterTest {
 
     @Test
     void valid_signed_request_passes_and_exposes_identity() throws Exception {
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
+        MockHttpServletRequest req = signedRequest(
+                "POST",
+                "/naming/v1/register",
                 singletonQuery("namespace", "prod", "clusterName", "cluster-A"),
-                "{}".getBytes(), clock.get(), "n-1");
+                "{}".getBytes(),
+                clock.get(),
+                "n-1");
         MockHttpServletResponse resp = new MockHttpServletResponse();
         RecordingChain chain = new RecordingChain();
 
@@ -116,8 +120,8 @@ class SecurityFilterTest {
 
         assertTrue(chain.called.get(), "valid request must reach the chain");
         assertNotNull(chain.capturedRequest.get());
-        ClusterIdentity injected = (ClusterIdentity)
-                chain.capturedRequest.get().getAttribute(SecurityFilter.ATTR_IDENTITY);
+        ClusterIdentity injected =
+                (ClusterIdentity) chain.capturedRequest.get().getAttribute(SecurityFilter.ATTR_IDENTITY);
         assertNotNull(injected, "authenticated identity should be exposed on the request");
         assertEquals(CLUSTER_ID, injected.getId());
     }
@@ -135,8 +139,8 @@ class SecurityFilterTest {
 
         assertFalse(chain.called.get());
         assertEquals(401, resp.getStatus());
-        assertEquals(SecurityConstants.ErrorCode.MISSING_SIGNATURE.name(),
-                resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
+        assertEquals(
+                SecurityConstants.ErrorCode.MISSING_SIGNATURE.name(), resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
     @Test
@@ -157,8 +161,13 @@ class SecurityFilterTest {
 
     @Test
     void unknown_cluster_id_is_rejected() throws Exception {
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), clock.get(), "n-2");
+        MockHttpServletRequest req = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{}".getBytes(),
+                clock.get(),
+                "n-2");
         req.removeHeader(SecurityConstants.HEADER_CLUSTER_ID);
         req.addHeader(SecurityConstants.HEADER_CLUSTER_ID, "someone-else");
         MockHttpServletResponse resp = new MockHttpServletResponse();
@@ -168,7 +177,8 @@ class SecurityFilterTest {
 
         assertFalse(chain.called.get());
         assertEquals(401, resp.getStatus());
-        assertEquals(SecurityConstants.ErrorCode.UNKNOWN_CLUSTER_ID.name(),
+        assertEquals(
+                SecurityConstants.ErrorCode.UNKNOWN_CLUSTER_ID.name(),
                 resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
@@ -177,23 +187,28 @@ class SecurityFilterTest {
     @Test
     void stale_timestamp_is_rejected() throws Exception {
         long stale = clock.get() - 10 * 60 * 1000L;
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), stale, "n-3");
+        MockHttpServletRequest req = signedRequest(
+                "POST", "/naming/v1/register", singletonQuery("namespace", "prod"), "{}".getBytes(), stale, "n-3");
         MockHttpServletResponse resp = new MockHttpServletResponse();
         RecordingChain chain = new RecordingChain();
 
         filter.doFilter(req, resp, chain);
 
         assertFalse(chain.called.get());
-        assertEquals(SecurityConstants.ErrorCode.TIMESTAMP_SKEW.name(),
-                resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
+        assertEquals(
+                SecurityConstants.ErrorCode.TIMESTAMP_SKEW.name(), resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
     @Test
     void tampered_body_produces_bad_signature() throws Exception {
         // Sign with body-A, then swap in body-B without re-signing.
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{\"a\":1}".getBytes(), clock.get(), "n-4");
+        MockHttpServletRequest req = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{\"a\":1}".getBytes(),
+                clock.get(),
+                "n-4");
         req.setContent("{\"a\":2}".getBytes());
         MockHttpServletResponse resp = new MockHttpServletResponse();
         RecordingChain chain = new RecordingChain();
@@ -201,26 +216,36 @@ class SecurityFilterTest {
         filter.doFilter(req, resp, chain);
 
         assertFalse(chain.called.get());
-        assertEquals(SecurityConstants.ErrorCode.BAD_SIGNATURE.name(),
-                resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
+        assertEquals(
+                SecurityConstants.ErrorCode.BAD_SIGNATURE.name(), resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
     @Test
     void replay_of_valid_request_is_rejected() throws Exception {
-        MockHttpServletRequest req1 = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), clock.get(), "same-nonce");
+        MockHttpServletRequest req1 = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{}".getBytes(),
+                clock.get(),
+                "same-nonce");
         MockHttpServletResponse resp1 = new MockHttpServletResponse();
         filter.doFilter(req1, resp1, new RecordingChain());
         assertEquals(200, resp1.getStatus());
 
-        MockHttpServletRequest req2 = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), clock.get(), "same-nonce");
+        MockHttpServletRequest req2 = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{}".getBytes(),
+                clock.get(),
+                "same-nonce");
         MockHttpServletResponse resp2 = new MockHttpServletResponse();
         RecordingChain chain2 = new RecordingChain();
         filter.doFilter(req2, resp2, chain2);
         assertFalse(chain2.called.get());
-        assertEquals(SecurityConstants.ErrorCode.REPLAY_DETECTED.name(),
-                resp2.getHeader(SecurityFilter.RESP_HEADER_ERROR));
+        assertEquals(
+                SecurityConstants.ErrorCode.REPLAY_DETECTED.name(), resp2.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
     // ------------------------------------------------------------------ authorization
@@ -229,11 +254,20 @@ class SecurityFilterTest {
     void caller_without_required_permission_is_forbidden() throws Exception {
         // Reload with an identity that only holds CONSOLE_READ.
         registry.reload(Collections.singletonList(new ClusterIdentity(
-                CLUSTER_ID, SECRET, Collections.emptySet(), Collections.emptySet(),
-                Collections.emptyList(), EnumSet.of(Permission.CONSOLE_READ))));
+                CLUSTER_ID,
+                SECRET,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                Collections.emptyList(),
+                EnumSet.of(Permission.CONSOLE_READ))));
 
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), clock.get(), "n-5");
+        MockHttpServletRequest req = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{}".getBytes(),
+                clock.get(),
+                "n-5");
         MockHttpServletResponse resp = new MockHttpServletResponse();
         RecordingChain chain = new RecordingChain();
 
@@ -241,21 +275,26 @@ class SecurityFilterTest {
 
         assertFalse(chain.called.get());
         assertEquals(403, resp.getStatus());
-        assertEquals(SecurityConstants.ErrorCode.FORBIDDEN.name(),
-                resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
+        assertEquals(SecurityConstants.ErrorCode.FORBIDDEN.name(), resp.getHeader(SecurityFilter.RESP_HEADER_ERROR));
     }
 
     @Test
     void namespace_outside_allow_list_is_forbidden() throws Exception {
         registry.reload(Collections.singletonList(new ClusterIdentity(
-                CLUSTER_ID, SECRET,
+                CLUSTER_ID,
+                SECRET,
                 Collections.singleton("staging"),
                 Collections.emptySet(),
                 Collections.emptyList(),
                 EnumSet.of(Permission.REGISTER))));
 
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), "{}".getBytes(), clock.get(), "n-6");
+        MockHttpServletRequest req = signedRequest(
+                "POST",
+                "/naming/v1/register",
+                singletonQuery("namespace", "prod"),
+                "{}".getBytes(),
+                clock.get(),
+                "n-6");
         MockHttpServletResponse resp = new MockHttpServletResponse();
         RecordingChain chain = new RecordingChain();
 
@@ -270,20 +309,21 @@ class SecurityFilterTest {
     @Test
     void body_is_readable_by_downstream_after_filter() throws Exception {
         byte[] body = "{\"a\":42}".getBytes();
-        MockHttpServletRequest req = signedRequest("POST", "/naming/v1/register",
-                singletonQuery("namespace", "prod"), body, clock.get(), "n-7");
+        MockHttpServletRequest req = signedRequest(
+                "POST", "/naming/v1/register", singletonQuery("namespace", "prod"), body, clock.get(), "n-7");
         MockHttpServletResponse resp = new MockHttpServletResponse();
 
         AtomicReference<String> downstreamBody = new AtomicReference<>();
         FilterChain chain = (r, rp) -> {
-            byte[] read = ((jakarta.servlet.http.HttpServletRequest) r).getInputStream().readAllBytes();
+            byte[] read = ((jakarta.servlet.http.HttpServletRequest) r)
+                    .getInputStream()
+                    .readAllBytes();
             downstreamBody.set(new String(read));
         };
 
         filter.doFilter(req, resp, chain);
 
-        assertEquals("{\"a\":42}", downstreamBody.get(),
-                "wrapper must let controllers still read the original body");
+        assertEquals("{\"a\":42}", downstreamBody.get(), "wrapper must let controllers still read the original body");
     }
 
     // ------------------------------------------------------------------ matches() helper
@@ -301,9 +341,8 @@ class SecurityFilterTest {
 
     // ------------------------------------------------------------------ helpers
 
-    private MockHttpServletRequest signedRequest(String method, String path,
-                                                 Map<String, String> query, byte[] body,
-                                                 long ts, String nonce) {
+    private MockHttpServletRequest signedRequest(
+            String method, String path, Map<String, String> query, byte[] body, long ts, String nonce) {
         MockHttpServletRequest req = new MockHttpServletRequest(method, path);
         req.setContent(body == null ? new byte[0] : body);
         for (Map.Entry<String, String> e : query.entrySet()) {
@@ -347,8 +386,7 @@ class SecurityFilterTest {
         final AtomicReference<ServletRequest> capturedRequest = new AtomicReference<>();
 
         @Override
-        public void doFilter(ServletRequest request, ServletResponse response)
-                throws IOException, ServletException {
+        public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
             called.set(true);
             capturedRequest.set(request);
         }

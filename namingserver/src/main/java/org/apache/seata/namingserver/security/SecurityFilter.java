@@ -18,11 +18,22 @@ package org.apache.seata.namingserver.security;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ReadListener;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.seata.common.security.CanonicalRequest;
+import org.apache.seata.common.security.SecurityConstants;
+import org.apache.seata.common.security.SignatureAlgorithm;
+import org.apache.seata.common.security.SignatureVerifier;
+import org.apache.seata.common.security.VerificationResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,17 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.HttpServletRequestWrapper;
-import org.apache.seata.common.security.CanonicalRequest;
-import org.apache.seata.common.security.SecurityConstants;
-import org.apache.seata.common.security.SignatureAlgorithm;
-import org.apache.seata.common.security.SignatureVerifier;
-import org.apache.seata.common.security.VerificationResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Servlet filter that authenticates every inbound HTTP request against a shared secret and
@@ -87,10 +87,11 @@ public class SecurityFilter implements Filter {
 
     private final PermissionChecker permissionChecker;
 
-    public SecurityFilter(SecurityProperties properties,
-                          ClusterIdentityRegistry registry,
-                          SignatureVerifier verifier,
-                          PermissionChecker permissionChecker) {
+    public SecurityFilter(
+            SecurityProperties properties,
+            ClusterIdentityRegistry registry,
+            SignatureVerifier verifier,
+            PermissionChecker permissionChecker) {
         this.properties = Objects.requireNonNull(properties, "properties");
         this.registry = Objects.requireNonNull(registry, "registry");
         this.verifier = Objects.requireNonNull(verifier, "verifier");
@@ -121,9 +122,13 @@ public class SecurityFilter implements Filter {
 
         // ---- Missing headers ----
         if (isBlank(clusterId) || isBlank(timestamp) || isBlank(nonce) || isBlank(signature)) {
-            handleFailure(httpReq, httpResp, chain,
+            handleFailure(
+                    httpReq,
+                    httpResp,
+                    chain,
                     SecurityConstants.ErrorCode.MISSING_SIGNATURE,
-                    "one or more required security headers are missing", null);
+                    "one or more required security headers are missing",
+                    null);
             return;
         }
 
@@ -132,25 +137,33 @@ public class SecurityFilter implements Filter {
         try {
             ts = Long.parseLong(timestamp);
         } catch (NumberFormatException e) {
-            handleFailure(httpReq, httpResp, chain, SecurityConstants.ErrorCode.BAD_REQUEST,
-                    "timestamp header is not a valid long", null);
+            handleFailure(
+                    httpReq,
+                    httpResp,
+                    chain,
+                    SecurityConstants.ErrorCode.BAD_REQUEST,
+                    "timestamp header is not a valid long",
+                    null);
             return;
         }
         SignatureAlgorithm algorithm;
         try {
-            algorithm = algName == null ? SignatureAlgorithm.HMAC_SHA256
-                    : SignatureAlgorithm.fromWireName(algName);
+            algorithm = algName == null ? SignatureAlgorithm.HMAC_SHA256 : SignatureAlgorithm.fromWireName(algName);
         } catch (IllegalArgumentException e) {
-            handleFailure(httpReq, httpResp, chain, SecurityConstants.ErrorCode.UNSUPPORTED_ALG,
-                    e.getMessage(), null);
+            handleFailure(httpReq, httpResp, chain, SecurityConstants.ErrorCode.UNSUPPORTED_ALG, e.getMessage(), null);
             return;
         }
 
         // ---- Identity lookup ----
         Optional<ClusterIdentity> identityOpt = registry.find(clusterId);
         if (!identityOpt.isPresent()) {
-            handleFailure(httpReq, httpResp, chain, SecurityConstants.ErrorCode.UNKNOWN_CLUSTER_ID,
-                    "no identity registered for cluster-id: " + clusterId, null);
+            handleFailure(
+                    httpReq,
+                    httpResp,
+                    chain,
+                    SecurityConstants.ErrorCode.UNKNOWN_CLUSTER_ID,
+                    "no identity registered for cluster-id: " + clusterId,
+                    null);
             return;
         }
         ClusterIdentity identity = identityOpt.get();
@@ -181,12 +194,17 @@ public class SecurityFilter implements Filter {
         String namespace = httpReq.getParameter("namespace");
         String cluster = httpReq.getParameter("clusterName");
         String vgroup = httpReq.getParameter("vGroup");
-        boolean allowed = permissionChecker.check(identity, httpReq.getMethod(),
-                httpReq.getRequestURI(), namespace, cluster, vgroup);
+        boolean allowed = permissionChecker.check(
+                identity, httpReq.getMethod(), httpReq.getRequestURI(), namespace, cluster, vgroup);
         if (!allowed) {
-            handleFailure(wrapper, httpResp, chain, SecurityConstants.ErrorCode.FORBIDDEN,
-                    "caller " + clusterId + " lacks permission for " + httpReq.getMethod()
-                            + " " + httpReq.getRequestURI(), identity);
+            handleFailure(
+                    wrapper,
+                    httpResp,
+                    chain,
+                    SecurityConstants.ErrorCode.FORBIDDEN,
+                    "caller " + clusterId + " lacks permission for " + httpReq.getMethod() + " "
+                            + httpReq.getRequestURI(),
+                    identity);
             return;
         }
 
@@ -214,8 +232,12 @@ public class SecurityFilter implements Filter {
             return false;
         }
         if (pattern.endsWith("/**")) {
+            // Trim the trailing "/**" and require an exact match of the parent segment
+            // or a proper descendant. Using a naked startsWith(prefix) would incorrectly
+            // match sibling paths that merely share the same prefix string
+            // (e.g. "/actuator/**" would otherwise match "/actuatorX").
             String prefix = pattern.substring(0, pattern.length() - 3);
-            return uri.startsWith(prefix);
+            return uri.equals(prefix) || uri.startsWith(prefix + "/");
         }
         return pattern.equals(uri);
     }
@@ -230,16 +252,22 @@ public class SecurityFilter implements Filter {
         return params;
     }
 
-    private void handleFailure(HttpServletRequest req,
-                               HttpServletResponse resp,
-                               FilterChain chain,
-                               SecurityConstants.ErrorCode code,
-                               String message,
-                               ClusterIdentity identity) throws IOException, ServletException {
+    private void handleFailure(
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            FilterChain chain,
+            SecurityConstants.ErrorCode code,
+            String message,
+            ClusterIdentity identity)
+            throws IOException, ServletException {
         SecurityProperties.Mode mode = properties.getMode();
         if (mode == SecurityProperties.Mode.WARN) {
-            LOGGER.warn("[security][WARN] {} {} rejected: code={} msg={} caller={}",
-                    req.getMethod(), req.getRequestURI(), code, message,
+            LOGGER.warn(
+                    "[security][WARN] {} {} rejected: code={} msg={} caller={}",
+                    req.getMethod(),
+                    req.getRequestURI(),
+                    code,
+                    message,
                     identity == null ? "unknown" : identity.getId());
             if (identity != null) {
                 req.setAttribute(ATTR_IDENTITY, identity);
@@ -251,21 +279,58 @@ public class SecurityFilter implements Filter {
         int status = (code == SecurityConstants.ErrorCode.FORBIDDEN)
                 ? HttpServletResponse.SC_FORBIDDEN
                 : HttpServletResponse.SC_UNAUTHORIZED;
-        LOGGER.warn("[security][ENFORCE] {} {} rejected status={} code={} msg={} caller={}",
-                req.getMethod(), req.getRequestURI(), status, code, message,
+        LOGGER.warn(
+                "[security][ENFORCE] {} {} rejected status={} code={} msg={} caller={}",
+                req.getMethod(),
+                req.getRequestURI(),
+                status,
+                code,
+                message,
                 identity == null ? "unknown" : identity.getId());
         resp.setHeader(RESP_HEADER_ERROR, code.name());
         resp.setContentType("application/json;charset=UTF-8");
         resp.setStatus(status);
-        resp.getWriter().write("{\"code\":\"" + code.name() + "\",\"message\":\""
-                + escapeJson(message) + "\"}");
+        resp.getWriter().write("{\"code\":\"" + code.name() + "\",\"message\":\"" + escapeJson(message) + "\"}");
     }
 
     private static String escapeJson(String v) {
         if (v == null) {
             return "";
         }
-        return v.replace("\\", "\\\\").replace("\"", "\\\"");
+        StringBuilder sb = new StringBuilder(v.length() + 8);
+        for (int i = 0; i < v.length(); i++) {
+            char c = v.charAt(i);
+            switch (c) {
+                case '\\':
+                    sb.append("\\\\");
+                    break;
+                case '"':
+                    sb.append("\\\"");
+                    break;
+                case '\n':
+                    sb.append("\\n");
+                    break;
+                case '\r':
+                    sb.append("\\r");
+                    break;
+                case '\t':
+                    sb.append("\\t");
+                    break;
+                case '\b':
+                    sb.append("\\b");
+                    break;
+                case '\f':
+                    sb.append("\\f");
+                    break;
+                default:
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
     }
 
     private static boolean isBlank(String s) {
@@ -293,13 +358,24 @@ public class SecurityFilter implements Filter {
             ByteArrayInputStream stream = new ByteArrayInputStream(body);
             return new ServletInputStream() {
                 @Override
-                public boolean isFinished() { return stream.available() == 0; }
+                public boolean isFinished() {
+                    return stream.available() == 0;
+                }
+
                 @Override
-                public boolean isReady() { return true; }
+                public boolean isReady() {
+                    return true;
+                }
+
                 @Override
-                public void setReadListener(ReadListener listener) { /* not used */ }
+                public void setReadListener(ReadListener listener) {
+                    /* not used */
+                }
+
                 @Override
-                public int read() { return stream.read(); }
+                public int read() {
+                    return stream.read();
+                }
             };
         }
 

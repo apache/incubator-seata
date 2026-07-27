@@ -27,8 +27,11 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * <h3>Design notes</h3>
  * <ul>
- *   <li>Backed by {@link ConcurrentHashMap} of {@code cluster-id + '|' + nonce → insertion millis}
- *       — namespacing by cluster-id prevents cross-tenant nonce collisions.</li>
+ *   <li>Backed by {@link ConcurrentHashMap} keyed by a length-prefixed composite of
+ *       {@code cluster-id} and {@code nonce}. The length prefix makes the split point
+ *       unambiguous, so no two distinct {@code (clusterId, nonce)} pairs can collide even
+ *       when either value contains arbitrary characters — this prevents cross-tenant
+ *       DoS via crafted headers.</li>
  *   <li>Lazy eviction: entries are removed on access when older than the TTL. A tiny amount of
  *       cross-check work amortises against every {@link #putIfAbsent(String, String)} call,
  *       so we do not need a background thread.</li>
@@ -139,9 +142,10 @@ public interface NonceCache {
         }
 
         private static String key(String clusterId, String nonce) {
-            // Deliberately a plain concatenation with a delimiter that cannot appear inside
-            // a UUID nonce or a cluster-id. Avoids the overhead of building a composite key object.
-            return clusterId + '|' + nonce;
+            // Length-prefix the cluster-id so that (a, b) and (c, d) can never collide
+            // as long as they are distinct pairs — both values are attacker-controlled
+            // headers, so any delimiter alone is insufficient.
+            return clusterId.length() + ":" + clusterId + nonce;
         }
     }
 

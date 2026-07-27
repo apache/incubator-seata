@@ -16,16 +16,16 @@
  */
 package org.apache.seata.namingserver.security;
 
+import org.apache.seata.common.security.CanonicalRequest;
+import org.apache.seata.common.security.HmacSigner;
+import org.apache.seata.common.security.SecurityConstants;
+import org.apache.seata.common.security.SignatureAlgorithm;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
-
-import org.apache.seata.common.security.CanonicalRequest;
-import org.apache.seata.common.security.HmacSigner;
-import org.apache.seata.common.security.SecurityConstants;
-import org.apache.seata.common.security.SignatureAlgorithm;
 
 /**
  * Produces the {@code X-Seata-*} headers that must accompany outgoing requests from
@@ -60,11 +60,12 @@ public final class OutboundSigner {
      * @param clock           supplies millisecond timestamps (defaults to system clock if null)
      * @param nonceSupplier   supplies unique nonces (defaults to random UUID if null)
      */
-    public OutboundSigner(String selfClusterId,
-                          byte[] secret,
-                          SignatureAlgorithm algorithm,
-                          Supplier<Long> clock,
-                          Supplier<String> nonceSupplier) {
+    public OutboundSigner(
+            String selfClusterId,
+            byte[] secret,
+            SignatureAlgorithm algorithm,
+            Supplier<Long> clock,
+            Supplier<String> nonceSupplier) {
         this.selfClusterId = Objects.requireNonNull(selfClusterId, "selfClusterId");
         this.secret = Objects.requireNonNull(secret, "secret").clone();
         this.algorithm = algorithm == null ? SignatureAlgorithm.HMAC_SHA256 : algorithm;
@@ -86,10 +87,7 @@ public final class OutboundSigner {
      * @param body         request body bytes (may be null/empty)
      * @return an ordered map ready to iterate onto the outbound request
      */
-    public Map<String, String> signHeaders(String method,
-                                           String path,
-                                           Map<String, String> queryParams,
-                                           byte[] body) {
+    public Map<String, String> signHeaders(String method, String path, Map<String, String> queryParams, byte[] body) {
         long ts = clock.get();
         String nonce = nonceSupplier.get();
         CanonicalRequest req = CanonicalRequest.builder()

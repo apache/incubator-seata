@@ -17,9 +17,9 @@
 package org.apache.seata.server.security;
 
 /**
- * Maps TC's inbound HTTP routes to a required {@link CallerPermission}. Deny-by-default:
- * any path that isn't matched here returns {@code null} and the filter treats that as
- * forbidden.
+ * Maps TC's inbound HTTP routes to a required {@link CallerPermission}. Any path that
+ * isn't matched here returns {@code null}, which the filter treats as "not part of the
+ * NamingServer control-plane surface" and passes through untouched.
  *
  * <p>Kept intentionally small — only paths that could conceivably be reached by
  * NamingServer or by an operator's console proxy need protection here. Netty ports and

@@ -78,8 +78,8 @@ public final class SecretResolver {
         if (secretRef.startsWith(PLAIN_PREFIX)) {
             return secretRef.substring(PLAIN_PREFIX.length()).getBytes(java.nio.charset.StandardCharsets.UTF_8);
         }
-        throw new IllegalArgumentException("unsupported secretRef scheme: " + secretRef
-                + " (supported: env:, base64:, plain:)");
+        throw new IllegalArgumentException(
+                "unsupported secretRef scheme: " + secretRef + " (supported: env:, base64:, plain:)");
     }
 
     private static byte[] decodeBase64(String value) {

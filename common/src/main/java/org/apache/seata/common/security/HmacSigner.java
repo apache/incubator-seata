@@ -98,9 +98,15 @@ public final class HmacSigner {
     }
 
     /**
-     * Length-safe constant-time byte array comparison. Both inputs are walked to
-     * their full lengths before returning, so timing does not depend on which byte
-     * first differs.
+     * Length-safe constant-time byte array comparison. Any length or content difference
+     * fails; iteration never short-circuits on the first differing byte, so timing does
+     * not leak which byte first differs.
+     *
+     * <p>The loop is bounded by the shorter input because in this class the reference
+     * value {@code expected} always has a fixed algorithm-defined MAC length (32 bytes
+     * for HMAC-SHA-256). Only {@code received} is attacker-controlled, and its length is
+     * a value the attacker already picked, so timing tied to {@code received.length}
+     * cannot reveal any secret material.
      */
     static boolean constantTimeEquals(byte[] a, byte[] b) {
         if (a == null || b == null) {

@@ -16,9 +16,9 @@
  */
 package org.apache.seata.namingserver.security;
 
-import java.util.regex.Pattern;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,8 +45,7 @@ class SecurityAutoConfigurationTest {
         // A literal '.' in a glob must not match arbitrary characters.
         Pattern p = SecurityAutoConfiguration.globToRegex("group.a");
         assertTrue(p.matcher("group.a").matches());
-        assertFalse(p.matcher("groupXa").matches(),
-                "'.' must be treated literally, not as regex any-char");
+        assertFalse(p.matcher("groupXa").matches(), "'.' must be treated literally, not as regex any-char");
     }
 
     @Test

@@ -39,12 +39,8 @@ public final class PermissionChecker {
      * @param vGroup    target vgroup (may be null)
      * @return {@code true} iff the request is authorized
      */
-    public boolean check(ClusterIdentity identity,
-                         String method,
-                         String path,
-                         String namespace,
-                         String cluster,
-                         String vGroup) {
+    public boolean check(
+            ClusterIdentity identity, String method, String path, String namespace, String cluster, String vGroup) {
         Objects.requireNonNull(identity, "identity");
         Objects.requireNonNull(method, "method");
         Objects.requireNonNull(path, "path");
@@ -86,10 +82,11 @@ public final class PermissionChecker {
         if ("POST".equals(method) && (path.endsWith("/addGroup") || path.endsWith("/changeGroup"))) {
             return Permission.VGROUP_WRITE;
         }
-        if ("GET".equals(method) && (path.endsWith("/discovery")
-                || path.endsWith("/clusters")
-                || path.endsWith("/clusterData")
-                || path.endsWith("/namespace"))) {
+        if ("GET".equals(method)
+                && (path.endsWith("/discovery")
+                        || path.endsWith("/clusters")
+                        || path.endsWith("/clusterData")
+                        || path.endsWith("/namespace"))) {
             return Permission.CONSOLE_READ;
         }
         if ("POST".equals(method) && path.endsWith("/watch")) {

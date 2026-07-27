@@ -18,13 +18,19 @@ package org.apache.seata.namingserver.security;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * In-memory table of {@link ClusterIdentity} keyed by cluster-id. Reads are lock-free; writes
  * only happen at startup or on config reload, so this is heavily biased for the read path.
+ *
+ * <p>The whole table is held as an immutable {@link Map} behind an {@link AtomicReference}.
+ * Register and reload publish a fresh snapshot via {@code compareAndSet} / {@code set}, so
+ * concurrent {@link #find(String)} calls always observe either the old table in full or the
+ * new table in full — never a transient empty/partial state during rotation.
  *
  * <p>Kept as a small stand-alone class (rather than a full-blown "IdentityService") so it can
  * be unit-tested without Spring context and shared between the inbound filter and the
@@ -32,34 +38,42 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ClusterIdentityRegistry {
 
-    private final Map<String, ClusterIdentity> byId = new ConcurrentHashMap<>();
+    private final AtomicReference<Map<String, ClusterIdentity>> ref = new AtomicReference<>(Collections.emptyMap());
 
     /** Register (or replace) an identity. Callers must have already validated the secret length. */
     public void register(ClusterIdentity identity) {
-        byId.put(identity.getId(), identity);
+        while (true) {
+            Map<String, ClusterIdentity> current = ref.get();
+            Map<String, ClusterIdentity> next = new HashMap<>(current);
+            next.put(identity.getId(), identity);
+            if (ref.compareAndSet(current, Collections.unmodifiableMap(next))) {
+                return;
+            }
+        }
     }
 
-    /** Bulk-load, replacing everything atomically-ish (individual puts, not a swap). */
+    /** Bulk-load, atomically replacing the whole table via a single reference swap. */
     public void reload(Collection<ClusterIdentity> identities) {
-        byId.clear();
+        Map<String, ClusterIdentity> next = new HashMap<>();
         for (ClusterIdentity id : identities) {
-            byId.put(id.getId(), id);
+            next.put(id.getId(), id);
         }
+        ref.set(Collections.unmodifiableMap(next));
     }
 
     public Optional<ClusterIdentity> find(String clusterId) {
         if (clusterId == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable(byId.get(clusterId));
+        return Optional.ofNullable(ref.get().get(clusterId));
     }
 
     /** Live, unmodifiable view — mainly for metrics / admin endpoints. */
     public Map<String, ClusterIdentity> asMap() {
-        return Collections.unmodifiableMap(byId);
+        return ref.get();
     }
 
     public int size() {
-        return byId.size();
+        return ref.get().size();
     }
 }

@@ -81,7 +81,8 @@ class SignatureCanonicalizerTest {
         Map<String, String> params = new HashMap<>();
         params.put("k", "a b/c=d&e");
         String canonical = SignatureCanonicalizer.canonicalQuery(params);
-        // spaces become %20 (not '+'), slash '/' stays literal per URLEncoder,
+        // spaces become %20 (canonicalizer rewrites the '+' produced by form-encoding),
+        // '/' becomes %2F because URLEncoder uses form-encoding semantics,
         // '=' inside value becomes %3D, '&' becomes %26.
         assertEquals("k=a%20b%2Fc%3Dd%26e", canonical);
     }

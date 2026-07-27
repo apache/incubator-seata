@@ -16,11 +16,11 @@
  */
 package org.apache.seata.namingserver.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.common.security.SecurityConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Configuration mapped from {@code seata.security.*} in {@code application.yml}.
@@ -133,27 +133,73 @@ public class SecurityProperties {
         private List<String> allowedVgroups = new ArrayList<>();
         private List<Permission> permissions = new ArrayList<>();
 
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
-        public String getSecretRef() { return secretRef; }
-        public void setSecretRef(String secretRef) { this.secretRef = secretRef; }
-        public List<String> getAllowedNamespaces() { return allowedNamespaces; }
-        public void setAllowedNamespaces(List<String> allowedNamespaces) { this.allowedNamespaces = allowedNamespaces; }
-        public List<String> getAllowedClusters() { return allowedClusters; }
-        public void setAllowedClusters(List<String> allowedClusters) { this.allowedClusters = allowedClusters; }
-        public List<String> getAllowedVgroups() { return allowedVgroups; }
-        public void setAllowedVgroups(List<String> allowedVgroups) { this.allowedVgroups = allowedVgroups; }
-        public List<Permission> getPermissions() { return permissions; }
-        public void setPermissions(List<Permission> permissions) { this.permissions = permissions; }
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getSecretRef() {
+            return secretRef;
+        }
+
+        public void setSecretRef(String secretRef) {
+            this.secretRef = secretRef;
+        }
+
+        public List<String> getAllowedNamespaces() {
+            return allowedNamespaces;
+        }
+
+        public void setAllowedNamespaces(List<String> allowedNamespaces) {
+            this.allowedNamespaces = allowedNamespaces;
+        }
+
+        public List<String> getAllowedClusters() {
+            return allowedClusters;
+        }
+
+        public void setAllowedClusters(List<String> allowedClusters) {
+            this.allowedClusters = allowedClusters;
+        }
+
+        public List<String> getAllowedVgroups() {
+            return allowedVgroups;
+        }
+
+        public void setAllowedVgroups(List<String> allowedVgroups) {
+            this.allowedVgroups = allowedVgroups;
+        }
+
+        public List<Permission> getPermissions() {
+            return permissions;
+        }
+
+        public void setPermissions(List<Permission> permissions) {
+            this.permissions = permissions;
+        }
     }
 
     public static class OutboundConfig {
         private String clusterId;
         private String secretRef;
 
-        public String getClusterId() { return clusterId; }
-        public void setClusterId(String clusterId) { this.clusterId = clusterId; }
-        public String getSecretRef() { return secretRef; }
-        public void setSecretRef(String secretRef) { this.secretRef = secretRef; }
+        public String getClusterId() {
+            return clusterId;
+        }
+
+        public void setClusterId(String clusterId) {
+            this.clusterId = clusterId;
+        }
+
+        public String getSecretRef() {
+            return secretRef;
+        }
+
+        public void setSecretRef(String secretRef) {
+            this.secretRef = secretRef;
+        }
     }
 }

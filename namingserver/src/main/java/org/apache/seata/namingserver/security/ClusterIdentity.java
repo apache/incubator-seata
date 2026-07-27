@@ -43,20 +43,19 @@ public final class ClusterIdentity {
 
     private final Set<Permission> permissions;
 
-    public ClusterIdentity(String id,
-                           byte[] secret,
-                           Set<String> allowedNamespaces,
-                           Set<String> allowedClusters,
-                           List<Pattern> allowedVgroupPatterns,
-                           Set<Permission> permissions) {
+    public ClusterIdentity(
+            String id,
+            byte[] secret,
+            Set<String> allowedNamespaces,
+            Set<String> allowedClusters,
+            List<Pattern> allowedVgroupPatterns,
+            Set<Permission> permissions) {
         this.id = Objects.requireNonNull(id, "id");
         this.secret = Objects.requireNonNull(secret, "secret").clone();
-        this.allowedNamespaces = allowedNamespaces == null
-                ? Collections.emptySet()
-                : Collections.unmodifiableSet(allowedNamespaces);
-        this.allowedClusters = allowedClusters == null
-                ? Collections.emptySet()
-                : Collections.unmodifiableSet(allowedClusters);
+        this.allowedNamespaces =
+                allowedNamespaces == null ? Collections.emptySet() : Collections.unmodifiableSet(allowedNamespaces);
+        this.allowedClusters =
+                allowedClusters == null ? Collections.emptySet() : Collections.unmodifiableSet(allowedClusters);
         this.allowedVgroupPatterns = allowedVgroupPatterns == null
                 ? Collections.emptyList()
                 : Collections.unmodifiableList(allowedVgroupPatterns);
@@ -92,15 +91,11 @@ public final class ClusterIdentity {
 
     /** Wildcard {@code *} in the allow-list means "no restriction". */
     public boolean isNamespaceAllowed(String namespace) {
-        return allowedNamespaces.isEmpty()
-                || allowedNamespaces.contains("*")
-                || allowedNamespaces.contains(namespace);
+        return allowedNamespaces.isEmpty() || allowedNamespaces.contains("*") || allowedNamespaces.contains(namespace);
     }
 
     public boolean isClusterAllowed(String cluster) {
-        return allowedClusters.isEmpty()
-                || allowedClusters.contains("*")
-                || allowedClusters.contains(cluster);
+        return allowedClusters.isEmpty() || allowedClusters.contains("*") || allowedClusters.contains(cluster);
     }
 
     public boolean isVgroupAllowed(String vGroup) {
