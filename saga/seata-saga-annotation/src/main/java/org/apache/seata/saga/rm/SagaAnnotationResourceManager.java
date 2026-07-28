@@ -23,12 +23,15 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
+import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
 import org.apache.seata.rm.AbstractResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,11 +103,14 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
                     String.format("SagaAnnotation resource is not available, resourceId: %s", resourceId));
         }
 
+        BusinessActionContext businessActionContext = null;
         try {
-            BusinessActionContext businessActionContext =
+            businessActionContext =
                     BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId, applicationData);
             Object[] args = this.getTwoPhaseRollbackArgs(resource, businessActionContext);
             BusinessActionContextUtil.setContext(businessActionContext);
+
+            doBeforeSagaAnnotationRollback(xid, branchId, resource.getActionName(), businessActionContext);
 
             boolean result;
             Object ret = compensationMethod.invoke(targetBean, args);
@@ -131,6 +137,7 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } finally {
+            doAfterSagaAnnotationRollback(xid, branchId, resource.getActionName(), businessActionContext);
             BusinessActionContextUtil.clear();
         }
     }
@@ -163,5 +170,49 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
             }
         }
         return args;
+    }
+
+    /**
+     * to do some business operations before saga annotation rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doBeforeSagaAnnotationRollback(
+            String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * to do some business operations after saga annotation rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doAfterSagaAnnotationRollback(
+            String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
     }
 }
