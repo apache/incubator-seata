@@ -139,7 +139,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
                     new ConcurrentHashMap<>(Objects.requireNonNull(contextVariables));
             copyContextVariables.put(loop.getElementIndexName(), loopCounter);
 
-            if (element != null || !isCompensation) {
+            if (element != null) {
                 copyContextVariables.put(loop.getElementVariableName(), element);
 
                 if (!isCompensation) {
