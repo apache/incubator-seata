@@ -89,18 +89,15 @@ public class StateHandlerInterceptorTest {
         when(state.getName()).thenReturn("LoopTask");
         when(state.isForCompensation()).thenReturn(false);
 
-        // Set non-null loop element to trigger the target branch
         Object mockLoopElement = "testLoopElementValue";
         when(context.getVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT)).thenReturn(mockLoopElement);
 
         when(stateMachineConfig.getSeqGenerator()).thenReturn(seqGenerator);
         when(seqGenerator.generate(anyString())).thenReturn("SEQ_1001");
 
-        // Execute preProcess
         ServiceTaskHandlerInterceptor interceptor = new ServiceTaskHandlerInterceptor();
         assertDoesNotThrow(() -> interceptor.preProcess(context));
 
-        // Capture stateInstance to verify extensionParams setting
         ArgumentCaptor<StateInstance> captor = ArgumentCaptor.forClass(StateInstance.class);
         verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATE_INST), captor.capture());
 

@@ -1160,18 +1160,12 @@ public class StateMachineDBTests extends AbstractServerTest {
         String stateMachineName = "simpleLoopTestStateMachine";
 
         SagaCostPrint.executeAndPrint("3-33-mutated", () -> {
-            // A specialized list that shrinks to simulate data mutation by subsequent states.
-            // If compensation re-evaluates the collection without a snapshot,
-            // it hits this shrunken list and throws NoSuchElementException.
             List<Integer> mutatingList = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5)) {
                 private int callCount = 0;
 
                 @Override
                 public Iterator<Integer> iterator() {
                     callCount++;
-                    // 1st call: Forward execution
-                    // 2nd call: JSON Serialization for DB
-                    // 3rd+ call: Compensation (if it wrongly re-evaluates)
                     if (callCount > 2) {
                         return Arrays.asList(1, 2).iterator();
                     }
