@@ -49,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +196,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setInputParams(serviceInputParams);
         Object loopElement = context.getVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT);
         if (loopElement != null) {
-            Map<String, Object> extensionParams = new java.util.HashMap<>();
+            Map<String, Object> extensionParams = new HashMap<>();
             extensionParams.put(DomainConstants.VAR_NAME_LOOP_ELEMENT, loopElement);
             stateInstance.setExtensionParams(extensionParams);
         }

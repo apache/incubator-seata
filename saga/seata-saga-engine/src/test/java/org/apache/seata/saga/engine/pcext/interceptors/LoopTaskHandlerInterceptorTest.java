@@ -272,6 +272,129 @@ public class LoopTaskHandlerInterceptorTest {
         assertTrue(holder.isFailEnd());
     }
 
+    @Test
+    public void preProcessWhenIsCompensateStateAndNoElement_EvaluateExpressionTest() {
+        Loop loop = mock(Loop.class);
+        when(loop.getCollection()).thenReturn("$.[collection]");
+
+        Map<String, Object> globalContextVariables = new HashMap<>();
+        globalContextVariables.put("existingKey", "existingValue");
+
+        StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
+
+        ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
+        ExpressionFactory factory = mock(ExpressionFactory.class);
+        Expression expression = mock(Expression.class);
+
+        when(config.getExpressionFactoryManager()).thenReturn(manager);
+        when(manager.getExpressionFactory(anyString())).thenReturn(factory);
+        when(factory.createExpression("$.[collection]")).thenReturn(expression);
+
+        List<String> mockHistoricalCollection = Arrays.asList("item0", "item1", "item2", "item3");
+        when(expression.getValue(globalContextVariables)).thenReturn(mockHistoricalCollection);
+
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
+
+        StateInstance stateToBeCompensated =
+                compensationHolder.getStatesNeedCompensation().get("CompensateTask");
+        when(stateToBeCompensated.getExtensionParams()).thenReturn(null);
+
+        executePreProcessWithStaticMocks(context, compensationHolder);
+
+        @SuppressWarnings("rawtypes")
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
+
+        Map<?, ?> capturedMap = mapCaptor.getValue();
+
+        assertEquals("existingValue", capturedMap.get("existingKey"));
+        assertEquals(2, capturedMap.get("loopIndex"));
+        assertEquals("item2", capturedMap.get("loopElement"));
+
+        verify(factory).createExpression("$.[collection]");
+        verify(expression).getValue(globalContextVariables);
+    }
+
+    @Test
+    public void preProcessWhenForwardLoopCollectionIsNull_HandlesNullElementGracefullyTest() {
+        HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
+        StateInstruction instruction = mock(StateInstruction.class);
+        AbstractTaskState taskState = mock(AbstractTaskState.class);
+        Loop loop = mock(Loop.class);
+
+        when(context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)).thenReturn(true);
+        when(context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE))
+                .thenReturn(false);
+        when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
+        when(instruction.getState(context)).thenReturn(taskState);
+        when(taskState.getLoop()).thenReturn(loop);
+        when(taskState.getName()).thenReturn("OriginalTask");
+        when(context.getVariable(DomainConstants.LOOP_COUNTER)).thenReturn(0);
+
+        when(loop.getElementIndexName()).thenReturn("loopIndex");
+        when(loop.getElementVariableName()).thenReturn("loopElement");
+
+        LoopContextHolder holder = new LoopContextHolder();
+        holder.setCollection(null);
+        when(context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER))
+                .thenReturn(holder);
+
+        Map<String, Object> contextVariables = new HashMap<>();
+        when(context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).thenReturn(contextVariables);
+
+        assertDoesNotThrow(() -> interceptor.preProcess(context));
+
+        @SuppressWarnings("rawtypes")
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
+
+        Map<?, ?> capturedMap = mapCaptor.getValue();
+        assertEquals(0, capturedMap.get("loopIndex"));
+        assertNull(capturedMap.get("loopElement"));
+    }
+
+    @Test
+    public void preProcessWhenCompensationAndCollectionSmallerThanCounter_SkipElementInjectionTest() {
+        Loop loop = mock(Loop.class);
+        when(loop.getCollection()).thenReturn("$.[collection]");
+
+        Map<String, Object> globalContextVariables = new HashMap<>();
+        globalContextVariables.put("existingKey", "existingValue");
+
+        StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
+
+        ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
+        ExpressionFactory factory = mock(ExpressionFactory.class);
+        Expression expression = mock(Expression.class);
+
+        when(config.getExpressionFactoryManager()).thenReturn(manager);
+        when(manager.getExpressionFactory(anyString())).thenReturn(factory);
+        when(factory.createExpression("$.[collection]")).thenReturn(expression);
+
+        List<String> mutatedSmallerCollection = Arrays.asList("item0", "item1");
+        when(expression.getValue(globalContextVariables)).thenReturn(mutatedSmallerCollection);
+
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
+
+        StateInstance stateToBeCompensated =
+                compensationHolder.getStatesNeedCompensation().get("CompensateTask");
+        when(stateToBeCompensated.getExtensionParams()).thenReturn(null);
+
+        executePreProcessWithStaticMocks(context, compensationHolder);
+
+        @SuppressWarnings("rawtypes")
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
+
+        Map<?, ?> capturedMap = mapCaptor.getValue();
+
+        assertEquals("existingValue", capturedMap.get("existingKey"));
+        assertEquals(2, capturedMap.get("loopIndex"));
+        assertNull(capturedMap.get("loopElement"));
+    }
+
     private HierarchicalProcessContext setupCommonMocks(
             Loop loop,
             Map<String, Object> globalContextVariables,
