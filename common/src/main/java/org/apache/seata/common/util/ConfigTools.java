@@ -111,7 +111,7 @@ public class ConfigTools {
         PublicKey publicKey = string2PublicKey(pubStr);
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        byte[] bytes = cipher.doFinal(content.getBytes());
+        byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
         return byte2Base64(bytes);
     }
 
@@ -143,7 +143,7 @@ public class ConfigTools {
         PrivateKey privateKey = string2PrivateKey(priStr);
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, privateKey);
-        byte[] bytes = cipher.doFinal(content.getBytes());
+        byte[] bytes = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
         return byte2Base64(bytes);
     }
 

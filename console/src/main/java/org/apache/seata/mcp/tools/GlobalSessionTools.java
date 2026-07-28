@@ -16,9 +16,6 @@
  */
 package org.apache.seata.mcp.tools;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.GlobalStatus;
@@ -37,6 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,8 +104,8 @@ public class GlobalSessionTools {
                 nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
         try {
             pageResult = objectMapper.readValue(result, new TypeReference<PageResult<McpGlobalSessionVO>>() {});
-        } catch (JsonProcessingException e) {
-            logger.error(e.getMessage());
+        } catch (JacksonException e) {
+            logger.error("Failed to parse global session response", e);
         }
         if (pageResult == null) {
             return PageResult.failure("", "query global session failed");
