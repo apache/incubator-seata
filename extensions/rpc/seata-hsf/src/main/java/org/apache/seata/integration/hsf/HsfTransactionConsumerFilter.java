@@ -22,79 +22,29 @@ import com.taobao.hsf.invocation.InvocationHandler;
 import com.taobao.hsf.invocation.RPCResult;
 import com.taobao.hsf.invocation.filter.ClientFilter;
 import com.taobao.hsf.util.concurrent.ListenableFuture;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
-/**
- * The type Hsf transaction consumer filter.
- */
+import java.util.Map;
+
 public class HsfTransactionConsumerFilter implements ClientFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HsfTransactionConsumerFilter.class);
 
     @Override
     public ListenableFuture<RPCResult> invoke(InvocationHandler nextHandler, Invocation invocation) throws Throwable {
-        return doInvoke(nextHandler, invocation);
-    }
-
-    private ListenableFuture<RPCResult> doInvoke(InvocationHandler nextHandler, Invocation invocation)
-            throws Throwable {
-        TransactionContext context = extractTransactionContext();
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[{}], branchType in RootContext[{}]", context.xid, context.branchType);
+        Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
+        if (!context.isEmpty()) {
+            for (Map.Entry<String, String> entry : context.entrySet()) {
+                RPCContext.getClientContext().putAttachment(entry.getKey(), entry.getValue());
+            }
         }
-
         try {
-            propagateTransactionContext(context);
             return nextHandler.invoke(invocation);
         } finally {
-            clearTransactionContext();
-        }
-    }
-
-    private TransactionContext extractTransactionContext() {
-        TransactionContext context = new TransactionContext();
-        context.xid = RootContext.getXID();
-        context.branchType = RootContext.getBranchType();
-        return context;
-    }
-
-    private void propagateTransactionContext(TransactionContext context) {
-        if (context.xid != null) {
-            RPCContext.getClientContext().putAttachment(RootContext.KEY_XID, context.xid);
-            RPCContext.getClientContext().putAttachment(RootContext.KEY_BRANCH_TYPE, context.branchType.name());
-
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("transaction context propagated: xid={}, branchType={}", context.xid, context.branchType);
+            for (String key : context.keySet()) {
+                RPCContext.getClientContext().removeAttachment(key);
             }
         }
     }
 
-    private void clearTransactionContext() {
-        RPCContext.getClientContext().removeAttachment(RootContext.KEY_XID);
-        RPCContext.getClientContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transaction context cleared");
-        }
-    }
-
     @Override
-    public void onResponse(Invocation invocation, RPCResult rpcResult) {
-        // No operation needed
-    }
-
-    private static class TransactionContext {
-        /**
-         * The Xid.
-         */
-        String xid;
-        /**
-         * The Branch type.
-         */
-        BranchType branchType;
-    }
+    public void onResponse(Invocation invocation, RPCResult rpcResult) {}
 }

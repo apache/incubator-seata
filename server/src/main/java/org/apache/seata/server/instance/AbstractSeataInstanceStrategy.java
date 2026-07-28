@@ -16,8 +16,11 @@
  */
 package org.apache.seata.server.instance;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.annotation.Resource;
 import org.apache.seata.common.metadata.Instance;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
@@ -25,16 +28,12 @@ import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNa
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -75,7 +74,7 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
             VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
-            EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
+            EXECUTOR_SERVICE = ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("scheduledExecutor", 1, true);
             EXECUTOR_SERVICE.scheduleAtFixedRate(
                     () -> {
                         try {

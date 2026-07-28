@@ -21,70 +21,40 @@ import com.baidu.brpc.interceptor.InterceptorChain;
 import com.baidu.brpc.protocol.Request;
 import com.baidu.brpc.protocol.Response;
 import org.apache.seata.core.context.RootContext;
-import org.apache.seata.integration.rpc.core.ProviderRpcFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
 import java.util.Map;
 
-/**
- * <p>1. load SEATA xid from brpc request in handleRequest</p>
- * <p>2. clear SEATA xid when brpc request done in aroundProcess</p>
- *
- */
-public class TransactionPropagationServerInterceptor extends AbstractInterceptor implements ProviderRpcFilter<Request> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationServerInterceptor.class);
-
-    @Override
-    public boolean handleRequest(Request request) {
-
-        Map<String, String> rpcContexts = getRpcContexts(request);
-        String xid = RootContext.getXID();
-        String rpcXid = getXidFromContexts(rpcContexts);
-        if (null == xid) {
-            if (null != rpcXid) {
-                bindRequestToContexts(rpcContexts);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("SEATA-BRPC bind {} to RootContext", getJsonContext(rpcContexts));
-                }
-            }
-        }
-
-        return super.handleRequest(request);
-    }
+public class TransactionPropagationServerInterceptor extends AbstractInterceptor {
 
     @Override
     public void aroundProcess(Request brpcRequest, Response brpcResponse, InterceptorChain chain) throws Exception {
-
+        String rpcXid = getXidFromRequest(brpcRequest);
+        String rpcBranchType = getAttachment(brpcRequest, RootContext.KEY_BRANCH_TYPE);
+        boolean bound = TransactionPropagationHandler.bindProviderContext(rpcXid, rpcBranchType);
         try {
             chain.intercept(brpcRequest, brpcResponse);
         } finally {
-            Map<String, String> rootContexts = cleanRootContexts();
-            Map<String, String> rpcContexts = getRpcContexts(brpcRequest);
-            String rpcXid = getXidFromContexts(rpcContexts);
-            String xid = getXidFromContexts(rootContexts);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("SEATA-BRPC unbind {} from RootContext", getJsonContext(rootContexts));
-            }
-            if (null != rpcXid && !rpcXid.equalsIgnoreCase(xid)) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn(
-                            "SEATA-BRPC context changed during RPC from {} to {},will be reset.",
-                            getJsonContext(rpcContexts),
-                            getJsonContext(rootContexts));
-                }
-                resetRootContexts(rootContexts);
+            if (bound) {
+                TransactionPropagationHandler.unbindProviderContext(rpcXid);
             }
         }
     }
 
-    @Override
-    public String getRpcContext(Request rpcContext, String key) {
-        if (null == rpcContext.getKvAttachment()) {
+    private String getXidFromRequest(Request request) {
+        String xid = getAttachment(request, RootContext.KEY_XID);
+        if (xid == null) {
+            xid = getAttachment(request, RootContext.KEY_XID.toLowerCase());
+        }
+        return xid;
+    }
+
+    private String getAttachment(Request request, String key) {
+        Map<String, Object> kvAttachment = request.getKvAttachment();
+        if (kvAttachment == null) {
             return null;
         }
-        Object value = rpcContext.getKvAttachment().get(key);
+        Object value = kvAttachment.get(key);
         return value == null ? null : value.toString();
     }
 }

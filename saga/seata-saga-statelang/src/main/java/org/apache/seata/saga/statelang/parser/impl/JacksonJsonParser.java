@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * JsonParser implement by Jackson
  *
- * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common module instead.
+ * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common-core module instead.
  */
 @Deprecated
 @LoadLevel(name = JacksonJsonParser.NAME)

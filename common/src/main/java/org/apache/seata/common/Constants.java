@@ -220,6 +220,16 @@ public interface Constants {
     String JACKSON_JSON_PARSER_NAME = "jackson";
 
     /**
+     * The constant FASTJSON2_JSON_PARSER_NAME
+     */
+    String FASTJSON2_JSON_PARSER_NAME = "fastjson2";
+
+    /**
+     * The constant JACKSON3_JSON_PARSER_NAME
+     */
+    String JACKSON3_JSON_PARSER_NAME = "jackson3";
+
+    /**
      * The constant GSON_JSON_PARSER_NAME
      */
     String GSON_JSON_PARSER_NAME = "gson";

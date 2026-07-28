@@ -26,9 +26,9 @@ import org.junit.jupiter.api.Test;
  *
  **/
 public class GlobalBeginResponseTest {
-    private final String XID = "test_xid";
-    private final String EXTRA_DATA = "test_extra_data";
-    private final ResultCode RESULT_CODE = ResultCode.Success;
+    private static final String XID = "test_xid";
+    private static final String EXTRA_DATA = "test_extra_data";
+    private static final ResultCode RESULT_CODE = ResultCode.Success;
 
     @Test
     public void testGetSetXid() {

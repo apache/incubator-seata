@@ -19,7 +19,7 @@ package org.apache.seata.core.rpc.processor.server;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -61,7 +61,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,13 +107,13 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         this.remotingServer = remotingServer;
         this.transactionMessageHandler = transactionMessageHandler;
         if (NettyServerConfig.isEnableTcServerBatchSendResponse()) {
-            batchResponseExecutorService = new ThreadPoolExecutor(
+            batchResponseExecutorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    BATCH_RESPONSE_THREAD_PREFIX,
                     MAX_BATCH_RESPONSE_THREAD,
                     MAX_BATCH_RESPONSE_THREAD,
                     KEEP_ALIVE_TIME,
                     TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(BATCH_RESPONSE_THREAD_PREFIX, MAX_BATCH_RESPONSE_THREAD));
+                    new LinkedBlockingQueue<>());
             batchResponseExecutorService.submit(new BatchResponseRunnable());
         }
     }

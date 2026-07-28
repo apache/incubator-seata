@@ -85,6 +85,9 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa 、 seata
     type: file
     preferred-networks: 30.240.*
+    # Network interface name patterns to ignore when determining local IP (regex supported).
+    # Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
+    ignored-interfaces: VMware.*
     metadata:
       weight: 100
     seata:
@@ -249,6 +252,7 @@ seata:
   transport:
     rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false
+    threadpool: auto
     # HTTP thread pool
     min-http-pool-size: 10
     max-http-pool-size: 100

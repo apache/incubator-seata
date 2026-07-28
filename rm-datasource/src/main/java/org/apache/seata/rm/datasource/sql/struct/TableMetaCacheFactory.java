@@ -18,7 +18,7 @@ package org.apache.seata.rm.datasource.sql.struct;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -125,13 +125,8 @@ public class TableMetaCacheFactory {
         private DataSourceProxy dataSource;
         private BlockingQueue<Long> tableMetaRefreshQueue;
 
-        private final Executor tableMetaRefreshExecutor = new ThreadPoolExecutor(
-                1,
-                1,
-                0L,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("tableMetaRefresh", 1, true));
+        private final Executor tableMetaRefreshExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "tableMetaRefresh", 1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), true);
 
         TableMetaRefreshHolder(DataSourceProxy dataSource) {
             this.dataSource = dataSource;

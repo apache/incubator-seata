@@ -22,8 +22,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.PositiveAtomicCounter;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.protocol.MessageFuture;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.MessageTypeAware;
@@ -49,7 +49,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -68,7 +67,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * The Timer executor.
      */
     protected final ScheduledExecutorService timerExecutor =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("timeoutChecker", 1, true));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("timeoutChecker", 1, true);
     /**
      * The Message executor.
      */

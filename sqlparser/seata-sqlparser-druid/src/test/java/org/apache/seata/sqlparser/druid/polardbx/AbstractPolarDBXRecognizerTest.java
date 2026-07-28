@@ -23,7 +23,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
  * Base Test for recognizer of PolarDB-X
  *
  **/
-public class AbstractPolarDBXRecognizerTest extends AbstractRecognizerTest {
+public abstract class AbstractPolarDBXRecognizerTest extends AbstractRecognizerTest {
     @Override
     public String getDbType() {
         // return JdbcConstants.POLARDBX;

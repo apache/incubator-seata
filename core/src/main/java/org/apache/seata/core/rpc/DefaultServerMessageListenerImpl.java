@@ -18,7 +18,7 @@ package org.apache.seata.core.rpc;
 
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.AbstractResultMessage;
@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -204,13 +203,14 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
      * Init.
      */
     public void init() {
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(
+        ExecutorService mergeSendExecutorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                THREAD_PREFIX,
                 MAX_LOG_SEND_THREAD,
                 MAX_LOG_SEND_THREAD,
                 KEEP_ALIVE_TIME,
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
-                new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
+                true);
         mergeSendExecutorService.submit(new BatchLogRunnable());
     }
 

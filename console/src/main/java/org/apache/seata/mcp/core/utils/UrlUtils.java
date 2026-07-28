@@ -16,11 +16,11 @@
  */
 package org.apache.seata.mcp.core.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,7 +28,7 @@ import java.util.Map;
 
 public class UrlUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(UrlUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UrlUtils.class);
 
     public static String buildUrl(
             String baseUrl, String path, Map<String, String> queryStringParams, Map<String, Object> queryObjectParams) {
@@ -81,7 +81,7 @@ public class UrlUtils {
         try {
             return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
         } catch (IllegalArgumentException e) {
-            logger.warn("Failed to convert object to map: {}", e.getMessage());
+            LOGGER.warn("Failed to convert object to map: {}", e.getMessage());
             return Collections.emptyMap();
         }
     }

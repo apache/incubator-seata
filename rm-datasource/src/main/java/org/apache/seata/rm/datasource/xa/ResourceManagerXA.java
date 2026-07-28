@@ -18,7 +18,7 @@ package org.apache.seata.rm.datasource.xa;
 
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.lock.ResourceLock;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -33,7 +33,6 @@ import javax.transaction.xa.XAException;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.core.constants.ConfigurationKeys.XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
@@ -75,8 +74,8 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                 return false;
                             });
                     if (shouldBeHold) {
-                        xaTwoPhaseTimeoutChecker = new ScheduledThreadPoolExecutor(
-                                1, new NamedThreadFactory("xaTwoPhaseTimeoutChecker", 1, true));
+                        xaTwoPhaseTimeoutChecker = ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(
+                                "xaTwoPhaseTimeoutChecker", 1, true);
                         xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(
                                 () -> {
                                     for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {

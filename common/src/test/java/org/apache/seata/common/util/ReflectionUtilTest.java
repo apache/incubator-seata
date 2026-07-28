@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 public class ReflectionUtilTest {
 
     // Prevent jvm from optimizing final
-    public static final String testValue = (null != null ? "hello" : "hello");
+    public static final String TEST_VALUE = (null != null ? "hello" : "hello");
 
     public final String testValue2 = (null != null ? "hello world" : "hello world");
 
@@ -134,9 +134,9 @@ public class ReflectionUtilTest {
     @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
     }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
-        Assertions.assertEquals("hello", testValue);
-        ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
-        Assertions.assertEquals("hello world", testValue);
+        Assertions.assertEquals("hello", TEST_VALUE);
+        ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "TEST_VALUE", "hello world");
+        Assertions.assertEquals("hello world", TEST_VALUE);
 
         // case: not a static field
         Assertions.assertThrows(IllegalArgumentException.class, () -> {

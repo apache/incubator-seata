@@ -426,6 +426,17 @@ Apache-2.0 licenses
     org.apache.tomcat.embed:tomcat-embed-core 9.0.106 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-el 9.0.106 Apache-2.0
 
+    The following font files are included in the Seata Console:
+    console/src/main/resources/static/console-fe/public/css/fonts/
+
+    roboto-regular.ttf Apache-2.0
+    roboto-regular.woff Apache-2.0
+    roboto-regular.woff2 Apache-2.0
+    roboto-bold.ttf Apache-2.0
+    roboto-bold.woff Apache-2.0
+    roboto-bold.woff2 Apache-2.0
+    (Google Roboto Font - https://fonts.google.com/specimen/Roboto)
+
 ========================================================================
 BSD-2-Clause licenses
 ========================================================================
@@ -565,6 +576,18 @@ MIT licenses
     @alicloud/console-components-actions 1.1.1 MIT see:licenses/alicloud-console-components-actions-MIT
     @alicloud/console-components-app-layout 1.1.4 MIT
     @alicloud/console-components-console-menu 1.2.12 MIT
+
+    The following font files are bundled with @alicloud/console-components (MIT):
+    console/src/main/resources/static/console-fe/public/css/fonts/
+
+    aliyun-console-font.eot MIT (bundled with @alicloud/console-components)
+    aliyun-console-font.ttf MIT (bundled with @alicloud/console-components)
+    aliyun-console-font.woff MIT (bundled with @alicloud/console-components)
+
+    The following icon font files are from iconfont.cn (Alibaba):
+    font_515771_emcns5054x3whfr.ttf MIT (iconfont.cn - https://www.iconfont.cn)
+    font_515771_emcns5054x3whfr.woff MIT (iconfont.cn - https://www.iconfont.cn)
+
     @alicloud/css-var-utils 0.1.0 MIT
     @alifd/babel-runtime-jsx-style-transform 1.0.0 MIT
     @alifd/field 1.7.0 MIT see:licenses/alifd-field-MIT

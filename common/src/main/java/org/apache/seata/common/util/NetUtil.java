@@ -189,7 +189,22 @@ public class NetUtil {
      * @return the local ip
      */
     public static String getLocalIp(String... preferredNetworks) {
-        InetAddress address = getLocalAddress(preferredNetworks);
+        return getIgnoredInterfacesLocalIp(null, preferredNetworks);
+    }
+
+    /**
+     * Gets local ip with network interface filtering support.
+     * This method allows filtering out unwanted network interfaces (e.g., virtual interfaces)
+     * and selecting preferred networks based on patterns.
+     *
+     * @param ignoredInterfaces the network interface name patterns to ignore (regex supported),
+     *                          e.g., "VMware.*", "VirtualBox.*", "docker.*", "veth.*"
+     * @param preferredNetworks the preferred network address patterns (regex or prefix match),
+     *                          e.g., "192.168.*", "10.0.*"
+     * @return the local ip address, or localhost if not found
+     */
+    public static String getIgnoredInterfacesLocalIp(String[] ignoredInterfaces, String... preferredNetworks) {
+        InetAddress address = getIgnoredInterfacesLocalAddress(ignoredInterfaces, preferredNetworks);
         if (null != address) {
             String hostAddress = address.getHostAddress();
             if (address instanceof Inet6Address) {
@@ -227,15 +242,38 @@ public class NetUtil {
      * @return the local address
      */
     public static InetAddress getLocalAddress(String... preferredNetworks) {
+        return getIgnoredInterfacesLocalAddress(null, preferredNetworks);
+    }
+
+    /**
+     * Gets local address with network interface filtering support.
+     * This method allows filtering out unwanted network interfaces (e.g., virtual interfaces)
+     * and selecting preferred networks based on patterns.
+     * <p>
+     * Note: Does not support IPv6.
+     * <p>
+     * Selection priority:
+     * 1. Filter out interfaces matching ignoredInterfaces patterns
+     * 2. If preferredNetworks is specified, return the first matching address
+     * 3. If no match found, return the first valid IP address
+     *
+     * @param ignoredInterfaces the network interface name patterns to ignore (regex supported),
+     *                          e.g., "VMware.*", "VirtualBox.*", "docker.*", "veth.*"
+     * @param preferredNetworks the preferred network address patterns (regex or prefix match),
+     *                          e.g., "192.168.*", "10.0.*"
+     * @return the local address, or null if not found
+     */
+    public static InetAddress getIgnoredInterfacesLocalAddress(
+            String[] ignoredInterfaces, String... preferredNetworks) {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
-        InetAddress localAddress = getLocalAddress0(preferredNetworks);
+        InetAddress localAddress = getLocalAddress0(ignoredInterfaces, preferredNetworks);
         LOCAL_ADDRESS = localAddress;
         return localAddress;
     }
 
-    private static InetAddress getLocalAddress0(String... preferredNetworks) {
+    private static InetAddress getLocalAddress0(String[] ignoredInterfaces, String... preferredNetworks) {
         InetAddress localAddress = null;
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -244,6 +282,9 @@ public class NetUtil {
                     try {
                         NetworkInterface network = interfaces.nextElement();
                         if (network.isUp()) {
+                            if (ignoreInterface(ignoredInterfaces, network.getDisplayName())) {
+                                continue;
+                            }
                             Enumeration<InetAddress> addresses = network.getInetAddresses();
                             while (addresses.hasMoreElements()) {
                                 try {
@@ -289,6 +330,27 @@ public class NetUtil {
                     localAddress.getHostAddress());
         }
         return localAddress;
+    }
+
+    /**
+     * Check if the network interface should be ignored based on the provided patterns.
+     * Supports regex matching for flexible interface name filtering.
+     *
+     * @param ignoredInterfaces array of regex patterns to match against interface names, null means no filtering
+     * @param interfaceName the display name of the network interface to check
+     * @return true if the interface matches any ignore pattern and should be skipped, false otherwise
+     */
+    public static boolean ignoreInterface(String[] ignoredInterfaces, String interfaceName) {
+        if (ignoredInterfaces == null) {
+            return false;
+        }
+        for (String regex : ignoredInterfaces) {
+            if (interfaceName.matches(regex)) {
+                LOGGER.trace("Ignoring interface: {}", interfaceName);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

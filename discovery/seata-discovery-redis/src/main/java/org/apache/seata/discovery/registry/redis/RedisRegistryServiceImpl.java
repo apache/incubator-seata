@@ -19,7 +19,7 @@ package org.apache.seata.discovery.registry.redis;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -76,9 +75,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private String transactionServiceGroup;
 
     private ScheduledExecutorService threadPoolExecutorForSubscribe =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("RedisRegistryService-subscribe", 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("RedisRegistryService-subscribe", 1);
     private ScheduledExecutorService threadPoolExecutorForUpdateMap =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("RedisRegistryService-updateClusterAddrMap", 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("RedisRegistryService-updateClusterAddrMap", 1);
 
     private RedisRegistryServiceImpl() {
         Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;

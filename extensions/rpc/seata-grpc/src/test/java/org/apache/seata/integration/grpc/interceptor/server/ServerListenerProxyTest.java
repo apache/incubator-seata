@@ -24,9 +24,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,18 +58,13 @@ class ServerListenerProxyTest {
     @Test
     void testOnHalfClose_withNonEmptyXid_andTCCBranchType_shouldBindContext() {
         String xid = "test-xid";
-        Map<String, String> context = new HashMap<>();
-        context.put(RootContext.KEY_BRANCH_TYPE, BranchType.TCC.name());
+        ServerListenerProxy<String> proxy = new ServerListenerProxy<>(xid, BranchType.TCC.name(), target);
 
-        ServerListenerProxy<String> proxy = new ServerListenerProxy<>(xid, context, target);
-
-        // Pre-bind some context to test cleanup
         RootContext.bind("old-xid");
         RootContext.bindBranchType(BranchType.AT);
 
         proxy.onHalfClose();
 
-        // Verify RootContext binding updated
         Assertions.assertEquals(xid, RootContext.getXID());
         Assertions.assertEquals(BranchType.TCC, RootContext.getBranchType());
 
@@ -81,15 +73,13 @@ class ServerListenerProxyTest {
 
     @Test
     void testOnHalfClose_withEmptyXid_shouldOnlyCleanContext_andCallTarget() {
-        ServerListenerProxy<String> proxy = new ServerListenerProxy<>(null, new HashMap<>(), target);
+        ServerListenerProxy<String> proxy = new ServerListenerProxy<>(null, null, target);
 
-        // Pre-bind some context to test cleanup
         RootContext.bind("old-xid");
         RootContext.bindBranchType(BranchType.TCC);
 
         proxy.onHalfClose();
 
-        // Context should be cleaned (unbind XID and branch type)
         Assertions.assertNull(RootContext.getXID());
         Assertions.assertNull(RootContext.getBranchType());
 

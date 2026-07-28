@@ -21,7 +21,7 @@ import io.netty.channel.ChannelFuture;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -166,15 +166,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             synchronized (RmNettyRemotingClient.class) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    final ThreadPoolExecutor messageExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads(),
                             nettyClientConfig.getClientWorkerThreads(),
                             KEEP_ALIVE_TIME,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(
-                                    nettyClientConfig.getRmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()),
                             new ThreadPoolExecutor.CallerRunsPolicy());
                     instance = new RmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }

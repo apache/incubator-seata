@@ -276,10 +276,10 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
 
     @Test
     public void testGetInsertParamsValueWithDefaultValues() {
-        String sql_3 = "INSERT INTO T1 DEFAULT VALUES";
-        SQLStatement ast_3 = getSQLStatement(sql_3);
-        SqlServerInsertRecognizer recognizer_3 = new SqlServerInsertRecognizer(sql_3, ast_3);
-        Assertions.assertTrue(recognizer_3.getInsertParamsValue().isEmpty());
+        String sql3 = "INSERT INTO T1 DEFAULT VALUES";
+        SQLStatement ast3 = getSQLStatement(sql3);
+        SqlServerInsertRecognizer recognizer3 = new SqlServerInsertRecognizer(sql3, ast3);
+        Assertions.assertTrue(recognizer3.getInsertParamsValue().isEmpty());
     }
 
     @Test

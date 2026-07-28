@@ -337,13 +337,13 @@ public class StringUtilsTest {
         Assertions.assertEquals("TestInterface$(a=\"aaa\")", StringUtils.toString(anonymousObj));
 
         // case: anonymous class from an abstract class
-        anonymousObj = new TestAbstractClass() {
+        anonymousObj = new AbstractTestClass() {
             private String a = "aaa";
 
             @Override
             public void test() {}
         };
-        Assertions.assertEquals("TestAbstractClass$(a=\"aaa\")", StringUtils.toString(anonymousObj));
+        Assertions.assertEquals("AbstractTestClass$(a=\"aaa\")", StringUtils.toString(anonymousObj));
 
         // final confirm: do not triggered the `toString` and `hashCode` methods
         Assertions.assertFalse(TestClass.hashCodeTriggered);
@@ -362,7 +362,7 @@ public class StringUtilsTest {
         void test();
     }
 
-    abstract class TestAbstractClass {
+    abstract class AbstractTestClass {
         abstract void test();
     }
 

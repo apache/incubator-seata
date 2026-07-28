@@ -700,7 +700,7 @@ public class ConnectionProxyXATest {
 
         // Verify branch report was called with Failed status
         Mockito.verify(mockResourceManager)
-                .branchReport(eq(BranchType.XA), eq(xid), anyLong(), eq(BranchStatus.PhaseOne_Failed), any());
+                .branchReport(eq(BranchType.XA), eq(xid), anyLong(), eq(BranchStatus.PhaseOne_PrepareFailed), any());
     }
 
     @AfterAll

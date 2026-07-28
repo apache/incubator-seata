@@ -21,8 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.RejectedPolicies;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -149,15 +149,13 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
             synchronized (TmNettyRemotingClient.class) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    final ThreadPoolExecutor messageExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads(),
                             nettyClientConfig.getClientWorkerThreads(),
                             KEEP_ALIVE_TIME,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(
-                                    nettyClientConfig.getTmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
                     instance = new TmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }

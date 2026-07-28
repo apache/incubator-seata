@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
+            <artifactId>seata-rpc-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -46,11 +46,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -69,21 +69,21 @@ public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMRespon
 
     @Override
     public RegisterRMResponse convert2Model(RegisterRMResponseProto registerRMResponseProto) {
-        RegisterRMResponse registerRMRequest = new RegisterRMResponse();
+        RegisterRMResponse registerRMResponse = new RegisterRMResponse();
 
-        AbstractIdentifyResponseProto abstractIdentifyRequestProto =
+        AbstractIdentifyResponseProto abstractIdentifyResponseProto =
                 registerRMResponseProto.getAbstractIdentifyResponse();
-        registerRMRequest.setExtraData(abstractIdentifyRequestProto.getExtraData());
-        registerRMRequest.setVersion(abstractIdentifyRequestProto.getVersion());
-        registerRMRequest.setIdentified(abstractIdentifyRequestProto.getIdentified());
+        registerRMResponse.setExtraData(abstractIdentifyResponseProto.getExtraData());
+        registerRMResponse.setVersion(abstractIdentifyResponseProto.getVersion());
+        registerRMResponse.setIdentified(abstractIdentifyResponseProto.getIdentified());
 
-        registerRMRequest.setMsg(
-                abstractIdentifyRequestProto.getAbstractResultMessage().getMsg());
-        registerRMRequest.setResultCode(ResultCode.valueOf(abstractIdentifyRequestProto
+        registerRMResponse.setMsg(
+                abstractIdentifyResponseProto.getAbstractResultMessage().getMsg());
+        registerRMResponse.setResultCode(ResultCode.valueOf(abstractIdentifyResponseProto
                 .getAbstractResultMessage()
                 .getResultCode()
                 .name()));
 
-        return registerRMRequest;
+        return registerRMResponse;
     }
 }

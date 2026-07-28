@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
@@ -47,11 +47,9 @@ public class MockFastJson2Test {
     @BeforeAll
     public static void before() {
         ConfigurationFactory.reload();
-        ConfigurationTestHelper.putConfig(
+        System.setProperty(
                 ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        // Enable it when testing is needed. The settings here will affect the global configuration.
-        // ConfigurationTestHelper.putConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,
-        // String.valueOf(SerializerType.FASTJSON2));
+        ConfigurationCache.clear();
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
@@ -60,8 +58,9 @@ public class MockFastJson2Test {
     @AfterAll
     public static void after() {
         // MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
+        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty(ConfigurationKeys.SERIALIZE_FOR_RPC);
+        ConfigurationCache.clear();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
     }

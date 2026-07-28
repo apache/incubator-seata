@@ -65,10 +65,10 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
     @Override
     public String getHeader(String name) {
-        if (RootContext.KEY_XID.equals(name)) return myRequest.getHeader().get(RootContext.KEY_XID);
-        else {
-            return null;
+        if (RootContext.KEY_XID.equals(name)) {
+            return myRequest.getHeader().get(RootContext.KEY_XID);
         }
+        return null;
     }
 
     @Override

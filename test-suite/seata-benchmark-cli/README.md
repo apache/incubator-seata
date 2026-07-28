@@ -20,13 +20,18 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 
 ## Features
 
-- Support for **AT**, **TCC**, and **SAGA** transaction modes
+- Support for **AT**, **TCC**, **SAGA**, **XA**, and **SAGA_ANNOTATION** transaction modes
 - **Dual execution modes**:
   - **Empty mode** (`--branches 0`): Pure Seata protocol overhead testing
   - **Real mode** (`--branches N`): Actual distributed transaction execution
 - **Configurable TPS** (Transactions Per Second) control
 - **Multi-threaded** workload generation
 - **Fault injection** with configurable rollback percentage
+- **Selectable SAGA state machine shapes** such as `simple` and `order`
+- **Selectable SAGA workload implementations** such as `mock` and `db`
+- **Step-targeted SAGA failure injection** for forward steps such as `inventory`, `payment`, and `order`
+- **Reproducible SAGA failure injection** with `--saga-random-seed`
+- **Step-targeted SAGA timeout simulation** with `--saga-timeout-step` and `--saga-timeout-ms`
 - **Window-based progress reporting** (every 10 seconds)
 - Performance metrics collection (latency percentiles, success rate, TPS)
 - **CSV export** for post-analysis
@@ -59,21 +64,39 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
   --duration 60
 
-# TCC mode benchmark
+# TCC mode benchmark (empty transaction)
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode TCC \
-  --tps 200 \
-  --threads 20 \
-  --duration 120
+  --tps 100 \
+  --threads 1 \
+  --duration 60
 
 # SAGA mode benchmark (empty transaction)
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# SAGA_ANNOTATION mode benchmark (empty transaction)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# XA mode benchmark (empty transaction)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
   --duration 60
 ```
 
@@ -85,6 +108,16 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
+
+# TCC mode with real try/confirm/cancel
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3
 
@@ -93,9 +126,75 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
+  --threads 1 \
   --duration 60 \
   --branches 3 \
   --rollback-percentage 5
+
+# SAGA mode with explicit order state machine shape
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order
+
+# SAGA mode with DB-backed business actions (via Testcontainers MySQL)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db
+
+# SAGA mode with payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
+
+# SAGA mode with reproducible payment-step failure injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --rollback-percentage 20 \
+  --saga-fail-step payment \
+  --saga-random-seed 123
+
+# SAGA mode with payment-step timeout simulation
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 10 \
+  --threads 1 \
+  --duration 10 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-timeout-step payment \
+  --saga-timeout-ms 3000
+
+# XA mode with real MySQL XA branches (via Testcontainers)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
 ```
 
 ### Performance Testing Modes
@@ -157,6 +256,12 @@ java -jar seata-benchmark-cli.jar \
 Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
                        [-d=<duration>] [--export-csv=<exportCsv>]
                        [-m=<mode>] [-s=<server>] [-t=<targetTps>]
+                       [--saga-shape=<sagaShape>]
+                       [--saga-workload=<sagaWorkload>]
+                       [--saga-fail-step=<sagaFailStep>]
+                       [--saga-random-seed=<sagaRandomSeed>]
+                       [--saga-timeout-step=<sagaTimeoutStep>]
+                       [--saga-timeout-ms=<sagaTimeoutMs>]
                        [--threads=<threads>] [--tx-service-group=<txServiceGroup>]
                        [--warmup-duration=<warmupDuration>]
                        [--rollback-percentage=<rollbackPercentage>]
@@ -164,7 +269,7 @@ Usage: seata-benchmark [-hV] [--application-id=<applicationId>]
 
 Options:
   -s, --server=<server>                Seata Server address (host:port)
-  -m, --mode=<mode>                    Transaction mode: AT, TCC, or SAGA
+  -m, --mode=<mode>                    Transaction mode: AT, TCC, SAGA, XA, or SAGA_ANNOTATION
   -t, --tps=<targetTps>                Target TPS (default: 100)
       --threads=<threads>              Concurrent threads (default: 10)
   -d, --duration=<duration>            Duration in seconds (default: 60)
@@ -172,6 +277,26 @@ Options:
                                        Warmup duration in seconds (default: 0)
       --rollback-percentage=<rollbackPercentage>
                                        Rollback percentage for fault injection (0-100, default: 2)
+      --saga-shape=<sagaShape>         Select SAGA state machine shape: simple or order.
+                                       If omitted, the benchmark keeps the existing
+                                       branches-based compatibility behavior.
+      --saga-workload=<sagaWorkload>   Select SAGA workload implementation: mock or db.
+                                       The default is mock. The db workload uses
+                                       Testcontainers MySQL for DB-backed order,
+                                       inventory, and payment actions.
+      --saga-fail-step=<sagaFailStep>  Restrict SAGA failure injection to one forward step:
+                                       inventory, payment, or order.
+                                       The failure ratio is still controlled by
+                                       --rollback-percentage.
+      --saga-random-seed=<sagaRandomSeed>
+                                       Optional random seed for reproducible SAGA
+                                       failure injection behavior.
+      --saga-timeout-step=<sagaTimeoutStep>
+                                       Simulate SAGA timeout at one forward step:
+                                       inventory, payment, or order.
+      --saga-timeout-ms=<sagaTimeoutMs>
+                                       Simulated timeout delay in milliseconds for
+                                       SAGA timeout injection (default: 3000).
       --branches=<branches>            Number of branch transactions
                                        0 = empty mode (protocol overhead only)
                                        >=1 = real mode (actual execution)
@@ -232,20 +357,36 @@ When the benchmark completes, a final report is displayed:
 ===================================================
            Seata Benchmark Final Report
 ===================================================
+Mode:                  SAGA
+Saga Workload:         db
+Saga Shape:            order
 Total Transactions:    6,000
-Success Count:         5,940
-Failed Count:          60
-Success Rate:          99.00%
-Average TPS:           100.2
+Success Count:         5,780
+Failed Count:          220
+Success Rate:          96.33%
+Committed Count:       4,860
+Compensated Count:     920
+Execution Failed Count: 180
+Compensation Failed Count: 40
+Unknown Count:         0
+Committed Rate:        81.00%
+Compensated Rate:      15.33%
+End-State Success Rate: 96.33%
+Average TPS:           100.0
 Elapsed Time:          60 seconds
 
 Latency Statistics:
   P50:                 12 ms
   P95:                 45 ms
   P99:                 89 ms
+  P99.9:               120 ms
   Max:                 230 ms
 ===================================================
 ```
+
+For timeout simulation scenarios, the reported `Elapsed Time` may slightly exceed the configured `--duration` because already-started transactions are allowed to finish before the workload generator stops.
+
+For DB-backed SAGA scenarios, the final report and CSV output also include `Saga Workload`, so benchmark results from `mock` and `db` workloads can be compared explicitly.
 
 ### CSV Export
 
@@ -264,17 +405,29 @@ Output format:
 
 ```csv
 Metric,Value
+Mode,SAGA
+Saga Workload,db
+Saga Shape,order
 Total Transactions,6000
-Success Count,5940
-Failed Count,60
-Success Rate (%),99.00
-Average TPS,100.2
+Success Count,5780
+Failed Count,220
+Success Rate (%),96.33
+Committed Count,4860
+Compensated Count,920
+Execution Failed Count,180
+Compensation Failed Count,40
+Unknown Count,0
+Committed Rate (%),81.00
+Compensated Rate (%),15.33
+End-State Success Rate (%),96.33
+Average TPS,100.0
 Elapsed Time (s),60
 Latency P50 (ms),12
 Latency P95 (ms),45
 Latency P99 (ms),89
+Latency P99.9 (ms),120
 Latency Max (ms),230
-Export Timestamp,2025-12-01 10:30:45
+Export Time,2025-12-01 10:30:45
 ```
 
 ## Examples
@@ -313,15 +466,139 @@ java -jar seata-benchmark-cli.jar \
   --rollback-percentage 5
 ```
 
-### Test TCC Mode at High Load
+### Test SAGA Mode with Payment-Step Failure Injection
 
 ```bash
 java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
+```
+
+### Test SAGA Mode with DB-Backed Business Actions
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db
+```
+
+### Test DB-Backed SAGA with Payment-Step Failure Injection
+
+```bash
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA \
+  --tps 10 \
+  --threads 1 \
+  --duration 10 \
+  --branches 3 \
+  --saga-shape order \
+  --saga-workload db \
+  --rollback-percentage 20 \
+  --saga-fail-step payment
+```
+
+### Test SAGA_ANNOTATION Mode (Annotation-based Compensation)
+
+```bash
+# Empty mode: protocol overhead only
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --duration 60
+
+# Real mode: 3 branches per transaction, 5% compensation rate
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION \
+  --tps 100 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 5
+```
+
+### Compare SAGA vs SAGA_ANNOTATION
+
+```bash
+# State-machine Saga
+java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
+  --mode SAGA --tps 10000 --threads 50 --duration 60 --branches 3
+
+# Annotation-based Saga
+java -jar seata-benchmark-cli.jar --server 127.0.0.1:8091 \
+  --mode SAGA_ANNOTATION --tps 10000 --threads 50 --duration 60 --branches 3
+```
+
+### Test XA Mode
+
+```bash
+# Empty mode: protocol overhead only
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# Real mode: 3 XA branches per transaction
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3
+
+# Real mode with rollback injection
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode XA \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 10
+```
+
+### Test TCC Mode (try/confirm/cancel)
+
+```bash
+# Empty mode: protocol overhead only (fixed TPS)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
   --mode TCC \
-  --tps 500 \
+  --tps 100 \
+  --threads 1 \
+  --duration 60
+
+# Empty mode: max throughput (fixed concurrency)
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100000 \
   --threads 50 \
-  --duration 300
+  --duration 60
+
+# Real mode: 3 branches per transaction, 10% cancel rate
+java -jar seata-benchmark-cli.jar \
+  --server 127.0.0.1:8091 \
+  --mode TCC \
+  --tps 100 \
+  --threads 1 \
+  --duration 60 \
+  --branches 3 \
+  --rollback-percentage 10
 ```
 
 ### Test with Warmup
@@ -331,6 +608,7 @@ java -jar seata-benchmark-cli.jar \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 200 \
+  --threads 1 \
   --duration 120 \
   --warmup-duration 30
 ```
@@ -339,19 +617,23 @@ java -jar seata-benchmark-cli.jar \
 
 ### Transaction Modes
 
-| Mode | Empty Mode (branches=0) | Real Mode (branches>0) |
-|------|-------------------------|------------------------|
-| AT   | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
-| TCC  | Mock implementation     | Mock implementation |
-| SAGA | Mock simulation         | State machine engine with compensation |
+| Mode             | Empty Mode (branches=0) | Real Mode (branches>0) |
+|------------------|-------------------------|------------------------|
+| AT               | Pure protocol overhead  | MySQL via Testcontainers (account transfer) |
+| TCC              | Pure protocol overhead  | Real try/confirm/cancel via @LocalTCC interceptor |
+| SAGA             | Mock simulation         | State machine engine with compensation |
+| XA               | Pure protocol overhead  | MySQL XA via Testcontainers (account transfer) |
+| SAGA_ANNOTATION  | Pure protocol overhead  | Annotation interceptor + TC compensation callback |
 
 ### Empty Transaction Mode
 
 For accurate benchmarking of Seata Server capacity, the tool executes **empty transactions**:
 
 - **AT Mode**: Only `begin()` and `commit()` operations, no SQL execution
-- **TCC Mode**: Empty transaction flow (mock implementation)
+- **TCC Mode**: Empty global transaction, no branch registration
 - **SAGA Mode**: Simplified simulation without state machine
+- **XA Mode**: Empty global transaction, no XA branch registration
+- **SAGA_ANNOTATION Mode**: Empty global transaction, no branch registration
 
 This approach:
 - Measures pure Seata protocol overhead
@@ -369,13 +651,50 @@ When `--branches` is set to a value greater than 0:
   - Executes real account transfer operations
   - Each branch performs debit/credit operations
 
+- **TCC Mode**:
+  - Uses `@LocalTCC` + `@TwoPhaseBusinessAction` annotation path
+  - Each branch is registered via the TCC interceptor (JDK dynamic proxy, no Spring required)
+  - `try` (prepare) runs in the business thread; `commit` / `rollback` are invoked by the TC
+  - No-op implementation so the benchmark measures pure TCC protocol overhead
+  - `--branches N` = N TCC branch registrations per transaction
+
 - **SAGA Mode**:
   - Uses Seata state machine engine
   - Executes predefined state machine definitions
+  - Supports `mock` and `db` workloads
   - Supports compensation on failure
   - Available state machines:
     - `benchmarkSimpleSaga`: For 1-2 branches
     - `benchmarkOrderSaga`: For 3+ branches (order/inventory/payment)
+  - DB workload behavior:
+    - Starts MySQL via Testcontainers
+    - Creates benchmark inventory, account, and order tables
+    - Executes DB-backed inventory/payment/order actions with compensation
+
+- **XA Mode**:
+  - Starts MySQL container via Testcontainers
+  - Wraps the datasource with `DataSourceProxyXA`
+  - Creates an XA benchmark account table with initial test data
+  - Executes `--branches N` XA-backed account transfer branches per global transaction
+
+### SAGA Workloads
+
+- `mock` workload:
+  - Keeps the lightweight benchmark-oriented implementation
+  - Uses in-memory Saga services with simulated delay, failure injection, and timeout injection
+  - Is the default workload and preserves backward compatibility
+
+- `db` workload:
+  - Starts a MySQL container via Testcontainers
+  - Initializes benchmark tables for inventory, account, and order data
+  - Executes DB-backed order, inventory, and payment actions while still supporting the same Saga shape, fail-step, random-seed, and timeout options
+  - Is intended for more realistic business-style Saga benchmarking
+
+- **SAGA_ANNOTATION Mode**:
+  - Uses `@SagaTransactional` + `@CompensationBusinessAction` annotation path
+  - Each branch is registered via the annotation interceptor (JDK dynamic proxy, no Spring required)
+  - On rollback, the TC invokes the compensation method for every registered branch
+  - `--branches N` = N `@CompensationBusinessAction` calls per transaction
 
 ### Fault Injection
 
@@ -444,7 +763,7 @@ Logs are written to `seata-benchmark.log` in the current directory.
 ## Roadmap
 
 ### Current Version (v1.0)
-- AT, TCC, and SAGA mode support
+- AT, TCC, SAGA, XA, and SAGA_ANNOTATION mode support
 - Empty and real transaction modes
 - YAML configuration file support
 - Fault injection (rollback percentage)
@@ -456,8 +775,6 @@ Logs are written to `seata-benchmark.log` in the current directory.
 
 **v1.1 - Enhancement:**
 - P99.9 percentile
-- Real TCC implementation with try/confirm/cancel
-- XA mode support
 
 **v2.0 - Advanced Features:**
 - Real-time TUI (Terminal User Interface)

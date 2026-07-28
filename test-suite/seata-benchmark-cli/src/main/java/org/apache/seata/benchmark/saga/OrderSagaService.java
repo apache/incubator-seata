@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -34,10 +35,24 @@ public class OrderSagaService {
 
     private final int rollbackPercentage;
     private final int simulatedDelayMs;
+    private final boolean failInjectionEnabled;
+    private final ThreadLocal<Random> failureRandom;
+    private final boolean timeoutInjectionEnabled;
+    private final int timeoutMs;
 
-    public OrderSagaService(int rollbackPercentage, int simulatedDelayMs) {
+    public OrderSagaService(
+            int rollbackPercentage,
+            int simulatedDelayMs,
+            boolean failInjectionEnabled,
+            ThreadLocal<Random> failureRandom,
+            boolean timeoutInjectionEnabled,
+            int timeoutMs) {
         this.rollbackPercentage = rollbackPercentage;
         this.simulatedDelayMs = simulatedDelayMs;
+        this.failInjectionEnabled = failInjectionEnabled;
+        this.failureRandom = failureRandom;
+        this.timeoutInjectionEnabled = timeoutInjectionEnabled;
+        this.timeoutMs = timeoutMs;
     }
 
     /**
@@ -58,7 +73,11 @@ public class OrderSagaService {
         // Simulate processing time
         simulateDelay();
 
-        // Simulate random failure based on rollback percentage
+        if (timeoutInjectionEnabled) {
+            simulateTimeout("order creation");
+        }
+
+        // Simulate failure injection on the selected step.
         if (shouldFail()) {
             LOGGER.debug("Order creation failed (simulated): userId={}", userId);
             throw new RuntimeException("Simulated order creation failure");
@@ -95,6 +114,12 @@ public class OrderSagaService {
         return result;
     }
 
+    public void destroy() {
+        if (failureRandom != null) {
+            failureRandom.remove();
+        }
+    }
+
     private void simulateDelay() {
         if (simulatedDelayMs > 0) {
             try {
@@ -106,6 +131,23 @@ public class OrderSagaService {
     }
 
     private boolean shouldFail() {
-        return ThreadLocalRandom.current().nextInt(100) < rollbackPercentage;
+        if (!failInjectionEnabled) {
+            return false;
+        }
+        return nextFailurePercent() < rollbackPercentage;
+    }
+
+    private void simulateTimeout(String operation) {
+        LOGGER.debug("Simulating {} timeout: {} ms", operation, timeoutMs);
+        try {
+            Thread.sleep(timeoutMs);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        throw new RuntimeException("Simulated " + operation + " timeout");
+    }
+
+    private int nextFailurePercent() {
+        return FailureRandomProvider.nextPercent(failureRandom);
     }
 }

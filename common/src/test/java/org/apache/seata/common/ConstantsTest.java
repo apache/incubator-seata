@@ -72,6 +72,7 @@ public class ConstantsTest {
         assertEquals("jackson", Constants.JACKSON_JSON_PARSER_NAME);
         assertEquals("gson", Constants.GSON_JSON_PARSER_NAME);
         assertEquals("{\"@class\":", Constants.JACKSON_JSON_TEXT_PREFIX);
+        assertEquals("jackson", DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
         assertEquals("40001", Constants.DEAD_LOCK_SQL_STATE);
         assertEquals("X-SEATA-RAFT-GROUP", Constants.RAFT_GROUP_HEADER);
     }

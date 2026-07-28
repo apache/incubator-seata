@@ -50,7 +50,7 @@ import static org.mockito.Mockito.when;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ConsulRegistryServiceImplMockTest {
 
-    final String TEST_CLUSTER_NAME = "testCluster";
+    private static final String TEST_CLUSTER_NAME = "testCluster";
 
     ConsulClient client;
     Configuration configuration;

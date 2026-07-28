@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>json-common</artifactId>
+            <artifactId>json-common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -31,9 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RootContextTest {
 
-    private final String DEFAULT_XID = "default_xid";
+    private static final String DEFAULT_XID = "default_xid";
 
-    private final BranchType DEFAULT_BRANCH_TYPE = BranchType.AT;
+    private static final BranchType DEFAULT_BRANCH_TYPE = BranchType.AT;
 
     /**
      * Test bind and unbind.

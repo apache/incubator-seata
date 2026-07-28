@@ -39,7 +39,7 @@ public class ApolloMockServer {
     private MockWebServer server;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final String CONFIG_PREFIX_PATH = "/configs";
+    private static final String CONFIG_PREFIX_PATH = "/configs";
 
     /**
      * Instantiates a new Apollo mock server.
@@ -72,9 +72,9 @@ public class ApolloMockServer {
         System.setProperty("apollo.configService", "http://localhost:" + port);
     }
 
-    private String loadMockData(String appId, String Cluster, String namespace) throws JsonProcessingException {
+    private String loadMockData(String appId, String cluster, String namespace) throws JsonProcessingException {
         String fileName = "mock-" + namespace + ".properties";
-        ApolloConfig apolloConfig = new ApolloConfig(appId, Cluster, namespace, "releaseKey");
+        ApolloConfig apolloConfig = new ApolloConfig(appId, cluster, namespace, "releaseKey");
         Properties properties = new Properties();
         try (InputStream input = this.getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (null != input) {

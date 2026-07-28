@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.console.impl.db;
 
+import jakarta.annotation.Resource;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -36,7 +37,6 @@ import org.apache.seata.server.console.service.GlobalSessionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

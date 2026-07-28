@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  *
  * This tests server backward compatibility - V2 server handling V1 client.
  */
-public class ServerV2ToClientV1Test extends MultiVersionCompatibilityTest {
+public class ServerV2ToClientV1Test extends AbstractMultiVersionCompatibilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerV2ToClientV1Test.class);
 

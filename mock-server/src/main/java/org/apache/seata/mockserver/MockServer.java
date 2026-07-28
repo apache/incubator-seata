@@ -19,12 +19,13 @@ package org.apache.seata.mockserver;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ public class MockServer {
     private static MockNettyRemotingServer nettyRemotingServer;
 
     private static volatile boolean inited = false;
+    private static volatile int actualPort;
 
     public static final int MOCK_DEFAULT_PORT = 10091;
     public static String MOCK_SEATA_PORT_KEY = "SEATA_MOCK_PORT";
@@ -81,13 +83,13 @@ public class MockServer {
                     System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
                     System.clearProperty("server.port");
                     inited = true;
-                    workingThreads = new ThreadPoolExecutor(
+                    workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            "ServerHandlerThread",
                             50,
                             50,
                             500,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
-                            new NamedThreadFactory("ServerHandlerThread", 500),
                             new ThreadPoolExecutor.CallerRunsPolicy());
                     NettyServerConfig config = new NettyServerConfig();
                     config.setServerListenPort(port);
@@ -105,19 +107,20 @@ public class MockServer {
                     coordinator.setRemotingServer(nettyRemotingServer);
                     nettyRemotingServer.setHandler(coordinator);
                     nettyRemotingServer.init();
-                    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            LOGGER.info("system is closing , pid info: "
-                                    + ManagementFactory.getRuntimeMXBean().getName());
-                        }
-                    }));
+                    ShutdownHook.getInstance()
+                            .addDisposable(() -> LOGGER.info("system is closing , pid info: "
+                                    + ManagementFactory.getRuntimeMXBean().getName()));
                     LOGGER.info(
                             "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    actualPort = port;
                     LOGGER.info("MockServer started on port: {}", port);
                 }
             }
         }
+    }
+
+    public static int getPort() {
+        return actualPort;
     }
 
     public static void close() {

@@ -91,7 +91,7 @@ public class TmNettyClientTest extends BaseNettyClientTest {
     @Test
     public void testSendMsgWithResponse() throws Exception {
         int dynamicPort = getDynamicPort();
-        ServerInstance serverInstance = startServerSimple(dynamicPort);
+        ServerInstance serverInstance = startServer(dynamicPort);
 
         try {
             configureClient(dynamicPort);
@@ -111,7 +111,7 @@ public class TmNettyClientTest extends BaseNettyClientTest {
             request.setXid("127.0.0.1:" + dynamicPort + ":1249853");
             GlobalCommitResponse globalCommitResponse = null;
             try {
-                globalCommitResponse = (GlobalCommitResponse) tmNettyRemotingClient.sendSyncRequest(request);
+                globalCommitResponse = (GlobalCommitResponse) tmNettyRemotingClient.sendSyncRequest(channel, request);
             } catch (TimeoutException e) {
                 throw new RuntimeException(e);
             }

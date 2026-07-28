@@ -31,9 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RejectedPoliciesTest {
 
-    private final int DEFAULT_CORE_POOL_SIZE = 1;
-    private final int DEFAULT_KEEP_ALIVE_TIME = 10;
-    private final int MAX_QUEUE_SIZE = 1;
+    private static final int DEFAULT_CORE_POOL_SIZE = 1;
+    private static final int DEFAULT_KEEP_ALIVE_TIME = 10;
+    private static final int MAX_QUEUE_SIZE = 1;
 
     /**
      * Test runs oldest task policy.

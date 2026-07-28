@@ -17,7 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import com.google.common.collect.Lists;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -39,8 +39,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
@@ -73,8 +71,7 @@ public class AsyncWorker {
         LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
         commitQueue = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
 
-        ThreadFactory threadFactory = new NamedThreadFactory("AsyncWorker", 2, true);
-        scheduledExecutor = new ScheduledThreadPoolExecutor(2, threadFactory);
+        scheduledExecutor = ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("AsyncWorker", 2, true);
         scheduledExecutor.scheduleAtFixedRate(this::doBranchCommitSafely, 10, 1000, TimeUnit.MILLISECONDS);
     }
 
