@@ -318,6 +318,10 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             }
 
             stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
+            if (stateInstance.getExtensionParams() != null) {
+                stateInstance.setSerializedExtensionParams(
+                        paramsSerializer.serialize(stateInstance.getExtensionParams()));
+            }
             if (!isUpdateMode) {
                 executeUpdate(
                         stateLogStoreSqls.getRecordStateStartedSql(dbType),
@@ -771,6 +775,10 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             if (serializedException != null) {
                 stateInstance.setException(exceptionSerializer.deserialize(serializedException));
             }
+            String extParams = (String) stateInstance.getSerializedExtensionParams();
+            if (StringUtils.hasLength(extParams)) {
+                stateInstance.setExtensionParams(paramsSerializer.deserialize(extParams));
+            }
         }
     }
 
@@ -969,6 +977,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(14, stateInstance.getStateIdRetriedFor());
             statement.setTimestamp(
                     15, new Timestamp(stateInstance.getGmtUpdated().getTime()));
+            statement.setObject(16, stateInstance.getSerializedExtensionParams());
         }
     }
 
@@ -1036,7 +1045,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             stateInstance.setSerializedInputParams(resultSet.getString("input_params"));
             stateInstance.setSerializedOutputParams(resultSet.getString("output_params"));
             stateInstance.setSerializedException(resultSet.getBytes("excep"));
-
+            stateInstance.setSerializedExtensionParams(resultSet.getString("ext_params"));
             return stateInstance;
         }
     }

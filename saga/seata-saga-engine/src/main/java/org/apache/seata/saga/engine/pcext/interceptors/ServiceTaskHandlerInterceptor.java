@@ -193,6 +193,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
 
         stateInstance.setInputParams(serviceInputParams);
+        Object loopElement = context.getVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT);
+        if (loopElement != null) {
+            Map<String, Object> extensionParams = new java.util.HashMap<>();
+            extensionParams.put(DomainConstants.VAR_NAME_LOOP_ELEMENT, loopElement);
+            stateInstance.setExtensionParams(extensionParams);
+        }
 
         if (stateMachineInstance.getStateMachine().isPersist()
                 && state.isPersist()
@@ -288,6 +294,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         context.removeVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         context.removeVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
+        context.removeVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT);
 
         stateInstance.setGmtEnd(new Date());
 

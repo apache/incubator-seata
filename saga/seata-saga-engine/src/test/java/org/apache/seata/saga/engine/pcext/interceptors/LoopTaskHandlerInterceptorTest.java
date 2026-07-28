@@ -47,19 +47,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Test class for {@link LoopTaskHandlerInterceptor}
@@ -126,6 +118,7 @@ public class LoopTaskHandlerInterceptorTest {
         when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
         when(instruction.getState(context)).thenReturn(taskState);
         when(taskState.getLoop()).thenReturn(loop);
+        when(taskState.getName()).thenReturn("OriginalTask");
         when(context.getVariable(DomainConstants.LOOP_COUNTER)).thenReturn(0);
 
         // Set loop configuration
@@ -147,8 +140,14 @@ public class LoopTaskHandlerInterceptorTest {
         // Execute
         assertDoesNotThrow(() -> interceptor.preProcess(context));
 
-        // Verify setVariableLocally is called
-        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), any(Map.class));
+        @SuppressWarnings("rawtypes")
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
+
+        Map<?, ?> capturedMap = mapCaptor.getValue();
+        assertEquals("existingValue", capturedMap.get("existingKey"));
+        assertEquals(0, capturedMap.get("loopIndex"));
+        assertEquals("item1", capturedMap.get("loopElement"));
     }
 
     // ========== Additional Tests: Coverage for postProcess Core Logic ==========
@@ -273,12 +272,15 @@ public class LoopTaskHandlerInterceptorTest {
         assertTrue(holder.isFailEnd());
     }
 
-    @Test
-    public void preProcessWhenIsCompensateStateEvaluateExpressionTest() {
+    private HierarchicalProcessContext setupCommonMocks(
+            Loop loop,
+            Map<String, Object> globalContextVariables,
+            StateMachineConfig config,
+            CompensationHolder compensationHolder) {
+
         HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
         StateInstruction instruction = mock(StateInstruction.class);
         AbstractTaskState currentState = mock(AbstractTaskState.class);
-        Loop loop = mock(Loop.class);
 
         when(context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)).thenReturn(true);
         when(context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE))
@@ -297,20 +299,96 @@ public class LoopTaskHandlerInterceptorTest {
         when(stateToBeCompensated.getStateMachineInstance()).thenReturn(stateMachineInstance);
         when(stateMachineInstance.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState(anyString())).thenReturn(compensateState);
+        when(compensateState.getName()).thenReturn("CompensateTask");
         when(compensateState.getLoop()).thenReturn(loop);
-        when(loop.getCollection()).thenReturn("$.[collection]");
+
         when(loop.getElementIndexName()).thenReturn("loopIndex");
         when(loop.getElementVariableName()).thenReturn("loopElement");
 
-        CompensationHolder compensationHolder = mock(CompensationHolder.class);
         Map<String, StateInstance> compMap = new HashMap<>();
         compMap.put("CompensateTask", stateToBeCompensated);
         when(compensationHolder.getStatesNeedCompensation()).thenReturn(compMap);
 
+        when(context.getVariable(anyString())).thenAnswer(invocation -> {
+            String arg = invocation.getArgument(0);
+            if (DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT.equals(arg)) {
+                return globalContextVariables;
+            }
+            if (DomainConstants.VAR_NAME_STATEMACHINE_CONFIG.equals(arg)) {
+                return config;
+            }
+            return null;
+        });
+
+        return context;
+    }
+
+    private void executePreProcessWithStaticMocks(
+            HierarchicalProcessContext context, CompensationHolder compensationHolder) {
+        try (MockedStatic<CompensationHolder> compHolderMock = mockStatic(CompensationHolder.class);
+                MockedStatic<LoopTaskUtils> loopTaskUtilsMock = mockStatic(LoopTaskUtils.class);
+                MockedStatic<EngineUtils> engineUtilsMock = mockStatic(EngineUtils.class)) {
+
+            compHolderMock
+                    .when(() -> CompensationHolder.getCurrent(context, true))
+                    .thenReturn(compensationHolder);
+            loopTaskUtilsMock
+                    .when(() -> LoopTaskUtils.reloadLoopCounter(anyString()))
+                    .thenReturn(2);
+            engineUtilsMock
+                    .when(() -> EngineUtils.getOriginStateName(any(StateInstance.class)))
+                    .thenReturn("OriginalTask");
+
+            assertDoesNotThrow(() -> interceptor.preProcess(context));
+        }
+    }
+
+    @Test
+    public void preProcessWhenIsCompensateStateWithSnapshot_UseSnapshotTest() {
+        Loop loop = mock(Loop.class);
         Map<String, Object> globalContextVariables = new HashMap<>();
+        StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
+
         globalContextVariables.put("existingKey", "existingValue");
 
+        ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
+        when(config.getExpressionFactoryManager()).thenReturn(manager);
+
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
+
+        // NEW: Mock extensionParams to provide the loop element (simulating DB persistence recovery)
+        Map<String, Object> extensionParams = new HashMap<>();
+        extensionParams.put(DomainConstants.VAR_NAME_LOOP_ELEMENT, "item2");
+        when(compensationHolder
+                        .getStatesNeedCompensation()
+                        .get("CompensateTask")
+                        .getExtensionParams())
+                .thenReturn(extensionParams);
+
+        executePreProcessWithStaticMocks(context, compensationHolder);
+
+        @SuppressWarnings("rawtypes")
+        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
+
+        Map<?, ?> capturedMap = mapCaptor.getValue();
+        assertEquals("existingValue", capturedMap.get("existingKey"));
+        assertEquals(2, capturedMap.get("loopIndex"));
+        assertEquals("item2", capturedMap.get("loopElement"));
+
+        verify(manager, never()).getExpressionFactory(anyString());
+    }
+
+    @Test
+    public void preProcessWhenExpressionReturnsNull_DoNotSetContextVariablesTest() {
+        Loop loop = mock(Loop.class);
+        when(loop.getCollection()).thenReturn("$.[collection]");
+
+        Map<String, Object> globalContextVariables = new HashMap<>();
         StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
+
         ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
         ExpressionFactory factory = mock(ExpressionFactory.class);
         Expression expression = mock(Expression.class);
@@ -318,273 +396,54 @@ public class LoopTaskHandlerInterceptorTest {
         when(config.getExpressionFactoryManager()).thenReturn(manager);
         when(manager.getExpressionFactory(anyString())).thenReturn(factory);
         when(factory.createExpression("$.[collection]")).thenReturn(expression);
+        when(expression.getValue(globalContextVariables)).thenReturn(null);
 
-        List<String> mockHistoricalCollection = Arrays.asList("item0", "item1", "item2", "item3");
-        when(expression.getValue(globalContextVariables)).thenReturn(mockHistoricalCollection);
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
 
-        when(context.getVariable(anyString())).thenAnswer(invocation -> {
-            String arg = invocation.getArgument(0);
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT.equals(arg)) {
-                return globalContextVariables;
-            }
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONFIG.equals(arg)) {
-                return config;
-            }
-            return null;
-        });
-
-        try (MockedStatic<CompensationHolder> compHolderMock = mockStatic(CompensationHolder.class);
-                MockedStatic<LoopTaskUtils> loopTaskUtilsMock = mockStatic(LoopTaskUtils.class);
-                MockedStatic<EngineUtils> engineUtilsMock = mockStatic(EngineUtils.class)) {
-
-            compHolderMock
-                    .when(() -> CompensationHolder.getCurrent(context, true))
-                    .thenReturn(compensationHolder);
-            loopTaskUtilsMock
-                    .when(() -> LoopTaskUtils.reloadLoopCounter(anyString()))
-                    .thenReturn(2);
-            engineUtilsMock
-                    .when(() -> EngineUtils.getOriginStateName(any(StateInstance.class)))
-                    .thenReturn("OriginalTask");
-
-            assertDoesNotThrow(() -> interceptor.preProcess(context));
-        }
-
-        @SuppressWarnings("rawtypes")
-        ArgumentCaptor<Map> mapCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(context).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), mapCaptor.capture());
-
-        Map<?, ?> capturedMap = mapCaptor.getValue();
-
-        assertEquals("existingValue", capturedMap.get("existingKey"));
-        assertEquals(2, capturedMap.get("loopIndex"));
-        assertEquals("item2", capturedMap.get("loopElement"));
-
-        verify(factory).createExpression("$.[collection]");
-        verify(expression).getValue(globalContextVariables);
-    }
-
-    @Test
-    public void preProcessWhenExpressionReturnsNull_DoNotSetContextVariablesTest() {
-        HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
-        StateInstruction instruction = mock(StateInstruction.class);
-        AbstractTaskState currentState = mock(AbstractTaskState.class);
-        Loop loop = mock(Loop.class);
-
-        when(context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)).thenReturn(true);
-        when(context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE))
-                .thenReturn(true);
-        when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
-        when(instruction.getState(context)).thenReturn(currentState);
-        when(currentState.getName()).thenReturn("CompensateTask");
-
-        StateInstance stateToBeCompensated = mock(StateInstance.class);
-        when(stateToBeCompensated.getName()).thenReturn("OriginalTask-2");
-
-        StateMachineInstance stateMachineInstance = mock(StateMachineInstance.class);
-        StateMachine stateMachine = mock(StateMachine.class);
-        AbstractTaskState compensateState = mock(AbstractTaskState.class);
-
-        when(stateToBeCompensated.getStateMachineInstance()).thenReturn(stateMachineInstance);
-        when(stateMachineInstance.getStateMachine()).thenReturn(stateMachine);
-        when(stateMachine.getState(anyString())).thenReturn(compensateState);
-        when(compensateState.getLoop()).thenReturn(loop);
-        when(loop.getCollection()).thenReturn("$.[collection]");
-        when(loop.getElementIndexName()).thenReturn("loopIndex");
-        when(loop.getElementVariableName()).thenReturn("loopElement");
-
-        CompensationHolder compensationHolder = mock(CompensationHolder.class);
-        Map<String, StateInstance> compMap = new HashMap<>();
-        compMap.put("CompensateTask", stateToBeCompensated);
-        when(compensationHolder.getStatesNeedCompensation()).thenReturn(compMap);
-
-        Map<String, Object> globalContextVariables = new HashMap<>();
-
-        when(context.getVariable(anyString())).thenAnswer(invocation -> {
-            String arg = invocation.getArgument(0);
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT.equals(arg)) {
-                return globalContextVariables;
-            }
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONFIG.equals(arg)) {
-                StateMachineConfig config = mock(StateMachineConfig.class);
-                ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
-                ExpressionFactory factory = mock(ExpressionFactory.class);
-                Expression expression = mock(Expression.class);
-
-                when(config.getExpressionFactoryManager()).thenReturn(manager);
-                when(manager.getExpressionFactory(anyString())).thenReturn(factory);
-                when(factory.createExpression("$.[collection]")).thenReturn(expression);
-                when(expression.getValue(globalContextVariables)).thenReturn(null);
-
-                return config;
-            }
-            return null;
-        });
-
-        try (MockedStatic<CompensationHolder> compHolderMock = mockStatic(CompensationHolder.class);
-                MockedStatic<LoopTaskUtils> loopTaskUtilsMock = mockStatic(LoopTaskUtils.class);
-                MockedStatic<EngineUtils> engineUtilsMock = mockStatic(EngineUtils.class)) {
-
-            compHolderMock
-                    .when(() -> CompensationHolder.getCurrent(context, true))
-                    .thenReturn(compensationHolder);
-            loopTaskUtilsMock
-                    .when(() -> LoopTaskUtils.reloadLoopCounter(anyString()))
-                    .thenReturn(2);
-            engineUtilsMock
-                    .when(() -> EngineUtils.getOriginStateName(any(StateInstance.class)))
-                    .thenReturn("OriginalTask");
-
-            assertDoesNotThrow(() -> interceptor.preProcess(context));
-        }
+        executePreProcessWithStaticMocks(context, compensationHolder);
 
         verify(context, never()).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), any(Map.class));
     }
 
     @Test
     public void preProcessWhenExpressionReturnsNonCollection_DoNotSetContextVariablesTest() {
-        HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
-        StateInstruction instruction = mock(StateInstruction.class);
-        AbstractTaskState currentState = mock(AbstractTaskState.class);
         Loop loop = mock(Loop.class);
-
-        when(context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)).thenReturn(true);
-        when(context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE))
-                .thenReturn(true);
-        when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
-        when(instruction.getState(context)).thenReturn(currentState);
-        when(currentState.getName()).thenReturn("CompensateTask");
-
-        StateInstance stateToBeCompensated = mock(StateInstance.class);
-        when(stateToBeCompensated.getName()).thenReturn("OriginalTask-2");
-
-        StateMachineInstance stateMachineInstance = mock(StateMachineInstance.class);
-        StateMachine stateMachine = mock(StateMachine.class);
-        AbstractTaskState compensateState = mock(AbstractTaskState.class);
-
-        when(stateToBeCompensated.getStateMachineInstance()).thenReturn(stateMachineInstance);
-        when(stateMachineInstance.getStateMachine()).thenReturn(stateMachine);
-        when(stateMachine.getState(anyString())).thenReturn(compensateState);
-        when(compensateState.getLoop()).thenReturn(loop);
         when(loop.getCollection()).thenReturn("$.[collection]");
-        when(loop.getElementIndexName()).thenReturn("loopIndex");
-        when(loop.getElementVariableName()).thenReturn("loopElement");
-
-        CompensationHolder compensationHolder = mock(CompensationHolder.class);
-        Map<String, StateInstance> compMap = new HashMap<>();
-        compMap.put("CompensateTask", stateToBeCompensated);
-        when(compensationHolder.getStatesNeedCompensation()).thenReturn(compMap);
 
         Map<String, Object> globalContextVariables = new HashMap<>();
+        StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
 
-        when(context.getVariable(anyString())).thenAnswer(invocation -> {
-            String arg = invocation.getArgument(0);
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT.equals(arg)) {
-                return globalContextVariables;
-            }
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONFIG.equals(arg)) {
-                StateMachineConfig config = mock(StateMachineConfig.class);
-                ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
-                ExpressionFactory factory = mock(ExpressionFactory.class);
-                Expression expression = mock(Expression.class);
+        ExpressionFactoryManager manager = mock(ExpressionFactoryManager.class);
+        ExpressionFactory factory = mock(ExpressionFactory.class);
+        Expression expression = mock(Expression.class);
 
-                when(config.getExpressionFactoryManager()).thenReturn(manager);
-                when(manager.getExpressionFactory(anyString())).thenReturn(factory);
-                when(factory.createExpression("$.[collection]")).thenReturn(expression);
-                when(expression.getValue(globalContextVariables)).thenReturn("not-a-collection-string");
+        when(config.getExpressionFactoryManager()).thenReturn(manager);
+        when(manager.getExpressionFactory(anyString())).thenReturn(factory);
+        when(factory.createExpression("$.[collection]")).thenReturn(expression);
+        when(expression.getValue(globalContextVariables)).thenReturn("not-a-collection-string");
 
-                return config;
-            }
-            return null;
-        });
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
 
-        try (MockedStatic<CompensationHolder> compHolderMock = mockStatic(CompensationHolder.class);
-                MockedStatic<LoopTaskUtils> loopTaskUtilsMock = mockStatic(LoopTaskUtils.class);
-                MockedStatic<EngineUtils> engineUtilsMock = mockStatic(EngineUtils.class)) {
-
-            compHolderMock
-                    .when(() -> CompensationHolder.getCurrent(context, true))
-                    .thenReturn(compensationHolder);
-            loopTaskUtilsMock
-                    .when(() -> LoopTaskUtils.reloadLoopCounter(anyString()))
-                    .thenReturn(2);
-            engineUtilsMock
-                    .when(() -> EngineUtils.getOriginStateName(any(StateInstance.class)))
-                    .thenReturn("OriginalTask");
-
-            assertDoesNotThrow(() -> interceptor.preProcess(context));
-        }
+        executePreProcessWithStaticMocks(context, compensationHolder);
 
         verify(context, never()).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), any(Map.class));
     }
 
     @Test
     public void preProcessWhenExpressionFactoryManagerIsNull_DoNotSetContextVariablesTest() {
-        HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
-        StateInstruction instruction = mock(StateInstruction.class);
-        AbstractTaskState currentState = mock(AbstractTaskState.class);
         Loop loop = mock(Loop.class);
-
-        when(context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)).thenReturn(true);
-        when(context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE))
-                .thenReturn(true);
-        when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
-        when(instruction.getState(context)).thenReturn(currentState);
-        when(currentState.getName()).thenReturn("CompensateTask");
-
-        StateInstance stateToBeCompensated = mock(StateInstance.class);
-        when(stateToBeCompensated.getName()).thenReturn("OriginalTask-2");
-
-        StateMachineInstance stateMachineInstance = mock(StateMachineInstance.class);
-        StateMachine stateMachine = mock(StateMachine.class);
-        AbstractTaskState compensateState = mock(AbstractTaskState.class);
-
-        when(stateToBeCompensated.getStateMachineInstance()).thenReturn(stateMachineInstance);
-        when(stateMachineInstance.getStateMachine()).thenReturn(stateMachine);
-        when(stateMachine.getState(anyString())).thenReturn(compensateState);
-        when(compensateState.getLoop()).thenReturn(loop);
         when(loop.getCollection()).thenReturn("$.[collection]");
-        when(loop.getElementIndexName()).thenReturn("loopIndex");
-        when(loop.getElementVariableName()).thenReturn("loopElement");
-
-        CompensationHolder compensationHolder = mock(CompensationHolder.class);
-        Map<String, StateInstance> compMap = new HashMap<>();
-        compMap.put("CompensateTask", stateToBeCompensated);
-        when(compensationHolder.getStatesNeedCompensation()).thenReturn(compMap);
 
         Map<String, Object> globalContextVariables = new HashMap<>();
+        StateMachineConfig config = mock(StateMachineConfig.class);
+        CompensationHolder compensationHolder = mock(CompensationHolder.class);
 
-        when(context.getVariable(anyString())).thenAnswer(invocation -> {
-            String arg = invocation.getArgument(0);
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT.equals(arg)) {
-                return globalContextVariables;
-            }
-            if (DomainConstants.VAR_NAME_STATEMACHINE_CONFIG.equals(arg)) {
-                StateMachineConfig config = mock(StateMachineConfig.class);
+        when(config.getExpressionFactoryManager()).thenReturn(null);
 
-                when(config.getExpressionFactoryManager()).thenReturn(null);
+        HierarchicalProcessContext context = setupCommonMocks(loop, globalContextVariables, config, compensationHolder);
 
-                return config;
-            }
-            return null;
-        });
-
-        try (MockedStatic<CompensationHolder> compHolderMock = mockStatic(CompensationHolder.class);
-                MockedStatic<LoopTaskUtils> loopTaskUtilsMock = mockStatic(LoopTaskUtils.class);
-                MockedStatic<EngineUtils> engineUtilsMock = mockStatic(EngineUtils.class)) {
-
-            compHolderMock
-                    .when(() -> CompensationHolder.getCurrent(context, true))
-                    .thenReturn(compensationHolder);
-            loopTaskUtilsMock
-                    .when(() -> LoopTaskUtils.reloadLoopCounter(anyString()))
-                    .thenReturn(2);
-            engineUtilsMock
-                    .when(() -> EngineUtils.getOriginStateName(any(StateInstance.class)))
-                    .thenReturn("OriginalTask");
-
-            assertDoesNotThrow(() -> interceptor.preProcess(context));
-        }
+        executePreProcessWithStaticMocks(context, compensationHolder);
 
         verify(context, never()).setVariableLocally(eq(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT), any(Map.class));
     }

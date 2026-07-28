@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS `seata_state_inst`
     `excep`                    BLOB COMMENT 'exception',
     `gmt_updated`              DATETIME(3) COMMENT 'update time',
     `gmt_end`                  DATETIME(3) COMMENT 'end time',
+    `ext_params`               LONGTEXT     DEFAULT NULL,
     PRIMARY KEY (`id`, `machine_inst_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4;

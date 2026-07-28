@@ -373,4 +373,32 @@ public interface StateInstance {
      * @return the get compensation status
      */
     ExecutionStatus getCompensationStatus();
+
+    /**
+     * get extension params
+     *
+     * @return extension params
+     */
+    Object getExtensionParams();
+
+    /**
+     * set extension params
+     *
+     * @param extensionParams extensionParams
+     */
+    void setExtensionParams(Object extensionParams);
+
+    /**
+     * Gets get serialized extension params.
+     *
+     * @return the get serialized extension params
+     */
+    Object getSerializedExtensionParams();
+
+    /**
+     * Sets set serialized extension params.
+     *
+     * @param serializedExtensionParams the serialized extension params
+     */
+    void setSerializedExtensionParams(Object serializedExtensionParams);
 }

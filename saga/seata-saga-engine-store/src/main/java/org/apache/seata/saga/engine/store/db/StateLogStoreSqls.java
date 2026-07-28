@@ -63,13 +63,13 @@ public class StateLogStoreSqls {
     private static final String STATE_INSTANCE_FIELDS =
             "id, machine_inst_id, name, type, business_key, gmt_started, service_name, service_method, service_type, "
                     + "is_for_update, status, input_params, output_params, excep, gmt_end, state_id_compensated_for, "
-                    + "state_id_retried_for";
+                    + "state_id_retried_for, ext_params";
 
     private static final String RECORD_STATE_STARTED_SQL =
             "INSERT INTO ${TABLE_PREFIX}state_inst (id, machine_inst_id, name, type,"
                     + " gmt_started, service_name, service_method, service_type, is_for_update, input_params, status, "
-                    + "business_key, state_id_compensated_for, state_id_retried_for, gmt_updated)\n"
-                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    + "business_key, state_id_compensated_for, state_id_retried_for, gmt_updated, ext_params)\n"
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String RECORD_STATE_FINISHED_SQL =
             "UPDATE ${TABLE_PREFIX}state_inst SET gmt_end = ?, excep = ?, status = ?, output_params = ?, gmt_updated = ? "

@@ -91,6 +91,10 @@ public class SubStateMachineHandler implements StateHandler, InterceptableStateH
         }
 
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
+        Object loopElement = context.getVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT);
+        if (loopElement != null) {
+            startParams.put(DomainConstants.VAR_NAME_LOOP_ELEMENT, loopElement);
+        }
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(

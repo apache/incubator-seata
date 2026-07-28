@@ -126,6 +126,7 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         context.removeVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         context.removeVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
+        context.removeVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT);
 
         if (exp != null
                 && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
