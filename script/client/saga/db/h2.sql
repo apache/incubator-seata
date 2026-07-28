@@ -71,5 +71,6 @@ create table if not exists seata_state_inst
     excep                    blob comment 'exception',
     gmt_updated              timestamp(3) comment 'update time',
     gmt_end                  timestamp(3) comment 'end time',
+    ext_params               LONGTEXT     DEFAULT NULL,
     primary key (id, machine_inst_id)
 );
