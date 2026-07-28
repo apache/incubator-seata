@@ -45,13 +45,17 @@ public class ServerXidHostTest {
     public void testResolveXidHostConvertsHostNameToIpLiteral() throws UnknownHostException {
         // the local host name is the only name guaranteed to resolve without external dns
         String hostName = InetAddress.getLocalHost().getHostName();
-        // in some environments the host name is already an ip literal, then there is nothing to convert
-        Assumptions.assumeFalse(NetUtil.isValidIp(hostName, true), "host name is already an ip literal");
+        // skip only when the host name is literally an ip, then there is nothing to convert. note that
+        // NetUtil.isValidIp resolves the name first, so it cannot be used to detect a literal here.
+        Assumptions.assumeFalse(
+                NetUtil.isValidIPv4(hostName) || NetUtil.isValidIPv6(hostName), "host name is already an ip literal");
 
-        String resolved = Server.resolveXidHost(hostName);
+        String expected = InetAddress.getByName(hostName).getHostAddress();
+        // resolveXidHost keeps the resolved literal only when it is a routable (non-forbidden) address;
+        // a loopback resolution would take the local-ip fallback path instead
+        Assumptions.assumeTrue(NetUtil.isValidIp(expected, false), "host name resolves to a forbidden address");
 
-        // the value stored in the xid must be the resolved ip literal, never the host name
-        Assertions.assertNotEquals(hostName, resolved);
-        Assertions.assertTrue(NetUtil.isValidIp(resolved, true), "resolved host is not an ip literal: " + resolved);
+        // the regression: the value stored in the xid is the resolved ip literal, not the host name
+        Assertions.assertEquals(expected, Server.resolveXidHost(hostName));
     }
 }
