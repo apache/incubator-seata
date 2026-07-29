@@ -265,6 +265,12 @@ public class NetUtil {
      */
     public static InetAddress getIgnoredInterfacesLocalAddress(
             String[] ignoredInterfaces, String... preferredNetworks) {
+        // The global cache only ever holds the unfiltered default address, and it predates
+        // the interface filtering support (#8090). A parameterized lookup must evaluate its
+        // own filters, so it neither reads nor overwrites the default cache (#8169).
+        if (CollectionUtils.isNotEmpty(ignoredInterfaces) || CollectionUtils.isNotEmpty(preferredNetworks)) {
+            return getLocalAddress0(ignoredInterfaces, preferredNetworks);
+        }
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
