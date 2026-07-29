@@ -16,6 +16,8 @@
  */
 package org.apache.seata.saga.rm;
 
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.hook.TccHook;
@@ -27,6 +29,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -34,9 +39,9 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Focus areas:
  * 1. branchRollback with TccHook before/after callbacks
- * 2. Hook exception handling (should not break rollback)
- * 3. Different compensation return types (boolean, TwoPhaseResult, null)
- * 4. Compensation exception handling
+ * 2. before-rollback hook failure blocks compensation and returns retryable
+ * 3. Action status driven rollback decision (none/running/success/failed/null)
+ * 4. Different compensation return types (boolean, TwoPhaseResult, null)
  */
 public class SagaAnnotationResourceManagerTest {
 
@@ -62,7 +67,10 @@ public class SagaAnnotationResourceManagerTest {
     // ---- Helper classes ----
 
     public static class TestCompensationTarget {
+        int compensateCount = 0;
+
         public boolean compensate(BusinessActionContext context) {
+            compensateCount++;
             return true;
         }
 
@@ -92,6 +100,7 @@ public class SagaAnnotationResourceManagerTest {
         boolean afterRollbackCalled = false;
         boolean shouldThrowInBefore = false;
         boolean shouldThrowInAfter = false;
+        BranchType capturedBranchType = null;
 
         @Override
         public void beforeTccPrepare(String xid, Long branchId, String actionName, BusinessActionContext context) {}
@@ -108,6 +117,7 @@ public class SagaAnnotationResourceManagerTest {
         @Override
         public void beforeTccRollback(String xid, Long branchId, String actionName, BusinessActionContext context) {
             beforeRollbackCalled = true;
+            capturedBranchType = context.getBranchType();
             if (shouldThrowInBefore) {
                 throw new RuntimeException("hook error in beforeTccRollback");
             }
@@ -123,9 +133,14 @@ public class SagaAnnotationResourceManagerTest {
     }
 
     private SagaAnnotationResource createResource(String actionName, String methodName) throws NoSuchMethodException {
+        return createResource(actionName, methodName, new TestCompensationTarget());
+    }
+
+    private SagaAnnotationResource createResource(String actionName, String methodName, TestCompensationTarget target)
+            throws NoSuchMethodException {
         SagaAnnotationResource resource = new SagaAnnotationResource();
         resource.setActionName(actionName);
-        resource.setTargetBean(new TestCompensationTarget());
+        resource.setTargetBean(target);
         resource.setCompensationMethod(
                 TestCompensationTarget.class.getDeclaredMethod(methodName, BusinessActionContext.class));
         resource.setCompensationArgsClasses(new Class<?>[] {BusinessActionContext.class});
@@ -133,7 +148,17 @@ public class SagaAnnotationResourceManagerTest {
         return resource;
     }
 
-    // ---- Tests for hook invocation in branchRollback ----
+    private String buildApplicationData(String actionStatus) {
+        Map<String, Object> inner = new HashMap<>();
+        if (actionStatus != null) {
+            inner.put(Constants.ACTION_STATUS, actionStatus);
+        }
+        Map<String, Object> outer = new HashMap<>();
+        outer.put(Constants.TX_ACTION_CONTEXT, inner);
+        return JsonUtil.toJSONString(outer);
+    }
+
+    // ---- Tests for hook invocation in branchRollback (legacy: null action status) ----
 
     @Test
     void testBranchRollbackWithHooksInvoked() throws Exception {
@@ -149,23 +174,28 @@ public class SagaAnnotationResourceManagerTest {
         assertEquals(BranchStatus.PhaseTwo_Rollbacked, status);
         assertTrue(hook.beforeRollbackCalled, "beforeTccRollback should be called");
         assertTrue(hook.afterRollbackCalled, "afterTccRollback should be called");
+        assertEquals(BranchType.SAGA_ANNOTATION, hook.capturedBranchType, "branchType should be set on context");
     }
 
     @Test
-    void testBranchRollbackHookExceptionInBeforeDoesNotBreakRollback() throws Exception {
+    void testBranchRollbackHookExceptionInBeforeReturnsRetryable() throws Exception {
         TrackingTccHook hook = new TrackingTccHook();
         hook.shouldThrowInBefore = true;
         TccHookManager.registerHook(hook);
 
-        SagaAnnotationResource resource = createResource("testAction2", "compensate");
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("testAction2", "compensate", target);
         resourceManager.getManagedResources().put("testAction2", resource);
 
         BranchStatus status =
                 resourceManager.branchRollback(BranchType.SAGA_ANNOTATION, "xid123", 2L, "testAction2", null);
 
-        assertEquals(BranchStatus.PhaseTwo_Rollbacked, status);
-        assertTrue(hook.beforeRollbackCalled);
-        assertTrue(hook.afterRollbackCalled, "afterTccRollback should still be called even if before throws");
+        assertEquals(
+                BranchStatus.PhaseTwo_RollbackFailed_Retryable,
+                status,
+                "before-hook failure should block compensation and return retryable");
+        assertEquals(0, target.compensateCount, "compensation should not execute when before-hook fails");
+        assertTrue(hook.afterRollbackCalled, "afterTccRollback should still be called in finally");
     }
 
     @Test
@@ -318,16 +348,124 @@ public class SagaAnnotationResourceManagerTest {
         TccHookManager.registerHook(hook1);
         TccHookManager.registerHook(hook2);
 
-        SagaAnnotationResource resource = createResource("testAction13", "compensate");
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("testAction13", "compensate", target);
         resourceManager.getManagedResources().put("testAction13", resource);
 
         BranchStatus status =
                 resourceManager.branchRollback(BranchType.SAGA_ANNOTATION, "xid123", 13L, "testAction13", null);
 
-        assertEquals(BranchStatus.PhaseTwo_Rollbacked, status);
+        assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Retryable, status);
         assertTrue(hook1.beforeRollbackCalled);
-        // hook2.beforeRollbackCalled is NOT guaranteed because hook1 throws
-        // the loop iterates hooks sequentially, and the exception breaks the loop
+        assertTrue(
+                hook2.beforeRollbackCalled,
+                "second hook beforeTccRollback should still be called (hook exceptions are caught per hook)");
         assertTrue(hook2.afterRollbackCalled, "afterTccRollback should still call all hooks");
+        assertEquals(0, target.compensateCount, "compensation should be skipped when a before-hook fails");
+    }
+
+    // ---- Tests for action status driven rollback decision ----
+
+    @Test
+    void testBranchRollbackEmptyRollbackWhenActionStatusNone() throws Exception {
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actNone", "compensate", target);
+        resourceManager.getManagedResources().put("actNone", resource);
+
+        BranchStatus status = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION, "xid", 1L, "actNone", buildApplicationData(Constants.ACTION_STATUS_NONE));
+
+        assertEquals(BranchStatus.PhaseTwo_Rollbacked, status, "none status -> empty rollback");
+        assertEquals(0, target.compensateCount, "compensation should be skipped on empty rollback");
+    }
+
+    @Test
+    void testBranchRollbackRetryWhenActionStatusRunning() throws Exception {
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actRunning", "compensate", target);
+        resourceManager.getManagedResources().put("actRunning", resource);
+
+        BranchStatus status = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION,
+                "xid",
+                1L,
+                "actRunning",
+                buildApplicationData(Constants.ACTION_STATUS_RUNNING));
+
+        assertEquals(
+                BranchStatus.PhaseTwo_RollbackFailed_Retryable, status, "running status -> retry (anti-suspension)");
+        assertEquals(0, target.compensateCount, "compensation should be skipped while phase one is running");
+    }
+
+    @Test
+    void testBranchRollbackEmptyRollbackWhenActionStatusFailed() throws Exception {
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actFailed", "compensate", target);
+        resourceManager.getManagedResources().put("actFailed", resource);
+
+        BranchStatus status = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION,
+                "xid",
+                1L,
+                "actFailed",
+                buildApplicationData(Constants.ACTION_STATUS_FAILED));
+
+        assertEquals(
+                BranchStatus.PhaseTwo_Rollbacked, status, "failed status -> empty rollback (business self-handled)");
+        assertEquals(0, target.compensateCount);
+    }
+
+    @Test
+    void testBranchRollbackCompensateWhenActionStatusSuccess() throws Exception {
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actSuccess", "compensate", target);
+        resourceManager.getManagedResources().put("actSuccess", resource);
+
+        BranchStatus status = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION,
+                "xid",
+                1L,
+                "actSuccess",
+                buildApplicationData(Constants.ACTION_STATUS_SUCCESS));
+
+        assertEquals(BranchStatus.PhaseTwo_Rollbacked, status, "success status -> execute compensation");
+        assertEquals(1, target.compensateCount);
+    }
+
+    @Test
+    void testBranchRollbackLegacyWhenActionStatusNull() throws Exception {
+        // action status report disabled -> getActionStatus returns null -> compensate unconditionally (legacy)
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actNull", "compensate", target);
+        resourceManager.getManagedResources().put("actNull", resource);
+
+        BranchStatus status = resourceManager.branchRollback(BranchType.SAGA_ANNOTATION, "xid", 1L, "actNull", null);
+
+        assertEquals(BranchStatus.PhaseTwo_Rollbacked, status);
+        assertEquals(1, target.compensateCount);
+    }
+
+    // ---- End-to-end retry flow: null -> retry -> reported -> retry with updated data ----
+
+    @Test
+    void testBranchRollbackRetryFlowFromNullToReportedStatus() throws Exception {
+        // Simulates the TC-driven retry sequence:
+        // 1. initial rollback with no status reported yet (null) -> legacy compensation would run, but here we
+        //    emulate the "phase one still running" window by reporting running on retry.
+        TestCompensationTarget target = new TestCompensationTarget();
+        SagaAnnotationResource resource = createResource("actE2e", "compensate", target);
+        resourceManager.getManagedResources().put("actE2e", resource);
+
+        // 1st retry: phase one still running -> retryable, no compensation
+        BranchStatus first = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION, "xid", 1L, "actE2e", buildApplicationData(Constants.ACTION_STATUS_RUNNING));
+        assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Retryable, first);
+        assertEquals(0, target.compensateCount);
+
+        // 2nd retry: phase one finally reported success -> compensation executes
+        BranchStatus second = resourceManager.branchRollback(
+                BranchType.SAGA_ANNOTATION, "xid", 1L, "actE2e", buildApplicationData(Constants.ACTION_STATUS_SUCCESS));
+        assertEquals(BranchStatus.PhaseTwo_Rollbacked, second);
+        assertEquals(1, target.compensateCount);
     }
 }

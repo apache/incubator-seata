@@ -91,6 +91,13 @@
       "defaultValue": false
     },
     {
+      "name": "seata.client.rm.saga-action-status-report-enable",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable saga annotation action status report for anti-suspension and empty rollback. Only takes effect for BranchType.SAGA_ANNOTATION.",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": false
+    },
+    {
       "name": "seata.client.rm.tcc-action-interceptor-order",
       "type": "java.lang.Integer",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",

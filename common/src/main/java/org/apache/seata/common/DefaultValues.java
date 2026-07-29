@@ -78,6 +78,11 @@ public interface DefaultValues {
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
 
     /**
+     * The constant DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE.
+     */
+    boolean DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE = false;
+
+    /**
      * The default session store dir
      */
     String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";

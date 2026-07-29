@@ -262,9 +262,19 @@ public interface Constants {
     String WATCH_EVENT_PREFIX = "CW:";
 
     /**
-     * Action status key for action context
+     * Framework-reserved action status key (sys:: prefix avoids collisions with business keys)
      */
-    String ACTION_STATUS = "actionStatus";
+    String ACTION_STATUS = "sys::actionStatus";
+
+    /**
+     * Action status: phase one not started (branch registered, business never executed)
+     */
+    String ACTION_STATUS_NONE = "none";
+
+    /**
+     * Action status: phase one is in progress (anti-suspension guard)
+     */
+    String ACTION_STATUS_RUNNING = "running";
 
     /**
      * Action status: prepare method executed successfully

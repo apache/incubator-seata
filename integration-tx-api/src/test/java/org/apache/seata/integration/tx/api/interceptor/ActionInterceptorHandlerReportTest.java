@@ -17,8 +17,8 @@
 package org.apache.seata.integration.tx.api.interceptor;
 
 import org.apache.seata.common.Constants;
-import org.apache.seata.common.executor.Callback;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
 import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
@@ -28,69 +28,44 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
- * Tests for action status report functionality in ActionInterceptorHandler.
+ * Tests for the action status state machine in ActionInterceptorHandler.
  *
- * Covers:
- * 1. reportActionStatus method (success/failed/exception paths)
- * 2. ENABLE_ACTION_STATUS_REPORT conditional branches in proceed method
+ * Covers the none/running/success/failed status transitions and the SAGA_ANNOTATION-only gating,
+ * replacing the previous sun.misc.Unsafe-based static field manipulation with an overridable method.
  */
 public class ActionInterceptorHandlerReportTest {
 
     private MockedStatic<BusinessActionContextUtil> mockedContextUtil;
-    private boolean originalEnableActionStatusReport;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         TccHookManager.clear();
         mockedContextUtil = Mockito.mockStatic(BusinessActionContextUtil.class);
         mockedContextUtil
                 .when(() -> BusinessActionContextUtil.reportContext(any()))
                 .thenReturn(true);
-
-        // Enable action status report via reflection
-        originalEnableActionStatusReport = setEnableActionStatusReport(true);
     }
 
     @AfterEach
-    void tearDown() throws Exception {
+    void tearDown() {
         mockedContextUtil.close();
         TccHookManager.clear();
-
-        // Restore original value
-        setEnableActionStatusReport(originalEnableActionStatusReport);
-    }
-
-    private boolean setEnableActionStatusReport(boolean value) throws Exception {
-        Field field = ActionInterceptorHandler.class.getDeclaredField("ENABLE_ACTION_STATUS_REPORT");
-        field.setAccessible(true);
-
-        // Use sun.misc.Unsafe to modify static final field (works on all Java versions)
-        Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-        theUnsafe.setAccessible(true);
-        sun.misc.Unsafe unsafe = (sun.misc.Unsafe) theUnsafe.get(null);
-
-        Object base = unsafe.staticFieldBase(field);
-        long offset = unsafe.staticFieldOffset(field);
-        boolean original = unsafe.getBoolean(base, offset);
-        unsafe.putBoolean(base, offset, value);
-        return original;
     }
 
     private BusinessActionContext createActionContext(String xid, long branchId) {
         BusinessActionContext context = new BusinessActionContext();
         context.setXid(xid);
         context.setBranchId(branchId);
-        context.setBranchType(BranchType.AT);
+        context.setBranchType(BranchType.SAGA_ANNOTATION);
         Map<String, Object> actionContext = new HashMap<>();
         context.setActionContext(actionContext);
         return context;
@@ -100,94 +75,47 @@ public class ActionInterceptorHandlerReportTest {
         TwoPhaseBusinessActionParam param = new TwoPhaseBusinessActionParam();
         param.setActionName(actionName);
         param.setDelayReport(Boolean.TRUE);
-        param.setBranchType(BranchType.AT);
+        param.setBranchType(BranchType.SAGA_ANNOTATION);
         param.setUseCommonFence(false);
         return param;
     }
 
-    // ---- Test reportActionStatus directly ----
-
-    @Test
-    void testReportActionStatusSuccess() {
-        ActionInterceptorHandler handler = new ActionInterceptorHandler();
-        BusinessActionContext context = createActionContext("xid1", 1L);
-
-        handler.reportActionStatus(context, Constants.ACTION_STATUS_SUCCESS);
-
-        assertEquals(Constants.ACTION_STATUS_SUCCESS, context.getActionStatus());
-        mockedContextUtil.verify(() -> BusinessActionContextUtil.reportContext(context));
-    }
-
-    @Test
-    void testReportActionStatusFailed() {
-        ActionInterceptorHandler handler = new ActionInterceptorHandler();
-        BusinessActionContext context = createActionContext("xid2", 2L);
-
-        handler.reportActionStatus(context, Constants.ACTION_STATUS_FAILED);
-
-        assertEquals(Constants.ACTION_STATUS_FAILED, context.getActionStatus());
-    }
-
-    @Test
-    void testReportActionStatusExceptionHandledGracefully() {
-        ActionInterceptorHandler handler = new ActionInterceptorHandler();
-        BusinessActionContext context = createActionContext("xid3", 3L);
-
-        mockedContextUtil
-                .when(() -> BusinessActionContextUtil.reportContext(any()))
-                .thenThrow(new RuntimeException("report failed"));
-
-        assertDoesNotThrow(() -> handler.reportActionStatus(context, Constants.ACTION_STATUS_SUCCESS));
-        assertEquals(Constants.ACTION_STATUS_SUCCESS, context.getActionStatus());
-    }
-
-    // ---- Test ENABLE_ACTION_STATUS_REPORT conditional in proceed ----
-
-    @Test
-    void testProceedReportsSuccessWhenCallbackSucceeds() throws Throwable {
+    private ActionInterceptorHandler spyHandlerWithReportEnabled() {
         ActionInterceptorHandler handler = Mockito.spy(new ActionInterceptorHandler());
-        Method method = TestTarget.class.getDeclaredMethod("execute", BusinessActionContext.class);
-        BusinessActionContext context = createActionContext("xid100", 100L);
-        Object[] arguments = new Object[] {context};
-        TwoPhaseBusinessActionParam param = createParam("testAction");
-
-        Mockito.doReturn("branch123")
+        Mockito.doReturn(true).when(handler).isActionStatusReportEnabled(any());
+        Mockito.doReturn("branch1")
                 .when(handler)
                 .doTxActionLogStore(
                         any(Method.class),
                         any(),
                         any(TwoPhaseBusinessActionParam.class),
                         any(BusinessActionContext.class));
+        return handler;
+    }
 
-        Callback<Object> successCallback = () -> "ok";
-        handler.proceed(method, arguments, "xid100", param, successCallback);
+    @Test
+    void testProceedReportsRunningThenSuccess() throws Throwable {
+        ActionInterceptorHandler handler = spyHandlerWithReportEnabled();
+        Method method = TestTarget.class.getDeclaredMethod("execute", BusinessActionContext.class);
+        BusinessActionContext context = createActionContext("xid1", 1L);
+
+        handler.proceed(method, new Object[] {context}, "xid1", createParam("testAction"), () -> "ok");
 
         assertEquals(Constants.ACTION_STATUS_SUCCESS, context.getActionStatus());
-        mockedContextUtil.verify(() -> BusinessActionContextUtil.reportContext(any()), Mockito.atLeast(1));
+        // running reported immediately before execute, plus the final report in finally
+        mockedContextUtil.verify(() -> BusinessActionContextUtil.reportContext(any()), Mockito.atLeast(2));
     }
 
     @Test
     void testProceedReportsFailedWhenCallbackThrows() throws Throwable {
-        ActionInterceptorHandler handler = Mockito.spy(new ActionInterceptorHandler());
+        ActionInterceptorHandler handler = spyHandlerWithReportEnabled();
         Method method = TestTarget.class.getDeclaredMethod("execute", BusinessActionContext.class);
-        BusinessActionContext context = createActionContext("xid200", 200L);
-        Object[] arguments = new Object[] {context};
-        TwoPhaseBusinessActionParam param = createParam("testAction");
-
-        Mockito.doReturn("branch456")
-                .when(handler)
-                .doTxActionLogStore(
-                        any(Method.class),
-                        any(),
-                        any(TwoPhaseBusinessActionParam.class),
-                        any(BusinessActionContext.class));
-
-        Callback<Object> failCallback = () -> {
-            throw new RuntimeException("business error");
-        };
+        BusinessActionContext context = createActionContext("xid2", 2L);
 
         try {
-            handler.proceed(method, arguments, "xid200", param, failCallback);
+            handler.proceed(method, new Object[] {context}, "xid2", createParam("testAction"), () -> {
+                throw new RuntimeException("business error");
+            });
         } catch (RuntimeException e) {
             // expected
         }
@@ -195,7 +123,48 @@ public class ActionInterceptorHandlerReportTest {
         assertEquals(Constants.ACTION_STATUS_FAILED, context.getActionStatus());
     }
 
-    // ---- Helper class for method reference ----
+    @Test
+    void testProceedReportsNoneWhenBeforePrepareHookThrows() throws Throwable {
+        ActionInterceptorHandler handler = spyHandlerWithReportEnabled();
+        TccHook throwingHook = Mockito.mock(TccHook.class);
+        Mockito.doThrow(new RuntimeException("prepare hook error"))
+                .when(throwingHook)
+                .beforeTccPrepare(any(), any(), any(), any());
+        TccHookManager.registerHook(throwingHook);
+
+        Method method = TestTarget.class.getDeclaredMethod("execute", BusinessActionContext.class);
+        BusinessActionContext context = createActionContext("xid3", 3L);
+
+        try {
+            handler.proceed(method, new Object[] {context}, "xid3", createParam("testAction"), () -> "ok");
+        } catch (RuntimeException e) {
+            // expected: before-prepare hook failure rethrown
+        }
+
+        assertEquals(Constants.ACTION_STATUS_NONE, context.getActionStatus());
+    }
+
+    @Test
+    void testProceedDoesNotReportWhenBranchTypeIsTcc() throws Throwable {
+        ActionInterceptorHandler handler = Mockito.spy(new ActionInterceptorHandler());
+        Mockito.doReturn(false).when(handler).isActionStatusReportEnabled(any());
+        Mockito.doReturn("branch4")
+                .when(handler)
+                .doTxActionLogStore(
+                        any(Method.class),
+                        any(),
+                        any(TwoPhaseBusinessActionParam.class),
+                        any(BusinessActionContext.class));
+
+        Method method = TestTarget.class.getDeclaredMethod("execute", BusinessActionContext.class);
+        BusinessActionContext context = createActionContext("xid4", 4L);
+        TwoPhaseBusinessActionParam param = createParam("testAction");
+        param.setBranchType(BranchType.TCC);
+
+        handler.proceed(method, new Object[] {context}, "xid4", param, () -> "ok");
+
+        assertNull(context.getActionStatus());
+    }
 
     public static class TestTarget {
         public Object execute(BusinessActionContext context) {
