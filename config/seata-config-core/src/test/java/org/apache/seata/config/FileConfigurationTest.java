@@ -484,6 +484,7 @@ class FileConfigurationTest {
             ConfigurationFactory.reload();
             Configuration fileConfig = ConfigurationFactory.getInstance();
 
+            // These values come from src/test/resources/file.conf.
             Assertions.assertEquals("127.0.0.1:8091", fileConfig.getConfig(groupListDataId));
             Assertions.assertFalse(fileConfig.getBoolean(disableGlobalTransactionDataId));
         } finally {
@@ -507,10 +508,12 @@ class FileConfigurationTest {
     void shouldReportMutationOperationOutcomeThroughConfigurationFactory() {
         Configuration fileConfig = ConfigurationFactory.getInstance();
 
+        // The current file-backed mutation branches acknowledge completion but do not rewrite the source file.
         Assertions.assertTrue(fileConfig.putConfig("adopted.put.key", "value", 5000L));
         Assertions.assertTrue(fileConfig.putConfigIfAbsent("adopted.put-if-absent.key", "value", 5000L));
         Assertions.assertTrue(fileConfig.removeConfig("adopted.remove.key", 5000L));
 
+        // A negative timeout expires before the operation can be processed.
         Assertions.assertFalse(fileConfig.putConfig("adopted.expired.put.key", "value", -1L));
         Assertions.assertFalse(fileConfig.putConfigIfAbsent("adopted.expired.put-if-absent.key", "value", -1L));
         Assertions.assertFalse(fileConfig.removeConfig("adopted.expired.remove.key", -1L));
