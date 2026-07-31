@@ -43,8 +43,8 @@
     </licenses>
 
     <organization>
-        <name>Apache</name>
-        <url>https://github.com/apache</url>
+        <name>The Apache Software Foundation</name>
+        <url>https://www.apache.org/</url>
     </organization>
 
     <url>https://seata.apache.org</url>
