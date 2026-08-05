@@ -230,6 +230,12 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaCompensatePersistModeUpdate";
 
     /**
+     * The constant CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE.
+     * Enable action status report for SAGA/TCC annotation mode to handle empty compensation and suspension issues.
+     */
+    String CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE = CLIENT_RM_PREFIX + "sagaActionStatusReportEnable";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "reportRetryCount";
