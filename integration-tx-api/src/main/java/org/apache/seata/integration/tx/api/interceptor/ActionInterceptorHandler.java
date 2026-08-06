@@ -57,6 +57,11 @@ public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
 
+    private static final boolean ACTION_STATUS_REPORT_ENABLED = ConfigurationFactory.getInstance()
+            .getBoolean(
+                    ConfigurationKeys.CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE,
+                    DefaultValues.DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE);
+
     /**
      * Whether action status report is enabled. Restricted to {@link BranchType#SAGA_ANNOTATION} so that enabling
      * this option does not affect normal TCC behavior. Overridable for testing.
@@ -65,11 +70,7 @@ public class ActionInterceptorHandler {
      * @return true if action status should be reported
      */
     protected boolean isActionStatusReportEnabled(BranchType branchType) {
-        return branchType == BranchType.SAGA_ANNOTATION
-                && ConfigurationFactory.getInstance()
-                        .getBoolean(
-                                ConfigurationKeys.CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE,
-                                DefaultValues.DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE);
+        return branchType == BranchType.SAGA_ANNOTATION && ACTION_STATUS_REPORT_ENABLED;
     }
 
     /**
