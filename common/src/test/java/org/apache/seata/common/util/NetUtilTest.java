@@ -226,6 +226,16 @@ public class NetUtilTest {
     }
 
     @Test
+    public void testBlankPatternsStillUseDefaultCache() {
+        // an empty config value split into [""] applies no filtering, so the lookup
+        // behaves exactly like the unfiltered default lookup and shares its cache
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {""})).isEqualTo(defaultAddress);
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(null, "")).isEqualTo(defaultAddress);
+    }
+
+    @Test
     public void testPreferredNetworksLookupResolvesAfterDefaultAddressIsCached() {
         InetAddress defaultAddress = NetUtil.getLocalAddress();
         assertThat(defaultAddress).isNotNull();
