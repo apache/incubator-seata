@@ -1,0 +1,191 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Native Build NamingServer
+
+on:
+  push:
+    branches: [ test*, "*.*.*", 2.x ]
+  pull_request:
+    branches: [ 2.x, develop, master ]
+    paths:
+      - '.github/workflows/native-namingserver.yml'
+      - 'build/pom.xml'
+      - 'pom.xml'
+      - 'common/pom.xml'
+      - 'common/src/main/**'
+      - 'console/pom.xml'
+      - 'console/src/main/**'
+      - 'namingserver/pom.xml'
+      - 'namingserver/src/main/**'
+      - 'test-suite/test-native-namingserver/pom.xml'
+      - 'test-suite/test-native-namingserver/src/**'
+      - 'test-suite/test-native-metadata-merge/pom.xml'
+      - 'test-suite/test-native-metadata-merge/src/**'
+  workflow_call:
+    inputs:
+      repository:
+        description: 'Repository to check out'
+        type: string
+        required: false
+        default: ''
+      ref:
+        description: 'Branch or tag to check out'
+        type: string
+        required: false
+        default: ''
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-26, windows-latest ]
+        # Note: macos-26 is Apple Silicon (ARM64) only.
+        # Intel macOS (x86_64) is not supported because GraalVM has
+        # discontinued updates for that platform.
+        # https://github.com/graalvm/graalvm-ce-builds/releases/tag/jdk-25.0.1
+    env:
+      USERNAME: seata
+      PASSWORD: seata
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v7.0.0
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.ref || github.ref }}
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v5.5.0
+        with:
+          distribution: 'graalvm'
+          java-version: 25
+      - name: "Print maven version"
+        run: ./mvnw -version
+      - name: "Restore local maven repository cache"
+        uses: actions/cache/restore@v6.1.0
+        id: cache-maven-repository
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-maven-
+      - name: "Install dependencies"
+        run: ./mvnw -T 4C clean -B -pl namingserver,server install -DskipTests -am
+      - name: "Compile native image"
+        shell: sh
+        run: |
+          ./mvnw -T 2C clean -B -pl namingserver package -DskipTests -Pnative spring-boot:process-aot native:compile
+          rm -rf namingserver/target/*.jar
+      - name: "Calculate SHA256"
+        shell: bash
+        run: |
+          echo "## SHA256 Checksums"
+          if command -v sha256sum &> /dev/null; then
+            sha256sum namingserver/target/seata-*-*
+          elif command -v shasum &> /dev/null; then
+            shasum -a 256 namingserver/target/seata-*-*
+          else
+            echo "ERROR: No SHA256 tool found (sha256sum or shasum required)"
+            exit 1
+          fi
+      - name: "Analyze binary (file & ldd)"
+        if: runner.os == 'Linux'
+        run: |
+          echo "=== Checking native binary file type ==="
+          file namingserver/target/seata-*-*
+          echo "=== Checking native binary shared library dependencies ==="
+          ldd namingserver/target/seata-*-*
+      - name: "Write git SHA"
+        shell: bash
+        run: |
+          echo "${{ github.sha }}" > namingserver/target/git-sha.txt
+      - name: "Upload binaries"
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: namingserver-native-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            namingserver/target/seata-*-*
+            namingserver/target/git-sha.txt
+          if-no-files-found: error
+      - name: "Verify native binary"
+        shell: sh
+        env:
+          CONSOLE_USER_USERNAME: ${{ env.USERNAME }}
+          CONSOLE_USER_PASSWORD: ${{ env.PASSWORD }}
+        run: |
+          ./namingserver/target/seata-namingserver-* &
+      - name: "Check port 8081"
+        shell: sh
+        env:
+          MAX_RETRIES: 6
+          SLEEP_SECONDS: 5
+        run: |
+          i=1
+          while [ $i -le $MAX_RETRIES ]; do
+            if curl -sSf http://localhost:8081/naming/v1/health >/dev/null 2>&1; then
+              echo "Port 8081 is responding"
+              exit 0
+            fi
+            echo "Waiting for port 8081... ($i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            i=$((i + 1))
+          done
+          echo "ERROR: Port 8081 is not responding after $((MAX_RETRIES * SLEEP_SECONDS)) seconds"
+          exit 1
+      - name: "Start Seata server"
+        env:
+          SEATA_REGISTRY_TYPE: seata
+          SEATA_REGISTRY_SEATA_SERVER_ADDR: 127.0.0.1:8081
+          SEATA_REGISTRY_SEATA_USERNAME: ${{ env.USERNAME }}
+          SEATA_REGISTRY_SEATA_PASSWORD: ${{ env.PASSWORD }}
+          MAX_RETRIES: 12
+          SLEEP_SECONDS: 5
+        shell: sh
+        run: |
+          ./mvnw -T 2C clean -B -pl server spring-boot:run -Prelease-seata-jar &
+          sleep 5
+          jcmd -l
+          SEATA_SERVER_PID=$(jcmd -l | grep -i seata-server | awk '{print $1}')
+          echo "Seata server started with PID=$SEATA_SERVER_PID"
+          i=1
+          while [ $i -le $MAX_RETRIES ]; do
+            if curl -sSf http://localhost:8091/health >/dev/null 2>&1; then
+              echo "Port 8091 is responding"
+              exit 0
+            fi
+            echo "Waiting for port 8091... ($i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            i=$((i + 1))
+          done
+          echo "ERROR: Port 8091 is not responding after $((MAX_RETRIES * SLEEP_SECONDS)) seconds"
+          exit 1
+      - name: "Run native tests"
+        run: ./mvnw -T 2C clean -B test -Ptest-native-namingserver -pl test-suite/test-native-namingserver
+      - name: "Delete snapshots from the Maven local repository"
+        shell: sh
+        run: find ~/.m2/repository -type d -name '*-SNAPSHOT' -print -exec rm -r {} + || true
+      - name: "Save local maven repository cache"
+        uses: actions/cache/save@v6.1.0
+        if: steps.cache-maven-repository.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}

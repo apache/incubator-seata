@@ -17,20 +17,24 @@
     limitations under the License.
 
 -->
-
 <!--
-    Default logback configuration for both JVM (direct java -jar) and
-    GraalVM native image.
+    JVM-only logback configuration with external conf directory support.
 
-    This file omits <if> conditional tags that require Janino runtime
-    compilation (not available in native image). All appender includes
-    are resolved from classpath resources.
+    This variant uses <if> conditional tags (requires Janino runtime
+    compilation) to load appender includes from either classpath resources
+    or an external conf directory based on LOG_BASH_DIR
+    (spring.config.additional-location).
 
     Distribution packaging (distribution/release-seata.xml):
-        For the JVM distribution, this file is NOT used. Instead,
-        logback-spring-jvm.xml is copied to conf/logback-spring.xml
-        so the launch script picks up the variant with <if> conditionals
-        and external conf directory support.
+        This file is copied to conf/logback-spring.xml in the JVM
+        distribution package, replacing the default logback-spring.xml.
+        The launch script (distribution/bin/seata-namingserver.sh)
+        references it via:
+            -Dlogging.config=${BASEDIR}/conf/logback-spring.xml
+
+    This file is NOT used as the default classpath logback-spring.xml.
+    The default is the simplified variant without <if> tags, which works
+    in both direct java -jar and GraalVM native image.
 -->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 
@@ -43,13 +47,23 @@
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="8081"/>
+    <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-namingserver"/>
 
-    <!-- console-appender -->
-    <include resource="logback/console-appender.xml"/>
+    <if condition='property("LOG_BASH_DIR").equals("")' >
+        <then>
+            <!-- console-appender -->
+            <include resource="logback/console-appender.xml"/>
 
-    <!-- file-appender -->
-    <include resource="logback/file-appender.xml"/>
+            <!-- file-appender -->
+            <include resource="logback/file-appender.xml"/>
+
+        </then>
+        <else>
+            <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
+            <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
+        </else>
+    </if>
 
 
 
