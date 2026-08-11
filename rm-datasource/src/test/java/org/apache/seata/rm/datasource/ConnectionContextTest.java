@@ -16,14 +16,20 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.core.context.GlobalLockConfigHolder;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -42,6 +48,11 @@ public class ConnectionContextTest {
     @BeforeEach
     public void setUp() {
         connectionContext = new ConnectionContext();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        GlobalLockConfigHolder.remove();
     }
 
     @Test
@@ -247,6 +258,146 @@ public class ConnectionContextTest {
     @Test
     public void testToStringReturnsNonNull() {
         assertNotNull(connectionContext.toString());
+    }
+
+    @Test
+    public void testGetBranchIdDefaultsToNull() {
+        assertNull(connectionContext.getBranchId());
+    }
+
+    @Test
+    public void testGetBranchIdReturnsSetValue() {
+        connectionContext.setBranchId(999L);
+        assertEquals(999L, connectionContext.getBranchId());
+    }
+
+    @Test
+    public void testGetApplicationDataReturnsNullWhenNoConfig() throws TransactionException {
+        connectionContext.setAutoCommitChanged(true);
+        assertNull(connectionContext.getApplicationData());
+    }
+
+    @Test
+    public void testGetApplicationDataReturnsNullWhenNoAppData() throws TransactionException {
+        connectionContext.setAutoCommitChanged(true);
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(1);
+        config.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        assertNull(connectionContext.getApplicationData());
+    }
+
+    @Test
+    public void testGetApplicationDataSetsSkipCheckLockTrueOnOptimistic() throws TransactionException {
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(3);
+        config.setLockStrategyMode(LockStrategyMode.OPTIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        String result = connectionContext.getApplicationData();
+        assertNotNull(result);
+        assertTrue(result.contains("\"skipCheckLock\":true"));
+    }
+
+    @Test
+    public void testGetApplicationDataSkipCheckLockTogglesOnSecondCall() throws TransactionException {
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(3);
+        config.setLockStrategyMode(LockStrategyMode.OPTIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        String first = connectionContext.getApplicationData();
+        assertTrue(first.contains("\"skipCheckLock\":true"));
+        String second = connectionContext.getApplicationData();
+        assertTrue(second.contains("\"skipCheckLock\":false"));
+    }
+
+    @Test
+    public void testGetApplicationDataSetsSkipCheckLockWhenAllBeforeImageEmpty() throws TransactionException {
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(3);
+        config.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        // append undo log with null beforeImage => allBeforeImageEmpty = true
+        SQLUndoLog undoLog = new SQLUndoLog();
+        undoLog.setSqlType(SQLType.INSERT);
+        undoLog.setTableName("test");
+        connectionContext.appendUndoItem(undoLog);
+        String result = connectionContext.getApplicationData();
+        assertNotNull(result);
+        assertTrue(result.contains("\"skipCheckLock\":true"));
+    }
+
+    @Test
+    public void testGetApplicationDataSetsAutoCommit() throws TransactionException {
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(3);
+        config.setLockStrategyMode(LockStrategyMode.OPTIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        String result = connectionContext.getApplicationData();
+        assertNotNull(result);
+        assertTrue(result.contains("\"autoCommit\":false"));
+    }
+
+    @Test
+    public void testGetApplicationDataLockRetryTimesMinusOne() throws TransactionException {
+        GlobalLockConfig config = new GlobalLockConfig();
+        config.setLockRetryTimes(-1);
+        config.setLockStrategyMode(LockStrategyMode.OPTIMISTIC);
+        GlobalLockConfigHolder.setAndReturnPrevious(config);
+        String result = connectionContext.getApplicationData();
+        assertNotNull(result);
+        assertTrue(result.contains("\"skipCheckLock\":true"));
+    }
+
+    @Test
+    public void testReleaseSavepointMovesUndoItems() throws SQLException {
+        Savepoint sp1 = createSavepoint("sp1");
+        connectionContext.appendSavepoint(sp1);
+        SQLUndoLog undoLog1 = new SQLUndoLog();
+        undoLog1.setSqlType(SQLType.INSERT);
+        undoLog1.setTableName("t1");
+        connectionContext.appendUndoItem(undoLog1);
+
+        Savepoint sp2 = createSavepoint("sp2");
+        connectionContext.appendSavepoint(sp2);
+        SQLUndoLog undoLog2 = new SQLUndoLog();
+        undoLog2.setSqlType(SQLType.UPDATE);
+        undoLog2.setTableName("t2");
+        connectionContext.appendUndoItem(undoLog2);
+
+        // release sp1: sp2's undo items should move to sp1 (now current)
+        connectionContext.releaseSavepoint(sp1);
+        List<SQLUndoLog> items = connectionContext.getUndoItems();
+        assertEquals(2, items.size());
+        assertTrue(connectionContext.hasUndoLog());
+    }
+
+    @Test
+    public void testRemoveSavepointClearsOnlyAfterSavepoints() throws SQLException {
+        Savepoint sp1 = createSavepoint("sp1");
+        connectionContext.appendSavepoint(sp1);
+        connectionContext.appendLockKey("table:1");
+
+        Savepoint sp2 = createSavepoint("sp2");
+        connectionContext.appendSavepoint(sp2);
+        connectionContext.appendLockKey("table:2");
+
+        // removeSavepoint removes the savepoint AND everything after it
+        // so sp1 data and sp2 data are both removed
+        connectionContext.removeSavepoint(sp1);
+        assertFalse(connectionContext.hasLockKey());
+    }
+
+    @Test
+    public void testMultipleAppendSavepointUpdatesCurrentSavepoint() throws SQLException {
+        Savepoint sp1 = createSavepoint("sp1");
+        connectionContext.appendSavepoint(sp1);
+        Savepoint sp2 = createSavepoint("sp2");
+        connectionContext.appendSavepoint(sp2);
+        // append to sp2
+        connectionContext.appendLockKey("sp2_key");
+        // remove sp2: sp2_key should be gone
+        connectionContext.removeSavepoint(sp2);
+        assertFalse(connectionContext.hasLockKey());
     }
 
     private Savepoint createSavepoint(String name) {
