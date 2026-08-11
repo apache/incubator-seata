@@ -18,6 +18,7 @@ package org.apache.seata.sqlparser.antlr.mysql;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.SQLUpdateRecognizer;
@@ -29,6 +30,7 @@ import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,5 +132,24 @@ public class AntlrMySQLUpdateRecognizer implements SQLUpdateRecognizer {
     @Override
     public String getOriginalSQL() {
         return sqlContext.getOriginalSQL();
+    }
+
+    @Override
+    public List<String> getWhereColumns() {
+        List<MySqlContext.SQL> sqls = sqlContext.getUpdateForWhereColumnNames();
+        if (CollectionUtils.isNotEmpty(sqls)) {
+            List<String> list = new ArrayList<>(sqls.size());
+            for (MySqlContext.SQL sql : sqls) {
+                String column = sql.getUpdateWhereColumnName();
+                int index = column.indexOf(".");
+                if (index > 0) {
+                    // table.column -> column name
+                    column = column.substring(index + 1);
+                }
+                list.add(column);
+            }
+            return list;
+        }
+        return Collections.emptyList();
     }
 }

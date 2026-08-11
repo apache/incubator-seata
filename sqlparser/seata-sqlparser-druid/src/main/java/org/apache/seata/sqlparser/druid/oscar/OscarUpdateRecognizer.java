@@ -104,9 +104,20 @@ public class OscarUpdateRecognizer extends BaseOscarRecognizer implements SQLUpd
     }
 
     @Override
+    public String getTableAlias(String tableName) {
+        return SQLUpdateRecognizer.super.getTableAlias(tableName);
+    }
+
+    @Override
     public List<String> getUpdateColumnsUnEscape() {
         List<String> updateColumns = getUpdateColumns();
         return ColumnUtils.delEscape(updateColumns, getDbType());
+    }
+
+    @Override
+    public List<String> getWhereColumns() {
+        SQLExpr where = ast.getWhere();
+        return ColumnUtils.delEscape(super.getWhereColumns(where), getDbType());
     }
 
     @Override

@@ -28,6 +28,7 @@ import org.apache.seata.rm.datasource.exec.LockConflictException;
 import org.apache.seata.rm.datasource.exec.LockRetryController;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,14 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
+        if (dataSourceProxy != null) {
+            String dbType = dataSourceProxy.getDbType();
+            if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.MARIADB.equals(dbType)) {
+                context.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            } else {
+                context.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            }
+        }
     }
 
     /**
@@ -297,6 +306,23 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void changeAutoCommit() throws SQLException {
         getContext().setAutoCommitChanged(true);
         setAutoCommit(false);
+    }
+
+    @Override
+    public int getTransactionIsolation() throws SQLException {
+        Integer transactionIsolation = context.getTransactionIsolation();
+        if (transactionIsolation != null) {
+            return transactionIsolation;
+        }
+        transactionIsolation = targetConnection.getTransactionIsolation();
+        context.setTransactionIsolation(transactionIsolation);
+        return transactionIsolation;
+    }
+
+    @Override
+    public void setTransactionIsolation(int level) throws SQLException {
+        targetConnection.setTransactionIsolation(level);
+        context.setTransactionIsolation(level);
     }
 
     @Override

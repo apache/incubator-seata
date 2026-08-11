@@ -18,21 +18,29 @@ package org.apache.seata.sqlparser.druid;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLLimit;
+import com.alibaba.druid.sql.ast.SQLObject;
 import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLRecognizer;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The type Base recognizer.
@@ -148,5 +156,63 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         };
         getAst().accept(visitor);
         return true;
+    }
+
+    public List<String> getWhereColumns(SQLExpr sqlExpr) {
+        if (sqlExpr == null) {
+            return Collections.emptyList();
+        }
+        // single condition
+        if (sqlExpr instanceof SQLBinaryOpExpr) {
+            return getWhereColumns(Collections.singletonList(sqlExpr));
+        } else {
+            // multiple conditions
+            return getWhereColumns(sqlExpr.getChildren());
+        }
+    }
+
+    public List<String> getWhereColumns(List<SQLObject> list) {
+        if (CollectionUtils.isNotEmpty(list)) {
+            List<String> columns = new ArrayList<>(list.size());
+            for (SQLObject sqlObject : list) {
+                if (sqlObject instanceof SQLIdentifierExpr) {
+                    columns.add(((SQLIdentifierExpr) sqlObject).getName());
+                } else {
+                    getWhereColumns(sqlObject, columns);
+                }
+            }
+            return columns;
+        }
+        return Collections.emptyList();
+    }
+
+    public void getWhereColumns(SQLObject sqlExpr, List<String> list) {
+        if (sqlExpr instanceof SQLBinaryOpExpr) {
+            SQLExpr left = ((SQLBinaryOpExpr) sqlExpr).getLeft();
+            getWhereColumn(left, list);
+            SQLExpr right = ((SQLBinaryOpExpr) sqlExpr).getRight();
+            getWhereColumn(right, list);
+        }
+    }
+
+    public void getWhereColumn(SQLExpr left, List<String> list) {
+        if (left instanceof SQLBetweenExpr) {
+            SQLExpr expr = ((SQLBetweenExpr) left).getTestExpr();
+            if (expr instanceof SQLIdentifierExpr) {
+                list.add(((SQLIdentifierExpr) expr).getName());
+            }
+            if (expr instanceof SQLPropertyExpr) {
+                list.add(((SQLPropertyExpr) expr).getName());
+            }
+        } else if (left instanceof SQLIdentifierExpr) {
+            list.add(((SQLIdentifierExpr) left).getName());
+        } else if (left instanceof SQLInListExpr) {
+            SQLExpr expr = ((SQLInListExpr) left).getExpr();
+            if (expr instanceof SQLIdentifierExpr) {
+                list.add(((SQLIdentifierExpr) expr).getName());
+            }
+        } else if (left instanceof SQLBinaryOpExpr) {
+            getWhereColumns(left, list);
+        }
     }
 }
