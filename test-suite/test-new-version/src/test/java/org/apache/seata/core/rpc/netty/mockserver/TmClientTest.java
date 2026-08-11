@@ -36,7 +36,7 @@ public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
 
-    public static void testTm() throws Exception {
+    public static void testTm(MockCoordinator coordinator) throws Exception {
         TransactionManager tm = getTm();
 
         // globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
@@ -63,12 +63,10 @@ public class TmClientTest {
         LOGGER.info("globalReport ok:" + globalReport);
         Assertions.assertEquals(globalReport, GlobalStatus.Committed);
 
-        MockCoordinator.getInstance().setExpectedResult(xid, ResultCode.Failed);
-        //        GlobalStatus globalReport2 = tm.globalReport(xid, GlobalStatus.Committed);
+        coordinator.setExpectedResult(xid, ResultCode.Failed);
 
         GlobalStatus rollback2 = tm.rollback(xid);
         LOGGER.info("globalRollback ok:" + rollback2);
-        // TODO expected response fail , but DefaultTransactionManager ignore resultCode
     }
 
     @NotNull

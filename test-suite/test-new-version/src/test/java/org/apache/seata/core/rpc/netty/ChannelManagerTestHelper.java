@@ -17,7 +17,6 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -31,7 +30,8 @@ public class ChannelManagerTestHelper {
     }
 
     public static Channel getChannel(TmNettyRemotingClient client) {
-        return getChannelManager(client).acquireChannel(ProtocolTestConstants.MOCK_SERVER_ADDRESS);
+        String serverAddress = System.getProperty("service.mock.grouplist", "0.0.0.0:10091");
+        return getChannelManager(client).acquireChannel(serverAddress);
     }
 
     private static NettyClientChannelManager getChannelManager(AbstractNettyRemotingClient remotingClient) {

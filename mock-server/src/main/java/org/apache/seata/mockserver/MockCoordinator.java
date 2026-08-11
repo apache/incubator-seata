@@ -69,32 +69,33 @@ public class MockCoordinator implements TCInboundHandler, TransactionMessageHand
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockCoordinator.class);
 
-    RemotingServer remotingServer;
+    private static final String ALL_BEGIN_FAIL_XID = "0";
 
-    private static MockCoordinator coordinator;
+    private RemotingServer remotingServer;
 
-    private static String AllBeginFailXid = "0";
+    private final Map<String, GlobalStatus> globalStatusMap;
+    private final Map<String, ResultCode> expectedResultMap;
+    private final Map<String, Integer> expectRetryTimesMap;
+    private final Map<String, List<MockBranchSession>> branchMap;
 
-    private Map<String, GlobalStatus> globalStatusMap;
-    private Map<String, ResultCode> expectedResultMap;
-    private Map<String, Integer> expectRetryTimesMap;
-    private Map<String, List<MockBranchSession>> branchMap;
+    public MockCoordinator() {
+        this.globalStatusMap = new ConcurrentHashMap<>();
+        this.expectedResultMap = new ConcurrentHashMap<>();
+        this.expectRetryTimesMap = new ConcurrentHashMap<>();
+        this.branchMap = new ConcurrentHashMap<>();
+    }
 
-    private MockCoordinator() {}
+    private static volatile MockCoordinator defaultInstance;
 
     public static MockCoordinator getInstance() {
-        if (coordinator == null) {
+        if (defaultInstance == null) {
             synchronized (MockCoordinator.class) {
-                if (coordinator == null) {
-                    coordinator = new MockCoordinator();
-                    coordinator.expectedResultMap = new ConcurrentHashMap<>();
-                    coordinator.globalStatusMap = new ConcurrentHashMap<>();
-                    coordinator.expectRetryTimesMap = new ConcurrentHashMap<>();
-                    coordinator.branchMap = new ConcurrentHashMap<>();
+                if (defaultInstance == null) {
+                    defaultInstance = new MockCoordinator();
                 }
             }
         }
-        return coordinator;
+        return defaultInstance;
     }
 
     @Override
@@ -155,7 +156,7 @@ public class MockCoordinator implements TCInboundHandler, TransactionMessageHand
     public GlobalBeginResponse handle(GlobalBeginRequest request, RpcContext rpcContext) {
         GlobalBeginResponse response = new GlobalBeginResponse();
         try {
-            checkMockActionFail(AllBeginFailXid);
+            checkMockActionFail(ALL_BEGIN_FAIL_XID);
         } catch (TransactionException e) {
             return handleException(e, response, ResultCode.Failed, "MockBeginException");
         }
@@ -220,7 +221,6 @@ public class MockCoordinator implements TCInboundHandler, TransactionMessageHand
             CallRm.branchRollback(remotingServer, branch);
             IntStream.range(0, retry).forEach(i -> CallRm.branchRollback(remotingServer, branch));
             if (Version.isV0(rpcContext.getVersion())) {
-                // test MsgVersionHelper and skip
                 CallRm.deleteUndoLog(remotingServer, branch);
             }
         });
@@ -240,7 +240,6 @@ public class MockCoordinator implements TCInboundHandler, TransactionMessageHand
         MockBranchSession branchSession = new MockBranchSession(request.getBranchType());
         String xid = request.getXid();
         branchSession.setXid(xid);
-        //        branchSession.setTransactionId(request.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
         branchSession.setResourceId(request.getResourceId());
         branchSession.setLockKey(request.getLockKey());

@@ -20,13 +20,8 @@ import com.google.protobuf.Any;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.config.ConfigurationCache;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
-import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
-import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.grpc.GrpcHeaderEnum;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.mockserver.MockServer;
@@ -44,17 +39,13 @@ public class GrpcTest {
 
     private static SeataServiceGrpc.SeataServiceStub seataServiceStub;
 
+    private static MockServer mockServer;
+
     @BeforeAll
     public static void before() {
-        ConfigurationFactory.reload();
-        System.setProperty(
-                ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        ConfigurationCache.clear();
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
+        mockServer = ProtocolTestConstants.initMockServer();
 
-        channel = ManagedChannelBuilder.forAddress("127.0.0.1", ProtocolTestConstants.MOCK_SERVER_PORT)
+        channel = ManagedChannelBuilder.forAddress("127.0.0.1", mockServer.getPort())
                 .usePlaintext()
                 .build();
         seataServiceStub = SeataServiceGrpc.newStub(channel);
@@ -62,11 +53,10 @@ public class GrpcTest {
 
     @AfterAll
     public static void after() {
-        // MockServer.close();
-        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        ConfigurationCache.clear();
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
+        if (channel != null) {
+            channel.shutdownNow();
+        }
+        ProtocolTestConstants.closeMockServer(mockServer);
     }
 
     private GrpcMessageProto getRegisterTMRequest() {

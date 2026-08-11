@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -39,13 +40,23 @@ import static org.apache.seata.integration.http.AbstractHttpExecutor.convertPara
 
 class HttpTest {
 
-    private static final String HOST = "http://127.0.0.1:8081";
+    private static final int PORT = findAvailablePort();
+    private static final String HOST = "http://127.0.0.1:" + PORT;
     private static final String TEST_EXCEPTION = "/testException";
     private static final String GET_PATH = "/testGet";
     private static final String POST_PATH = "/testPost";
-    public static final String XID = "127.0.0.1:8081:87654321";
+    public static final String XID = "127.0.0.1:" + PORT + ":87654321";
     private static final int PARAM_TYPE_MAP = 1;
     private static final int PARAM_TYPE_BEAN = 2;
+
+    private static int findAvailablePort() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            socket.setReuseAddress(true);
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            return 8081;
+        }
+    }
 
     @Test
     void testGetProviderXID() {
@@ -75,7 +86,7 @@ class HttpTest {
     }
 
     public void providerStart() {
-        new MockWebServer().start(8081);
+        new MockWebServer().start(PORT);
     }
 
     public static class Person {

@@ -18,15 +18,11 @@ package org.apache.seata.core.rpc.netty.mockserver;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationCache;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.protocol.Protocol;
-import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
-import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
-import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.junit.jupiter.api.AfterAll;
@@ -45,26 +41,19 @@ public class MockGrpcServerTest {
 
     Logger logger = LoggerFactory.getLogger(MockGrpcServerTest.class);
 
+    private static MockServer mockServer;
+
     @BeforeAll
     public static void before() {
-        ConfigurationFactory.reload();
-        System.setProperty(
-                ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.GRPC.value);
-        ConfigurationCache.clear();
-        MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
+        mockServer = ProtocolTestConstants.initMockServer();
     }
 
     @AfterAll
     public static void after() {
-        // MockServer.close();
-        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        ProtocolTestConstants.closeMockServer(mockServer);
         System.clearProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
         ConfigurationCache.clear();
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
     }
 
     @Test
@@ -101,7 +90,7 @@ public class MockGrpcServerTest {
 
         String xid = tm.begin(
                 ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
-        MockCoordinator.getInstance().setExpectedRetry(xid, times);
+        mockServer.getCoordinator().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
@@ -115,7 +104,7 @@ public class MockGrpcServerTest {
         String xid = tm.begin(
                 ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
         logger.info("doTestRollback xid:{}", xid);
-        MockCoordinator.getInstance().setExpectedRetry(xid, times);
+        mockServer.getCoordinator().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
