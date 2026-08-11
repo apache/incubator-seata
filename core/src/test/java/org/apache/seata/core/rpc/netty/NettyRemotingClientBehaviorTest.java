@@ -37,9 +37,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -1140,6 +1143,31 @@ public class NettyRemotingClientBehaviorTest {
     }
 
     @Test
+    public void testReconnectTaskSharedByTransactionRole() throws Exception {
+        clearReconnectTasks();
+        TestNettyRemotingClient firstClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        TestNettyRemotingClient secondClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+
+        try {
+            firstClient.init();
+            assertEquals(1, reconnectTasks().size());
+
+            secondClient.init();
+            assertEquals(1, reconnectTasks().size());
+
+            secondClient.destroy();
+            assertEquals(1, reconnectTasks().size());
+
+            firstClient.destroy();
+            assertTrue(reconnectTasks().isEmpty());
+        } finally {
+            secondClient.destroy();
+            firstClient.destroy();
+            clearReconnectTasks();
+        }
+    }
+
+    @Test
     public void testInitWithReconnectException() throws Exception {
         // Create a client that will throw exception during reconnect
         TestNettyRemotingClientWithReconnectException clientWithException =
@@ -1558,5 +1586,21 @@ public class NettyRemotingClientBehaviorTest {
         public NettyClientChannelManager getClientChannelManager() {
             return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<NettyPoolKey.TransactionRole, Object> reconnectTasks() throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("RECONNECT_TASKS");
+        field.setAccessible(true);
+        return (Map<NettyPoolKey.TransactionRole, Object>) field.get(null);
+    }
+
+    private static void clearReconnectTasks() throws Exception {
+        for (Object taskHolder : reconnectTasks().values()) {
+            Field futureField = taskHolder.getClass().getDeclaredField("future");
+            futureField.setAccessible(true);
+            ((ScheduledFuture<?>) futureField.get(taskHolder)).cancel(true);
+        }
+        reconnectTasks().clear();
     }
 }
