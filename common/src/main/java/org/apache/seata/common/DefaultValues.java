@@ -357,12 +357,6 @@ public interface DefaultValues {
     String BUSINESS_ACTION_CONTEXT_JSON_PARSER = "jackson";
 
     /**
-     * The constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER.
-     */
-    @Deprecated
-    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = BUSINESS_ACTION_CONTEXT_JSON_PARSER;
-
-    /**
      * The constant DEFAULT_SERVER_ENABLE_CHECK_AUTH.
      */
     boolean DEFAULT_SERVER_ENABLE_CHECK_AUTH = true;

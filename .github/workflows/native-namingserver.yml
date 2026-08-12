@@ -23,18 +23,7 @@ on:
     branches: [ 2.x, develop, master ]
     paths:
       - '.github/workflows/native-namingserver.yml'
-      - 'build/pom.xml'
-      - 'pom.xml'
-      - 'common/pom.xml'
-      - 'common/src/main/**'
-      - 'console/pom.xml'
-      - 'console/src/main/**'
-      - 'namingserver/pom.xml'
-      - 'namingserver/src/main/**'
-      - 'test-suite/test-native-namingserver/pom.xml'
-      - 'test-suite/test-native-namingserver/src/**'
-      - 'test-suite/test-native-metadata-merge/pom.xml'
-      - 'test-suite/test-native-metadata-merge/src/**'
+      - 'namingserver/src/main/resources/META-INF/native-image/**'
   workflow_call:
     inputs:
       repository:

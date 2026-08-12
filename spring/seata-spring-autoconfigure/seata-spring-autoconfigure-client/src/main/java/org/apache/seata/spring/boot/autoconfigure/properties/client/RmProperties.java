@@ -45,7 +45,10 @@ public class RmProperties {
     private long tableMetaCheckerInterval = DEFAULT_TABLE_META_CHECKER_INTERVAL;
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+
+    @Deprecated
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
     private boolean sagaActionStatusReportEnable = DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE;
@@ -101,10 +104,12 @@ public class RmProperties {
         this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
     }
 
+    @Deprecated
     public String getSagaJsonParser() {
         return sagaJsonParser;
     }
 
+    @Deprecated
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
     }
