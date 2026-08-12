@@ -151,6 +151,10 @@
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
         <mysql.copy.skip>true</mysql.copy.skip>
+
+        <native-maven-plugin.version>1.1.5</native-maven-plugin.version>
+        <!-- Default native platform classifier; overridden by OS/arch-specific profiles -->
+        <native.platform>${os.arch}</native.platform>
     </properties>
 
     <build>
@@ -256,6 +260,11 @@
                     <groupId>com.github.eirslett</groupId>
                     <artifactId>frontend-maven-plugin</artifactId>
                     <version>${frontend-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

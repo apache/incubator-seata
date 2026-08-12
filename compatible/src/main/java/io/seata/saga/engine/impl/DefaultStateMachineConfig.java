@@ -381,10 +381,18 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setScriptEngineManager(scriptEngineManager);
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public String getSagaJsonParser() {
         return actual.getSagaJsonParser();
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public void setSagaJsonParser(String sagaJsonParser) {
         actual.setSagaJsonParser(sagaJsonParser);
     }

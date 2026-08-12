@@ -76,6 +76,36 @@ import static org.mockito.Mockito.when;
 
 class RaftRegistryServiceImplTest {
 
+    @Test
+    public void shouldParseLoginResponseWithJsonUtil() throws Exception {
+        String responseBody = "{\"code\":\"200\",\"data\":\"token\"}";
+        try (MockedStatic<HttpClientUtil> httpClient = Mockito.mockStatic(HttpClientUtil.class)) {
+            httpClient
+                    .when(() -> HttpClientUtil.doPost(anyString(), anyMap(), anyMap(), anyInt()))
+                    .thenReturn(buildMockResponse(HttpStatus.SC_OK, responseBody));
+            Method refreshToken = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
+            refreshToken.setAccessible(true);
+            refreshToken.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092");
+        }
+    }
+
+    @Test
+    public void malformedLoginResponseIsRetryable() throws Exception {
+        try (MockedStatic<HttpClientUtil> httpClient = Mockito.mockStatic(HttpClientUtil.class)) {
+            httpClient
+                    .when(() -> HttpClientUtil.doPost(anyString(), anyMap(), anyMap(), anyInt()))
+                    .thenReturn(buildMockResponse(HttpStatus.SC_OK, "{"));
+
+            Method refreshToken = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
+            refreshToken.setAccessible(true);
+            InvocationTargetException exception = assertThrows(
+                    InvocationTargetException.class,
+                    () -> refreshToken.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092"));
+
+            assertTrue(exception.getCause() instanceof RetryableException);
+        }
+    }
+
     @BeforeAll
     public static void beforeClass() {
         System.setProperty("service.vgroupMapping.tx", "default");
@@ -744,33 +774,54 @@ class RaftRegistryServiceImplTest {
      */
     @Test
     public void acquireClusterMetaDataSuccessTest() throws Exception {
+        String clusterName = "metadata-refresh-cluster";
+        String group = "metadata-refresh-group";
         String responseBody =
-                "{\"nodes\":[{\"control\":{\"host\":\"localhost\",\"port\":7091},\"transaction\":{\"host\":\"localhost\",\"port\":8091},\"group\":\"default\",\"role\":\"LEADER\"}],\"storeMode\":\"raft\",\"term\":1}";
+                "{\"nodes\":[{\"control\":{\"host\":\"metadata-refresh-node\",\"port\":7091},\"transaction\":{\"host\":\"metadata-refresh-node\",\"port\":8091},\"group\":\"metadata-refresh-group\",\"role\":\"LEADER\"}],\"storeMode\":\"raft\",\"term\":42}";
 
-        Field clusterNameField = RaftRegistryServiceImpl.class.getDeclaredField("CURRENT_TRANSACTION_CLUSTER_NAME");
-        clusterNameField.setAccessible(true);
-        clusterNameField.set(null, "default");
-
-        // Setup metadata
         Field metadataField = RaftRegistryServiceImpl.class.getDeclaredField("METADATA");
         metadataField.setAccessible(true);
         Metadata metadata = (Metadata) metadataField.get(null);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        MetadataResponse metadataResponse = objectMapper.readValue(responseBody, MetadataResponse.class);
-        metadata.refreshMetadata("default", metadataResponse);
+        Field initAddressesField = RaftRegistryServiceImpl.class.getDeclaredField("INIT_ADDRESSES");
+        initAddressesField.setAccessible(true);
+        Map<String, List<InetSocketAddress>> initAddresses =
+                (Map<String, List<InetSocketAddress>>) initAddressesField.get(null);
+        initAddresses.put(clusterName, Collections.singletonList(new InetSocketAddress("127.0.0.1", 8092)));
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
-            Response mockResponse = buildMockResponse(HttpStatus.SC_OK, responseBody);
-
             when(HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
-                    .thenReturn(mockResponse);
+                    .thenReturn(buildMockResponse(HttpStatus.SC_OK, responseBody));
+            when(HttpClientUtil.doPost(anyString(), anyMap(), anyMap(), anyInt()))
+                    .thenReturn(buildMockResponse(HttpStatus.SC_OK, "{\"code\":\"200\",\"data\":\"token\"}"));
 
             Method acquireClusterMetaDataMethod = RaftRegistryServiceImpl.class.getDeclaredMethod(
                     "acquireClusterMetaData", String.class, String.class);
             acquireClusterMetaDataMethod.setAccessible(true);
 
-            // Should not throw exception
+            assertDoesNotThrow(() -> acquireClusterMetaDataMethod.invoke(null, clusterName, group));
+        }
+
+        List<Node> nodes = metadata.getNodes(clusterName, group);
+        assertNotNull(nodes);
+        assertEquals(1, nodes.size());
+        assertEquals("metadata-refresh-node", nodes.get(0).getControl().getHost());
+        assertEquals(8091, nodes.get(0).getTransaction().getPort());
+        assertEquals(nodes.get(0), metadata.getLeader(clusterName));
+        assertTrue(metadata.isRaftMode());
+        assertEquals(42L, metadata.getClusterTerm(clusterName).get(group));
+    }
+
+    @Test
+    public void malformedMetadataResponseIsHandled() throws Exception {
+        try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
+            when(HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                    .thenReturn(buildMockResponse(HttpStatus.SC_OK, "{"));
+
+            Method acquireClusterMetaDataMethod = RaftRegistryServiceImpl.class.getDeclaredMethod(
+                    "acquireClusterMetaData", String.class, String.class);
+            acquireClusterMetaDataMethod.setAccessible(true);
+
             assertDoesNotThrow(() -> acquireClusterMetaDataMethod.invoke(null, "default", "default"));
         }
     }

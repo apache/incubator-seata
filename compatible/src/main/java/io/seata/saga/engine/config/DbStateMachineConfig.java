@@ -40,7 +40,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCES
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * The type Db state machine config.
@@ -74,8 +73,10 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 this.sagaBranchRegisterEnable = configuration.getBoolean(
                         ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE,
                         DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
-                setSagaJsonParser(
-                        configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
+                String sagaJsonParser = configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER);
+                if (StringUtils.hasLength(sagaJsonParser)) {
+                    setSagaJsonParser(sagaJsonParser);
+                }
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
                 this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY, null);

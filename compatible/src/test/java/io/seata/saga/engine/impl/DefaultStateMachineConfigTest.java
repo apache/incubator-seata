@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 
 import javax.script.ScriptEngineManager;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -468,7 +469,12 @@ public class DefaultStateMachineConfigTest {
     }
 
     @Test
-    public void testSagaJsonParser() {
+    public void testDeprecatedSagaJsonParserCompatibilityAccessors() throws NoSuchMethodException {
+        Method getter = DefaultStateMachineConfig.class.getMethod("getSagaJsonParser");
+        Method setter = DefaultStateMachineConfig.class.getMethod("setSagaJsonParser", String.class);
+        assertTrue(getter.isAnnotationPresent(Deprecated.class));
+        assertTrue(setter.isAnnotationPresent(Deprecated.class));
+
         // afterPropertiesSet() sets default parser to "fastjson"
         assertEquals("fastjson", defaultStateMachineConfig.getSagaJsonParser());
 

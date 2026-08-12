@@ -42,6 +42,8 @@ public abstract class BaseHttpChannelHandler<T> extends SimpleChannelInboundHand
             new ThreadPoolExecutor.AbortPolicy());
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(HTTP_HANDLER_THREADS::shutdown));
+        Runtime.getRuntime()
+                .addShutdownHook(ThreadPoolExecutorFactory.newThreadFactory("http-handler-shutdown", 1, false)
+                        .newThread(HTTP_HANDLER_THREADS::shutdown));
     }
 }

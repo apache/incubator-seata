@@ -304,6 +304,12 @@
                                     <order>,javax|java,\#</order>
                                 </importOrder>
                             </java>
+                            <json>
+                                <includes>
+                                    <include>src/main/resources/META-INF/native-image/*.json</include>
+                                </includes>
+                                <jackson/>
+                            </json>
                         </configuration>
                         <executions>
                             <execution>
@@ -386,6 +392,68 @@
                 <!--<module>test-suite/test-new-version</module>-->
                 <module>test-suite/test-old-version</module>
             </modules>
+        </profile>
+
+        <!-- profile: native -->
+        <profile>
+            <id>test-native-namingserver</id>
+            <modules>
+                <module>test-suite/test-native-namingserver</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>test-native-metadata-merge</id>
+            <modules>
+                <module>test-suite/test-native-metadata-merge</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>native-linux-amd64</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>linux-amd64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-linux-aarch64</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>linux-arm64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-darwin-aarch64</id>
+            <activation>
+                <os>
+                    <name>mac os x</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>darwin-arm64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-windows-amd64</id>
+            <activation>
+                <os>
+                    <name>windows</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>windows-amd64</native.platform>
+            </properties>
         </profile>
     </profiles>
 

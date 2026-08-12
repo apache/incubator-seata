@@ -216,7 +216,10 @@ public interface ConfigurationKeys {
 
     /**
      * The constant CLIENT_SAGA_JSON_PARSER.
+     *
+     * @deprecated use {@link #JSON_SERIALIZER_TYPE} instead
      */
+    @Deprecated
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
@@ -997,12 +1000,6 @@ public interface ConfigurationKeys {
      * The constant JSON_SERIALIZER_TYPE
      */
     String JSON_SERIALIZER_TYPE = JSON_PREFIX + "serializerType";
-
-    /**
-     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
-     */
-    @Deprecated
-    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
 
     /**
      * The constant rpcRmRequestTimeout
