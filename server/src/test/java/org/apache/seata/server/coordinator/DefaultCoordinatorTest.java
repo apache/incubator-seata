@@ -73,7 +73,10 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
@@ -1233,6 +1236,60 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }
 
     @Test
+    public void handleAsyncCommittingWaitsForGlobalSessionLockTest() throws Exception {
+        LockTrackingGlobalSession globalSession =
+                new LockTrackingGlobalSession(applicationId, txServiceGroup, txName, timeout);
+        globalSession.begin();
+        Long branchId = core.branchRegister(
+                BranchType.AT,
+                "resource_async_commit_lock",
+                clientId,
+                globalSession.getXid(),
+                applicationData,
+                lockKeys_1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<?> asyncCommitFuture = null;
+
+        try {
+            globalSession.lock();
+            try {
+                globalSession.changeGlobalStatus(GlobalStatus.AsyncCommitting);
+                globalSession.trackLockAttempt();
+                asyncCommitFuture = executor.submit(defaultCoordinator::handleAsyncCommitting);
+
+                Assertions.assertTrue(globalSession.awaitLockAttempt(5, TimeUnit.SECONDS));
+                Assertions.assertFalse(asyncCommitFuture.isDone());
+                Assertions.assertNotNull(globalSession.getBranch(branchId));
+
+                // Simulate the initial commit thread finishing global lock cleanup before releasing the session lock.
+                globalSession.clean();
+            } finally {
+                globalSession.unlock();
+            }
+
+            asyncCommitFuture.get(5, TimeUnit.SECONDS);
+            Assertions.assertNull(SessionHolder.findGlobalSession(globalSession.getXid()));
+
+            String nextXid = core.begin(applicationId, txServiceGroup, txName, timeout);
+            GlobalSession nextGlobalSession = SessionHolder.findGlobalSession(nextXid);
+            try {
+                Assertions.assertNotNull(core.branchRegister(
+                        BranchType.AT, "resource_async_commit_lock", clientId, nextXid, applicationData, lockKeys_1));
+            } finally {
+                nextGlobalSession.changeGlobalStatus(GlobalStatus.Committed);
+                nextGlobalSession.end();
+            }
+        } finally {
+            executor.shutdownNow();
+            GlobalSession remainingSession = SessionHolder.findGlobalSession(globalSession.getXid());
+            if (remainingSession != null) {
+                remainingSession.changeGlobalStatus(GlobalStatus.Committed);
+                remainingSession.end();
+            }
+        }
+    }
+
+    @Test
     public void undoLogDeleteWithActiveChannelsTest() throws TransactionException {
         // Create global transaction to ensure session manager is active
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
@@ -1304,5 +1361,33 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
         @Override
         public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {}
+    }
+
+    private static class LockTrackingGlobalSession extends GlobalSession {
+
+        private final CountDownLatch lockAttempted = new CountDownLatch(1);
+
+        private volatile boolean trackLockAttempt;
+
+        private LockTrackingGlobalSession(
+                String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+            super(applicationId, transactionServiceGroup, transactionName, timeout);
+        }
+
+        @Override
+        public void lock() throws TransactionException {
+            if (trackLockAttempt) {
+                lockAttempted.countDown();
+            }
+            super.lock();
+        }
+
+        private void trackLockAttempt() {
+            trackLockAttempt = true;
+        }
+
+        private boolean awaitLockAttempt(long timeout, TimeUnit unit) throws InterruptedException {
+            return lockAttempted.await(timeout, unit);
+        }
     }
 }

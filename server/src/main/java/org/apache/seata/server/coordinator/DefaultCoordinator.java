@@ -530,7 +530,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         SessionHelper.forEach(asyncCommittingSessions, asyncCommittingSession -> {
             try {
-                core.doGlobalCommit(asyncCommittingSession, true);
+                SessionHolder.lockAndExecute(asyncCommittingSession, () -> {
+                    if (!GlobalStatus.AsyncCommitting.equals(asyncCommittingSession.getStatus())) {
+                        return false;
+                    }
+                    return core.doGlobalCommit(asyncCommittingSession, true);
+                });
             } catch (TransactionException ex) {
                 LOGGER.error(
                         "Failed to async committing [{}] {} {}",
