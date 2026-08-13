@@ -265,12 +265,18 @@ public class NetUtil {
      */
     public static InetAddress getIgnoredInterfacesLocalAddress(
             String[] ignoredInterfaces, String... preferredNetworks) {
-        if (LOCAL_ADDRESS != null) {
-            return LOCAL_ADDRESS;
+        // The global cache holds the address of an unfiltered lookup, so it can only answer
+        // an unfiltered lookup. A call carrying patterns must evaluate them, otherwise the
+        // first unfiltered call anywhere in the JVM would silently disable the filtering.
+        if (CollectionUtils.isEmpty(ignoredInterfaces) && CollectionUtils.isEmpty(preferredNetworks)) {
+            if (LOCAL_ADDRESS != null) {
+                return LOCAL_ADDRESS;
+            }
+            InetAddress localAddress = getLocalAddress0(ignoredInterfaces, preferredNetworks);
+            LOCAL_ADDRESS = localAddress;
+            return localAddress;
         }
-        InetAddress localAddress = getLocalAddress0(ignoredInterfaces, preferredNetworks);
-        LOCAL_ADDRESS = localAddress;
-        return localAddress;
+        return getLocalAddress0(ignoredInterfaces, preferredNetworks);
     }
 
     private static InetAddress getLocalAddress0(String[] ignoredInterfaces, String... preferredNetworks) {

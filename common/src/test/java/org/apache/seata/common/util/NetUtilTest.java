@@ -415,4 +415,40 @@ public class NetUtilTest {
         assertThat(NetUtil.getIgnoredInterfacesLocalAddress(ignoredInterfaces, preferredNetworks))
                 .isNotNull();
     }
+
+    /**
+     * A filtered lookup must evaluate its patterns even when an earlier unfiltered lookup has
+     * already populated the global cache. Ignoring every interface leaves no candidate, so the
+     * result is null rather than the cached address.
+     */
+    @Test
+    public void testIgnoredInterfacesAreAppliedAfterDefaultAddressIsCached() {
+        // Populate the global cache through the unfiltered lookup first.
+        assertThat(NetUtil.getLocalAddress()).isNotNull();
+
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"}))
+                .isNull();
+    }
+
+    /**
+     * The same early return also bypassed preferredNetworks. Ignoring every interface through the
+     * preferred-network path leaves no candidate either, so the cached address must not leak out.
+     */
+    @Test
+    public void testPreferredNetworksAreAppliedAfterDefaultAddressIsCached() {
+        // Populate the global cache through the unfiltered lookup first.
+        assertThat(NetUtil.getLocalAddress()).isNotNull();
+
+        // A filtered lookup that excludes everything cannot be answered from the unfiltered cache.
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"}, "192.168.*"))
+                .isNull();
+    }
+
+    /**
+     * The unfiltered lookup keeps using the global cache, so repeated calls stay identical.
+     */
+    @Test
+    public void testUnfilteredLookupRemainsCached() {
+        assertThat(NetUtil.getLocalAddress()).isSameAs(NetUtil.getLocalAddress());
+    }
 }
