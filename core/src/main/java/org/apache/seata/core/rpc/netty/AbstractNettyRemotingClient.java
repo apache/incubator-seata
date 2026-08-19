@@ -587,6 +587,20 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             while (true) {
                 mergeLock.lock();
                 try {
+                    // Park until there are pending messages, so the merge thread no longer
+                    // burns CPU with a 1ms polling cycle when idle. The check-and-wait is
+                    // atomic under mergeLock and producers offer to the basket before
+                    // signalling (see sendSyncRequest), so no wake-up can be lost.
+                    while (isBasketEmpty()) {
+                        isSending = false;
+                        mergeCondition.await();
+                    }
+                    isSending = true;
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("merge send thread woken up with pending messages");
+                    }
+                    // Keep the original 1ms merge window, so messages arriving within this
+                    // window are still batched into a single request as before.
                     mergeCondition.await(MAX_MERGE_SEND_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -637,6 +651,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 });
                 isSending = false;
             }
+        }
+
+        /**
+         * Checks whether all baskets are empty. The merge thread parks itself
+         * when this returns true, avoiding the idle 1ms polling busy loop.
+         *
+         * @return true if every basket in basketMap is empty
+         */
+        private boolean isBasketEmpty() {
+            for (BlockingQueue<RpcMessage> basket : basketMap.values()) {
+                if (!basket.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void printMergeMessageLog(MergedWarpMessage mergeMessage) {

@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -1476,6 +1477,50 @@ public class NettyRemotingClientBehaviorTest {
 
         } finally {
             mergeClient.destroy();
+        }
+    }
+
+    @Test
+    public void testMergedSendRunnableIdleWaitState() throws Exception {
+        TestNettyRemotingClientWithMergeRunnable mergeClient =
+                new TestNettyRemotingClientWithMergeRunnable(clientConfig, messageExecutor);
+
+        try {
+            mergeClient.init();
+
+            // Wait for the merge send thread to start and park itself
+            Thread.sleep(300);
+
+            // The merge thread must be parked on Condition.await (WAITING) instead of
+            // spinning on a 1ms timed wait (TIMED_WAITING) when idle
+            for (Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
+                Thread thread = entry.getKey();
+                if (thread.getName().startsWith("rpcMergeMessageSend")) {
+                    assertFalse(Thread.State.TIMED_WAITING == thread.getState(),
+                            "merge send thread should not spin on a 1ms timed wait when idle: "
+                                    + thread.getName());
+                }
+            }
+
+            // A message must wake the thread and get drained from the basket
+            GlobalBeginRequest request = new GlobalBeginRequest();
+            request.setTransactionName("test-tx-idle-wake");
+            try {
+                mergeClient.sendSyncRequest(request);
+            } catch (Exception e) {
+                // Expected: no real server at 127.0.0.1:8080, the merge thread
+                // drains the basket and fast-fails the future
+            }
+
+            Thread.sleep(300);
+            assertTrue(mergeClient.basketMap.values().stream().allMatch(BlockingQueue::isEmpty),
+                    "basket should be drained by the merge send thread after wake-up");
+        } finally {
+            try {
+                mergeClient.destroy();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 
