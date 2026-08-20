@@ -142,6 +142,19 @@ class NettyClientChannelManagerTest {
 
     @Test
     @SuppressWarnings("unchecked")
+    void assertReleaseChannelWithoutExistingAddressLock() throws Exception {
+        setNettyClientKeyPool();
+        ConcurrentMap<String, NettyPoolKey> poolKeyMap =
+                (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
+        poolKeyMap.putIfAbsent("127.0.0.1:8091", nettyPoolKey);
+
+        channelManager.releaseChannel(channel, "127.0.0.1:8091");
+
+        verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
     void assertReleaseCachedChannel() throws Exception {
         setNettyClientKeyPool();
         setUpReleaseChannel();

@@ -125,7 +125,8 @@ class NettyClientChannelManager {
             return;
         }
         try {
-            synchronized (channelLocks.get(serverAddress)) {
+            Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
+            synchronized (lockObj) {
                 Channel ch = channels.get(serverAddress);
                 if (ch == null) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
