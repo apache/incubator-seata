@@ -96,6 +96,43 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile boolean combine = false;
 
+    static class BranchAlreadyTerminatedException extends SQLException {
+        BranchAlreadyTerminatedException(String message) {
+            super(message);
+        }
+    }
+
+    static boolean isClosedConnectionFailure(Throwable failure) {
+        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException) {
+                for (SQLException sqlException = (SQLException) cause;
+                        sqlException != null;
+                        sqlException = sqlException.getNextException()) {
+                    String sqlState = sqlException.getSQLState();
+                    if ("08003".equals(sqlState) || "S1009".equals(sqlState)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isBenignMySqlXaEndFailure(XAException failure) {
+        if (!DBType.MYSQL.name().equalsIgnoreCase(resource.getDbType())) {
+            return false;
+        }
+        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+            if (cause instanceof SQLException) {
+                SQLException sqlException = (SQLException) cause;
+                if (sqlException.getErrorCode() == 1614) {
+                    return true;
+                }
+            }
+        }
+        return isClosedConnectionFailure(failure);
+    }
+
     /**
      * Constructor of Connection Proxy for XA mode.
      *
@@ -340,19 +377,25 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         }
         try {
             if (!rollBacked) {
-                // XA End: Fail
                 try {
                     xaEnd(xaBranchXid, XAResource.TMFAIL);
                 } catch (XAException e) {
-                    // In MySQL, deadlock would automatically "roll back" branch txn, triggering error 1614. Still, we
-                    // are able to call "XA ROLLBACK xid". So we just mask this exception for this particular case.
-                    if (!DBType.MYSQL.name().equalsIgnoreCase(resource.getDbType())
-                            || !(e.getCause() instanceof SQLException)
-                            || ((SQLException) e.getCause()).getErrorCode() != 1614) {
+                    // MySQL automatically rolls a deadlocked branch back. A statement timeout can instead make the
+                    // pool close the physical connection before Spring reaches this cleanup path.
+                    if (!isBenignMySqlXaEndFailure(e)) {
                         throw e;
                     }
+                    LOGGER.debug("Ignore XA end for an already rolled-back MySQL branch", e);
                 }
-                xaRollback(xaBranchXid);
+                try {
+                    xaRollback(xaBranchXid);
+                } catch (XAException e) {
+                    // Closing the physical connection already rolls an unprepared MySQL XA branch back.
+                    if (!DBType.MYSQL.name().equalsIgnoreCase(resource.getDbType()) || !isClosedConnectionFailure(e)) {
+                        throw e;
+                    }
+                    LOGGER.debug("Ignore XA rollback on an already closed MySQL connection", e);
+                }
             }
             // Branch Report to TC
             reportStatusToTC(BranchStatus.PhaseOne_Failed);
@@ -424,9 +467,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                         sonataPrePrepare();
                     }
 
-                    // XA End: Success
+                    long now = System.currentTimeMillis();
                     try {
                         end(XAResource.TMSUCCESS);
+                        checkTimeout(now);
+                    } catch (BranchAlreadyTerminatedException terminated) {
+                        // TM may decide to roll back after RM ended the branch but before RM prepared it. Preparing the
+                        // branch gives the TC's rollback retry a stable XA branch to finish.
+                        LOGGER.warn(terminated.getMessage());
                     } catch (SQLException sqle) {
                         // Rollback immediately before the XA Branch Context is deleted.
                         String xaBranchXid = this.xaBranchXid.toString();
@@ -436,8 +484,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                                 SQLSTATE_XA_NOT_END,
                                 sqle);
                     }
-                    long now = System.currentTimeMillis();
-                    checkTimeout(now);
                     setPrepareTime(now);
                     int prepare = xaResource.prepare(xaBranchXid);
                     // Based on the four databases: MySQL (8), Oracle (12c), Postgres (16), and MSSQL Server (2022),
@@ -531,8 +577,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         BranchStatus branchStatus = BaseDataSourceResource.getBranchStatus(xaBranchXid);
         if (branchStatus != null) {
             releaseIfNecessary();
-            throw new SQLException("failed xa branch " + xid + " the global transaction has finish, branch status: "
-                    + branchStatus.getCode());
+            throw new BranchAlreadyTerminatedException("failed xa branch " + xaBranchXid
+                    + " because the global transaction has finished, branch status: " + branchStatus.getCode());
         }
     }
 

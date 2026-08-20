@@ -16,10 +16,14 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import org.apache.seata.spring.boot.autoconfigure.properties.SonataProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.Ordered;
+
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SONATA_PREFIX;
 
 public class SeataClientEnvironmentPostProcessorTest {
 
@@ -32,5 +36,6 @@ public class SeataClientEnvironmentPostProcessorTest {
                 new SeataClientEnvironmentPostProcessor();
         seataClientEnvironmentPostProcessor.postProcessEnvironment(applicationContext.getEnvironment(), null);
         Assertions.assertEquals(Ordered.HIGHEST_PRECEDENCE, seataClientEnvironmentPostProcessor.getOrder());
+        Assertions.assertEquals(SonataProperties.class, PROPERTY_BEAN_MAP.get(SONATA_PREFIX));
     }
 }
