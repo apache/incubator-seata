@@ -142,7 +142,7 @@ else
   JAVA_OPT="${JAVA_OPT} -Xloggc:${LOG_HOME}/seata_gc.log -verbose:gc -XX:+PrintGCDetails  -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 fi
 
-JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
+JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced -Dio.netty.allocator.type=pooled"
 JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-namingserver -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
 
 if [ "$JMX_ENABLE" = "true" ]; then
