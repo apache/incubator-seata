@@ -353,6 +353,8 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-all</artifactId>
             <version>${project.version}</version>
+            <!-- Its classes are included in this module's shaded JAR. Do not expose the duplicate dependency tree. -->
+            <optional>true</optional>
         </dependency>
 
         <!-- spring  -->
