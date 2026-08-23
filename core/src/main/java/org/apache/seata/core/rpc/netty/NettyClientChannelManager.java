@@ -125,20 +125,25 @@ class NettyClientChannelManager {
             return;
         }
         try {
-            Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
+            String channelAddress = channels.entrySet().stream()
+                    .filter(entry -> entry.getValue() == channel)
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElse(serverAddress);
+            Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, channelAddress, key -> new Object());
             synchronized (lockObj) {
-                Channel ch = channels.get(serverAddress);
+                Channel ch = channels.get(channelAddress);
                 if (ch == null) {
-                    nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
+                    nettyClientKeyPool.returnObject(poolKeyMap.get(channelAddress), channel);
                     return;
                 }
                 if (ch.compareTo(channel) == 0) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("return to pool, rm channel:{}", channel);
                     }
-                    destroyChannel(serverAddress, channel);
+                    destroyChannel(channelAddress, channel);
                 } else {
-                    nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
+                    nettyClientKeyPool.returnObject(poolKeyMap.get(channelAddress), channel);
                 }
             }
         } catch (Exception exx) {

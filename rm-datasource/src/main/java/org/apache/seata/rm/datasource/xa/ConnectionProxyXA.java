@@ -497,6 +497,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             } catch (XAException xe) {
                 // Some drivers (e.g., PG) do not automatically roll back and reset autocommit when failing to prepare,
                 // which would cause the later reuse of the connection to fail at init(). Thus, we do it manually.
+                // The Seata 2.0.0 patch applied this cleanup only to PostgreSQL. It was later generalized to all
+                // databases and may be overly broad; keep the current behavior unless an actual failure requires us to
+                // revisit it.
                 originalConnection.rollback();
                 originalConnection.setAutoCommit(true);
 
