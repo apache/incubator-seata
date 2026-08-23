@@ -117,10 +117,11 @@
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <!-- Packaging -->
+        <project.build.outputTimestamp>1980-01-01T00:00:02Z</project.build.outputTimestamp>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
         <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-        <maven-shade-plugin.version>2.4.3</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
         <maven-assembly-plugin.version>3.0.0</maven-assembly-plugin.version>
         <jib-maven-plugin.version>3.3.0</jib-maven-plugin.version>
