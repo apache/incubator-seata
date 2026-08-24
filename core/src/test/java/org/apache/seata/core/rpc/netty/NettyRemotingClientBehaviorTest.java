@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -1143,27 +1144,33 @@ public class NettyRemotingClientBehaviorTest {
     }
 
     @Test
-    public void testReconnectTaskSharedByTransactionRole() throws Exception {
-        clearReconnectTasks();
+    public void testReconnectSchedulerSharedWithIndependentClients() throws Exception {
+        clearReconnectState();
         TestNettyRemotingClient firstClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
         TestNettyRemotingClient secondClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
 
         try {
             firstClient.init();
-            assertEquals(1, reconnectTasks().size());
+            assertEquals(1, reconnectClients().size());
+            ScheduledFuture<?> firstFuture = reconnectFuture();
+            assertNotNull(firstFuture);
 
             secondClient.init();
-            assertEquals(1, reconnectTasks().size());
+            assertEquals(2, reconnectClients().size());
+            assertSame(firstFuture, reconnectFuture());
 
             secondClient.destroy();
-            assertEquals(1, reconnectTasks().size());
+            assertEquals(1, reconnectClients().size());
+            assertSame(firstFuture, reconnectFuture());
+            assertFalse(firstFuture.isCancelled());
 
             firstClient.destroy();
-            assertTrue(reconnectTasks().isEmpty());
+            assertTrue(reconnectClients().isEmpty());
+            assertNull(reconnectFuture());
         } finally {
             secondClient.destroy();
             firstClient.destroy();
-            clearReconnectTasks();
+            clearReconnectState();
         }
     }
 
@@ -1589,18 +1596,27 @@ public class NettyRemotingClientBehaviorTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<NettyPoolKey.TransactionRole, Object> reconnectTasks() throws Exception {
-        Field field = AbstractNettyRemotingClient.class.getDeclaredField("RECONNECT_TASKS");
+    private static Set<AbstractNettyRemotingClient> reconnectClients() throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("RECONNECT_CLIENTS");
         field.setAccessible(true);
-        return (Map<NettyPoolKey.TransactionRole, Object>) field.get(null);
+        return (Set<AbstractNettyRemotingClient>) field.get(null);
     }
 
-    private static void clearReconnectTasks() throws Exception {
-        for (Object taskHolder : reconnectTasks().values()) {
-            Field futureField = taskHolder.getClass().getDeclaredField("future");
-            futureField.setAccessible(true);
-            ((ScheduledFuture<?>) futureField.get(taskHolder)).cancel(true);
+    private static ScheduledFuture<?> reconnectFuture() throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("reconnectFuture");
+        field.setAccessible(true);
+        return (ScheduledFuture<?>) field.get(null);
+    }
+
+    private static void clearReconnectState() throws Exception {
+        ScheduledFuture<?> future = reconnectFuture();
+        if (future != null) {
+            future.cancel(true);
         }
-        reconnectTasks().clear();
+        reconnectClients().clear();
+
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("reconnectFuture");
+        field.setAccessible(true);
+        field.set(null, null);
     }
 }

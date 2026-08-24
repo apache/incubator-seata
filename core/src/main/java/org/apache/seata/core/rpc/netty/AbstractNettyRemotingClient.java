@@ -27,7 +27,6 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
@@ -54,6 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -61,16 +62,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -89,18 +91,38 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     private static final int MAX_MERGE_SEND_THREAD = 1;
+    private static final int MAX_RECONNECT_WORKER_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
-    private static final Object RECONNECT_TASK_LOCK = new Object();
-    private static final ScheduledThreadPoolExecutor RECONNECT_EXECUTOR =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("NettyClientReconnectTimer", true));
-    private static final ConcurrentMap<NettyPoolKey.TransactionRole, ReconnectTaskHolder> RECONNECT_TASKS =
-            new ConcurrentHashMap<>();
+    private static final Object RECONNECT_SCHEDULE_LOCK = new Object();
+    private static final ScheduledThreadPoolExecutor RECONNECT_SCHEDULER =
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("NettyClientReconnectTimer", 1, true);
+    private static final Map<NettyPoolKey.TransactionRole, ThreadPoolExecutor> RECONNECT_WORKERS =
+            createReconnectWorkers();
+    private static final Set<AbstractNettyRemotingClient> RECONNECT_CLIENTS = ConcurrentHashMap.newKeySet();
+    private static volatile ScheduledFuture<?> reconnectFuture;
 
     static {
-        RECONNECT_EXECUTOR.setRemoveOnCancelPolicy(true);
+        RECONNECT_SCHEDULER.setRemoveOnCancelPolicy(true);
+    }
+
+    private static Map<NettyPoolKey.TransactionRole, ThreadPoolExecutor> createReconnectWorkers() {
+        Map<NettyPoolKey.TransactionRole, ThreadPoolExecutor> workers =
+                new EnumMap<>(NettyPoolKey.TransactionRole.class);
+        for (NettyPoolKey.TransactionRole role : NettyPoolKey.TransactionRole.values()) {
+            workers.put(
+                    role,
+                    ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            "NettyClientReconnectWorker_" + role.name(),
+                            MAX_RECONNECT_WORKER_THREAD,
+                            MAX_RECONNECT_WORKER_THREAD,
+                            KEEP_ALIVE_TIME,
+                            TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<>()));
+        }
+        return Collections.unmodifiableMap(workers);
     }
 
     private final CopyOnWriteArrayList<ChannelEventListener> channelEventListeners = new CopyOnWriteArrayList<>();
@@ -130,6 +152,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
+    private final AtomicBoolean reconnecting = new AtomicBoolean(false);
 
     @Override
     public void init() {
@@ -149,34 +172,55 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     private void scheduleReconnectTask() {
-        ReconnectTaskHolder taskHolder = RECONNECT_TASKS.get(transactionRole);
-        if (taskHolder != null && !taskHolder.future.isCancelled() && !taskHolder.future.isDone()) {
+        RECONNECT_CLIENTS.add(this);
+        if (reconnectFuture != null && !reconnectFuture.isCancelled() && !reconnectFuture.isDone()) {
             return;
         }
-        synchronized (RECONNECT_TASK_LOCK) {
-            taskHolder = RECONNECT_TASKS.get(transactionRole);
-            if (taskHolder != null && !taskHolder.future.isCancelled() && !taskHolder.future.isDone()) {
+        synchronized (RECONNECT_SCHEDULE_LOCK) {
+            if (reconnectFuture != null && !reconnectFuture.isCancelled() && !reconnectFuture.isDone()) {
                 return;
             }
 
-            ScheduledFuture<?> future = RECONNECT_EXECUTOR.scheduleAtFixedRate(
-                    () -> {
-                        try {
-                            String transactionServiceGroup = getTransactionServiceGroup();
-                            if (StringUtils.isNotBlank(transactionServiceGroup)) {
-                                clientChannelManager.reconnect(transactionServiceGroup);
-                            }
-                        } catch (Exception ex) {
-                            LOGGER.warn(
-                                    "reconnect server failed, transactionRole: {}, error: {}",
-                                    transactionRole.name(),
-                                    ex.getMessage());
-                        }
-                    },
+            reconnectFuture = RECONNECT_SCHEDULER.scheduleAtFixedRate(
+                    AbstractNettyRemotingClient::dispatchReconnectTasks,
                     SCHEDULE_DELAY_MILLS,
                     SCHEDULE_INTERVAL_MILLS,
                     TimeUnit.MILLISECONDS);
-            RECONNECT_TASKS.put(transactionRole, new ReconnectTaskHolder(this, future));
+        }
+    }
+
+    private static void dispatchReconnectTasks() {
+        for (AbstractNettyRemotingClient client : RECONNECT_CLIENTS) {
+            client.submitReconnectTask();
+        }
+    }
+
+    private void submitReconnectTask() {
+        if (!reconnecting.compareAndSet(false, true)) {
+            return;
+        }
+        try {
+            RECONNECT_WORKERS.get(transactionRole).execute(() -> {
+                try {
+                    String transactionServiceGroup = getTransactionServiceGroup();
+                    if (StringUtils.isNotBlank(transactionServiceGroup)) {
+                        clientChannelManager.reconnect(transactionServiceGroup);
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn(
+                            "reconnect server failed, transactionRole: {}, error: {}",
+                            transactionRole.name(),
+                            ex.getMessage());
+                } finally {
+                    reconnecting.set(false);
+                }
+            });
+        } catch (RejectedExecutionException ex) {
+            reconnecting.set(false);
+            LOGGER.warn(
+                    "submit reconnect task failed, transactionRole: {}, error: {}",
+                    transactionRole.name(),
+                    ex.getMessage());
         }
     }
 
@@ -315,11 +359,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     }
 
     private void cancelReconnectTask() {
-        synchronized (RECONNECT_TASK_LOCK) {
-            ReconnectTaskHolder taskHolder = RECONNECT_TASKS.get(transactionRole);
-            if (taskHolder != null && taskHolder.client == this) {
-                taskHolder.future.cancel(true);
-                RECONNECT_TASKS.remove(transactionRole);
+        RECONNECT_CLIENTS.remove(this);
+        if (RECONNECT_CLIENTS.isEmpty()) {
+            synchronized (RECONNECT_SCHEDULE_LOCK) {
+                if (RECONNECT_CLIENTS.isEmpty() && reconnectFuture != null) {
+                    reconnectFuture.cancel(false);
+                    reconnectFuture = null;
+                }
             }
         }
     }
@@ -395,16 +441,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return lambda function
      */
     protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
-
-    private static class ReconnectTaskHolder {
-        private final AbstractNettyRemotingClient client;
-        private final ScheduledFuture<?> future;
-
-        private ReconnectTaskHolder(AbstractNettyRemotingClient client, ScheduledFuture<?> future) {
-            this.client = client;
-            this.future = future;
-        }
-    }
 
     /**
      * Get transaction service group.
