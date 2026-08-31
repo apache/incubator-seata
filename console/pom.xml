@@ -244,7 +244,7 @@
                 <directory>src/main/resources</directory>
                 <excludes>
                     <exclude>**/node_modules/**</exclude>
-                    <exclude>static/console-fe</exclude>
+                    <exclude>static/console-fe/node/**</exclude>
                 </excludes>
             </resource>
         </resources>
