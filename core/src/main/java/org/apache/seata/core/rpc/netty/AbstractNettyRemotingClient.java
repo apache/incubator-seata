@@ -82,7 +82,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
-    private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
@@ -596,12 +595,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         mergeCondition.await();
                     }
                     isSending = true;
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("merge send thread woken up with pending messages");
-                    }
-                    // Keep the original 1ms merge window, so messages arriving within this
-                    // window are still batched into a single request as before.
-                    mergeCondition.await(MAX_MERGE_SEND_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     LOGGER.warn("MergedSendRunnable wait interrupted", e);
