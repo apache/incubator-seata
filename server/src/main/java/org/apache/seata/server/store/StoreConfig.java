@@ -24,6 +24,7 @@ import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.env.ContainerHelper;
+import org.apache.seata.server.storage.file.FileStoreEngine;
 import org.apache.seata.server.storage.file.FlushDiskMode;
 
 import static org.apache.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
@@ -72,6 +73,8 @@ public class StoreConfig {
      */
     private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
+    private static final String DEFAULT_FILE_STORE_ENGINE = FileStoreEngine.FILE.getName();
+
     public static int getMaxBranchSessionSize() {
         return CONFIGURATION.getInt(STORE_FILE_PREFIX + "maxBranchSessionSize", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
@@ -86,6 +89,11 @@ public class StoreConfig {
 
     public static FlushDiskMode getFlushDiskMode() {
         return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
+    }
+
+    public static FileStoreEngine getFileStoreEngine() {
+        return FileStoreEngine.get(
+                CONFIGURATION.getConfig(ConfigurationKeys.STORE_FILE_ENGINE, DEFAULT_FILE_STORE_ENGINE));
     }
 
     /**
