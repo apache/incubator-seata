@@ -53,7 +53,7 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public boolean insertMappingDO(MappingDO mappingDO) {
-        String sql = "INSERT INTO " + vMapping + " (vgroup,namespace, cluster) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO " + vMapping + " (vgroup,namespace, cluster_name) VALUES (?, ?, ?)";
         Connection conn = null;
         PreparedStatement ps = null;
         try {
@@ -63,7 +63,7 @@ public class VGroupMappingDataBaseDAO {
             ps = conn.prepareStatement(sql);
             ps.setString(index++, mappingDO.getVGroup());
             ps.setString(index++, mappingDO.getNamespace());
-            ps.setString(index++, mappingDO.getCluster());
+            ps.setString(index++, mappingDO.getClusterName());
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -91,7 +91,8 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public boolean deleteMappingDOByVGroup(String vGroup) {
-        String sql = "DELETE FROM " + vMapping + " WHERE vGroup = ? and cluster = ?";
+        // Change 'cluster' to 'cluster_name'
+        String sql = "DELETE FROM " + vMapping + " WHERE vGroup = ? and cluster_name = ?";
         Instance instance = Instance.getInstance();
         Connection conn = null;
         PreparedStatement ps = null;
@@ -109,7 +110,8 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public List<MappingDO> queryMappingDO() {
-        String sql = "SELECT vgroup,namespace, cluster FROM " + vMapping + " WHERE cluster = ?";
+        // Change 'cluster' to 'cluster_name' in both places
+        String sql = "SELECT vgroup, namespace, cluster_name FROM " + vMapping + " WHERE cluster_name = ?";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -124,7 +126,8 @@ public class VGroupMappingDataBaseDAO {
             while (rs.next()) {
                 MappingDO mappingDO = new MappingDO();
                 mappingDO.setNamespace(rs.getString("namespace"));
-                mappingDO.setCluster(rs.getString("cluster"));
+                // Update the ResultSet getter to 'cluster_name'
+                mappingDO.setClusterName(rs.getString("cluster_name"));
                 mappingDO.setVGroup(rs.getString("vGroup"));
                 result.add(mappingDO);
             }
