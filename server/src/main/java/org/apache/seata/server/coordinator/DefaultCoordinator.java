@@ -62,21 +62,29 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.session.SessionScanStats;
+import org.apache.seata.server.storage.rocksdb.session.RocksDBSessionManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
 import static org.apache.seata.common.Constants.COMMITTING;
@@ -179,6 +187,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     org.apache.seata.common.ConfigurationKeys.RETRY_DEAD_THRESHOLD,
                     DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
+    protected static final int SESSION_BACKGROUND_TASK_QUERY_LIMIT = Math.max(
+            1,
+            CONFIG.getInt(
+                    ConfigurationKeys.SESSION_BACKGROUND_TASK_QUERY_LIMIT,
+                    DefaultValues.DEFAULT_SESSION_BACKGROUND_TASK_QUERY_LIMIT));
+
     private final ScheduledThreadPoolExecutor retryRollbacking =
             ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(RETRY_ROLLBACKING, 1);
 
@@ -209,6 +223,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Committed, GlobalStatus.Finished
     };
 
+    private final Map<GlobalStatus, byte[]> backgroundSessionStatusCursors = new ConcurrentHashMap<>();
+
+    private final Map<List<GlobalStatus>, AtomicInteger> backgroundSessionStatusGroupOffsets =
+            new ConcurrentHashMap<>();
+
+    private volatile byte[] timeoutCheckCursor;
+
+    private final int backgroundSessionQueryLimit;
+
     private final ThreadPoolExecutor branchRemoveExecutor;
 
     private RemotingServer remotingServer;
@@ -223,10 +246,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param remotingServer the remoting server
      */
     protected DefaultCoordinator(RemotingServer remotingServer) {
+        this(remotingServer, SESSION_BACKGROUND_TASK_QUERY_LIMIT);
+    }
+
+    DefaultCoordinator(RemotingServer remotingServer, int backgroundSessionQueryLimit) {
         if (remotingServer == null) {
             throw new IllegalArgumentException("RemotingServer not allowed be null.");
         }
         this.remotingServer = remotingServer;
+        this.backgroundSessionQueryLimit = Math.max(1, backgroundSessionQueryLimit);
         this.core = new DefaultCore(remotingServer);
         boolean enableBranchAsyncRemove =
                 CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
@@ -406,8 +434,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void timeoutCheck() {
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
         sessionCondition.setLazyLoadBranch(true);
-        Collection<GlobalSession> beginGlobalSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        SessionManager rootSessionManager = SessionHolder.getRootSessionManager();
+        boolean deadlineBoundedScan = configureTimeoutCheckDeadlineScan(rootSessionManager, sessionCondition);
+        Collection<GlobalSession> beginGlobalSessions = rootSessionManager.findGlobalSessions(sessionCondition);
+        if (deadlineBoundedScan) {
+            updateTimeoutCheckCursor(sessionCondition);
+        }
         if (CollectionUtils.isEmpty(beginGlobalSessions)) {
             return;
         }
@@ -445,14 +477,48 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
     }
 
+    private boolean configureTimeoutCheckDeadlineScan(
+            SessionManager rootSessionManager, SessionCondition sessionCondition) {
+        if (!(rootSessionManager instanceof RocksDBSessionManager)) {
+            return false;
+        }
+        sessionCondition.setLimit(backgroundSessionQueryLimit);
+        sessionCondition.setScanLimit(backgroundSessionQueryLimit);
+        sessionCondition.setMaxTimeoutDeadlineMillis(timeoutDeadlineUpperBound());
+        byte[] cursor = timeoutCheckCursor;
+        if (cursor != null) {
+            sessionCondition.setTimeoutScanCursor(cursor);
+        }
+        return true;
+    }
+
+    private long timeoutDeadlineUpperBound() {
+        long now = System.currentTimeMillis();
+        return now == Long.MIN_VALUE ? Long.MIN_VALUE : now - 1;
+    }
+
+    private void updateTimeoutCheckCursor(SessionCondition sessionCondition) {
+        switch (sessionCondition.getTimeoutScanContinuation()) {
+            case RESUMABLE:
+                byte[] nextCursor = sessionCondition.getNextTimeoutScanCursor();
+                timeoutCheckCursor = Arrays.copyOf(nextCursor, nextCursor.length);
+                break;
+            case EXHAUSTED:
+                timeoutCheckCursor = null;
+                break;
+            case UNSET:
+                break;
+            default:
+                throw new IllegalStateException(
+                        "unsupported timeout scan continuation:" + sessionCondition.getTimeoutScanContinuation());
+        }
+    }
+
     /**
      * Handle retry rollbacking.
      */
     protected void handleRetryRollbacking() {
-        SessionCondition sessionCondition = new SessionCondition(retryRollbackingStatuses);
-        sessionCondition.setLazyLoadBranch(true);
-        Collection<GlobalSession> rollbackingSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        List<GlobalSession> rollbackingSessions = findBackgroundSessions(retryRollbackingStatuses, true);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
             return;
         }
@@ -485,10 +551,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle retry committing.
      */
     protected void handleRetryCommitting() {
-        SessionCondition retryCommittingSessionCondition = new SessionCondition(retryCommittingStatuses);
-        retryCommittingSessionCondition.setLazyLoadBranch(true);
-        Collection<GlobalSession> committingSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(retryCommittingSessionCondition);
+        List<GlobalSession> committingSessions = findBackgroundSessions(retryCommittingStatuses, true);
         if (CollectionUtils.isEmpty(committingSessions)) {
             return;
         }
@@ -522,9 +585,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
-        Collection<GlobalSession> asyncCommittingSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        List<GlobalSession> asyncCommittingSessions = findBackgroundSessions(GlobalStatus.AsyncCommitting, false);
         if (CollectionUtils.isEmpty(asyncCommittingSessions)) {
             return;
         }
@@ -574,14 +635,164 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         return timeout >= ALWAYS_RETRY_BOUNDARY && now - beginTime > timeout;
     }
 
+    private List<GlobalSession> findBackgroundSessions(GlobalStatus status, boolean lazyLoadBranch) {
+        return findBackgroundSessions(new GlobalStatus[] {status}, lazyLoadBranch);
+    }
+
+    private List<GlobalSession> findBackgroundSessions(GlobalStatus[] statuses, boolean lazyLoadBranch) {
+        if (statuses == null || statuses.length == 0) {
+            return Collections.emptyList();
+        }
+        if (statuses.length == 1) {
+            return findBackgroundSessionsBySingleStatus(statuses[0], lazyLoadBranch);
+        }
+        SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        if (sessionManager instanceof RocksDBSessionManager && backgroundSessionQueryLimit >= statuses.length) {
+            return findBackgroundSessionsByMultipleStatusesForRocksDB(statuses, lazyLoadBranch, sessionManager);
+        }
+        List<GlobalSession> sessions = new ArrayList<>();
+        if (backgroundSessionQueryLimit < statuses.length) {
+            int startIndex = nextBackgroundSessionStatusStart(statuses, backgroundSessionQueryLimit);
+            for (int i = 0; i < backgroundSessionQueryLimit; i++) {
+                GlobalStatus status = statuses[(startIndex + i) % statuses.length];
+                sessions.addAll(findBackgroundSessionsBySingleStatus(status, lazyLoadBranch, 1));
+            }
+            sessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+            return sessions;
+        }
+        int budgetPerStatus = backgroundSessionQueryLimit / statuses.length;
+        int remainder = backgroundSessionQueryLimit % statuses.length;
+        for (int i = 0; i < statuses.length; i++) {
+            int statusBudget = budgetPerStatus + (i < remainder ? 1 : 0);
+            if (statusBudget == 0) {
+                break;
+            }
+            sessions.addAll(findBackgroundSessionsBySingleStatus(statuses[i], lazyLoadBranch, statusBudget));
+        }
+        sessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+        return sessions;
+    }
+
+    private int nextBackgroundSessionStatusStart(GlobalStatus[] statuses, int statusesPerRound) {
+        List<GlobalStatus> statusGroup =
+                Collections.unmodifiableList(Arrays.asList(Arrays.copyOf(statuses, statuses.length)));
+        AtomicInteger nextStart =
+                backgroundSessionStatusGroupOffsets.computeIfAbsent(statusGroup, ignored -> new AtomicInteger());
+        return nextStart.getAndUpdate(current -> (current + statusesPerRound) % statuses.length);
+    }
+
+    private synchronized List<GlobalSession> findBackgroundSessionsByMultipleStatusesForRocksDB(
+            GlobalStatus[] statuses, boolean lazyLoadBranch, SessionManager sessionManager) {
+        SessionCondition sessionCondition = new SessionCondition(statuses);
+        sessionCondition.setLazyLoadBranch(lazyLoadBranch);
+        sessionCondition.setLimit(backgroundSessionQueryLimit);
+        sessionCondition.setScanLimit(backgroundSessionQueryLimit);
+        Map<GlobalStatus, byte[]> statusScanCursors = new EnumMap<>(GlobalStatus.class);
+        for (GlobalStatus status : statuses) {
+            byte[] cursor = backgroundSessionStatusCursors.get(status);
+            if (cursor != null) {
+                statusScanCursors.put(status, cursor);
+            }
+        }
+        sessionCondition.setStatusScanCursors(statusScanCursors);
+        long startedAt = System.nanoTime();
+        List<GlobalSession> sessions = sessionManager.findGlobalSessions(sessionCondition);
+        updateBackgroundSessionCursors(statuses, sessionCondition);
+        logBackgroundSessionScan(Arrays.toString(statuses), sessions, sessionCondition.getScanStats(), startedAt);
+        if (CollectionUtils.isEmpty(sessions)) {
+            return Collections.emptyList();
+        }
+        return limitBackgroundSessions(sessions);
+    }
+
+    private List<GlobalSession> findBackgroundSessionsBySingleStatus(GlobalStatus status, boolean lazyLoadBranch) {
+        return limitBackgroundSessions(
+                findBackgroundSessionsBySingleStatus(status, lazyLoadBranch, backgroundSessionQueryLimit));
+    }
+
+    private List<GlobalSession> findBackgroundSessionsBySingleStatus(
+            GlobalStatus status, boolean lazyLoadBranch, int queryBudget) {
+        SessionCondition sessionCondition = new SessionCondition(status);
+        sessionCondition.setLazyLoadBranch(lazyLoadBranch);
+        sessionCondition.setLimit(queryBudget);
+        sessionCondition.setScanLimit(queryBudget);
+        byte[] statusScanCursor = backgroundSessionStatusCursors.get(status);
+        if (statusScanCursor != null) {
+            sessionCondition.setStatusScanCursor(statusScanCursor);
+        }
+        long startedAt = System.nanoTime();
+        List<GlobalSession> sessions = SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        logBackgroundSessionScan(status, sessions, sessionCondition.getScanStats(), startedAt);
+        updateBackgroundSessionCursor(status, sessionCondition);
+        if (CollectionUtils.isEmpty(sessions)) {
+            return Collections.emptyList();
+        }
+        return sessions;
+    }
+
+    private void updateBackgroundSessionCursors(GlobalStatus[] statuses, SessionCondition sessionCondition) {
+        Map<GlobalStatus, byte[]> nextCursors = sessionCondition.getNextStatusScanCursors();
+        for (GlobalStatus status : statuses) {
+            byte[] nextCursor = nextCursors.get(status);
+            if (nextCursor == null) {
+                backgroundSessionStatusCursors.remove(status);
+            } else {
+                backgroundSessionStatusCursors.put(status, Arrays.copyOf(nextCursor, nextCursor.length));
+            }
+        }
+    }
+
+    private void logBackgroundSessionScan(
+            Object status, List<GlobalSession> sessions, SessionScanStats scanStats, long startedAtNanos) {
+        if (!LOGGER.isDebugEnabled()) {
+            return;
+        }
+        SessionScanStats stats = scanStats == null ? SessionScanStats.empty() : scanStats;
+        int sessionsReturned = sessions == null ? 0 : sessions.size();
+        long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAtNanos);
+        LOGGER.debug(
+                "Background session scan status:{}, sessionsReturned:{}, rowsScanned:{}, rowsReturned:{}, "
+                        + "pointReads:{}, limitReached:{}, elapsedMillis:{}, storeElapsedMillis:{}",
+                status,
+                sessionsReturned,
+                stats.getRowsScanned(),
+                stats.getRowsReturned(),
+                stats.getPointReads(),
+                stats.isLimitReached(),
+                elapsedMillis,
+                stats.getElapsedMillis());
+    }
+
+    private void updateBackgroundSessionCursor(GlobalStatus status, SessionCondition sessionCondition) {
+        switch (sessionCondition.getStatusScanContinuation()) {
+            case RESUMABLE:
+                byte[] nextStatusScanCursor = sessionCondition.getNextStatusScanCursor();
+                backgroundSessionStatusCursors.put(
+                        status, Arrays.copyOf(nextStatusScanCursor, nextStatusScanCursor.length));
+                break;
+            case EXHAUSTED:
+                backgroundSessionStatusCursors.remove(status);
+                break;
+            case UNSET:
+                break;
+            default:
+                throw new IllegalStateException(
+                        "unsupported status scan continuation:" + sessionCondition.getStatusScanContinuation());
+        }
+    }
+
+    private List<GlobalSession> limitBackgroundSessions(List<GlobalSession> sessions) {
+        if (sessions.size() <= backgroundSessionQueryLimit) {
+            return sessions;
+        }
+        return new ArrayList<>(sessions.subList(0, backgroundSessionQueryLimit));
+    }
+
     /**
      * Handle rollbacking by scheduled.
      */
     protected void handleRollbackingByScheduled() {
-        SessionCondition sessionCondition = new SessionCondition(rollbackingStatuses);
-        sessionCondition.setLazyLoadBranch(true);
-        List<GlobalSession> rollbackingSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        List<GlobalSession> rollbackingSessions = findBackgroundSessions(rollbackingStatuses, true);
         if (CollectionUtils.isEmpty(rollbackingSessions)) {
             rollbackingSchedule(RETRY_DEAD_THRESHOLD);
             return;
@@ -640,10 +851,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle committing by scheduled.
      */
     protected void handleCommittingByScheduled() {
-        SessionCondition sessionCondition = new SessionCondition(committingStatuses);
-        sessionCondition.setLazyLoadBranch(true);
-        List<GlobalSession> committingSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        List<GlobalSession> committingSessions = findBackgroundSessions(committingStatuses, true);
         if (CollectionUtils.isEmpty(committingSessions)) {
             committingSchedule(RETRY_DEAD_THRESHOLD);
             return;
@@ -700,10 +908,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle end status by scheduled.
      */
     protected void handleEndStatesByScheduled() {
-        SessionCondition sessionCondition = new SessionCondition(endStatuses);
-        sessionCondition.setLazyLoadBranch(true);
-        List<GlobalSession> endStatusSessions =
-                SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        List<GlobalSession> endStatusSessions = findBackgroundSessions(endStatuses, true);
         if (CollectionUtils.isEmpty(endStatusSessions)) {
             endSchedule(RETRY_DEAD_THRESHOLD);
             return;

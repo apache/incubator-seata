@@ -582,6 +582,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    /**
      * Gets application data.
      *
      * @return the application data
@@ -772,7 +781,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void decode(byte[] a) {
-        this.branchSessions = new ArrayList<>();
+        this.branchSessions = isLazyLoadBranch() ? null : new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(a);
         this.transactionId = byteBuffer.getLong();
         this.timeout = byteBuffer.getInt();
@@ -807,6 +816,45 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.applicationData = new String(applicationDataLenBytes);
         }
 
+        this.beginTime = byteBuffer.getLong();
+        this.status = GlobalStatus.get(byteBuffer.get());
+    }
+
+    /**
+     * Lightweight decode that only extracts fields needed for status-query
+     * verification: transactionId, timeout, xid, beginTime, status.
+     * <p>
+     * Skips String allocation for applicationId, transactionServiceGroup,
+     * transactionName, and applicationData to reduce GC pressure during
+     * high-throughput status scans.
+     *
+     * @param a the serialized payload
+     */
+    public void decodeLightweight(byte[] a) {
+        this.branchSessions = isLazyLoadBranch() ? null : new ArrayList<>();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(a);
+        this.transactionId = byteBuffer.getLong();
+        this.timeout = byteBuffer.getInt();
+        // Skip applicationId
+        short applicationIdLen = byteBuffer.getShort();
+        byteBuffer.position(byteBuffer.position() + applicationIdLen);
+        // Skip transactionServiceGroup
+        short serviceGroupLen = byteBuffer.getShort();
+        byteBuffer.position(byteBuffer.position() + serviceGroupLen);
+        // Skip transactionName
+        short txNameLen = byteBuffer.getShort();
+        byteBuffer.position(byteBuffer.position() + txNameLen);
+        // Read xid (needed for identification)
+        int xidLen = byteBuffer.getInt();
+        if (xidLen > 0) {
+            byte[] xidBytes = new byte[xidLen];
+            byteBuffer.get(xidBytes);
+            this.xid = new String(xidBytes);
+        }
+        // Skip applicationData (potentially large)
+        int applicationDataLen = byteBuffer.getInt();
+        byteBuffer.position(byteBuffer.position() + applicationDataLen);
+        // Read beginTime and status (needed for verification)
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
     }

@@ -18,6 +18,7 @@ package org.apache.seata.server.session;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.AfterEach;
@@ -50,6 +51,7 @@ public class SessionHolderTest extends BaseSpringBootTest {
 
     @BeforeEach
     public void before() {
+        ConfigurationCache.clear();
         String sessionStorePath =
                 SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                         + separator
@@ -78,6 +80,8 @@ public class SessionHolderTest extends BaseSpringBootTest {
 
     @AfterEach
     public void after() {
+        System.clearProperty(ConfigurationKeys.STORE_FILE_ENGINE);
+        ConfigurationCache.clear();
         final File actual = new File(pathname);
         if (actual.exists()) {
             actual.delete();

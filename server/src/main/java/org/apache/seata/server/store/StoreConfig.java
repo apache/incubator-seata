@@ -16,18 +16,19 @@
  */
 package org.apache.seata.server.store;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.env.ContainerHelper;
 import org.apache.seata.server.storage.file.FlushDiskMode;
 
+import static org.apache.seata.common.ConfigurationKeys.STORE_FILE_PREFIX;
 import static org.apache.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
-import static org.apache.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
 /**
  */
@@ -88,6 +89,17 @@ public class StoreConfig {
         return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
     }
 
+    public static FileStoreEngine getFileEngine() {
+        String fileEngine =
+                CONFIGURATION.getConfig(ConfigurationKeys.STORE_FILE_ENGINE, FileStoreEngine.FILE.getName());
+        try {
+            return FileStoreEngine.get(fileEngine);
+        } catch (IllegalArgumentException e) {
+            throw new StoreException(
+                    "unknown file store engine:" + fileEngine + ", config:" + ConfigurationKeys.STORE_FILE_ENGINE);
+        }
+    }
+
     /**
      * only for inner call
      *
@@ -128,6 +140,34 @@ public class StoreConfig {
     }
 
     public static LockMode getLockMode() {
+        LockMode configuredLockMode = getConfiguredLockMode();
+        if (configuredLockMode != null) {
+            return configuredLockMode;
+        }
+        // complication old config
+        return LockMode.get(getStoreMode().name());
+    }
+
+    public static LockMode getEffectiveLockMode() {
+        LockMode configuredLockMode = getConfiguredLockMode();
+        if (StoreMode.FILE == getStoreMode() && FileStoreEngine.ROCKSDB == getFileEngine()) {
+            if (configuredLockMode != null && configuredLockMode != LockMode.ROCKSDB) {
+                throw new StoreException("RocksDB file engine requires rocksdb lock mode, but configured lock mode is "
+                        + configuredLockMode.getName());
+            }
+            return LockMode.ROCKSDB;
+        }
+        if (configuredLockMode == LockMode.ROCKSDB) {
+            throw new StoreException("RocksDB lock mode requires store.mode=file and store.file.engine=rocksdb");
+        }
+        if (configuredLockMode != null) {
+            return configuredLockMode;
+        }
+        // complication old config
+        return LockMode.get(getStoreMode().name());
+    }
+
+    private static LockMode getConfiguredLockMode() {
         // startup
         if (null != lockMode) {
             return lockMode;
@@ -142,7 +182,6 @@ public class StoreConfig {
         if (StringUtils.isNotBlank(lockModeConfig)) {
             return LockMode.get(lockModeConfig);
         }
-        // complication old config
-        return LockMode.get(getStoreMode().name());
+        return null;
     }
 }

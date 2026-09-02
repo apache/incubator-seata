@@ -101,6 +101,7 @@ public interface StarterConstants {
     String STORE_SESSION_PREFIX = STORE_PREFIX + ".session";
     String STORE_LOCK_PREFIX = STORE_PREFIX + ".lock";
     String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
+    String STORE_FILE_ROCKSDB_PREFIX = STORE_FILE_PREFIX + ".rocksdb";
     String STORE_DB_PREFIX = STORE_PREFIX + ".db";
     String STORE_DB_DRUID_PREFIX = STORE_DB_PREFIX + ".druid";
     String STORE_DB_HIKARI_PREFIX = STORE_DB_PREFIX + ".hikari";

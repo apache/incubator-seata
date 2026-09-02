@@ -136,6 +136,10 @@ public class GlobalSessionDBServiceImpl extends AbstractGlobalService implements
             whereConditionBuilder.append(" and xid = ? ");
             sqlParamList.add(param.getXid());
         }
+        if (param.getTransactionId() != null && param.getTransactionId() > 0) {
+            whereConditionBuilder.append(" and transaction_id = ? ");
+            sqlParamList.add(param.getTransactionId());
+        }
         if (StringUtils.isNotBlank(param.getApplicationId())) {
             whereConditionBuilder.append(" and application_id = ? ");
             sqlParamList.add(param.getApplicationId());

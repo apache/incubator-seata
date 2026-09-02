@@ -33,13 +33,25 @@ import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.lock.LockManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
+import org.apache.seata.server.storage.file.store.FileSessionLogReplayer;
+import org.apache.seata.server.storage.rocksdb.RocksDBStoreEngine;
+import org.apache.seata.server.storage.rocksdb.RocksDBStoreEngineFactory;
+import org.apache.seata.server.storage.rocksdb.index.RocksDBIndexManager;
+import org.apache.seata.server.storage.rocksdb.lock.RocksDBLockManager;
+import org.apache.seata.server.storage.rocksdb.lock.RocksDBOrphanLockCleanupController;
+import org.apache.seata.server.storage.rocksdb.migration.RocksDBMigrationService;
+import org.apache.seata.server.storage.rocksdb.session.RocksDBSessionManager;
+import org.apache.seata.server.store.FileStoreEngine;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +99,10 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
+    private static final int ROCKSDB_STARTUP_ORPHAN_LOCK_CLEAN_LIMIT = 1024;
+
+    private static volatile RocksDBOrphanLockCleanupController ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER;
+
     public static void init() {
         init(null);
     }
@@ -121,6 +137,7 @@ public class SessionHolder {
                 RaftServerManager.init();
                 RaftServerManager.start();
             } else {
+                FileStoreEngine fileStoreEngine = StoreConfig.getFileEngine();
                 String vGroupMappingStorePath =
                         CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)
                                 + separator
@@ -132,20 +149,39 @@ public class SessionHolder {
                 if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
                     throw new StoreException("the {store.file.dir} is empty.");
                 }
+                if (FileStoreEngine.ROCKSDB != fileStoreEngine) {
+                    new FileSessionLogReplayer()
+                            .ensureLegacyFileModeAllowed(Paths.get(sessionStorePath, ROOT_SESSION_MANAGER_NAME));
+                }
                 ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(
                         VGroupMappingStoreManager.class,
                         SessionMode.FILE.getName(),
                         new Object[] {vGroupMappingStorePath});
 
-                ROOT_SESSION_MANAGER =
-                        EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(), new Object[] {
-                            ROOT_SESSION_MANAGER_NAME, sessionStorePath
-                        });
-                ROOT_SESSION_MANAGER =
-                        EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(), new Object[] {
-                            ROOT_SESSION_MANAGER_NAME, sessionStorePath
-                        });
-                reload(sessionMode);
+                if (FileStoreEngine.ROCKSDB == fileStoreEngine) {
+                    try {
+                        RocksDBStoreEngine rocksDBStoreEngine = RocksDBStoreEngineFactory.getInstance();
+                        new RocksDBMigrationService()
+                                .migrate(Paths.get(sessionStorePath, ROOT_SESSION_MANAGER_NAME), rocksDBStoreEngine);
+                        new RocksDBIndexManager(rocksDBStoreEngine).ensureReady();
+                        ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(
+                                SessionManager.class,
+                                FileStoreEngine.ROCKSDB.getName(),
+                                new Object[] {ROOT_SESSION_MANAGER_NAME});
+                        cleanRocksDBOrphanLocks();
+                        startRocksDBOrphanLockCleanup(rocksDBStoreEngine);
+                        reloadRocksDBSessions((RocksDBSessionManager) ROOT_SESSION_MANAGER, sessionMode);
+                    } catch (RuntimeException | Error startupFailure) {
+                        rollbackFailedRocksDBInitialization(startupFailure);
+                        throw startupFailure;
+                    }
+                } else {
+                    ROOT_SESSION_MANAGER =
+                            EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(), new Object[] {
+                                ROOT_SESSION_MANAGER_NAME, sessionStorePath
+                            });
+                    reload(sessionMode);
+                }
             }
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
@@ -158,17 +194,102 @@ public class SessionHolder {
         }
     }
 
+    private static void startRocksDBOrphanLockCleanup(RocksDBStoreEngine rocksDBStoreEngine) {
+        RocksDBOrphanLockCleanupController previous = ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER;
+        if (previous != null) {
+            previous.close();
+        }
+        LockManager lockManager = LockerManagerFactory.getLockManager();
+        if (!(lockManager instanceof RocksDBLockManager)) {
+            ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER = null;
+            return;
+        }
+        RocksDBOrphanLockCleanupController controller =
+                RocksDBOrphanLockCleanupController.create((RocksDBLockManager) lockManager, rocksDBStoreEngine);
+        ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER = controller;
+        controller.start();
+    }
+
+    private static void rollbackFailedRocksDBInitialization(Throwable startupFailure) {
+        RocksDBOrphanLockCleanupController cleanupController = ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER;
+        ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER = null;
+        if (cleanupController != null) {
+            cleanupAfterFailedRocksDBInitialization(startupFailure, cleanupController::close);
+        }
+
+        cleanupAfterFailedRocksDBInitialization(startupFailure, () -> {
+            LockerManagerFactory.destroy();
+            EnhancedServiceLoader.unload(LockManager.class);
+        });
+
+        SessionManager sessionManager = ROOT_SESSION_MANAGER;
+        ROOT_SESSION_MANAGER = null;
+        if (sessionManager != null) {
+            cleanupAfterFailedRocksDBInitialization(startupFailure, sessionManager::destroy);
+        }
+
+        ROOT_VGROUP_MAPPING_MANAGER = null;
+        cleanupAfterFailedRocksDBInitialization(startupFailure, RocksDBStoreEngineFactory::destroy);
+    }
+
+    private static void cleanupAfterFailedRocksDBInitialization(Throwable startupFailure, Runnable cleanup) {
+        try {
+            cleanup.run();
+        } catch (RuntimeException | Error cleanupFailure) {
+            startupFailure.addSuppressed(cleanupFailure);
+        }
+    }
+
+    private static void cleanRocksDBOrphanLocks() {
+        LockManager lockManager = LockerManagerFactory.getLockManager();
+        if (!(lockManager instanceof RocksDBLockManager)) {
+            return;
+        }
+        RocksDBLockManager rocksDBLockManager = (RocksDBLockManager) lockManager;
+        if (rocksDBLockManager.wasLastShutdownClean()) {
+            LOGGER.info("Skip RocksDB startup orphan lock cleanup because previous shutdown was clean");
+            return;
+        }
+        RocksDBLockManager.CleanOrphanLocksResult result =
+                rocksDBLockManager.cleanOrphanLocks(ROCKSDB_STARTUP_ORPHAN_LOCK_CLEAN_LIMIT);
+        if (result.getCleaned() > 0) {
+            LOGGER.warn("Cleaned RocksDB orphan locks, count:{}, scanned:{}", result.getCleaned(), result.getScanned());
+        }
+        if (result.isLimitReached()) {
+            LOGGER.warn(
+                    "RocksDB orphan lock cleanup reached startup scan limit:{}, scanned:{}, cleaned:{}, "
+                            + "remaining locks may be cleaned by maintenance tasks",
+                    ROCKSDB_STARTUP_ORPHAN_LOCK_CLEAN_LIMIT,
+                    result.getScanned(),
+                    result.getCleaned());
+        }
+    }
+
     /**
      * Reload.
      *
      * @param sessionMode the mode of store
      */
     protected static void reload(SessionMode sessionMode) {
-        if (sessionMode == SessionMode.FILE) {
+        if (sessionMode == SessionMode.FILE && ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
+            reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
+        } else if (sessionMode == SessionMode.FILE) {
             reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
         } else {
             reload(null, sessionMode);
+        }
+    }
+
+    private static void reloadRocksDBSessions(RocksDBSessionManager sessionManager, SessionMode sessionMode) {
+        RocksDBSessionManager.RecoveryCursor cursor = RocksDBSessionManager.RecoveryCursor.initial();
+        while (true) {
+            RocksDBSessionManager.RecoveryPage page = sessionManager.readStartupRecoveryPage(cursor);
+            reload(page.getSessions(), sessionMode, true, true);
+            if (page.isExhausted()) {
+                return;
+            }
+            cursor = page.getContinuation();
         }
     }
 
@@ -177,6 +298,11 @@ public class SessionHolder {
     }
 
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
+        reload(allSessions, storeMode, acquireLock, false);
+    }
+
+    private static void reload(
+            Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock, boolean failFast) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
                 && CollectionUtils.isNotEmpty(allSessions)) {
             long currentTimeMillis = System.currentTimeMillis();
@@ -192,6 +318,7 @@ public class SessionHolder {
                                     "Could not handle the global session, xid: {},error: {}",
                                     globalSession.getXid(),
                                     e.getMessage());
+                            throwIfRocksDBStartupReloadFailed(globalSession, e, failFast);
                         }
                         break;
                     case Committed:
@@ -202,6 +329,7 @@ public class SessionHolder {
                                     "Could not handle the global session, xid: {},error: {}",
                                     globalSession.getXid(),
                                     e.getMessage());
+                            throwIfRocksDBStartupReloadFailed(globalSession, e, failFast);
                         }
                         break;
                     case Finished:
@@ -209,7 +337,9 @@ public class SessionHolder {
                     case CommitFailed:
                     case RollbackFailed:
                     case TimeoutRollbackFailed:
-                        removeInErrorState(globalSession);
+                    case CommitRetryTimeout:
+                    case RollbackRetryTimeout:
+                        removeInErrorState(globalSession, failFast);
                         break;
                     case AsyncCommitting:
                     case Committing:
@@ -224,6 +354,7 @@ public class SessionHolder {
                                 throw new RuntimeException(e);
                             }
                         }
+                        break;
                     case StopCommitOrCommitRetry:
                     case StopRollbackOrRollbackRetry:
                     case Deleting:
@@ -302,7 +433,18 @@ public class SessionHolder {
         }
     }
 
+    private static void throwIfRocksDBStartupReloadFailed(
+            GlobalSession globalSession, TransactionException cause, boolean failFast) {
+        if (failFast) {
+            throw new StoreException(cause, "RocksDB startup reload failed, xid: " + globalSession.getXid());
+        }
+    }
+
     private static void removeInErrorState(GlobalSession globalSession) {
+        removeInErrorState(globalSession, false);
+    }
+
+    private static void removeInErrorState(GlobalSession globalSession, boolean failFast) {
         try {
             LOGGER.warn(
                     "The global session should NOT be {}, remove it. xid = {}",
@@ -321,6 +463,9 @@ public class SessionHolder {
                     globalSession.getXid(),
                     globalSession.getStatus(),
                     e);
+            if (failFast) {
+                throw new StoreException(e, "RocksDB startup reload failed, xid: " + globalSession.getXid());
+            }
         }
     }
 
@@ -446,12 +591,27 @@ public class SessionHolder {
         return lock;
     }
 
-    public static void destroy() {
+    public static synchronized void destroy() {
         RaftServerManager.destroy();
+        boolean rocksDBCleanupClosed = closeRocksDBOrphanLockCleanupController();
+        if (rocksDBCleanupClosed) {
+            LockerManagerFactory.destroy();
+            EnhancedServiceLoader.unload(LockManager.class);
+        }
         if (ROOT_SESSION_MANAGER != null) {
             ROOT_SESSION_MANAGER.destroy();
         }
         SESSION_MANAGER_MAP = null;
+    }
+
+    private static boolean closeRocksDBOrphanLockCleanupController() {
+        RocksDBOrphanLockCleanupController orphanLockCleanupController = ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER;
+        if (orphanLockCleanupController == null) {
+            return false;
+        }
+        orphanLockCleanupController.close();
+        ROCKSDB_ORPHAN_LOCK_CLEANUP_CONTROLLER = null;
+        return true;
     }
 
     @FunctionalInterface

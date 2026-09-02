@@ -18,9 +18,6 @@ package org.apache.seata.server.lock;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.store.LockMode;
-import org.apache.seata.common.store.StoreMode;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +29,6 @@ import org.slf4j.LoggerFactory;
 public class LockerManagerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LockerManagerFactory.class);
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * the lock manager
@@ -62,13 +58,10 @@ public class LockerManagerFactory {
             synchronized (LockerManagerFactory.class) {
                 if (LOCK_MANAGER == null) {
                     if (null == lockMode) {
-                        lockMode = StoreConfig.getLockMode();
+                        lockMode = StoreConfig.getEffectiveLockMode();
                     }
                     LOGGER.info("use lock store mode: {}", lockMode.getName());
-                    // if not exist the lock mode, throw exception
-                    if (null != StoreMode.get(lockMode.name())) {
-                        LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
-                    }
+                    LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
                 }
             }
         }

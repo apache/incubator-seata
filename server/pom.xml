@@ -172,6 +172,10 @@
             <artifactId>seata-metrics-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.rocksdb</groupId>
+            <artifactId>rocksdbjni</artifactId>
+        </dependency>
 <!--
 
         <dependency>

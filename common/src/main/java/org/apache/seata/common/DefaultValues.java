@@ -401,6 +401,11 @@ public interface DefaultValues {
     int DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD = 10 * 1000;
 
     /**
+     * the constant DEFAULT_SESSION_BACKGROUND_TASK_QUERY_LIMIT
+     */
+    int DEFAULT_SESSION_BACKGROUND_TASK_QUERY_LIMIT = 1024;
+
+    /**
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;

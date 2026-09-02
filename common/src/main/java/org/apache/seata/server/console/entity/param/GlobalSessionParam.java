@@ -31,6 +31,10 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
      */
     private String xid;
     /**
+     * the transaction id
+     */
+    private Long transactionId;
+    /**
      * the application id
      */
     private String applicationId;
@@ -61,6 +65,14 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
 
     public void setXid(String xid) {
         this.xid = xid;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getTransactionName() {
@@ -105,9 +117,13 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
 
     @Override
     public String toString() {
-        return "GlobalSessionParam{" + "xid='" + xid + '\'' + ", applicationId='" + applicationId + '\'' + ", status="
-                + status + ", transactionName='" + transactionName + '\'' + ", vgroup='" + vgroup + '\''
-                + ", withBranch="
+        return "GlobalSessionParam{" + "xid='"
+                + xid + '\'' + ", transactionId="
+                + transactionId + ", applicationId='"
+                + applicationId + '\'' + ", status="
+                + status + ", transactionName='"
+                + transactionName + '\'' + ", vgroup='"
+                + vgroup + '\'' + ", withBranch="
                 + withBranch + '}';
     }
 }
