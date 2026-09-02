@@ -25,6 +25,7 @@ import org.apache.seata.spring.boot.autoconfigure.properties.server.store.DruidP
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.HikariProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties.RocksDB;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties.Sentinel;
@@ -77,6 +78,8 @@ public class ServerPropertiesTest {
     @Test
     public void testStoreFileProperties() {
         assertEquals(context.getBean(StoreFileProperties.class).getDir(), "sessionStore");
+        assertEquals(context.getBean(StoreFileProperties.class).getEngine(), "file");
+        assertEquals(context.getBean(RocksDB.class).getDir(), "sessionStore/rocksdb");
     }
 
     @Test

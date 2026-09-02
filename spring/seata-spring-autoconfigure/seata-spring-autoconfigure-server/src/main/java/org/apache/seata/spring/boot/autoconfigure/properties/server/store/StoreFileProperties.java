@@ -21,16 +21,27 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_ROCKSDB_PREFIX;
 
 @Component
 @ConfigurationProperties(prefix = STORE_FILE_PREFIX)
 public class StoreFileProperties {
+    private String engine = "file";
     private String dir = "sessionStore";
     private Integer maxBranchSessionSize = 16384;
     private Integer maxGlobalSessionSize = 512;
     private Integer fileWriteBufferCacheSize = 16384;
     private Integer sessionReloadReadSize = DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
     private String flushDiskMode = "async";
+
+    public String getEngine() {
+        return engine;
+    }
+
+    public StoreFileProperties setEngine(String engine) {
+        this.engine = engine;
+        return this;
+    }
 
     public String getDir() {
         return dir;
@@ -84,5 +95,20 @@ public class StoreFileProperties {
     public StoreFileProperties setFlushDiskMode(String flushDiskMode) {
         this.flushDiskMode = flushDiskMode;
         return this;
+    }
+
+    @Component
+    @ConfigurationProperties(prefix = STORE_FILE_ROCKSDB_PREFIX)
+    public static class RocksDB {
+        private String dir = "sessionStore/rocksdb";
+
+        public String getDir() {
+            return dir;
+        }
+
+        public RocksDB setDir(String dir) {
+            this.dir = dir;
+            return this;
+        }
     }
 }

@@ -139,6 +139,100 @@ public interface ConfigurationKeys {
     String STORE_FILE_DIR = STORE_FILE_PREFIX + "dir";
 
     /**
+     * The constant STORE_FILE_ENGINE
+     */
+    String STORE_FILE_ENGINE = STORE_FILE_PREFIX + "engine";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_PREFIX
+     */
+    String STORE_FILE_ROCKSDB_PREFIX = STORE_FILE_PREFIX + "rocksdb.";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_DIR
+     */
+    String STORE_FILE_ROCKSDB_DIR = STORE_FILE_ROCKSDB_PREFIX + "dir";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_BLOCK_CACHE_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_BLOCK_CACHE_SIZE = STORE_FILE_ROCKSDB_PREFIX + "blockCacheSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "writeBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_WRITE_BUFFER_NUMBER.
+     */
+    String STORE_FILE_ROCKSDB_MAX_WRITE_BUFFER_NUMBER = STORE_FILE_ROCKSDB_PREFIX + "maxWriteBufferNumber";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MIN_WRITE_BUFFER_NUMBER_TO_MERGE.
+     */
+    String STORE_FILE_ROCKSDB_MIN_WRITE_BUFFER_NUMBER_TO_MERGE =
+            STORE_FILE_ROCKSDB_PREFIX + "minWriteBufferNumberToMerge";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_BACKGROUND_JOBS.
+     */
+    String STORE_FILE_ROCKSDB_MAX_BACKGROUND_JOBS = STORE_FILE_ROCKSDB_PREFIX + "maxBackgroundJobs";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_OPEN_FILES.
+     */
+    String STORE_FILE_ROCKSDB_MAX_OPEN_FILES = STORE_FILE_ROCKSDB_PREFIX + "maxOpenFiles";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_TARGET_FILE_SIZE_BASE.
+     */
+    String STORE_FILE_ROCKSDB_TARGET_FILE_SIZE_BASE = STORE_FILE_ROCKSDB_PREFIX + "targetFileSizeBase";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_FILE_NUM_COMPACTION_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_FILE_NUM_COMPACTION_TRIGGER =
+            STORE_FILE_ROCKSDB_PREFIX + "level0FileNumCompactionTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_SLOWDOWN_WRITES_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_SLOWDOWN_WRITES_TRIGGER =
+            STORE_FILE_ROCKSDB_PREFIX + "level0SlowdownWritesTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_STOP_WRITES_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_STOP_WRITES_TRIGGER = STORE_FILE_ROCKSDB_PREFIX + "level0StopWritesTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ENABLE_STATISTICS.
+     */
+    String STORE_FILE_ROCKSDB_ENABLE_STATISTICS = STORE_FILE_ROCKSDB_PREFIX + "enableStatistics";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_OPTIMIZE_FILTERS_FOR_HITS.
+     */
+    String STORE_FILE_ROCKSDB_OPTIMIZE_FILTERS_FOR_HITS = STORE_FILE_ROCKSDB_PREFIX + "optimizeFiltersForHits";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_COMPRESSION_TYPE.
+     */
+    String STORE_FILE_ROCKSDB_COMPRESSION_TYPE = STORE_FILE_ROCKSDB_PREFIX + "compressionType";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ENABLE_RANGE_DELETE.
+     */
+    String STORE_FILE_ROCKSDB_ENABLE_RANGE_DELETE = STORE_FILE_ROCKSDB_PREFIX + "enableRangeDelete";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_RANGE_DELETE_COMPACT_AFTER_DELETE.
+     */
+    String STORE_FILE_ROCKSDB_RANGE_DELETE_COMPACT_AFTER_DELETE =
+            STORE_FILE_ROCKSDB_PREFIX + "rangeDeleteCompactAfterDelete";
+
+    /**
      * The constant SERVICE_GROUP_MAPPING_PREFIX.
      */
     String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroupMapping.";

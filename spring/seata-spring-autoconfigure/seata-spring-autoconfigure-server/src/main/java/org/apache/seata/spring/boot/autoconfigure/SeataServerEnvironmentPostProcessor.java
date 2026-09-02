@@ -60,6 +60,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_HIKARI_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_ROCKSDB_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
@@ -90,6 +91,7 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(STORE_SESSION_PREFIX, Session.class);
             PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, Lock.class);
             PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_FILE_ROCKSDB_PREFIX, StoreFileProperties.RocksDB.class);
             PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_DB_DRUID_PREFIX, DruidProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_DB_HIKARI_PREFIX, HikariProperties.class);

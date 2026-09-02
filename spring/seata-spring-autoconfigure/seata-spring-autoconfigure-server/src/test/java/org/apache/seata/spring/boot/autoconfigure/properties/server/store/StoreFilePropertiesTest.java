@@ -25,17 +25,22 @@ public class StoreFilePropertiesTest {
     public void testStoreFileProperties() {
         StoreFileProperties storeFileProperties = new StoreFileProperties();
         storeFileProperties.setDir("dir");
+        storeFileProperties.setEngine("rocksdb");
         storeFileProperties.setFlushDiskMode("disk");
         storeFileProperties.setFileWriteBufferCacheSize(1);
         storeFileProperties.setMaxBranchSessionSize(1);
         storeFileProperties.setMaxGlobalSessionSize(1);
         storeFileProperties.setSessionReloadReadSize(1);
+        StoreFileProperties.RocksDB rocksDB = new StoreFileProperties.RocksDB();
+        rocksDB.setDir("rocksdb-dir");
 
         Assertions.assertEquals("dir", storeFileProperties.getDir());
+        Assertions.assertEquals("rocksdb", storeFileProperties.getEngine());
         Assertions.assertEquals("disk", storeFileProperties.getFlushDiskMode());
         Assertions.assertEquals(1, storeFileProperties.getFileWriteBufferCacheSize());
         Assertions.assertEquals(1, storeFileProperties.getMaxGlobalSessionSize());
         Assertions.assertEquals(1, storeFileProperties.getMaxBranchSessionSize());
         Assertions.assertEquals(1, storeFileProperties.getSessionReloadReadSize());
+        Assertions.assertEquals("rocksdb-dir", rocksDB.getDir());
     }
 }

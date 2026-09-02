@@ -772,7 +772,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void decode(byte[] a) {
-        this.branchSessions = new ArrayList<>();
+        this.branchSessions = isLazyLoadBranch() ? null : new ArrayList<>();
         ByteBuffer byteBuffer = ByteBuffer.wrap(a);
         this.transactionId = byteBuffer.getLong();
         this.timeout = byteBuffer.getInt();
