@@ -19,6 +19,9 @@ package org.apache.seata.common.json;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -269,6 +272,18 @@ public class JsonAllowlistManagerTest {
     }
 
     @Test
+    public void testCheckClass_overlongNameIsTruncatedInMessage() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+        String className = buildClassName(1100);
+
+        assertThatThrownBy(() -> manager.checkClass(className))
+                .isInstanceOf(SecurityException.class)
+                .hasMessageContaining("not in JSON deserialization allowlist")
+                .hasMessageContaining("truncated, length=1100")
+                .hasMessageNotContaining(className);
+    }
+
+    @Test
     public void testCheckClass_userAllowed() {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
 
@@ -318,6 +333,7 @@ public class JsonAllowlistManagerTest {
     @Test
     public void testCacheWorks() {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+        manager.clearUserAllowlist();
 
         boolean result1 = manager.isAllowed("java.lang.String");
 
@@ -325,6 +341,44 @@ public class JsonAllowlistManagerTest {
 
         assertThat(result1).isTrue();
         assertThat(result2).isTrue();
+        assertThat(cacheSize(manager)).isEqualTo(1);
+    }
+
+    @Test
+    public void testRejectedClassesAreNotCached() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+        manager.clearUserAllowlist();
+
+        for (int i = 0; i < 100; i++) {
+            assertThat(manager.isAllowed("com.malicious.EvilClass" + i)).isFalse();
+        }
+
+        assertThat(cacheSize(manager)).isZero();
+    }
+
+    @Test
+    public void testOverlongClassNameIsRejectedAndNotCached() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+        manager.clearUserAllowlist();
+        String className = buildClassName(1100);
+
+        assertThat(manager.isAllowed(className)).isFalse();
+
+        assertThat(cacheSize(manager)).isZero();
+    }
+
+    @Test
+    public void testAllowedClassCacheIsBounded() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+        manager.clearUserAllowlist();
+        manager.addUserPrefix("com.allowed.generated.");
+
+        for (int i = 0; i < 5000; i++) {
+            assertThat(manager.isAllowed("com.allowed.generated.AllowedClass" + i))
+                    .isTrue();
+        }
+
+        assertThat(cacheSize(manager)).isEqualTo(4096);
     }
 
     @Test
@@ -336,5 +390,27 @@ public class JsonAllowlistManagerTest {
         manager.loadUserAllowlist("com.example.CacheTest");
 
         assertThat(manager.isAllowed("com.example.CacheTest")).isTrue();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static int cacheSize(JsonAllowlistManager manager) {
+        try {
+            Field cacheField = JsonAllowlistManager.class.getDeclaredField("cache");
+            cacheField.setAccessible(true);
+            Map<String, Boolean> cache = (Map<String, Boolean>) cacheField.get(manager);
+            return cache.size();
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Failed to read JsonAllowlistManager cache", e);
+        }
+    }
+
+    private static String buildClassName(int length) {
+        String prefix = "com.example.";
+        StringBuilder builder = new StringBuilder(length);
+        builder.append(prefix);
+        while (builder.length() < length) {
+            builder.append('A');
+        }
+        return builder.toString();
     }
 }
