@@ -88,3 +88,5 @@ Thumbs.db
 /console/src/main/resources/static/saga-statemachine-designer/
 /console/src/main/resources/static/index.html
 /console/src/main/resources/static/version.json
+
+__pycache__/

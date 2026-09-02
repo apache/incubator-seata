@@ -1,0 +1,64 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+server:
+  port: 50180
+
+---
+
+spring:
+  application:
+    name: seata-test-native-server
+
+---
+
+spring:
+  datasource:
+    driver-class-name: ${DATASOURCE_DRIVER:com.mysql.cj.jdbc.Driver}
+    url: ${DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/${DATASOURCE_DB:seata_test_native}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    defer-datasource-initialization: false
+    show-sql: true
+
+---
+
+spring:
+  sql:
+    init:
+      # Disabled because schema.sql and data.sql are executed early via
+      # EarlyDatabaseInitializer (a BeanFactoryPostProcessor) to ensure
+      # the undo_log table exists before Seata's DataSourceProxy checks for it.
+      mode: never
+
+---
+
+seata:
+  config:
+    type: file
+  registry:
+    type: file
+  tx-service-group: default_tx_group
+  data-source-proxy-mode: AT
+  service:
+    vgroup-mapping:
+      default_tx_group: default
+    grouplist:
+      default: ${SEATA_SERVER_ADDR:127.0.0.1:8091}

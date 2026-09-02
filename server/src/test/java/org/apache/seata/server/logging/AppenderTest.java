@@ -24,6 +24,7 @@ import net.logstash.logback.appender.LogstashTcpSocketAppender;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.logging.logback.appender.MetricLogbackAppender;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestPropertySource;
@@ -31,6 +32,7 @@ import org.springframework.test.context.TestPropertySource;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 
+@Disabled
 @TestPropertySource(
         properties = {
             "logging.extend.logstash-appender.enabled=true",

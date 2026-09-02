@@ -49,11 +49,11 @@ public class SessionProperties {
         return this;
     }
 
-    public Boolean getEnableBranchAsync() {
+    public Boolean getEnableBranchAsyncRemove() {
         return enableBranchAsyncRemove;
     }
 
-    public SessionProperties setEnableBranchAsync(Boolean enableBranchAsyncRemove) {
+    public SessionProperties setEnableBranchAsyncRemove(Boolean enableBranchAsyncRemove) {
         this.enableBranchAsyncRemove = enableBranchAsyncRemove;
         return this;
     }

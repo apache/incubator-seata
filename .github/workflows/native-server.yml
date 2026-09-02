@@ -1,0 +1,402 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Native Build Server
+
+on:
+  push:
+    branches: [ test*, "*.*.*", 2.x ]
+  pull_request:
+    branches: [ 2.x, develop, master ]
+    paths:
+      - '.github/workflows/native-server.yml'
+      - 'server/src/main/resources/META-INF/native-image/**'
+  workflow_call:
+    inputs:
+      repository:
+        description: 'Repository to check out'
+        type: string
+        required: false
+        default: ''
+      ref:
+        description: 'Branch or tag to check out'
+        type: string
+        required: false
+        default: ''
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    name: build & test (file)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-26, windows-latest ]
+        # Note: macos-26 is Apple Silicon (ARM64) only.
+        # Intel macOS (x86_64) is not supported because GraalVM has
+        # discontinued updates for that platform.
+        # https://github.com/graalvm/graalvm-ce-builds/releases/tag/jdk-25.0.1
+    env:
+      USERNAME: seata
+      PASSWORD: seata
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v7.0.0
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.ref || github.ref }}
+      - name: "Start MySQL via Docker (Linux only)"
+        if: runner.os == 'Linux'
+        shell: sh
+        run: |
+          docker run -d --name mysql-test \
+            -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+            -e MYSQL_DATABASE=seata_test_native \
+            -p 3306:3306 \
+            mysql:8.0
+          echo "Waiting for MySQL to be ready..."
+          for i in $(seq 1 30); do
+            if docker exec mysql-test mysqladmin ping -h localhost --silent 2>/dev/null; then
+              echo "MySQL is ready"
+              docker logs mysql-test --tail 10
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          echo "ERROR: MySQL failed to start after 60s"
+          docker logs mysql-test --tail 50
+          exit 1
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v5.5.0
+        with:
+          distribution: 'graalvm'
+          java-version: 25
+      - name: "Print maven version"
+        run: ./mvnw -version
+      - name: "Restore local maven repository cache"
+        uses: actions/cache/restore@v6.1.0
+        id: cache-maven-repository
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-maven-
+      - name: "Install dependencies"
+        # test-native-server requires seata-spring-boot-starter
+        run: ./mvnw -T 4C clean -B -pl server,spring/seata-spring-boot-starter install -DskipTests -am
+      - name: "Compile native image"
+        shell: sh
+        run: |
+          ./mvnw -T 2C clean -B -pl server package -DskipTests -Pnative spring-boot:process-aot native:compile
+          rm -rf server/target/*.jar
+      - name: "Upload binaries"
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: server-native-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            server/target/seata-*-*
+          if-no-files-found: error
+      - name: "Verify native binary"
+        shell: sh
+        env:
+          SEATA_CONFIG_TYPE: file
+          SEATA_REGISTRY_TYPE: file
+          SEATA_STORE_TYPE: file
+        run: |
+          ./server/target/seata-server-* &
+          NATIVE_PID=$!
+          echo "$NATIVE_PID" > ./seata-native-server.pid
+          echo "Native binary started with PID=$NATIVE_PID"
+          sleep 10
+          if kill -0 $NATIVE_PID 2>/dev/null; then
+            echo "Native binary is running normally (PID=$NATIVE_PID)"
+          else
+            echo "ERROR: Native binary failed to start or crashed (PID=$NATIVE_PID)"
+            exit 1
+          fi
+      - name: "Check port 8091 for server in ${{ matrix.os }}"
+        shell: sh
+        env:
+          MAX_RETRIES: 6
+          SLEEP_SECONDS: 5
+        run: |
+          NATIVE_PID=$(cat ./seata-native-server.pid)
+          echo "NATIVE_PID=$NATIVE_PID"
+          i=1
+          while [ $i -le $MAX_RETRIES ]; do
+            if curl -sSf http://localhost:8091/health >/dev/null 2>&1; then
+              echo "Port 8091 is responding"
+              exit 0
+            fi
+            echo "Waiting for port 8091... ($i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            i=$((i + 1))
+          done
+          echo "ERROR: Port 8091 is not responding after $((MAX_RETRIES * SLEEP_SECONDS)) seconds"
+          exit 1
+      - name: "Start test-native-server app for server in ${{ matrix.os }}"
+        if: runner.os == 'Linux'
+        env:
+          MAX_RETRIES: 12
+          SLEEP_SECONDS: 5
+        run: |
+          nohup ./mvnw -e -T 2C -Ptest-native-server -pl test-suite/test-native-server spring-boot:run &
+          i=1
+          while [ $i -le $MAX_RETRIES ]; do
+            if curl -sSf http://localhost:50180/actuator/health >/dev/null 2>&1; then
+              echo "Port 50180 is responding"
+              exit 0
+            fi
+            echo "Waiting for port 50180... ($i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            i=$((i + 1))
+          done
+          echo "ERROR: Port 50180 is not responding after $((MAX_RETRIES * SLEEP_SECONDS)) seconds"
+          exit 1
+      - name: "Run native tests for server in ${{ matrix.os }}"
+        if: runner.os == 'Linux'
+        run: ./mvnw -e -T 2C -Ptest-native-server -pl test-suite/test-native-server clean test
+      - name: "Capture test reports on failure"
+        if: failure() && runner.os == 'Linux'
+        shell: sh
+        run: |
+          echo "=== Surefire Test Reports ==="
+          if [ -d test-suite/test-native-server/target/surefire-reports ]; then
+            for f in test-suite/test-native-server/target/surefire-reports/*.txt; do
+              [ -f "$f" ] || continue
+              echo ""
+              echo "============================================================"
+              echo "--- $f ---"
+              echo "============================================================"
+              cat "$f"
+            done
+          else
+            echo "No surefire-reports directory found"
+          fi
+      - name: "Delete snapshots from the Maven local repository"
+        shell: sh
+        run: find ~/.m2/repository -type d -name '*-SNAPSHOT' -print -exec rm -r {} + || true
+      - name: "Save local maven repository cache"
+        uses: actions/cache/save@v6.1.0
+        if: steps.cache-maven-repository.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+
+  nacos:
+    name: test (nacos)
+    runs-on: ${{ matrix.os }}
+    env:
+      MAX_RETRIES: 60
+      SLEEP_SECONDS: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-24.04, ubuntu-24.04-arm, macos-26, windows-latest ]
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v7.0.0
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+          ref: ${{ inputs.ref || github.ref }}
+      - name: "Start MySQL via Docker (Linux only)"
+        if: runner.os == 'Linux'
+        shell: sh
+        run: |
+          docker run -d --name mysql-test \
+            -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
+            -e MYSQL_DATABASE=seata_test_native \
+            -p 3306:3306 \
+            mysql:8.0
+          echo "Waiting for MySQL to be ready..."
+          for i in $(seq 1 30); do
+            if docker exec mysql-test mysqladmin ping -h localhost --silent 2>/dev/null; then
+              echo "MySQL is ready"
+              docker logs mysql-test --tail 10
+              exit 0
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+          echo "ERROR: MySQL failed to start after 60s"
+          docker logs mysql-test --tail 50
+          exit 1
+      - name: "Checkout Nacos"
+        uses: actions/checkout@v7.0.0
+        with:
+          repository: alibaba/nacos
+          ref: 3.2.3
+          path: nacos
+      - name: "Build Nacos"
+        working-directory: nacos
+        run: ./mvnw install -B -pl bootstrap -DskipTests -am
+      - name: "Start Nacos"
+        shell: sh
+        working-directory: nacos
+        run: |
+          nohup ./mvnw -B spring-boot:run -pl bootstrap -Prelease-nacos \
+            -Dspring-boot.run.jvmArguments="--add-opens java.base/java.util=ALL-UNNAMED -Dnacos.standalone=true -Dnacos.core.auth.server.identity.key=identity.key -Dnacos.core.auth.server.identity.value=identity.value -Dnacos.core.auth.plugin.nacos.token.secret.key=VGhpc0lzTXlDdXN0b21TZWNyZXRLZXkwMTIzNDU2Nzg= -Dnacos.core.auth.enabled=false" &
+          echo "Waiting for Nacos to be ready..."
+          for i in $(seq 1 30); do
+            if curl -sSf http://localhost:8080/v3/console/server/state >/dev/null 2>&1; then
+              echo "Port 8080 is responding"
+              exit 0
+            fi
+            echo "Waiting for Nacos... ($i/30)"
+            sleep 2
+          done
+          echo "ERROR: Nacos failed to start after 60s"
+          docker logs nacos-test --tail 50
+          exit 1
+      - name: "Set up Java JDK"
+        uses: actions/setup-java@v5.5.0
+        with:
+          distribution: 'graalvm'
+          java-version: 25
+      - name: "Print maven version"
+        run: ./mvnw -version
+      - name: "Restore local maven repository cache"
+        uses: actions/cache/restore@v6.1.0
+        id: cache-maven-repository
+        with:
+          path: ~/.m2/repository
+          key: server-native-nacos-${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            server-native-nacos-${{ runner.os }}-${{ runner.arch }}-maven-
+      - name: "Install dependencies"
+        # test-native-server requires seata-spring-boot-starter
+        shell: sh
+        run: |
+          ./mvnw -T 4C clean -B -pl server,spring/seata-spring-boot-starter install -DskipTests -am
+          rm -rf server/target/*.jar
+      - name: "Adjust retry timeout for Windows"
+        if: runner.os == 'Windows'
+        run: echo "MAX_RETRIES=180" >> $GITHUB_ENV
+      - name: "Wait for build job"
+        shell: sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 ${{ env.MAX_RETRIES }}); do
+            RESULT=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+              --jq ".jobs[] | select(.name | startswith(\"build & test (file)\") and endswith(\"(${{ matrix.os }})\")) | \"\(.status) \(.conclusion)\"")
+            if [ -z "$RESULT" ]; then
+              echo "Build job for ${{ matrix.os }} not found yet... ($i/${{ env.MAX_RETRIES }})"
+              sleep ${{ env.SLEEP_SECONDS }}
+              continue
+            fi
+            STATUS="${RESULT%% *}"
+            CONCLUSION="${RESULT##* }"
+            case "${STATUS}|${CONCLUSION}" in
+              "completed|success")
+                echo "Build job for ${{ matrix.os }} completed successfully"
+                exit 0
+                ;;
+              "completed|failure"|"completed|cancelled"|"completed|skipped")
+                echo "ERROR: Build job for ${{ matrix.os }} finished with status=${STATUS} conclusion=${CONCLUSION}"
+                exit 1
+                ;;
+            esac
+            echo "Build job for ${{ matrix.os }} status=${STATUS}... ($i/${{ env.MAX_RETRIES }})"
+            sleep ${{ env.SLEEP_SECONDS }}
+          done
+          echo "ERROR: Build job for ${{ matrix.os }} did not complete in $(( ${{ env.MAX_RETRIES }} * ${{ env.SLEEP_SECONDS }} )) seconds"
+          exit 1
+      - name: "Download binaries"
+        uses: actions/download-artifact@v7.0.0
+        with:
+          name: server-native-${{ runner.os }}-${{ runner.arch }}
+          path: server/target/
+      - name: "Fix binary permissions"
+        shell: sh
+        run: chmod +x ./server/target/seata-server-*
+      - name: "Verify native binary"
+        shell: sh
+        env:
+          SEATA_CONFIG_TYPE: nacos
+          SEATA_CONFIG_NACOS_SERVERADDR: "127.0.0.1:8848"
+          SEATA_CONFIG_NACOS_NAMESPACE: ""
+          SEATA_CONFIG_NACOS_GROUP: SEATA_GROUP
+          SEATA_CONFIG_NACOS_CONTEXTPATH: ""
+          SEATA_CONFIG_NACOS_USERNAME: ""
+          SEATA_CONFIG_NACOS_PASSWORD: ""
+          SEATA_CONFIG_NACOS_ACCESSKEY: ""
+          SEATA_CONFIG_NACOS_SECRETKEY: ""
+          SEATA_CONFIG_NACOS_RAMROLENAME: ""
+          SEATA_CONFIG_NACOS_DATAID: seataServer.properties
+          SEATA_REGISTRY_TYPE: nacos
+          SEATA_REGISTRY_PREFERREDNETWORKS: "30.240.*"
+          SEATA_REGISTRY_IGNOREDINTERFACES: VMware.*
+          SEATA_REGISTRY_METADATA_WEIGHT: "100"
+          SEATA_REGISTRY_NACOS_APPLICATION: seata-server
+          SEATA_REGISTRY_NACOS_SERVERADDR: "127.0.0.1:8848"
+          SEATA_REGISTRY_NACOS_NAMESPACE: ""
+          SEATA_REGISTRY_NACOS_GROUP: "SEATA_GROUP"
+          SEATA_REGISTRY_NACOS_CLUSTER: default
+          SEATA_REGISTRY_NACOS_CONTEXTPATH: ""
+          SEATA_REGISTRY_NACOS_USERNAME: ""
+          SEATA_REGISTRY_NACOS_PASSWORD: ""
+          SEATA_REGISTRY_NACOS_ACCESSKEY: ""
+          SEATA_REGISTRY_NACOS_SECRETKEY: ""
+          SEATA_REGISTRY_NACOS_RAMROLENAME: ""
+          SEATA_STORE_TYPE: file
+        run: |
+          ./server/target/seata-server-* &
+          NATIVE_PID=$!
+          echo "$NATIVE_PID" > ./seata-native-server.pid
+          echo "Native binary started with PID=$NATIVE_PID"
+          sleep 10
+          if kill -0 $NATIVE_PID 2>/dev/null; then
+            echo "Native binary is running normally (PID=$NATIVE_PID)"
+          else
+            echo "ERROR: Native binary failed to start or crashed (PID=$NATIVE_PID)"
+            exit 1
+          fi
+      - name: "Check port 8091 for server in ${{ matrix.os }}"
+        shell: sh
+        env:
+          MAX_RETRIES: 6
+          SLEEP_SECONDS: 5
+        run: |
+          NATIVE_PID=$(cat ./seata-native-server.pid)
+          echo "NATIVE_PID=$NATIVE_PID"
+          i=1
+          while [ $i -le $MAX_RETRIES ]; do
+            if curl -sSf http://localhost:8091/health >/dev/null 2>&1; then
+              echo "Port 8091 is responding"
+              exit 0
+            fi
+            echo "Waiting for port 8091... ($i/$MAX_RETRIES)"
+            sleep $SLEEP_SECONDS
+            i=$((i + 1))
+          done
+          echo "ERROR: Port 8091 is not responding after $((MAX_RETRIES * SLEEP_SECONDS)) seconds"
+          exit 1
+      - name: "Delete snapshots and Nacos from the Maven local repository"
+        shell: sh
+        run: |
+          find ~/.m2/repository -type d -name '*-SNAPSHOT' -print -exec rm -r {} + || true
+          find ~/.m2/repository -type d -name 'nacos' -print -exec rm -r {} + || true
+      - name: "Save local maven repository cache"
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: ~/.m2/repository
+          key: server-native-nacos-${{ runner.os }}-${{ runner.arch }}-maven-${{ hashFiles('**/pom.xml') }}

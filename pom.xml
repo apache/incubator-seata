@@ -396,6 +396,12 @@
 
         <!-- profile: native -->
         <profile>
+            <id>test-native-server</id>
+            <modules>
+                <module>test-suite/test-native-server</module>
+            </modules>
+        </profile>
+        <profile>
             <id>test-native-namingserver</id>
             <modules>
                 <module>test-suite/test-native-namingserver</module>

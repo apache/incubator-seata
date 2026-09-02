@@ -17,10 +17,14 @@
 package org.apache.seata.server.config;
 
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.server.instance.AbstractSeataInstanceStrategy;
 import org.apache.seata.server.instance.GeneralInstanceStrategy;
 import org.apache.seata.server.instance.RaftServerInstanceStrategy;
 import org.apache.seata.server.instance.SeataInstanceStrategy;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,10 +35,19 @@ public class ServerInstanceStrategyConfig {
     String sessionMode;
 
     @Bean
-    public SeataInstanceStrategy seataInstanceStrategy() {
+    public SeataInstanceStrategy seataInstanceStrategy(
+            RegistryProperties registryProperties,
+            RegistryNamingServerProperties registryNamingServerProperties,
+            ServerProperties serverProperties) {
+        AbstractSeataInstanceStrategy strategy;
         if (StringUtils.equalsIgnoreCase("raft", sessionMode)) {
-            return new RaftServerInstanceStrategy();
+            strategy = new RaftServerInstanceStrategy();
+        } else {
+            strategy = new GeneralInstanceStrategy();
         }
-        return new GeneralInstanceStrategy();
+        strategy.setRegistryProperties(registryProperties);
+        strategy.setRegistryNamingServerProperties(registryNamingServerProperties);
+        strategy.setServerProperties(serverProperties);
+        return strategy;
     }
 }

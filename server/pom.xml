@@ -479,6 +479,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -533,6 +537,7 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
             <id>release-seata-jar</id>
             <properties>
@@ -559,6 +564,129 @@
                         </executions>
                     </plugin>
                 </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>native</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-jar-plugin</artifactId>
+                            <configuration>
+                                <archive>
+                                    <manifestEntries>
+                                        <Spring-Boot-Native-Processed>true</Spring-Boot-Native-Processed>
+                                    </manifestEntries>
+                                </archive>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-maven-plugin</artifactId>
+                            <configuration>
+                                <mainClass>org.apache.seata.server.ServerApplication</mainClass>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>process-aot</id>
+                                    <goals>
+                                        <goal>process-aot</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.graalvm.buildtools</groupId>
+                            <artifactId>native-maven-plugin</artifactId>
+                            <configuration>
+                                <mainClass>org.apache.seata.server.ServerApplication</mainClass>
+                                <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                                <imageName>${project.artifactId}-${project.version}-${native.platform}</imageName>
+                                <buildArgs>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.Logger</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.LoggerContext</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.spi.TurboFilterList</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.spi.LoggerContextVO</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.Level</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.BasicStatusManager</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.spi.LogbackLock</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.helpers.CyclicBuffer</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.status.InfoStatus</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.util.LogbackMDCAdapter</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.ConsoleAppender</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.spi.AppenderAttachableImpl</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.util.ContextInitializer</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.COWArrayList</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.ReentryGuard</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.ReentryGuard$ReentryGuardImpl</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.SimpleTimeBasedGuard</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.spi.FilterAttachableImpl</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.joran.spi.ConsoleTarget</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.joran.spi.ConsoleTarget$1</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.joran.spi.ConsoleTarget$2</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.spi.ContextAwareImpl</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.BasicConfigurator</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.encoder.LayoutWrappingEncoder</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.layout.TTLLLayout</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.pattern.ThrowableProxyConverter</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.CachingDateFormatter</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.core.util.CachingDateFormatter$CacheTuple</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.util.ContextInitializer</arg>
+                                    <arg>--initialize-at-build-time=ch.qos.logback.classic.util.ContextInitializer$1</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderBaseModule</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderBaseModule$ReaderAnnotationProcessor</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.util.TypeUtils</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.util.TypeUtils$Cache</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.JSONFactory</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.JSONFactory$CacheItem</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToDouble</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.writer.ObjectWriterBaseModule</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.writer.ObjectWriterBaseModule$WriterAnnotationProcessor</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.StringToAny</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToBigDecimal</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToBigInteger</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToBoolean</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToByte</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToDouble</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToFloat</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToInteger</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToLong</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToNumber</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToShort</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.function.impl.ToString</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderImplString</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderProvider</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderProvider$LRUAutoTypeCache</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.util.ParameterizedTypeImpl</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.JSONReader</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.JSONReader$Context</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.writer.ObjectWriterCreator</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.writer.ObjectWriterCreator$LambdaInfo</arg>
+                                    <arg>--initialize-at-build-time=com.alibaba.fastjson2.reader.ObjectReaderCreator$LambdaSetterInfo</arg>
+                                    <arg>--initialize-at-run-time=io.netty.channel.kqueue.Native</arg>
+                                    <arg>--initialize-at-run-time=io.netty.channel.kqueue.KQueueEventArray</arg>
+                                </buildArgs>
+                                <exclusions>
+                                    <exclusion>
+                                        <groupId>org.springframework.boot</groupId>
+                                        <artifactId>spring-boot-devtools</artifactId>
+                                    </exclusion>
+                                </exclusions>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>add-reachability-metadata</id>
+                                    <goals>
+                                        <goal>add-reachability-metadata</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
             </build>
         </profile>
     </profiles>

@@ -83,7 +83,7 @@
         <hessian.version>4.0.63</hessian.version>
         <fastjson2.version>2.0.52</fastjson2.version>
         <groovy.version>4.0.31</groovy.version>
-        <zstd.version>1.5.0-4</zstd.version>
+        <zstd.version>1.5.7-3</zstd.version>
         <jackson.version>2.18.3</jackson.version>
         <jackson3.version>3.1.1</jackson3.version>
         <xstream.version>1.4.21</xstream.version>
