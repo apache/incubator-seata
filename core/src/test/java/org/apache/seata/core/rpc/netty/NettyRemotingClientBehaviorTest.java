@@ -1493,12 +1493,13 @@ public class NettyRemotingClientBehaviorTest {
 
             // The merge thread must be parked on Condition.await (WAITING) instead of
             // spinning on a 1ms timed wait (TIMED_WAITING) when idle
-            for (Map.Entry<Thread, StackTraceElement[]> entry : Thread.getAllStackTraces().entrySet()) {
+            for (Map.Entry<Thread, StackTraceElement[]> entry :
+                    Thread.getAllStackTraces().entrySet()) {
                 Thread thread = entry.getKey();
                 if (thread.getName().startsWith("rpcMergeMessageSend")) {
-                    assertFalse(Thread.State.TIMED_WAITING == thread.getState(),
-                            "merge send thread should not spin on a 1ms timed wait when idle: "
-                                    + thread.getName());
+                    assertFalse(
+                            Thread.State.TIMED_WAITING == thread.getState(),
+                            "merge send thread should not spin on a 1ms timed wait when idle: " + thread.getName());
                 }
             }
 
@@ -1513,7 +1514,8 @@ public class NettyRemotingClientBehaviorTest {
             }
 
             Thread.sleep(300);
-            assertTrue(mergeClient.basketMap.values().stream().allMatch(BlockingQueue::isEmpty),
+            assertTrue(
+                    mergeClient.basketMap.values().stream().allMatch(BlockingQueue::isEmpty),
                     "basket should be drained by the merge send thread after wake-up");
         } finally {
             try {
