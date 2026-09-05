@@ -24,6 +24,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_APPLICATION_DATA_SIZ
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_RETRY_COUNT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
@@ -44,9 +45,13 @@ public class RmProperties {
     private long tableMetaCheckerInterval = DEFAULT_TABLE_META_CHECKER_INTERVAL;
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
+
+    @Deprecated
     private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
+
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
+    private boolean sagaActionStatusReportEnable = DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE;
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
     private int branchExecutionTimeoutXA = DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
     private int connectionTwoPhaseHoldTimeoutXA = DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
@@ -99,10 +104,12 @@ public class RmProperties {
         this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
     }
 
+    @Deprecated
     public String getSagaJsonParser() {
         return sagaJsonParser;
     }
 
+    @Deprecated
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
     }
@@ -129,6 +136,14 @@ public class RmProperties {
 
     public void setSagaCompensatePersistModeUpdate(boolean sagaCompensatePersistModeUpdate) {
         this.sagaCompensatePersistModeUpdate = sagaCompensatePersistModeUpdate;
+    }
+
+    public boolean isSagaActionStatusReportEnable() {
+        return sagaActionStatusReportEnable;
+    }
+
+    public void setSagaActionStatusReportEnable(boolean sagaActionStatusReportEnable) {
+        this.sagaActionStatusReportEnable = sagaActionStatusReportEnable;
     }
 
     public int getTccActionInterceptorOrder() {

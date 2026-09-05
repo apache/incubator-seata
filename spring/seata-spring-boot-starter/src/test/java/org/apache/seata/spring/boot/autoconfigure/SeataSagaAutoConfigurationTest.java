@@ -32,6 +32,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,6 +45,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -68,6 +70,11 @@ import static org.mockito.Mockito.when;
             "seata.saga.state-machine.enable-async=true"
         })
 class SeataSagaAutoConfigurationTest {
+    private static final String SPRING_BOOT_2_3_DATA_SOURCE_AUTO_CONFIGURATION =
+            "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration";
+    private static final String SPRING_BOOT_4_DATA_SOURCE_AUTO_CONFIGURATION =
+            "org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration";
+
     @Autowired
     private ApplicationContext applicationContext;
 
@@ -135,5 +142,17 @@ class SeataSagaAutoConfigurationTest {
         assertThat(asyncExecutor).isNotNull();
         assertThat(rejectedExecutionHandler).isNotNull();
         assertThat(rejectedExecutionHandler).isInstanceOf(ThreadPoolExecutor.CallerRunsPolicy.class);
+    }
+
+    @Test
+    void testAutoConfigureAfterSupportsSpringBoot4DataSourceAutoConfiguration() {
+        AutoConfigureAfter autoConfigureAfter =
+                SeataSagaAutoConfiguration.class.getAnnotation(AutoConfigureAfter.class);
+
+        AssertionsForClassTypes.assertThat(autoConfigureAfter).isNotNull();
+        assertThat(autoConfigureAfter.value()).containsExactly(SeataAutoConfiguration.class);
+        assertThat(Arrays.asList(autoConfigureAfter.name()))
+                .containsExactly(
+                        SPRING_BOOT_2_3_DATA_SOURCE_AUTO_CONFIGURATION, SPRING_BOOT_4_DATA_SOURCE_AUTO_CONFIGURATION);
     }
 }

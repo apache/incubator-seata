@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.console.controller;
 
+import jakarta.annotation.Resource;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.Resource;
 
 /**
  * Global Lock Controller

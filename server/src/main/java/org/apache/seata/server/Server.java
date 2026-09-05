@@ -16,12 +16,14 @@
  */
 package org.apache.seata.server;
 
+import jakarta.annotation.Resource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
@@ -35,7 +37,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -84,12 +85,12 @@ public class Server {
         } else {
             // Get preferred network patterns from configuration (regex or prefix match)
             // Used to select specific network interfaces when multiple are available
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
+            String preferredNetworks = getRegistryConfig(REGISTRY_PREFERRED_NETWORKS);
 
             // Get ignored interface patterns from configuration (regex supported)
             // Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
             // Example: "VMware.*,VirtualBox.*,bridge.*,docker.*,veth.*"
-            String ignoredInterfaces = ConfigurationFactory.getInstance().getConfig(REGISTRY_IGNORED_INTERFACES);
+            String ignoredInterfaces = getRegistryConfig(REGISTRY_IGNORED_INTERFACES);
             String[] ignoredInterfacesSplit = null;
             if (ignoredInterfaces != null) {
                 ignoredInterfacesSplit = ignoredInterfaces.split(",");
@@ -126,5 +127,16 @@ public class Server {
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
+    }
+
+    static String getRegistryConfig(String dataId) {
+        Configuration registryConfiguration = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+        if (registryConfiguration != null) {
+            String config = registryConfiguration.getConfig(dataId);
+            if (config != null) {
+                return config;
+            }
+        }
+        return ConfigurationFactory.getInstance().getConfig(dataId);
     }
 }

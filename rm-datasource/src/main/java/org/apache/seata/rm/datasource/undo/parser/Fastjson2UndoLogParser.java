@@ -20,9 +20,17 @@ import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.json.Fastjson2ObjectReaderWarmup;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.rm.datasource.sql.struct.Row;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.BranchUndoLog;
+import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
+import org.apache.seata.sqlparser.SQLType;
+
+import java.util.ArrayList;
 
 @LoadLevel(name = Fastjson2UndoLogParser.NAME)
 public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
@@ -53,6 +61,16 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
         };
+
+        Fastjson2ObjectReaderWarmup.warmup(
+                Object.class,
+                ArrayList.class,
+                BranchUndoLog.class,
+                SQLUndoLog.class,
+                SQLType.class,
+                TableRecords.class,
+                Row.class,
+                Field.class);
 
         // SerialArray support: Fastjson2 with FieldBased and SupportAutoType features
         // can handle SerialArray serialization automatically through field access

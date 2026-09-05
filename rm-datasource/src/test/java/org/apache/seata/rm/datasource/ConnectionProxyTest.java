@@ -45,6 +45,10 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.nullable;
+
 /**
  * ConnectionProxy test
  *
@@ -64,6 +68,7 @@ public class ConnectionProxyTest {
 
     private Field branchRollbackFlagField;
     private boolean originalBranchRollbackFlag;
+    private GlobalLockConfig originalGlobalLockConfig;
     private ResourceManager originalAtResourceManager;
 
     @BeforeEach
@@ -75,6 +80,7 @@ public class ConnectionProxyTest {
         modifiersField.setInt(branchRollbackFlagField, branchRollbackFlagField.getModifiers() & ~Modifier.FINAL);
         branchRollbackFlagField.setAccessible(true);
         originalBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
+        originalGlobalLockConfig = GlobalLockConfigHolder.getCurrentGlobalLockConfig();
 
         dataSourceProxy = Mockito.mock(DataSourceProxy.class);
         Mockito.when(dataSourceProxy.getResourceId()).thenReturn(TEST_RESOURCE_ID);
@@ -82,12 +88,12 @@ public class ConnectionProxyTest {
         DefaultResourceManager rm = Mockito.mock(DefaultResourceManager.class);
 
         Mockito.when(rm.branchRegister(
-                        BranchType.AT,
-                        dataSourceProxy.getResourceId(),
-                        null,
-                        TEST_XID,
-                        "{\"autoCommit\":false}",
-                        LOCK_KEY))
+                        eq(BranchType.AT),
+                        eq(TEST_RESOURCE_ID),
+                        isNull(),
+                        eq(TEST_XID),
+                        nullable(String.class),
+                        eq(LOCK_KEY)))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
@@ -100,6 +106,11 @@ public class ConnectionProxyTest {
         try {
             branchRollbackFlagField.set(null, originalBranchRollbackFlag);
         } finally {
+            if (originalGlobalLockConfig == null) {
+                GlobalLockConfigHolder.remove();
+            } else {
+                GlobalLockConfigHolder.setAndReturnPrevious(originalGlobalLockConfig);
+            }
             if (originalAtResourceManager != null) {
                 DefaultResourceManager.mockResourceManager(BranchType.AT, originalAtResourceManager);
             }
@@ -113,7 +124,7 @@ public class ConnectionProxyTest {
         preGlobalLockConfig.setLockRetryTimes(0);
         preGlobalLockConfig.setLockRetryInterval(10);
         preGlobalLockConfig.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
-        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
+        GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
         try (ConnectionProxy connectionProxy =
                 new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null))) {
             connectionProxy.bind(TEST_XID);
@@ -135,17 +146,19 @@ public class ConnectionProxyTest {
         preGlobalLockConfig.setLockRetryTimes(30);
         preGlobalLockConfig.setLockRetryInterval(10);
         preGlobalLockConfig.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
-        GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
-        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, null);
-        connectionProxy.bind(TEST_XID);
-        connectionProxy.appendUndoLog(new SQLUndoLog());
-        connectionProxy.appendLockKey(LOCK_KEY);
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.add(new Row());
-        sqlUndoLog.setBeforeImage(beforeImage);
-        connectionProxy.getContext().appendUndoItem(sqlUndoLog);
-        Assertions.assertThrows(LockWaitTimeoutException.class, connectionProxy::commit);
+        GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
+        try (ConnectionProxy connectionProxy =
+                new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null))) {
+            connectionProxy.bind(TEST_XID);
+            connectionProxy.appendUndoLog(new SQLUndoLog());
+            connectionProxy.appendLockKey(LOCK_KEY);
+            SQLUndoLog sqlUndoLog = new SQLUndoLog();
+            TableRecords beforeImage = new TableRecords();
+            beforeImage.add(new Row());
+            sqlUndoLog.setBeforeImage(beforeImage);
+            connectionProxy.getContext().appendUndoItem(sqlUndoLog);
+            Assertions.assertThrows(LockWaitTimeoutException.class, connectionProxy::commit);
+        }
     }
 
     @Test

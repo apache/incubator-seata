@@ -43,7 +43,7 @@ import java.util.Map;
  */
 public class ChoiceStateHandler implements StateHandler {
 
-    private final ResourceLock CHOICE_LOCK = new ResourceLock();
+    private final ResourceLock choiceLock = new ResourceLock();
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -53,7 +53,7 @@ public class ChoiceStateHandler implements StateHandler {
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
-            try (ResourceLock ignored = CHOICE_LOCK.obtain()) {
+            try (ResourceLock ignored = choiceLock.obtain()) {
                 choiceEvaluators = choiceState.getChoiceEvaluators();
                 if (choiceEvaluators == null) {
 

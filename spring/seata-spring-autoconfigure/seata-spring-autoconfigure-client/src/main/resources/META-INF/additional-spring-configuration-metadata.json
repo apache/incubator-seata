@@ -76,7 +76,12 @@
       "name": "seata.client.rm.saga-json-parser",
       "type": "java.lang.String",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",
-      "defaultValue": "fastjson"
+      "defaultValue": "fastjson",
+      "deprecation": {
+        "level": "warning",
+        "replacement": "seata.json.serializer-type",
+        "reason": "It may be removed in a future release, please configure to 'seata.json.serializer-type' (canonical key: 'json.serializerType')."
+      }
     },
     {
       "name": "seata.client.rm.saga-retry-persist-mode-update",
@@ -87,6 +92,13 @@
     {
       "name": "seata.client.rm.saga-compensate-persist-mode-update",
       "type": "java.lang.Boolean",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.client.rm.saga-action-status-report-enable",
+      "type": "java.lang.Boolean",
+      "description": "Whether enable saga annotation action status report for anti-suspension and empty rollback. Only takes effect for BranchType.SAGA_ANNOTATION.",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",
       "defaultValue": false
     },

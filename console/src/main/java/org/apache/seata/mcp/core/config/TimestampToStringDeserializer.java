@@ -16,21 +16,21 @@
  */
 package org.apache.seata.mcp.core.config;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class TimestampToStringDeserializer extends JsonDeserializer<String> {
+public class TimestampToStringDeserializer extends ValueDeserializer<String> {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public String deserialize(JsonParser p, DeserializationContext cxt) throws IOException {
+    public String deserialize(JsonParser p, DeserializationContext ctxt) throws JacksonException {
         long timestamp = p.getLongValue();
         LocalDateTime dateTime =
                 Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();

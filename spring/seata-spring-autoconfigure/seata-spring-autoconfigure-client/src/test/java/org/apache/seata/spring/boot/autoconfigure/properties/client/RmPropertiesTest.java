@@ -69,4 +69,20 @@ public class RmPropertiesTest {
         rmProperties.setApplicationDataLimit(1);
         Assertions.assertEquals(1, rmProperties.getApplicationDataLimit());
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testSagaJsonParserCompatibilityApiIsDeprecated() throws NoSuchFieldException, NoSuchMethodException {
+        RmProperties rmProperties = new RmProperties();
+        rmProperties.setSagaJsonParser("json");
+
+        Assertions.assertEquals("json", rmProperties.getSagaJsonParser());
+        Assertions.assertTrue(
+                RmProperties.class.getDeclaredField("sagaJsonParser").isAnnotationPresent(Deprecated.class));
+        Assertions.assertTrue(
+                RmProperties.class.getDeclaredMethod("getSagaJsonParser").isAnnotationPresent(Deprecated.class));
+        Assertions.assertTrue(RmProperties.class
+                .getDeclaredMethod("setSagaJsonParser", String.class)
+                .isAnnotationPresent(Deprecated.class));
+    }
 }

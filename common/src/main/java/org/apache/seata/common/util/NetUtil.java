@@ -265,12 +265,32 @@ public class NetUtil {
      */
     public static InetAddress getIgnoredInterfacesLocalAddress(
             String[] ignoredInterfaces, String... preferredNetworks) {
+        // The global cache only ever holds the unfiltered default address, and it predates
+        // the interface filtering support (#8090). A parameterized lookup must evaluate its
+        // own filters, so it neither reads nor overwrites the default cache (#8169). Blank
+        // patterns (e.g. an empty config value split into [""]) apply no filtering, so they
+        // still go through the cache.
+        if (hasNonBlankPattern(ignoredInterfaces) || hasNonBlankPattern(preferredNetworks)) {
+            return getLocalAddress0(ignoredInterfaces, preferredNetworks);
+        }
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
         }
         InetAddress localAddress = getLocalAddress0(ignoredInterfaces, preferredNetworks);
         LOCAL_ADDRESS = localAddress;
         return localAddress;
+    }
+
+    private static boolean hasNonBlankPattern(String[] patterns) {
+        if (patterns == null) {
+            return false;
+        }
+        for (String pattern : patterns) {
+            if (StringUtils.isNotBlank(pattern)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static InetAddress getLocalAddress0(String[] ignoredInterfaces, String... preferredNetworks) {

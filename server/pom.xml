@@ -32,9 +32,10 @@
     <description>server for Seata built with Maven</description>
 
     <properties>
-        <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
-        <spring-framework-for-server.version>5.3.39</spring-framework-for-server.version>
+        <spring-boot-for-server.version>4.0.6</spring-boot-for-server.version>
+        <spring-framework-for-server.version>7.0.7</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
+        <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -97,6 +98,10 @@
 
     <dependencies>
         <!-- springboot -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-web-server</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -516,6 +521,34 @@
                                     <artifactId>null</artifactId>
                                 </include>
                             </includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release-seata-jar</id>
+            <properties>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
+            <build>
+                <finalName>seata-server</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-for-server.version}</version>
+                        <configuration>
+                            <mainClass>org.apache.seata.server.ServerApplication</mainClass>
                         </configuration>
                         <executions>
                             <execution>

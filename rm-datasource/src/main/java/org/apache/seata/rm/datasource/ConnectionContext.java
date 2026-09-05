@@ -19,8 +19,7 @@ package org.apache.seata.rm.datasource;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
@@ -62,7 +61,6 @@ public class ConnectionContext {
 
     private String xid;
     private Long branchId;
-    private final JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer("jackson");
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
@@ -304,7 +302,7 @@ public class ConnectionContext {
 
         if (!this.applicationData.isEmpty()) {
             try {
-                return jsonSerializer.toJSONString(this.applicationData, true, false);
+                return JsonUtil.toJSONString(this.applicationData, true, false);
             } catch (JsonParseException e) {
                 throw new TransactionException(e.getMessage(), e);
             }

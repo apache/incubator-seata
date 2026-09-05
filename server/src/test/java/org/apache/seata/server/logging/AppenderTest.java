@@ -24,33 +24,37 @@ import net.logstash.logback.appender.LogstashTcpSocketAppender;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.logging.logback.appender.MetricLogbackAppender;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.impl.StaticLoggerBinder;
+import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestPropertySource;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
 
+@TestPropertySource(
+        properties = {
+            "logging.extend.logstash-appender.enabled=true",
+            "logging.extend.kafka-appender.enabled=true",
+            "logging.extend.kafka-appender.topic=test",
+            "logging.extend.metric-appender.enabled=true"
+        })
 public class AppenderTest extends BaseSpringBootTest {
-
-    @BeforeAll
-    public static void init() {
-        System.setProperty("logging.extend.logstash-appender.enabled", "true");
-        System.setProperty("logging.extend.kafka-appender.enabled", "true");
-        System.setProperty("logging.extend.kafka-appender.topic", "test");
-        System.setProperty("logging.extend.metric-appender.enabled", "true");
-    }
 
     @Test
     public void testAppenderEnabled() {
-        LoggerContext lc = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
         Iterator<Appender<ILoggingEvent>> appenderIterator =
                 lc.getLogger("ROOT").iteratorForAppenders();
+
+        boolean kafkaFound = false;
+        boolean metricFound = false;
+        boolean logstashFound = false;
 
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
             if (appender.getName().equals("KAFKA")) {
                 KafkaAppender<ILoggingEvent> kafkaAppender = (KafkaAppender<ILoggingEvent>) appender;
+                kafkaFound = true;
 
                 try {
                     // use reflection to obtain the "protect topic" fields of the abstract class inherited by the
@@ -69,12 +73,18 @@ public class AppenderTest extends BaseSpringBootTest {
 
             if (appender.getName().equals("METRIC")) {
                 Assertions.assertInstanceOf(MetricLogbackAppender.class, appender);
+                metricFound = true;
             }
 
             if (appender.getName().equals("LOGSTASH")) {
                 Assertions.assertInstanceOf(LogstashTcpSocketAppender.class, appender);
+                logstashFound = true;
             }
         }
+
+        Assertions.assertTrue(kafkaFound);
+        Assertions.assertTrue(metricFound);
+        Assertions.assertTrue(logstashFound);
     }
 
     private static Field getDeclaredFieldRecursive(Class<?> clazz, String fieldName) throws NoSuchFieldException {
