@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/apache/seata/tools/seata-ai-cli/internal/command"
 	"github.com/apache/seata/tools/seata-ai-cli/internal/protocol"
 )
 
@@ -67,5 +68,28 @@ func TestEmitterStateStreamAndExit(t *testing.T) {
 		if code, err := em.Emit(e, &out, &errout); err != nil || code == 0 || out.Len() != 0 || errout.Len() == 0 {
 			t.Fatalf("%s: %d %v", kind, code, err)
 		}
+	}
+}
+
+func TestCommandDataFailureIsRejectedBeforeOutput(t *testing.T) {
+	r, err := command.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	emitter, err := protocol.NewEmitter(r.OutputValidators())
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := protocol.NewEnvelope("system.version", time.Now())
+	e.Data = map[string]any{"versions": map[string]any{"cli": "0.1.0-dev", "protocol": "0.1", "go": "go1.27.1"}, "contract_revision": "R9", "state_store_id": nil}
+	var out, errout bytes.Buffer
+	if code, err := emitter.Emit(e, &out, &errout); err != nil || code != 0 {
+		t.Fatal(code, err)
+	}
+	e.Data.(map[string]any)["versions"].(map[string]any)["cli"] = 17
+	out.Reset()
+	errout.Reset()
+	if _, err = emitter.Emit(e, &out, &errout); err == nil || out.Len()+errout.Len() != 0 {
+		t.Fatal("invalid typed data was emitted")
 	}
 }

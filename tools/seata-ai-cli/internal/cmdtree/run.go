@@ -63,7 +63,7 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	if err != nil {
 		return emitInternal(stdout, stderr, started)
 	}
-	emitter, err := protocol.NewEmitter()
+	emitter, err := protocol.NewEmitter(reg.OutputValidators())
 	if err != nil {
 		return emitInternal(stdout, stderr, started)
 	}
@@ -241,7 +241,16 @@ func Run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	}
 	root.SetFlagErrorFunc(func(c *cobra.Command, e error) error { return fmt.Errorf("invalid arguments") })
 	root.SetArgs(args)
-	err = root.Execute()
+	executed, executeErr := root.ExecuteC()
+	err = executeErr
+	if selected == nil && executed != nil {
+		for _, s := range reg.Specs {
+			if s.Path == executed.CommandPath() {
+				selected = s
+				break
+			}
+		}
+	}
 	if err != nil {
 		if selected != nil {
 			env.Command = selected.ID

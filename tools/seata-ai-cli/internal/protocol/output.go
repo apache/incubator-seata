@@ -18,6 +18,7 @@
 package protocol
 
 import (
+	"bytes"
 	"crypto/rand"
 	_ "embed"
 	"encoding/hex"
@@ -73,10 +74,20 @@ func NewEnvelope(command string, started time.Time) Envelope {
 func (e *Envelope) Fail(f *Fault) { e.OK = false; e.State = "failed"; e.Error = f }
 
 func Compile(name string, doc any) (*jsonschema.Schema, error) {
+	encoded, err := json.Marshal(doc)
+	if err != nil {
+		return nil, err
+	}
+	var resource any
+	decoder := json.NewDecoder(bytes.NewReader(encoded))
+	decoder.UseNumber()
+	if err = decoder.Decode(&resource); err != nil {
+		return nil, err
+	}
 	c := jsonschema.NewCompiler()
 	c.DefaultDraft(jsonschema.Draft2020)
 	c.AssertFormat()
-	if err := c.AddResource(name, doc); err != nil {
+	if err := c.AddResource(name, resource); err != nil {
 		return nil, err
 	}
 	return c.Compile(name)
@@ -91,11 +102,18 @@ func EnvelopeSchema() map[string]any {
 
 // Emitter validates and serializes the entire message before touching either stream.
 // A short OS write still means the caller may not have received an envelope.
-type Emitter struct{ schema *jsonschema.Schema }
+type Emitter struct {
+	schema  *jsonschema.Schema
+	outputs map[string]*jsonschema.Schema
+}
 
-func NewEmitter() (*Emitter, error) {
+func NewEmitter(outputValidators ...map[string]*jsonschema.Schema) (*Emitter, error) {
 	s, e := Compile("https://seata.invalid/envelope", EnvelopeSchema())
-	return &Emitter{s}, e
+	em := &Emitter{schema: s}
+	if len(outputValidators) > 0 {
+		em.outputs = outputValidators[0]
+	}
+	return em, e
 }
 func (em *Emitter) Emit(e Envelope, stdout, stderr io.Writer) (int, error) {
 	b, err := json.Marshal(e)
@@ -106,11 +124,18 @@ func (em *Emitter) Emit(e Envelope, stdout, stderr io.Writer) (int, error) {
 		return 5, errors.New("output_too_large")
 	}
 	var obj any
-	if err = json.Unmarshal(b, &obj); err != nil {
+	decoder := json.NewDecoder(bytes.NewReader(b))
+	decoder.UseNumber()
+	if err = decoder.Decode(&obj); err != nil {
 		return 5, err
 	}
 	if err = em.schema.Validate(obj); err != nil {
 		return 5, errors.New("output_contract_violation")
+	}
+	if s := em.outputs[e.Command]; s != nil && e.State == "completed" {
+		if err = s.Validate(obj.(map[string]any)["data"]); err != nil {
+			return 5, errors.New("output_data_contract_violation")
+		}
 	}
 	code := 0
 	out := stdout

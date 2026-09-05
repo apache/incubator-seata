@@ -35,3 +35,16 @@ for(const c of corpus){
  if(valid!==c.schema_valid)throw Error(`corpus mismatch: ${c.name}`);
 }
 console.log(`${corpus.length} independent positive/negative corpus cases passed`);
+
+// Generate from Go rather than maintaining a second output contract in JS.
+const {execFileSync}=await import('node:child_process');
+const catalog=JSON.parse(execFileSync(process.env.GO_BINARY || 'go',['run','./cmd/protocolgen'],{cwd:'../..',encoding:'utf8',maxBuffer:8*1024*1024}));
+let outputCount=0;
+for(const c of catalog.commands){
+ if(c.output_data_schema===null)continue;
+ const validate=ajv.compile(c.output_data_schema);
+ if(validate({}))throw Error(`empty successful data accepted: ${c.capability.id}`);
+ outputCount++;
+}
+if(outputCount!==4||catalog.affordances.length!==13||catalog.skill_ids.length!==7)throw Error('incomplete discovery catalog');
+console.log(`${outputCount} command data schemas compiled in strict Ajv; 13 domains and 7 skill references checked`);

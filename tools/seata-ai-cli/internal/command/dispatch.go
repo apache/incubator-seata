@@ -31,7 +31,12 @@ import (
 func (r *Registry) Dispatch(inv Invocation, started time.Time) protocol.Envelope {
 	e := protocol.NewEnvelope(inv.Command, started)
 	// Discovery does not echo caller-controlled context or probe supplied endpoints.
-	if !r.Get(inv.Command).Available() {
+	spec := r.Get(inv.Command)
+	if spec == nil || inv.Command == "system.invoke" {
+		e.Fail(protocol.Failure("validation", "invalid_argument", "Dispatch requires a validated target command."))
+		return e
+	}
+	if !spec.Available() {
 		e.Fail(protocol.Failure("policy", "command_unavailable", "This handler is not implemented in this development checkpoint."))
 		return e
 	}
@@ -59,27 +64,20 @@ func (r *Registry) Dispatch(inv Invocation, started time.Time) protocol.Envelope
 			e.Fail(protocol.Failure("validation", "invalid_argument", "Select an executable target command ID."))
 			return e
 		}
-		e.Data = map[string]any{"command_id": id, "schema_version": "0.1", "invocation_schema": s.InvocationSchema, "output_schema": protocol.EnvelopeSchema(), "output_schema_scope": "common_envelope_only"}
-		e.Warnings = append(e.Warnings, map[string]string{"code": "output_schema_incomplete", "message": "Command-specific nested output schemas are not implemented at this checkpoint."})
+		scope := "common_envelope_only"
+		if s.OutputDataSchema != nil {
+			scope = "command"
+		} else {
+			e.Warnings = append(e.Warnings, map[string]string{"code": "output_schema_incomplete", "message": "This unimplemented handler has no command-specific data schema yet."})
+		}
+		e.Data = map[string]any{"command_id": id, "schema_version": "0.1", "invocation_schema": s.InvocationSchema, "output_schema": s.Schema(), "output_schema_scope": scope}
 	case "system.capabilities":
-		specs := r.Specs
-		if id, ok := inv.Input["command_id"].(string); ok {
-			s := r.Get(id)
-			if s == nil {
-				e.Fail(protocol.Failure("validation", "invalid_argument", "Unknown command ID."))
-				return e
-			}
-			specs = []*Spec{s}
+		id, _ := inv.Input["command_id"].(string)
+		if id != "" && r.Get(id) == nil {
+			e.Fail(protocol.Failure("validation", "invalid_argument", "Unknown command ID."))
+			return e
 		}
-		commands := []any{}
-		for _, s := range specs {
-			availability, reason := "unavailable", "not_implemented"
-			if s.Available() {
-				availability, reason = "available", "local_discovery"
-			}
-			commands = append(commands, map[string]any{"id": s.ID, "path": s.Path, "risk": s.Risk, "confirmation": s.Confirmation, "availability": availability, "reason": reason, "backends": s.Backends, "schema_ref": s.ID})
-		}
-		e.Data = map[string]any{"commands": commands, "runtime": map[string]any{"network_probed": false, "stage": "M1-protocol", "platform_support": "experimental"}, "assurance": map[string]any{"outcome_tracking": "local_transactional_journal", "certified_combinations": []any{}, "production_write_enabled": false}}
+		e.Data = r.Capabilities(id)
 	}
 	return e
 }

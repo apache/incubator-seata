@@ -43,6 +43,8 @@ type Spec struct {
 	Backends         string         `json:"backends"`
 	Skills           string         `json:"skills"`
 	InvocationSchema map[string]any `json:"invocation_schema"`
+	OutputDataSchema map[string]any `json:"-"`
+	outputValidator  *jsonschema.Schema
 	validator        *jsonschema.Schema
 }
 
@@ -77,6 +79,7 @@ func New() (*Registry, error) {
 		return nil, err
 	}
 	paths := map[string]bool{}
+	outputs := outputDataSchemas()
 	for _, s := range r.Specs {
 		if r.byID[s.ID] != nil || paths[s.Path] {
 			return nil, errors.New("duplicate_registry_binding")
@@ -87,6 +90,13 @@ func New() (*Registry, error) {
 			continue
 		}
 		var err error
+		s.OutputDataSchema = outputs[s.ID]
+		if s.OutputDataSchema != nil {
+			s.outputValidator, err = protocol.Compile("https://seata.invalid/output/"+s.ID, s.OutputDataSchema)
+			if err != nil {
+				return nil, err
+			}
+		}
 		s.validator, err = protocol.Compile("https://seata.invalid/"+s.ID, s.InvocationSchema)
 		if err != nil {
 			return nil, fmt.Errorf("%s: %w", s.ID, err)
