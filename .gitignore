@@ -69,6 +69,9 @@ dependency-reduced-pom.xml
 /distribution/*/sessionStore/
 /file_store/
 
+# python ignore
+__pycache__/
+
 # system ignore
 .DS_Store
 Thumbs.db
