@@ -18,10 +18,15 @@ name: License checker
 
 on:
   pull_request:
-      branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, "*.*.*" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  check-license:
+  # Job 1: check license header and dependencies' license
+  check-license-header:
     runs-on: ubuntu-latest
     steps:
       # step 1 clear cache
@@ -31,21 +36,100 @@ jobs:
       # step 2 checkout
       - name: Checkout
         uses: actions/checkout@v3
-      # step 3 https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
+      # step 3 setup node https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
       - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
-      # step 4 check license
+      # step 4 check license header
       - name: Check License Header
         uses: apache/skywalking-eyes/header@8fc52baabc14c86294d96034bcc194cfa7f76b05
         with:
           log: info
           config: .licenserc.yaml
           mode: check
-      # step 5 check dependencies
+      # step 5 check dependencies' license
       - name: Check Dependencies' License
         uses: apache/skywalking-eyes/dependency@8fc52baabc14c86294d96034bcc194cfa7f76b05
         with:
           log: info
           config: .licenserc.yaml
           mode: check
+
+  # Job 2: build and verify generated license files
+  check-license-files:
+    runs-on: ubuntu-latest
+    steps:
+      # step 1 checkout
+      - name: Checkout
+        uses: actions/checkout@v3
+      # step 2 set up Go
+      - name: "Set up Go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+      # step 3 install license-eye CLI
+      - name: "Install license-eye"
+        run: go install github.com/apache/skywalking-eyes/cmd/license-eye@latest
+      # step 4 set up Java JDK
+      - name: "Set up Java JDK 25"
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: 'zulu'
+          java-version: 25
+      # step 4 print maven version
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 5 restore local maven repository cache
+      - name: "Restore local maven repository cache"
+        uses: actions/cache/restore@v4
+        id: cache-maven-repository
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-license-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-license-maven-
+      # step 6 build (generates license-related files via maven plugin)
+      - name: Build with Maven
+        run: ./mvnw -B clean install -DskipTests
+      # step 7 save local maven repository cache
+      - name: "Save local maven repository cache"
+        uses: actions/cache/save@v4
+        if: steps.cache-maven-repository.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-license-maven-${{ hashFiles('**/pom.xml') }}
+      # step 8 check for uncommitted changes after maven build
+      - name: Check for changes after Maven build
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::Uncommitted changes detected after Maven build."
+            echo "Please run './mvnw -B clean install -DskipTests' locally and commit the generated files."
+            exit 1
+          fi
+      # step 9 generate LICENSE files for distribution
+      - name: Generate LICENSE files
+        run: ./script/license/generate-license.sh all
+      # step 10 save diff to file
+      - name: Save license diff to file
+        run: git diff > license-diff.diff
+      # step 11 upload diff as artifact
+      - name: Upload license diff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-diff
+          path: license-diff.diff
+      # step 12 check for license file changes and fail if present
+      - name: Check for license file changes
+        run: |
+          if [ -s license-diff.diff ]; then
+            echo "License file changes detected:"
+            cat license-diff.diff
+            echo ""
+            echo "::error::License files are out of date."
+            echo "Please run './script/license/generate-license.sh all' locally and commit the changes."
+            echo "You can also download the license-diff artifact from this CI run's artifacts, then apply it with: git apply license-diff.diff"
+            exit 1
+          else
+            echo "No license file changes detected. All good!"
+          fi

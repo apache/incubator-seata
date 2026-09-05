@@ -25,7 +25,8 @@ help: ## Show help information
 MVN ?= $(shell command -v mvn >/dev/null 2>&1 && echo "mvn" || echo "./mvnw")
 MAVEN_ARGS ?= -T 4C -e -B -V
 
-.PHONY: clean checkstyle checkstyle-diff license test package-only package
+.PHONY: clean checkstyle checkstyle-diff license test package-only package \
+	generate-license-all generate-license-namingserver generate-license-server generate-license-distribution
 
 clean: ## Clean the project
 	$(MVN) $(MAVEN_ARGS) clean
@@ -66,3 +67,18 @@ package-only: ## Package the project without running tests
 
 package: ## Package the project
 	$(MVN) $(MAVEN_ARGS) clean package
+
+install-only: ## Package the project without running tests
+	$(MVN) $(MAVEN_ARGS) clean install -DskipTests
+
+generate-license-all: install-only ## Generate LICENSE-namingserver, LICENSE-server and LICENSE files
+	@./script/license/generate-license.sh all $(LICENSE_STRICT_FLAG)
+
+generate-license-namingserver: install-only ## Generate LICENSE-namingserver files
+	@./script/license/generate-license.sh namingserver $(LICENSE_STRICT_FLAG)
+
+generate-license-server: install-only ## Generate LICENSE-server files
+	@./script/license/generate-license.sh server $(LICENSE_STRICT_FLAG)
+
+generate-license-distribution: install-only ## Generate distribution LICENSE file
+	@./script/license/generate-license.sh distribution $(LICENSE_STRICT_FLAG)
