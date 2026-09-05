@@ -30,7 +30,7 @@ import (
 
 // This package-private model exercises the persistence barrier in M1. It does
 // not issue a SendPermit or make a network request. M5 must add the complete
-// executor, owner lifetime lock, redaction, capacity and compatibility gates
+// executor, redaction, capacity and compatibility gates
 // before connecting these transitions to any management handler.
 var requestIDPattern = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$`)
 
@@ -183,45 +183,55 @@ type fence struct {
 }
 
 func (s *Store) sendIntent(ctx context.Context, r record, f fence) error {
-	return s.transaction(ctx, func(c *sql.Conn) error {
-		var version, revision, generation int
-		var state, plan, created, expires, material, target, trust, profileTarget, profile string
-		e := c.QueryRowContext(ctx, `SELECT e.state,e.record_version,e.plan_id,p.created_at,p.expires_at,p.material_digest,p.target_digest,pr.revision,pr.auth_generation,pr.target_digest,pr.trust_digest,pr.profile_id
+	owner, err := s.AcquireExecution(ctx, r.ID)
+	if err != nil {
+		return err
+	}
+	defer owner.Close()
+	return s.sendIntentOwned(ctx, owner, r, f)
+}
+func (s *Store) sendIntentOwned(ctx context.Context, owner *ExecutionOwner, r record, f fence) error {
+	return owner.withHeld(s, r.ID, func() error {
+		return s.transaction(ctx, func(c *sql.Conn) error {
+			var version, revision, generation int
+			var state, plan, created, expires, material, target, trust, profileTarget, profile string
+			e := c.QueryRowContext(ctx, `SELECT e.state,e.record_version,e.plan_id,p.created_at,p.expires_at,p.material_digest,p.target_digest,pr.revision,pr.auth_generation,pr.target_digest,pr.trust_digest,pr.profile_id
 FROM executions e JOIN plans p ON e.plan_id=p.plan_id JOIN profiles pr ON e.profile_id=pr.profile_id
 WHERE e.execution_id=? AND pr.deleted_at IS NULL AND p.consumed_by IS NULL`, r.ID).Scan(&state, &version, &plan, &created, &expires, &material, &target, &revision, &generation, &profileTarget, &trust, &profile)
-		if e != nil {
-			return ErrPlan
-		}
-		if (state != "PREPARED" && state != "AWAITING_CONFIRMATION") || version != r.Version {
-			return ErrState
-		}
-		if state == "AWAITING_CONFIRMATION" && !f.Confirmed {
-			return ErrState
-		}
-		a, ea := time.Parse(time.RFC3339Nano, created)
-		b, eb := time.Parse(time.RFC3339Nano, expires)
-		if ea != nil || eb != nil || f.Now.Before(a) || !f.Now.Before(b) || material != f.Material || target != r.Target {
-			return ErrPlan
-		}
-		if revision != f.Revision || generation != f.Generation || profileTarget != f.Target || trust != f.Trust {
-			return ErrState
-		}
-		now := stamp()
-		res, e := c.ExecContext(ctx, "UPDATE plans SET consumed_by=?,consumed_at=? WHERE plan_id=? AND consumed_by IS NULL", r.ID, now, plan)
-		if e != nil {
-			return e
-		}
-		if n, _ := res.RowsAffected(); n != 1 {
-			return ErrPlan
-		}
-		res, e = c.ExecContext(ctx, "UPDATE executions SET state='SEND_INTENT',request_phase='request_maybe_sent',outcome='unknown',send_intent_at=?,record_version=record_version+1,updated_at=? WHERE execution_id=? AND record_version=?", now, now, r.ID, r.Version)
-		if e != nil {
-			return e
-		}
-		if n, _ := res.RowsAffected(); n != 1 {
-			return ErrState
-		}
-		return appendEvent(ctx, c, r.ID, "SEND_INTENT", `{"outcome":"unknown"}`)
+			if e != nil {
+				return ErrPlan
+			}
+			if (state != "PREPARED" && state != "AWAITING_CONFIRMATION") || version != r.Version {
+				return ErrState
+			}
+			if state == "AWAITING_CONFIRMATION" && !f.Confirmed {
+				return ErrState
+			}
+			a, ea := time.Parse(time.RFC3339Nano, created)
+			b, eb := time.Parse(time.RFC3339Nano, expires)
+			if ea != nil || eb != nil || f.Now.Before(a) || !f.Now.Before(b) || material != f.Material || target != r.Target {
+				return ErrPlan
+			}
+			if revision != f.Revision || generation != f.Generation || profileTarget != f.Target || trust != f.Trust {
+				return ErrState
+			}
+			now := stamp()
+			res, e := c.ExecContext(ctx, "UPDATE plans SET consumed_by=?,consumed_at=? WHERE plan_id=? AND consumed_by IS NULL", r.ID, now, plan)
+			if e != nil {
+				return e
+			}
+			if n, _ := res.RowsAffected(); n != 1 {
+				return ErrPlan
+			}
+			res, e = c.ExecContext(ctx, "UPDATE executions SET state='SEND_INTENT',request_phase='request_maybe_sent',outcome='unknown',send_intent_at=?,record_version=record_version+1,updated_at=? WHERE execution_id=? AND record_version=?", now, now, r.ID, r.Version)
+			if e != nil {
+				return e
+			}
+			if n, _ := res.RowsAffected(); n != 1 {
+				return ErrState
+			}
+			return appendEvent(ctx, c, r.ID, "SEND_INTENT", `{"outcome":"unknown"}`)
+		})
 	})
 }
 func appendEvent(ctx context.Context, c *sql.Conn, id, kind, payload string) error {

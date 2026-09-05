@@ -89,6 +89,9 @@ func Open(ctx context.Context, path string) (s *Store, err error) {
 		return nil, err
 	}
 	defer c.Close()
+	if err = configureBusyBudget(ctx, c); err != nil {
+		return nil, err
+	}
 	var journal string
 	if err = c.QueryRowContext(ctx, "PRAGMA journal_mode=WAL").Scan(&journal); err != nil || journal != "wal" {
 		return nil, ErrUnsafe
@@ -159,10 +162,45 @@ func (s *Store) Close() error {
 	}
 	return e
 }
+func configureBusyBudget(ctx context.Context, c *sql.Conn) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	budget := int64(5000)
+	if deadline, ok := ctx.Deadline(); ok {
+		remaining := time.Until(deadline).Milliseconds()
+		if remaining <= 0 {
+			return context.DeadlineExceeded
+		}
+		if remaining < budget {
+			budget = remaining
+		}
+	}
+	if _, err := c.ExecContext(ctx, fmt.Sprintf("PRAGMA busy_timeout=%d", budget)); err != nil {
+		return err
+	}
+	var actual int64
+	if err := c.QueryRowContext(ctx, "PRAGMA busy_timeout").Scan(&actual); err != nil {
+		return err
+	}
+	if actual != budget {
+		return ErrUnsafe
+	}
+	return nil
+}
 func checkConnection(ctx context.Context, c *sql.Conn) error {
-	for p, want := range map[string]string{"journal_mode": "wal", "synchronous": "2", "foreign_keys": "1", "busy_timeout": "5000"} {
+	if err := configureBusyBudget(ctx, c); err != nil {
+		return err
+	}
+	for p, want := range map[string]string{"journal_mode": "wal", "synchronous": "2", "foreign_keys": "1"} {
 		var got string
-		if err := c.QueryRowContext(ctx, "PRAGMA "+p).Scan(&got); err != nil || got != want {
+		if err := c.QueryRowContext(ctx, "PRAGMA "+p).Scan(&got); err != nil {
+			if ctx.Err() != nil {
+				return ctx.Err()
+			}
+			return ErrUnsafe
+		}
+		if got != want {
 			return ErrUnsafe
 		}
 	}
