@@ -16,13 +16,11 @@
  */
 package org.apache.seata.server.store.file;
 
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.storage.file.TransactionWriteStore;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
@@ -30,9 +28,7 @@ import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.TransactionStoreManager;
 import org.assertj.core.util.Files;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -44,16 +40,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class FileTransactionStoreManagerTest extends BaseSpringBootTest {
-
-    @BeforeEach
-    public void setUp() {
-        SessionHolder.init(SessionMode.FILE);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        SessionHolder.destroy();
-    }
 
     @Test
     public void testBigDataWrite() throws Exception {

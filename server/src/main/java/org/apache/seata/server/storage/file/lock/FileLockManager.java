@@ -17,44 +17,46 @@
 package org.apache.seata.server.storage.file.lock;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.lock.AbstractLockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.storage.raft.lock.RaftLockManager;
-import org.slf4j.MDC;
-
-import java.util.List;
-
-import static org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
+import org.apache.seata.server.storage.file.spi.FileLockStore;
 
 /**
  * The type file lock manager.
  *
  */
-@LoadLevel(name = "file")
+@LoadLevel(name = "file", scope = Scope.PROTOTYPE)
 public class FileLockManager extends AbstractLockManager {
+
+    private final FileLockStore lockStore;
+
+    protected FileLockManager() {
+        this(new DefaultFileLockStore());
+    }
+
+    public FileLockManager(FileLockStore lockStore) {
+        if (lockStore == null) {
+            throw new IllegalArgumentException("lockStore must not be null");
+        }
+        this.lockStore = lockStore;
+    }
 
     @Override
     public Locker getLocker(BranchSession branchSession) {
-        return new FileLocker(branchSession);
+        return lockStore.getLocker(branchSession);
+    }
+
+    @Override
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        return lockStore.releaseBranchLock(branchSession);
     }
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        List<BranchSession> branchSessions = globalSession.getBranchSessions();
-        boolean releaseLockResult = true;
-        for (BranchSession branchSession : branchSessions) {
-            try {
-                MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                releaseLockResult = this instanceof RaftLockManager
-                        ? super.releaseLock(branchSession)
-                        : this.releaseLock(branchSession);
-            } finally {
-                MDC.remove(MDC_KEY_BRANCH_ID);
-            }
-        }
-        return releaseLockResult;
+        return lockStore.releaseGlobalLock(globalSession);
     }
 }

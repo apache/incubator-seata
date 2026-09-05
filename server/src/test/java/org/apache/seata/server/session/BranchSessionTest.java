@@ -20,6 +20,9 @@ import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.lock.LockManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +34,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Branch session test.
@@ -41,6 +47,34 @@ public class BranchSessionTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {}
+
+    @AfterEach
+    void afterEach() {
+        LockerManagerFactory.destroy();
+    }
+
+    @org.junit.jupiter.api.Test
+    void constructionDoesNotInitializeLockManagerAndOperationsResolveCurrentManager() throws Exception {
+        LockerManagerFactory.destroy();
+        BranchSession branchSession = new BranchSession(BranchType.AT);
+        branchSession.setLockKey("t_order:1");
+
+        java.lang.reflect.Field field = LockerManagerFactory.class.getDeclaredField("LOCK_MANAGER");
+        field.setAccessible(true);
+        Assertions.assertNull(field.get(null));
+
+        LockManager first = mock(LockManager.class);
+        when(first.acquireLock(branchSession, true, false)).thenReturn(true);
+        field.set(null, first);
+        Assertions.assertTrue(branchSession.lock());
+        verify(first).acquireLock(branchSession, true, false);
+
+        LockManager second = mock(LockManager.class);
+        when(second.releaseLock(branchSession)).thenReturn(true);
+        field.set(null, second);
+        Assertions.assertTrue(branchSession.unlock());
+        verify(second).releaseLock(branchSession);
+    }
 
     /**
      * Codec test.

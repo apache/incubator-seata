@@ -23,7 +23,6 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
-import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.storage.file.lock.FileLocker;
 import org.apache.seata.server.store.SessionStorable;
@@ -76,8 +75,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private LockStatus lockStatus = Locked;
 
     private final Map<FileLocker.BucketLockMap, Set<String>> lockHolder;
-
-    private final LockManager lockManager = LockerManagerFactory.getLockManager();
 
     public BranchSession() {
         lockHolder = new ConcurrentHashMap<>(2);
@@ -298,7 +295,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     public boolean lock(boolean autoCommit, boolean skipCheckLock) throws TransactionException {
         if (this.branchType.equals(BranchType.AT)) {
-            return lockManager.acquireLock(this, autoCommit, skipCheckLock);
+            return LockerManagerFactory.getLockManager().acquireLock(this, autoCommit, skipCheckLock);
         }
         return true;
     }
@@ -306,7 +303,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     @Override
     public boolean unlock() throws TransactionException {
         if (this.branchType == BranchType.AT) {
-            return lockManager.releaseLock(this);
+            return LockerManagerFactory.getLockManager().releaseLock(this);
         }
         return true;
     }

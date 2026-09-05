@@ -1,0 +1,2 @@
+org.apache.seata.server.storage.file.spi.TestNamedFileStoreProvider
+org.apache.seata.server.storage.file.spi.SessionHolderFaultFileStoreProvider

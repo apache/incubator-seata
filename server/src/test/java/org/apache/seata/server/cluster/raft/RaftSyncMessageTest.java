@@ -19,7 +19,6 @@ package org.apache.seata.server.cluster.raft;
 import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.BaseSpringBootTest;
@@ -36,12 +35,8 @@ import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
-import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -55,16 +50,6 @@ import java.util.Map;
 /**
  */
 public class RaftSyncMessageTest extends BaseSpringBootTest {
-
-    @BeforeAll
-    public static void setUp(ApplicationContext context) {
-        SessionHolder.init(SessionMode.FILE);
-    }
-
-    @AfterAll
-    public static void destroy() {
-        SessionHolder.destroy();
-    }
 
     @Test
     public void testSecurityMsgSerialize() throws IOException {

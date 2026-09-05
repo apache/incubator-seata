@@ -18,7 +18,6 @@ package org.apache.seata.server.lock;
 
 import jakarta.annotation.Resource;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
@@ -27,11 +26,13 @@ import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,11 @@ public class LockManagerTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {}
+
+    @AfterAll
+    public static void tearDown() {
+        DefaultCoordinator.getInstance().destroy();
+    }
 
     /**
      * Acquire lock success.
@@ -219,8 +225,6 @@ public class LockManagerTest extends BaseSpringBootTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2)
             throws TransactionException, ParseException {
-        SessionHolder.getRootSessionManager().destroy();
-        SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
         // make sure sessionMaanager is empty
         Collection<GlobalSession> sessions = sessionManager.allSessions();
@@ -343,7 +347,6 @@ public class LockManagerTest extends BaseSpringBootTest {
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
             sessionManager.removeGlobalSession(globalSessions2);
-            sessionManager.destroy();
         }
     }
 

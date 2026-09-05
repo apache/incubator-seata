@@ -16,23 +16,26 @@
  */
 package org.apache.seata.server.store;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.server.env.ContainerHelper;
 import org.apache.seata.server.storage.file.FlushDiskMode;
 
+import java.util.Locale;
+
+import static org.apache.seata.common.ConfigurationKeys.STORE_FILE_PREFIX;
 import static org.apache.seata.common.DefaultValues.SERVER_DEFAULT_STORE_MODE;
-import static org.apache.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
 
 /**
  */
 public class StoreConfig {
 
+    private static final String DEFAULT_FILE_ENGINE_NAME = "default";
     private static final Configuration CONFIGURATION = ConfigurationFactory.getInstance();
     private static StoreMode storeMode;
     private static SessionMode sessionMode;
@@ -88,6 +91,13 @@ public class StoreConfig {
         return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flushDiskMode"));
     }
 
+    public static String getFileEngineName() {
+        String fileEngine = CONFIGURATION.getConfig(ConfigurationKeys.STORE_FILE_ENGINE, DEFAULT_FILE_ENGINE_NAME);
+        return StringUtils.isBlank(fileEngine)
+                ? DEFAULT_FILE_ENGINE_NAME
+                : fileEngine.trim().toLowerCase(Locale.ROOT);
+    }
+
     /**
      * only for inner call
      *
@@ -128,6 +138,15 @@ public class StoreConfig {
     }
 
     public static LockMode getLockMode() {
+        LockMode configuredLockMode = getConfiguredLockMode();
+        if (configuredLockMode != null) {
+            return configuredLockMode;
+        }
+        // complication old config
+        return LockMode.get(getStoreMode().name());
+    }
+
+    private static LockMode getConfiguredLockMode() {
         // startup
         if (null != lockMode) {
             return lockMode;
@@ -142,7 +161,6 @@ public class StoreConfig {
         if (StringUtils.isNotBlank(lockModeConfig)) {
             return LockMode.get(lockModeConfig);
         }
-        // complication old config
-        return LockMode.get(getStoreMode().name());
+        return null;
     }
 }

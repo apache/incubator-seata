@@ -20,7 +20,6 @@ import io.netty.channel.Channel;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.config.Configuration;
@@ -56,7 +55,6 @@ import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -71,7 +69,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ApplicationContext;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -125,14 +122,10 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         defaultCoordinator = DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
         core = new DefaultCore(remotingServer);
-        // Initialize SessionHolder once for all tests
-        SessionHolder.init(SessionMode.FILE);
     }
 
     @BeforeEach
-    public void tearUp() throws IOException {
-        // Only delete data files before each test
-        StoreUtil.deleteDataFile();
+    public void tearUp() {
         // Reinitialize core before each test to clear previous mocks
         core = new DefaultCore(remotingServer);
     }
@@ -269,14 +262,11 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
-        // Destroy SessionHolder to clean up static state
-        SessionHolder.destroy();
     }
 
     @AfterEach
-    public void tearDown() throws IOException {
+    public void tearDown() {
         MetricsManager.get().getRegistry().clearUp();
-        StoreUtil.deleteDataFile();
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {

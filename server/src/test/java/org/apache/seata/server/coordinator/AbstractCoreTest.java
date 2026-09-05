@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.coordinator;
 
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.BranchTransactionException;
 import org.apache.seata.core.exception.GlobalTransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -27,7 +26,6 @@ import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,30 +37,25 @@ import java.util.Collection;
 /**
  * The type Abstract core test.
  */
+@SuppressWarnings("checkstyle:AbstractClassName")
 public class AbstractCoreTest extends BaseSpringBootTest {
 
     private static TestableAbstractCore abstractCore;
     private static RemotingServer remotingServer;
 
-    private static final String applicationId = "demo-app";
-    private static final String txServiceGroup = "default_tx_group";
-    private static final String txName = "test-tx";
-    private static final int timeout = 3000;
-    private static final String resourceId = "tb_test";
-    private static final String clientId = "test_client";
-    private static final String lockKeys = "tb_test:1";
-    private static final String applicationData = "{\"data\":\"test\"}";
+    private static final String APPLICATION_ID = "demo-app";
+    private static final String TX_SERVICE_GROUP = "default_tx_group";
+    private static final String TX_NAME = "test-tx";
+    private static final int TIMEOUT = 3000;
+    private static final String RESOURCE_ID = "tb_test";
+    private static final String CLIENT_ID = "test_client";
+    private static final String LOCK_KEYS = "tb_test:1";
+    private static final String APPLICATION_DATA = "{\"data\":\"test\"}";
 
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         abstractCore = new TestableAbstractCore(remotingServer);
-    }
-
-    @AfterAll
-    public static void destroySessionManager() {
-        SessionHolder.destroy();
     }
 
     @AfterEach
@@ -92,7 +85,7 @@ public class AbstractCoreTest extends BaseSpringBootTest {
         GlobalSession globalSession = createGlobalSession();
 
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
 
         Assertions.assertNotNull(branchId);
         Assertions.assertTrue(branchId > 0);
@@ -104,11 +97,11 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBranchRegisterWithNullLockKeysTest() throws Exception {
+    public void lBranchRegisterWithNullLockKeysTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
 
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, null);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, null);
 
         Assertions.assertNotNull(branchId);
         Assertions.assertTrue(branchId > 0);
@@ -117,46 +110,47 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBranchRegisterGlobalSessionNotFoundTest() {
+    public void lBranchRegisterGlobalSessionNotFoundTest() {
         Assertions.assertThrows(GlobalTransactionException.class, () -> {
-            abstractCore.branchRegister(BranchType.AT, resourceId, clientId, "invalid_xid", applicationData, lockKeys);
+            abstractCore.branchRegister(
+                    BranchType.AT, RESOURCE_ID, CLIENT_ID, "invalid_xid", APPLICATION_DATA, LOCK_KEYS);
         });
     }
 
     @Test
-    public void LBranchRegisterGlobalSessionNotActiveTest() throws Exception {
+    public void lBranchRegisterGlobalSessionNotActiveTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         globalSession.changeGlobalStatus(GlobalStatus.Committed);
 
         Assertions.assertThrows(GlobalTransactionException.class, () -> {
             abstractCore.branchRegister(
-                    BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                    BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
         });
 
         globalSession.end();
     }
 
     @Test
-    public void LBranchRegisterGlobalSessionStatusInvalidTest() throws Exception {
+    public void lBranchRegisterGlobalSessionStatusInvalidTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         globalSession.changeGlobalStatus(GlobalStatus.Committing);
 
         Assertions.assertThrows(GlobalTransactionException.class, () -> {
             abstractCore.branchRegister(
-                    BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                    BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
         });
 
         globalSession.end();
     }
 
     @Test
-    public void LBranchReportSuccessTest() throws Exception {
+    public void lBranchReportSuccessTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
 
         abstractCore.branchReport(
-                BranchType.AT, globalSession.getXid(), branchId, BranchStatus.PhaseOne_Done, applicationData);
+                BranchType.AT, globalSession.getXid(), branchId, BranchStatus.PhaseOne_Done, APPLICATION_DATA);
 
         GlobalSession foundSession = SessionHolder.findGlobalSession(globalSession.getXid());
         BranchSession branchSession = foundSession.getBranch(branchId);
@@ -166,29 +160,29 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBranchReportGlobalSessionNotFoundTest() {
+    public void lBranchReportGlobalSessionNotFoundTest() {
         Assertions.assertThrows(GlobalTransactionException.class, () -> {
-            abstractCore.branchReport(BranchType.AT, "invalid_xid", 1L, BranchStatus.PhaseOne_Done, applicationData);
+            abstractCore.branchReport(BranchType.AT, "invalid_xid", 1L, BranchStatus.PhaseOne_Done, APPLICATION_DATA);
         });
     }
 
     @Test
-    public void LBranchReportBranchSessionNotFoundTest() throws Exception {
+    public void lBranchReportBranchSessionNotFoundTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
 
         Assertions.assertThrows(BranchTransactionException.class, () -> {
             abstractCore.branchReport(
-                    BranchType.AT, globalSession.getXid(), 999L, BranchStatus.PhaseOne_Done, applicationData);
+                    BranchType.AT, globalSession.getXid(), 999L, BranchStatus.PhaseOne_Done, APPLICATION_DATA);
         });
 
         globalSession.end();
     }
 
     @Test
-    public void LBranchReportUpdateApplicationDataTest() throws Exception {
+    public void lBranchReportUpdateApplicationDataTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
 
         String newApplicationData = "{\"data\":\"updated\"}";
         abstractCore.branchReport(
@@ -202,16 +196,16 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LLockQueryDefaultReturnTrueTest() throws Exception {
-        boolean result = abstractCore.lockQuery(BranchType.AT, resourceId, "test_xid", lockKeys);
+    public void lLockQueryDefaultReturnTrueTest() throws Exception {
+        boolean result = abstractCore.lockQuery(BranchType.AT, RESOURCE_ID, "test_xid", LOCK_KEYS);
         Assertions.assertTrue(result);
     }
 
     @Test
-    public void LBranchCommitSuccessTest() throws Exception {
+    public void lBranchCommitSuccessTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
 
         BranchSession branchSession = globalSession.getBranch(branchId);
         BranchStatus status = abstractCore.branchCommit(globalSession, branchSession);
@@ -222,10 +216,10 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBranchRollbackSuccessTest() throws Exception {
+    public void lBranchRollbackSuccessTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
 
         BranchSession branchSession = globalSession.getBranch(branchId);
         BranchStatus status = abstractCore.branchRollback(globalSession, branchSession);
@@ -236,7 +230,7 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LGlobalSessionStatusCheckActiveSessionTest() throws Exception {
+    public void lGlobalSessionStatusCheckActiveSessionTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
 
         // Should not throw exception
@@ -246,7 +240,7 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LGlobalSessionStatusCheckInactiveSessionTest() throws Exception {
+    public void lGlobalSessionStatusCheckInactiveSessionTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         globalSession.changeGlobalStatus(GlobalStatus.Committed);
 
@@ -258,7 +252,7 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LGlobalSessionStatusCheckInvalidStatusTest() throws Exception {
+    public void lGlobalSessionStatusCheckInvalidStatusTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         globalSession.changeGlobalStatus(GlobalStatus.Committing);
 
@@ -270,19 +264,19 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBeginReturnsNullTest() throws Exception {
-        String result = abstractCore.begin(applicationId, txServiceGroup, txName, timeout);
+    public void lBeginReturnsNullTest() throws Exception {
+        String result = abstractCore.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         Assertions.assertNull(result);
     }
 
     @Test
-    public void LCommitReturnsNullTest() throws Exception {
+    public void lCommitReturnsNullTest() throws Exception {
         GlobalStatus result = abstractCore.commit("test_xid");
         Assertions.assertNull(result);
     }
 
     @Test
-    public void LDoGlobalCommitReturnsTrueTest() throws Exception {
+    public void lDoGlobalCommitReturnsTrueTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         boolean result = abstractCore.doGlobalCommit(globalSession, false);
         Assertions.assertTrue(result);
@@ -290,19 +284,19 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LGlobalReportReturnsNullTest() throws Exception {
+    public void lGlobalReportReturnsNullTest() throws Exception {
         GlobalStatus result = abstractCore.globalReport("test_xid", GlobalStatus.Committed);
         Assertions.assertNull(result);
     }
 
     @Test
-    public void LRollbackReturnsNullTest() throws Exception {
+    public void lRollbackReturnsNullTest() throws Exception {
         GlobalStatus result = abstractCore.rollback("test_xid");
         Assertions.assertNull(result);
     }
 
     @Test
-    public void LDoGlobalRollbackReturnsTrueTest() throws Exception {
+    public void lDoGlobalRollbackReturnsTrueTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         boolean result = abstractCore.doGlobalRollback(globalSession, false);
         Assertions.assertTrue(result);
@@ -310,13 +304,13 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LGetStatusReturnsNullTest() throws Exception {
+    public void lGetStatusReturnsNullTest() throws Exception {
         GlobalStatus result = abstractCore.getStatus("test_xid");
         Assertions.assertNull(result);
     }
 
     @Test
-    public void LDoGlobalReportNoExceptionTest() throws Exception {
+    public void lDoGlobalReportNoExceptionTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         // Should not throw exception
         abstractCore.doGlobalReport(globalSession, globalSession.getXid(), GlobalStatus.Committed);
@@ -324,10 +318,10 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LDoBranchDeleteReturnsTrueTest() throws Exception {
+    public void lDoBranchDeleteReturnsTrueTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
         BranchSession branchSession = globalSession.getBranch(branchId);
 
         Boolean result = abstractCore.doBranchDelete(globalSession, branchSession);
@@ -337,10 +331,10 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void LBranchDeleteReturnsNullTest() throws Exception {
+    public void lBranchDeleteReturnsNullTest() throws Exception {
         GlobalSession globalSession = createGlobalSession();
         Long branchId = abstractCore.branchRegister(
-                BranchType.AT, resourceId, clientId, globalSession.getXid(), applicationData, lockKeys);
+                BranchType.AT, RESOURCE_ID, CLIENT_ID, globalSession.getXid(), APPLICATION_DATA, LOCK_KEYS);
         BranchSession branchSession = globalSession.getBranch(branchId);
 
         BranchStatus result = abstractCore.branchDelete(globalSession, branchSession);
@@ -350,7 +344,8 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     }
 
     private GlobalSession createGlobalSession() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession(applicationId, txServiceGroup, txName, timeout);
+        GlobalSession globalSession =
+                GlobalSession.createGlobalSession(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession.begin();
         return globalSession;
     }

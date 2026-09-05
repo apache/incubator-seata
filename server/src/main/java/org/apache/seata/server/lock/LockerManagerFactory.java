@@ -16,11 +16,9 @@
  */
 package org.apache.seata.server.lock;
 
+import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.store.LockMode;
-import org.apache.seata.common.store.StoreMode;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,6 @@ import org.slf4j.LoggerFactory;
 public class LockerManagerFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LockerManagerFactory.class);
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * the lock manager
@@ -49,28 +46,62 @@ public class LockerManagerFactory {
         return LOCK_MANAGER;
     }
 
-    public static void init() {
-        init(null);
+    public static boolean init() {
+        return init(null);
     }
 
     public static void destroy() {
         LOCK_MANAGER = null;
     }
 
-    public static void init(LockMode lockMode) {
-        if (LOCK_MANAGER == null) {
-            synchronized (LockerManagerFactory.class) {
-                if (LOCK_MANAGER == null) {
-                    if (null == lockMode) {
-                        lockMode = StoreConfig.getLockMode();
-                    }
-                    LOGGER.info("use lock store mode: {}", lockMode.getName());
-                    // if not exist the lock mode, throw exception
-                    if (null != StoreMode.get(lockMode.name())) {
-                        LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
-                    }
-                }
+    public static boolean init(LockMode lockMode) {
+        if (LOCK_MANAGER != null) {
+            return false;
+        }
+        synchronized (LockerManagerFactory.class) {
+            if (LOCK_MANAGER != null) {
+                return false;
             }
+            if (null == lockMode) {
+                lockMode = StoreConfig.getLockMode();
+            }
+            if (LockMode.FILE == lockMode) {
+                throw new StoreException("FileMode lock manager must be installed by FileStoreRuntime before use");
+            }
+            LOGGER.info("use lock store mode: {}", lockMode.getName());
+            LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());
+            return true;
+        }
+    }
+
+    public static boolean init(LockMode lockMode, Class<?>[] argumentTypes, Object[] arguments) {
+        if (argumentTypes == null || arguments == null) {
+            throw new IllegalArgumentException("argumentTypes and arguments must not be null");
+        }
+        if (argumentTypes.length != arguments.length) {
+            throw new IllegalArgumentException("argumentTypes and arguments must have the same length");
+        }
+        LockMode resolvedLockMode = lockMode == null ? StoreConfig.getLockMode() : lockMode;
+        if (LOCK_MANAGER != null) {
+            rejectExistingTypedFileManager(resolvedLockMode);
+            return false;
+        }
+        synchronized (LockerManagerFactory.class) {
+            if (LOCK_MANAGER != null) {
+                rejectExistingTypedFileManager(resolvedLockMode);
+                return false;
+            }
+            LOGGER.info("use lock store mode: {}", resolvedLockMode.getName());
+            LOCK_MANAGER =
+                    EnhancedServiceLoader.load(LockManager.class, resolvedLockMode.getName(), argumentTypes, arguments);
+            return true;
+        }
+    }
+
+    private static void rejectExistingTypedFileManager(LockMode lockMode) {
+        if (LockMode.FILE == lockMode) {
+            throw new StoreException(
+                    "FileMode lock manager is already installed; refusing to replace its FileLockStore binding");
         }
     }
 }

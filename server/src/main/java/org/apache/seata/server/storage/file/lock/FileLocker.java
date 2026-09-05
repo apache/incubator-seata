@@ -95,9 +95,7 @@ public class FileLocker extends AbstractLocker {
                 Set<String> keysInHolder = CollectionUtils.computeIfAbsent(
                         bucketHolder, bucketLockMap, key -> ConcurrentHashMap.newKeySet());
                 keysInHolder.add(pk);
-            } else if (previousLockBranchSession.getTransactionId() == transactionId) {
-                // Locked by me before
-            } else {
+            } else if (previousLockBranchSession.getTransactionId() != transactionId) {
                 LOGGER.info(
                         "Global lock on [{}:{}] is holding by xid {} branchId {}",
                         tableName,
@@ -130,6 +128,15 @@ public class FileLocker extends AbstractLocker {
             // no lock
             return true;
         }
+        return releaseLock();
+    }
+
+    /**
+     * Releases all locks held by this locker's branch session.
+     *
+     * @return whether the locks were released
+     */
+    public boolean releaseLock() {
         Map<BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
         if (CollectionUtils.isEmpty(lockHolder)) {
             return true;

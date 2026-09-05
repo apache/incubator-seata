@@ -16,19 +16,15 @@
  */
 package org.apache.seata.server.session;
 
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.BaseSpringBootTest;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -41,16 +37,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  * @since 2019 /1/23
  */
 public class GlobalSessionTest extends BaseSpringBootTest {
-
-    @BeforeAll
-    public static void init(ApplicationContext context) {
-        SessionHolder.init(SessionMode.FILE);
-    }
-
-    @AfterAll
-    public static void destroy() {
-        SessionHolder.destroy();
-    }
 
     /**
      * Can be committed async test.
