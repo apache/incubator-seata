@@ -27,13 +27,22 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
 import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Tm rpc client test.
@@ -142,6 +151,37 @@ public class TmNettyClientTest {
         ConfigurationCache.clear();
         Assertions.assertThrows(FrameworkException.class, tmClient::init);
         System.setProperty(ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+    }
+
+    @Test
+    public void onRegisterMsgSuccessRecordsServerVersionTest() throws Exception {
+        ServerVersionHolder.clear();
+        TmNettyRemotingClient.getInstance().destroy();
+        TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("app", "default_tx_group");
+
+        String serverAddress = "127.0.0.1:8091";
+        Channel channel = mock(Channel.class);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8091));
+
+        RegisterTMRequest request = new RegisterTMRequest("app", "default_tx_group");
+        RegisterTMResponse response = new RegisterTMResponse();
+        response.setVersion("2.6.0");
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        field.setAccessible(true);
+        field.set(tmClient, channelManager);
+
+        try {
+            tmClient.onRegisterMsgSuccess(serverAddress, channel, response, request);
+
+            // the version carried by the register channel is the peer(server) version
+            verify(channelManager).registerChannel(eq(serverAddress), eq(channel), eq("2.6.0"));
+            Assertions.assertEquals("2.6.0", ServerVersionHolder.getServerVersion(serverAddress));
+        } finally {
+            ServerVersionHolder.clear();
+            TmNettyRemotingClient.getInstance().destroy();
+        }
     }
 
     /**

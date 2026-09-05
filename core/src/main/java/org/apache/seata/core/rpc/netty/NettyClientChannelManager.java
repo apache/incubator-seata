@@ -58,8 +58,6 @@ class NettyClientChannelManager {
 
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String, String> serverVersionMap = new ConcurrentHashMap<>();
-
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
 
     private Function<String, NettyPoolKey> poolKeyFunction;
@@ -161,7 +159,6 @@ class NettyClientChannelManager {
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
-                serverVersionMap.remove(serverAddress);
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {
@@ -292,6 +289,14 @@ class NettyClientChannelManager {
         nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
     }
 
+    /**
+     * Register the channel to the server address.
+     *
+     * @param serverAddress server address
+     * @param channel       channel to the server
+     * @param version       the version of the peer, that is the version reported by the server in
+     *                      its register response
+     */
     void registerChannel(final String serverAddress, final Channel channel, String version) {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null && channelToServer.isActive()) {
@@ -299,18 +304,6 @@ class NettyClientChannelManager {
         }
         channels.put(serverAddress, channel);
         Version.putChannelVersion(channel, version);
-    }
-
-    void putServerVersion(String serverAddress, String version) {
-        serverVersionMap.put(serverAddress, version);
-    }
-
-    String getServerVersion(String serverAddress) {
-        return serverVersionMap.get(serverAddress);
-    }
-
-    void clearServerVersions() {
-        serverVersionMap.clear();
     }
 
     /**
@@ -329,7 +322,6 @@ class NettyClientChannelManager {
             return;
         }
         boolean removed = false;
-        removed |= serverVersionMap.remove(serverAddress) != null;
         removed |= poolKeyMap.remove(serverAddress) != null;
         removed |= channelLocks.remove(serverAddress) != null;
         if (removed && LOGGER.isInfoEnabled()) {
