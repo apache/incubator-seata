@@ -1,0 +1,14 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "transaction.get",
+  "context": {
+    "profile": "prod"
+  },
+  "input": {
+    "xid": "10.0.0.1:8091:123"
+  },
+  "options": {
+    "timeout_ms": 15000
+  }
+}

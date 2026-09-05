@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lock.check input",
+  "type": "object",
+  "properties": {
+    "xid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "branch_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 19,
+      "pattern": "^[1-9][0-9]*$"
+    }
+  },
+  "required": [
+    "xid",
+    "branch_id"
+  ],
+  "additionalProperties": false
+}

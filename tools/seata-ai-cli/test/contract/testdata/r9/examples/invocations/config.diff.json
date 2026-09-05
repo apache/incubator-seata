@@ -1,0 +1,17 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "config.diff",
+  "context": {},
+  "input": {
+    "left": {
+      "path": "a.yml"
+    },
+    "right": {
+      "path": "b.yml"
+    }
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

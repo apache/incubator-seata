@@ -1,0 +1,1435 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "R9 Runtime Envelope — stream/exit verified outside JSON",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "contract_revision": {
+      "const": "R9"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "pending",
+        "partial",
+        "failed",
+        "indeterminate"
+      ]
+    },
+    "command": {
+      "enum": [
+        "system.version",
+        "system.help",
+        "system.capabilities",
+        "system.schema",
+        "system.invoke",
+        "setup.inspect",
+        "setup.initialize",
+        "profile.list",
+        "profile.get",
+        "profile.create",
+        "profile.update",
+        "profile.use",
+        "profile.delete",
+        "auth.login",
+        "auth.login.status",
+        "auth.login.cancel",
+        "auth.status",
+        "auth.logout",
+        "skills.list",
+        "skills.read",
+        "skills.export",
+        "skills.validate",
+        "skills.install",
+        "skills.status",
+        "environment.inspect",
+        "connectivity.check",
+        "namespace.list",
+        "cluster.list",
+        "server.list",
+        "config.inspect",
+        "config.validate",
+        "config.diff",
+        "transaction.list",
+        "transaction.get",
+        "transaction.abnormal",
+        "transaction.trace",
+        "branch.list",
+        "branch.get",
+        "lock.list",
+        "lock.check",
+        "lock.conflicts",
+        "diagnose.rules.list",
+        "diagnose.rules.get",
+        "diagnose.run",
+        "diagnose.snapshot",
+        "diagnose.snapshot.export",
+        "execution.get",
+        "execution.reconcile",
+        "transaction.retry.resume",
+        "transaction.retry.pause",
+        "branch.retry.resume",
+        "branch.retry.pause",
+        "transaction.dispatch",
+        "transaction.status.recover",
+        "transaction.delete",
+        "branch.delete",
+        "lock.delete"
+      ]
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "not": {
+        "required": [
+          "cluster",
+          "vgroup"
+        ]
+      }
+    },
+    "data": {
+      "type": "object"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "api",
+            "validation",
+            "authentication",
+            "authorization",
+            "config",
+            "network",
+            "internal",
+            "policy",
+            "not_found",
+            "conflict",
+            "partial_failure",
+            "confirmation",
+            "cancelled",
+            "indeterminate"
+          ]
+        },
+        "subtype": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "retry": {
+          "type": "string",
+          "enum": [
+            "never",
+            "read_only",
+            "new_execution_after_fix"
+          ]
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "subtype",
+        "message",
+        "retry",
+        "details"
+      ],
+      "additionalProperties": true
+    },
+    "continuation": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "not_before_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 120000
+        },
+        "invocation": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "protocol_version": {
+                  "const": "0.1"
+                },
+                "contract_revision": {
+                  "const": "R9"
+                },
+                "command": {
+                  "const": "auth.login.status"
+                },
+                "context": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "cluster": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "vgroup": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    }
+                  },
+                  "required": [
+                    "profile"
+                  ],
+                  "additionalProperties": false,
+                  "not": {
+                    "required": [
+                      "cluster",
+                      "vgroup"
+                    ]
+                  }
+                },
+                "input": {
+                  "type": "object",
+                  "properties": {
+                    "flow_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_-]+$"
+                    }
+                  },
+                  "required": [
+                    "flow_id"
+                  ],
+                  "additionalProperties": false
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1000,
+                      "maximum": 120000,
+                      "default": 30000
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "protocol_version",
+                "contract_revision",
+                "command",
+                "context",
+                "input",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "protocol_version": {
+                  "const": "0.1"
+                },
+                "contract_revision": {
+                  "const": "R9"
+                },
+                "command": {
+                  "const": "auth.status"
+                },
+                "context": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "cluster": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "vgroup": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    }
+                  },
+                  "required": [
+                    "profile"
+                  ],
+                  "additionalProperties": false,
+                  "not": {
+                    "required": [
+                      "cluster",
+                      "vgroup"
+                    ]
+                  }
+                },
+                "input": {
+                  "type": "object",
+                  "properties": {
+                    "verify": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1000,
+                      "maximum": 120000,
+                      "default": 30000
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "protocol_version",
+                "contract_revision",
+                "command",
+                "context",
+                "input",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "protocol_version": {
+                  "const": "0.1"
+                },
+                "contract_revision": {
+                  "const": "R9"
+                },
+                "command": {
+                  "const": "execution.get"
+                },
+                "context": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "cluster": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "vgroup": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false,
+                  "not": {
+                    "required": [
+                      "cluster",
+                      "vgroup"
+                    ]
+                  }
+                },
+                "input": {
+                  "type": "object",
+                  "properties": {
+                    "execution_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_-]+$"
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 36,
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false,
+                  "oneOf": [
+                    {
+                      "required": [
+                        "execution_id"
+                      ],
+                      "not": {
+                        "required": [
+                          "client_request_id"
+                        ]
+                      }
+                    },
+                    {
+                      "required": [
+                        "client_request_id"
+                      ],
+                      "not": {
+                        "required": [
+                          "execution_id"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1000,
+                      "maximum": 120000,
+                      "default": 30000
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "protocol_version",
+                "contract_revision",
+                "command",
+                "context",
+                "input",
+                "options"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "protocol_version": {
+                  "const": "0.1"
+                },
+                "contract_revision": {
+                  "const": "R9"
+                },
+                "command": {
+                  "const": "execution.reconcile"
+                },
+                "context": {
+                  "type": "object",
+                  "properties": {
+                    "profile": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "namespace": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "cluster": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "vgroup": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    }
+                  },
+                  "required": [
+                    "profile"
+                  ],
+                  "additionalProperties": false,
+                  "not": {
+                    "required": [
+                      "cluster",
+                      "vgroup"
+                    ]
+                  }
+                },
+                "input": {
+                  "type": "object",
+                  "properties": {
+                    "execution_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 128,
+                      "pattern": "^[A-Za-z0-9_-]+$"
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 36,
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false,
+                  "oneOf": [
+                    {
+                      "required": [
+                        "execution_id"
+                      ],
+                      "not": {
+                        "required": [
+                          "client_request_id"
+                        ]
+                      }
+                    },
+                    {
+                      "required": [
+                        "client_request_id"
+                      ],
+                      "not": {
+                        "required": [
+                          "execution_id"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "options": {
+                  "type": "object",
+                  "properties": {
+                    "timeout_ms": {
+                      "type": "integer",
+                      "minimum": 1000,
+                      "maximum": 120000,
+                      "default": 30000
+                    },
+                    "client_request_id": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "protocol_version",
+                "contract_revision",
+                "command",
+                "context",
+                "input",
+                "options"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "required": [
+        "reason",
+        "not_before_ms",
+        "invocation"
+      ],
+      "additionalProperties": true
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "client_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "state_store_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "duration_ms",
+        "partial"
+      ],
+      "additionalProperties": true
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "protocol_version",
+    "contract_revision",
+    "ok",
+    "state",
+    "command",
+    "request_id",
+    "timestamp",
+    "context",
+    "meta",
+    "warnings"
+  ],
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "completed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": true
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "not": {
+          "required": [
+            "error"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "pending"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": true
+          }
+        },
+        "required": [
+          "data",
+          "continuation"
+        ],
+        "not": {
+          "required": [
+            "error"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "partial"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "properties": {
+              "type": {
+                "const": "partial_failure"
+              }
+            }
+          }
+        },
+        "required": [
+          "data",
+          "error"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "partial_failure",
+                    "indeterminate"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "indeterminate"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "properties": {
+              "type": {
+                "const": "indeterminate"
+              },
+              "retry": {
+                "const": "read_only"
+              }
+            }
+          },
+          "data": {
+            "required": [
+              "execution"
+            ],
+            "properties": {
+              "execution": {
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "execution_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "client_request_id": {
+                        "type": "string",
+                        "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                      },
+                      "state_store_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "command": {
+                        "enum": [
+                          "branch.delete",
+                          "branch.retry.pause",
+                          "branch.retry.resume",
+                          "lock.delete",
+                          "transaction.delete",
+                          "transaction.dispatch",
+                          "transaction.retry.pause",
+                          "transaction.retry.resume",
+                          "transaction.status.recover"
+                        ]
+                      },
+                      "state": {
+                        "type": "string",
+                        "enum": [
+                          "CREATED",
+                          "PREPARED",
+                          "AWAITING_CONFIRMATION",
+                          "SEND_INTENT",
+                          "RESPONSE_OBSERVED",
+                          "FINAL"
+                        ]
+                      },
+                      "request_phase": {
+                        "type": "string",
+                        "enum": [
+                          "not_started",
+                          "request_maybe_sent",
+                          "response_complete"
+                        ]
+                      },
+                      "outcome": {
+                        "type": "string",
+                        "enum": [
+                          "not_started",
+                          "unknown",
+                          "not_applied",
+                          "applied",
+                          "partially_applied"
+                        ]
+                      },
+                      "response_ack": {
+                        "type": "string",
+                        "enum": [
+                          "none",
+                          "accepted",
+                          "rejected_before_effect",
+                          "ambiguous"
+                        ]
+                      },
+                      "observation": {
+                        "type": "string",
+                        "enum": [
+                          "postcondition_observed",
+                          "precondition_still_observed",
+                          "partial_state_observed",
+                          "divergent_state_observed",
+                          "unknown"
+                        ]
+                      },
+                      "business_completion": {
+                        "type": "string",
+                        "enum": [
+                          "not_claimed",
+                          "in_progress",
+                          "succeeded",
+                          "failed",
+                          "unknown"
+                        ]
+                      },
+                      "causality": {
+                        "const": "unproven"
+                      },
+                      "target_digest": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "target": {
+                        "type": "object",
+                        "properties": {
+                          "profile_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "profile_revision": {
+                            "type": "integer",
+                            "minimum": 1
+                          },
+                          "console_base_endpoint": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "naming_base_endpoint": {
+                            "type": "string",
+                            "format": "uri"
+                          },
+                          "trust_digest": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          },
+                          "namespace": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          },
+                          "cluster": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          },
+                          "vgroup": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          },
+                          "route_assurance": {
+                            "type": "string",
+                            "enum": [
+                              "resolved_identity",
+                              "selector_only"
+                            ]
+                          },
+                          "adapter_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 128
+                          },
+                          "adapter_digest": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          },
+                          "command_schema_version": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 4096
+                          }
+                        },
+                        "required": [
+                          "profile_id",
+                          "profile_revision",
+                          "console_base_endpoint",
+                          "naming_base_endpoint",
+                          "trust_digest",
+                          "namespace",
+                          "route_assurance",
+                          "adapter_id",
+                          "adapter_digest",
+                          "command_schema_version"
+                        ],
+                        "additionalProperties": true,
+                        "oneOf": [
+                          {
+                            "required": [
+                              "cluster"
+                            ],
+                            "not": {
+                              "required": [
+                                "vgroup"
+                              ]
+                            }
+                          },
+                          {
+                            "required": [
+                              "vgroup"
+                            ],
+                            "not": {
+                              "required": [
+                                "cluster"
+                              ]
+                            }
+                          }
+                        ]
+                      },
+                      "plan_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "record_version": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "send_intent_at": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "format": "date-time"
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "execution_id",
+                      "client_request_id",
+                      "state_store_id",
+                      "command",
+                      "state",
+                      "request_phase",
+                      "outcome",
+                      "response_ack",
+                      "observation",
+                      "business_completion",
+                      "causality",
+                      "target_digest",
+                      "target",
+                      "plan_id",
+                      "record_version",
+                      "send_intent_at",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "additionalProperties": true,
+                    "allOf": [
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "enum": [
+                                "CREATED",
+                                "PREPARED",
+                                "AWAITING_CONFIRMATION"
+                              ]
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "request_phase": {
+                              "const": "not_started"
+                            },
+                            "outcome": {
+                              "const": "not_started"
+                            },
+                            "send_intent_at": {
+                              "const": null
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "SEND_INTENT"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "request_phase": {
+                              "const": "request_maybe_sent"
+                            },
+                            "outcome": {
+                              "const": "unknown"
+                            },
+                            "send_intent_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "if": {
+                          "properties": {
+                            "state": {
+                              "const": "RESPONSE_OBSERVED"
+                            }
+                          }
+                        },
+                        "then": {
+                          "properties": {
+                            "request_phase": {
+                              "const": "response_complete"
+                            },
+                            "send_intent_at": {
+                              "type": "string",
+                              "format": "date-time"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "outcome": {
+                        "const": "unknown"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "continuation": {
+            "properties": {
+              "invocation": {
+                "properties": {
+                  "command": {
+                    "const": "execution.reconcile"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "data",
+          "error",
+          "continuation"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "error": {
+            "properties": {
+              "type": {
+                "const": "confirmation"
+              }
+            }
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "required": [
+              "execution_id",
+              "plan"
+            ],
+            "properties": {
+              "execution_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "plan": {
+                "type": "object",
+                "properties": {
+                  "plan_id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 128
+                  },
+                  "plan_format_version": {
+                    "const": 1
+                  },
+                  "command": {
+                    "enum": [
+                      "branch.delete",
+                      "branch.retry.pause",
+                      "branch.retry.resume",
+                      "lock.delete",
+                      "transaction.delete",
+                      "transaction.dispatch",
+                      "transaction.retry.pause",
+                      "transaction.retry.resume",
+                      "transaction.status.recover"
+                    ]
+                  },
+                  "target": {
+                    "type": "object",
+                    "properties": {
+                      "profile_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "profile_revision": {
+                        "type": "integer",
+                        "minimum": 1
+                      },
+                      "console_base_endpoint": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "naming_base_endpoint": {
+                        "type": "string",
+                        "format": "uri"
+                      },
+                      "trust_digest": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "namespace": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "cluster": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "vgroup": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "route_assurance": {
+                        "type": "string",
+                        "enum": [
+                          "resolved_identity",
+                          "selector_only"
+                        ]
+                      },
+                      "adapter_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                      },
+                      "adapter_digest": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "command_schema_version": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      }
+                    },
+                    "required": [
+                      "profile_id",
+                      "profile_revision",
+                      "console_base_endpoint",
+                      "naming_base_endpoint",
+                      "trust_digest",
+                      "namespace",
+                      "route_assurance",
+                      "adapter_id",
+                      "adapter_digest",
+                      "command_schema_version"
+                    ],
+                    "additionalProperties": true,
+                    "oneOf": [
+                      {
+                        "required": [
+                          "cluster"
+                        ],
+                        "not": {
+                          "required": [
+                            "vgroup"
+                          ]
+                        }
+                      },
+                      {
+                        "required": [
+                          "vgroup"
+                        ],
+                        "not": {
+                          "required": [
+                            "cluster"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "normalized_input": {
+                    "type": "object"
+                  },
+                  "expected_direction": {
+                    "enum": [
+                      "commit",
+                      "rollback",
+                      null
+                    ]
+                  },
+                  "resolved_direction": {
+                    "enum": [
+                      "commit",
+                      "rollback",
+                      null
+                    ]
+                  },
+                  "before": {
+                    "type": "object"
+                  },
+                  "preconditions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "effects": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "possible_partial_effects": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "risk": {
+                    "type": "string",
+                    "enum": [
+                      "controlled_write",
+                      "high_risk_write"
+                    ]
+                  },
+                  "reversibility": {
+                    "type": "object",
+                    "properties": {
+                      "kind": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "limitations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 4096
+                        }
+                      }
+                    },
+                    "required": [
+                      "kind",
+                      "limitations"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "material_digest": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096
+                  },
+                  "created_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "expires_at": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "consumed_by": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "limitations": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    }
+                  }
+                },
+                "required": [
+                  "plan_id",
+                  "plan_format_version",
+                  "command",
+                  "target",
+                  "normalized_input",
+                  "expected_direction",
+                  "resolved_direction",
+                  "before",
+                  "preconditions",
+                  "effects",
+                  "possible_partial_effects",
+                  "risk",
+                  "reversibility",
+                  "material_digest",
+                  "created_at",
+                  "expires_at",
+                  "consumed_by",
+                  "limitations"
+                ],
+                "additionalProperties": true
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      }
+    }
+  ]
+}

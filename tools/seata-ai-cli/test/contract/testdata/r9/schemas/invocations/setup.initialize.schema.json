@@ -1,0 +1,233 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "setup.initialize invocation",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "contract_revision": {
+      "const": "R9"
+    },
+    "command": {
+      "const": "setup.initialize"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "cluster",
+          "vgroup"
+        ]
+      }
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+            },
+            "environment": {
+              "type": "string",
+              "enum": [
+                "production",
+                "staging",
+                "development"
+              ]
+            },
+            "management": {
+              "type": "object",
+              "properties": {
+                "console_endpoint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                },
+                "naming_endpoint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                },
+                "deployment": {
+                  "type": "string",
+                  "enum": [
+                    "integrated",
+                    "standalone_console"
+                  ]
+                },
+                "compatibility_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "proxy_mode": {
+                  "type": "string",
+                  "enum": [
+                    "direct",
+                    "explicit"
+                  ]
+                },
+                "proxy_endpoint": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                },
+                "ca_ref": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048
+                }
+              },
+              "required": [
+                "console_endpoint",
+                "compatibility_id"
+              ],
+              "additionalProperties": false
+            },
+            "target": {
+              "type": "object",
+              "properties": {
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                }
+              },
+              "required": [
+                "namespace"
+              ],
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "required": [
+                    "cluster"
+                  ],
+                  "not": {
+                    "required": [
+                      "vgroup"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "vgroup"
+                  ],
+                  "not": {
+                    "required": [
+                      "cluster"
+                    ]
+                  }
+                }
+              ]
+            },
+            "policy": {
+              "type": "object",
+              "properties": {
+                "require_https": {
+                  "type": "boolean"
+                },
+                "allow_selector_only_high_risk": {
+                  "type": "boolean"
+                },
+                "storage_policy": {
+                  "type": "string",
+                  "enum": [
+                    "keyring_required",
+                    "protected_file"
+                  ]
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "name",
+            "environment",
+            "management",
+            "target"
+          ],
+          "additionalProperties": false
+        },
+        "accept_target": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "config",
+        "accept_target"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 120000,
+          "default": 30000
+        },
+        "client_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "protocol_version",
+    "contract_revision",
+    "command",
+    "context",
+    "input",
+    "options"
+  ],
+  "additionalProperties": false
+}

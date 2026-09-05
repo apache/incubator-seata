@@ -1,0 +1,5 @@
+{
+  "xid": "10.0.0.1:8091:123",
+  "expected_direction": "rollback",
+  "branch_id": "123"
+}

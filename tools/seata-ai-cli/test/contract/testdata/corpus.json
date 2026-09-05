@@ -1,0 +1,309 @@
+[
+  {
+    "name": "minimal-read",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": true
+  },
+  {
+    "name": "missing-protocol_version",
+    "invocation": {
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "missing-contract_revision",
+    "invocation": {
+      "protocol_version": "0.1",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "missing-context",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "missing-input",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "missing-options",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      }
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "null-context",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": null,
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "unknown-context",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod",
+        "surprise": true
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "null-input",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": null,
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "unknown-input",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x",
+        "surprise": true
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "null-options",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": null
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "unknown-options",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {
+        "surprise": true
+      }
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "confirmation-on-read",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {
+        "confirm_high_risk": true
+      }
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "write-without-request-id",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.delete",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "dry-run-with-yes",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.delete",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {
+        "dry_run": true,
+        "confirm_high_risk": true
+      }
+    },
+    "schema_valid": true
+  },
+  {
+    "name": "int64-max-string",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "branch.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x",
+        "branch_id": "9223372036854775807"
+      },
+      "options": {}
+    },
+    "schema_valid": true
+  },
+  {
+    "name": "numeric-branch-id",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "branch.get",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x",
+        "branch_id": 9007199254740993
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "ambiguous-route",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.get",
+      "context": {
+        "profile": "prod",
+        "cluster": "a",
+        "vgroup": "b"
+      },
+      "input": {
+        "xid": "x"
+      },
+      "options": {}
+    },
+    "schema_valid": false
+  },
+  {
+    "name": "high-risk-without-confirm-reaches-runtime-gate",
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "transaction.retry.resume",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "xid": "x",
+        "expected_direction": "rollback"
+      },
+      "options": {
+        "client_request_id": "35BF7B3C-44D2-4CA8-8B6D-5B40C3E6D016"
+      }
+    },
+    "schema_valid": true
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "name": "seata-ai-cli-contract-tests",
+  "private": true,
+  "scripts": {
+    "test": "node validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}

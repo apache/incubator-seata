@@ -1,0 +1,12 @@
+{
+  "invocation": {
+    "protocol_version": "0.1",
+    "contract_revision": "R9",
+    "command": "system.version",
+    "context": {},
+    "input": {},
+    "options": {
+      "timeout_ms": 30000
+    }
+  }
+}

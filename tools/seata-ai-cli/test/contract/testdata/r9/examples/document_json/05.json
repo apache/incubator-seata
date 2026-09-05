@@ -1,0 +1,16 @@
+{
+  "key": "service.vgroupMapping.order_tx_group",
+  "value": "default",
+  "source": "application.yml",
+  "location": "project/application.yml:12",
+  "scope": "local_project",
+  "target_process": null,
+  "evidence_kind": "observed_file",
+  "precedence": null,
+  "effective_status": "unknown",
+  "sensitive": false,
+  "redacted": false,
+  "limitations": [
+    "remote_process_overrides_not_observed"
+  ]
+}

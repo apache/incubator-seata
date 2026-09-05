@@ -1,0 +1,6340 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "system.invoke input",
+  "type": "object",
+  "properties": {
+    "invocation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "system.version"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "system.help"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "maxItems": 8
+                },
+                "field": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "system.capabilities"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "system.schema"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "command_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [
+                "command_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "setup.inspect"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "root": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "max_parent_depth": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 3,
+                  "default": 3
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "setup.initialize"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "enum": [
+                        "production",
+                        "staging",
+                        "development"
+                      ]
+                    },
+                    "management": {
+                      "type": "object",
+                      "properties": {
+                        "console_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "naming_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "deployment": {
+                          "type": "string",
+                          "enum": [
+                            "integrated",
+                            "standalone_console"
+                          ]
+                        },
+                        "compatibility_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128,
+                          "pattern": "^[A-Za-z0-9_-]+$"
+                        },
+                        "proxy_mode": {
+                          "type": "string",
+                          "enum": [
+                            "direct",
+                            "explicit"
+                          ]
+                        },
+                        "proxy_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "ca_ref": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "console_endpoint",
+                        "compatibility_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "target": {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "cluster": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "vgroup": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "namespace"
+                      ],
+                      "additionalProperties": false,
+                      "oneOf": [
+                        {
+                          "required": [
+                            "cluster"
+                          ],
+                          "not": {
+                            "required": [
+                              "vgroup"
+                            ]
+                          }
+                        },
+                        {
+                          "required": [
+                            "vgroup"
+                          ],
+                          "not": {
+                            "required": [
+                              "cluster"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "policy": {
+                      "type": "object",
+                      "properties": {
+                        "require_https": {
+                          "type": "boolean"
+                        },
+                        "allow_selector_only_high_risk": {
+                          "type": "boolean"
+                        },
+                        "storage_policy": {
+                          "type": "string",
+                          "enum": [
+                            "keyring_required",
+                            "protected_file"
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "environment",
+                    "management",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                "accept_target": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "config",
+                "accept_target"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.get"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.create"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "config": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "enum": [
+                        "production",
+                        "staging",
+                        "development"
+                      ]
+                    },
+                    "management": {
+                      "type": "object",
+                      "properties": {
+                        "console_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "naming_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "deployment": {
+                          "type": "string",
+                          "enum": [
+                            "integrated",
+                            "standalone_console"
+                          ]
+                        },
+                        "compatibility_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128,
+                          "pattern": "^[A-Za-z0-9_-]+$"
+                        },
+                        "proxy_mode": {
+                          "type": "string",
+                          "enum": [
+                            "direct",
+                            "explicit"
+                          ]
+                        },
+                        "proxy_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "ca_ref": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "console_endpoint",
+                        "compatibility_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "target": {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "cluster": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "vgroup": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "namespace"
+                      ],
+                      "additionalProperties": false,
+                      "oneOf": [
+                        {
+                          "required": [
+                            "cluster"
+                          ],
+                          "not": {
+                            "required": [
+                              "vgroup"
+                            ]
+                          }
+                        },
+                        {
+                          "required": [
+                            "vgroup"
+                          ],
+                          "not": {
+                            "required": [
+                              "cluster"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "policy": {
+                      "type": "object",
+                      "properties": {
+                        "require_https": {
+                          "type": "boolean"
+                        },
+                        "allow_selector_only_high_risk": {
+                          "type": "boolean"
+                        },
+                        "storage_policy": {
+                          "type": "string",
+                          "enum": [
+                            "keyring_required",
+                            "protected_file"
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "environment",
+                    "management",
+                    "target"
+                  ],
+                  "additionalProperties": false
+                },
+                "accept_target": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "config"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.update"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                },
+                "patch": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "enum": [
+                        "production",
+                        "staging",
+                        "development"
+                      ]
+                    },
+                    "management": {
+                      "type": "object",
+                      "properties": {
+                        "console_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "naming_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "deployment": {
+                          "type": "string",
+                          "enum": [
+                            "integrated",
+                            "standalone_console"
+                          ]
+                        },
+                        "compatibility_id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 128,
+                          "pattern": "^[A-Za-z0-9_-]+$"
+                        },
+                        "proxy_mode": {
+                          "type": "string",
+                          "enum": [
+                            "direct",
+                            "explicit"
+                          ]
+                        },
+                        "proxy_endpoint": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048,
+                          "format": "uri"
+                        },
+                        "ca_ref": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2048
+                        }
+                      },
+                      "required": [
+                        "console_endpoint",
+                        "compatibility_id"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "target": {
+                      "type": "object",
+                      "properties": {
+                        "namespace": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "cluster": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        },
+                        "vgroup": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "namespace"
+                      ],
+                      "additionalProperties": false,
+                      "oneOf": [
+                        {
+                          "required": [
+                            "cluster"
+                          ],
+                          "not": {
+                            "required": [
+                              "vgroup"
+                            ]
+                          }
+                        },
+                        {
+                          "required": [
+                            "vgroup"
+                          ],
+                          "not": {
+                            "required": [
+                              "cluster"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "policy": {
+                      "type": "object",
+                      "properties": {
+                        "require_https": {
+                          "type": "boolean"
+                        },
+                        "allow_selector_only_high_risk": {
+                          "type": "boolean"
+                        },
+                        "storage_policy": {
+                          "type": "string",
+                          "enum": [
+                            "keyring_required",
+                            "protected_file"
+                          ]
+                        }
+                      },
+                      "required": [],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false,
+                  "minProperties": 1
+                },
+                "accept_target": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "expected_revision",
+                "patch"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.use"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "profile.delete"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "expected_revision": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                }
+              },
+              "required": [
+                "name",
+                "expected_revision"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "auth.login"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "auth.login.status"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "flow_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [
+                "flow_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "auth.login.cancel"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "flow_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [
+                "flow_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "auth.status"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "verify": {
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "auth.logout"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.read"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "skill_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "section": {
+                  "type": "string",
+                  "enum": [
+                    "main",
+                    "references",
+                    "examples"
+                  ]
+                },
+                "relative_path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "skill_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.export"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "skill_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "root": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "overwrite": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "root",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.validate"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "root": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.install"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "global": {
+                  "type": "boolean",
+                  "const": true
+                },
+                "host_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "skills.status"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "host_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "environment.inspect"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "root": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "connectivity.check"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "namespace.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "cluster.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "server.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "config.inspect"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "yaml",
+                          "properties"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 16
+                },
+                "include_environment": {
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "config.validate"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "sources": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 4096
+                      },
+                      "format": {
+                        "type": "string",
+                        "enum": [
+                          "yaml",
+                          "properties"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "maxItems": 16
+                },
+                "ruleset_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "config.diff"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "left": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "yaml",
+                        "properties"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false
+                },
+                "right": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "yaml",
+                        "properties"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "left",
+                "right"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20
+                },
+                "application_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "transaction_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "time_range": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000,
+                  "default": 1
+                },
+                "page_size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000,
+                  "default": 10000
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.get"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.abnormal"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "status": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 20
+                },
+                "application_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "transaction_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "time_range": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000,
+                  "default": 1
+                },
+                "page_size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000,
+                  "default": 10000
+                },
+                "min_age_ms": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 86400000
+                },
+                "ruleset_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.trace"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "branch.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000,
+                  "default": 1
+                },
+                "page_size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000,
+                  "default": 10000
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "branch.get"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "lock.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                },
+                "transaction_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[0-9]+$"
+                },
+                "resource_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "table_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "pk": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "time_range": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000,
+                  "default": 1
+                },
+                "page_size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000,
+                  "default": 10000
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "lock.check"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "lock.conflicts"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                },
+                "transaction_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[0-9]+$"
+                },
+                "resource_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "table_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "pk": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "time_range": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    },
+                    "end": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end"
+                  ],
+                  "additionalProperties": false
+                },
+                "page": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 1000000,
+                  "default": 1
+                },
+                "page_size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "default": 20
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000,
+                  "default": 10000
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "diagnose.rules.list"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {},
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "diagnose.rules.get"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "rule_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [
+                "rule_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "diagnose.run"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "scope": {
+                  "type": "string",
+                  "enum": [
+                    "environment",
+                    "transaction"
+                  ]
+                },
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "ruleset_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                }
+              },
+              "required": [
+                "scope"
+              ],
+              "additionalProperties": false,
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "scope": {
+                        "const": "transaction"
+                      }
+                    },
+                    "required": [
+                      "scope"
+                    ]
+                  },
+                  "then": {
+                    "required": [
+                      "xid"
+                    ]
+                  }
+                }
+              ]
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "input": {
+                    "properties": {
+                      "scope": {
+                        "const": "transaction"
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "context": {
+                    "required": [
+                      "profile"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "diagnose.snapshot"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "include_config": {
+                  "type": "boolean"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "diagnose.snapshot.export"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "include_config": {
+                  "type": "boolean"
+                },
+                "root": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "path": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "json",
+                    "zip"
+                  ]
+                },
+                "overwrite": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "root",
+                "path",
+                "format"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "execution.get"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "execution_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36,
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "required": [
+                    "execution_id"
+                  ],
+                  "not": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "client_request_id"
+                  ],
+                  "not": {
+                    "required": [
+                      "execution_id"
+                    ]
+                  }
+                }
+              ]
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "execution.reconcile"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "execution_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128,
+                  "pattern": "^[A-Za-z0-9_-]+$"
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36,
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false,
+              "oneOf": [
+                {
+                  "required": [
+                    "execution_id"
+                  ],
+                  "not": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  }
+                },
+                {
+                  "required": [
+                    "client_request_id"
+                  ],
+                  "not": {
+                    "required": [
+                      "execution_id"
+                    ]
+                  }
+                }
+              ]
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.retry.resume"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.retry.pause"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "branch.retry.resume"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "branch.retry.pause"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.dispatch"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.status.recover"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "expected_direction": {
+                  "type": "string",
+                  "enum": [
+                    "commit",
+                    "rollback"
+                  ]
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  },
+                  "input": {
+                    "required": [
+                      "expected_direction"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "transaction.delete"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "xid"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "branch.delete"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "protocol_version": {
+              "const": "0.1"
+            },
+            "contract_revision": {
+              "const": "R9"
+            },
+            "command": {
+              "const": "lock.delete"
+            },
+            "context": {
+              "type": "object",
+              "properties": {
+                "profile": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "namespace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "cluster": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "vgroup": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "profile"
+              ],
+              "additionalProperties": false,
+              "not": {
+                "required": [
+                  "cluster",
+                  "vgroup"
+                ]
+              }
+            },
+            "input": {
+              "type": "object",
+              "properties": {
+                "xid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "branch_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 19,
+                  "pattern": "^[1-9][0-9]*$"
+                },
+                "resource_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "table_name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                },
+                "pk": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              },
+              "required": [
+                "xid",
+                "branch_id",
+                "resource_id",
+                "table_name",
+                "pk"
+              ],
+              "additionalProperties": false
+            },
+            "options": {
+              "type": "object",
+              "properties": {
+                "timeout_ms": {
+                  "type": "integer",
+                  "minimum": 1000,
+                  "maximum": 120000,
+                  "default": 30000
+                },
+                "client_request_id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+                },
+                "dry_run": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "confirm_high_risk": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "plan_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "required": [],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "protocol_version",
+            "contract_revision",
+            "command",
+            "context",
+            "input",
+            "options"
+          ],
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "not": {
+                  "properties": {
+                    "options": {
+                      "required": [
+                        "dry_run"
+                      ],
+                      "properties": {
+                        "dry_run": {
+                          "const": true
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "options": {
+                    "required": [
+                      "client_request_id"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "invocation"
+  ],
+  "additionalProperties": false
+}

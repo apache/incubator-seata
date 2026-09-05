@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "R9 ExecutionPlan safe output minimum",
+  "type": "object",
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "plan_format_version": {
+      "const": 1
+    },
+    "command": {
+      "enum": [
+        "branch.delete",
+        "branch.retry.pause",
+        "branch.retry.resume",
+        "lock.delete",
+        "transaction.delete",
+        "transaction.dispatch",
+        "transaction.retry.pause",
+        "transaction.retry.resume",
+        "transaction.status.recover"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "console_base_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "naming_base_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "trust_digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "route_assurance": {
+          "type": "string",
+          "enum": [
+            "resolved_identity",
+            "selector_only"
+          ]
+        },
+        "adapter_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "command_schema_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "profile_id",
+        "profile_revision",
+        "console_base_endpoint",
+        "naming_base_endpoint",
+        "trust_digest",
+        "namespace",
+        "route_assurance",
+        "adapter_id",
+        "adapter_digest",
+        "command_schema_version"
+      ],
+      "additionalProperties": true,
+      "oneOf": [
+        {
+          "required": [
+            "cluster"
+          ],
+          "not": {
+            "required": [
+              "vgroup"
+            ]
+          }
+        },
+        {
+          "required": [
+            "vgroup"
+          ],
+          "not": {
+            "required": [
+              "cluster"
+            ]
+          }
+        }
+      ]
+    },
+    "normalized_input": {
+      "type": "object"
+    },
+    "expected_direction": {
+      "enum": [
+        "commit",
+        "rollback",
+        null
+      ]
+    },
+    "resolved_direction": {
+      "enum": [
+        "commit",
+        "rollback",
+        null
+      ]
+    },
+    "before": {
+      "type": "object"
+    },
+    "preconditions": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "effects": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "possible_partial_effects": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "risk": {
+      "type": "string",
+      "enum": [
+        "controlled_write",
+        "high_risk_write"
+      ]
+    },
+    "reversibility": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "limitations"
+      ],
+      "additionalProperties": true
+    },
+    "material_digest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "consumed_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      }
+    }
+  },
+  "required": [
+    "plan_id",
+    "plan_format_version",
+    "command",
+    "target",
+    "normalized_input",
+    "expected_direction",
+    "resolved_direction",
+    "before",
+    "preconditions",
+    "effects",
+    "possible_partial_effects",
+    "risk",
+    "reversibility",
+    "material_digest",
+    "created_at",
+    "expires_at",
+    "consumed_by",
+    "limitations"
+  ],
+  "additionalProperties": true
+}

@@ -1,0 +1,42 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "ok": true,
+  "state": "pending",
+  "command": "auth.login",
+  "request_id": "req_002",
+  "timestamp": "2026-09-05T00:00:00Z",
+  "context": {
+    "profile": "prod"
+  },
+  "data": {
+    "auth_method": "local_browser",
+    "flow_id": "flow_001",
+    "flow_state": "pending",
+    "verification_url": "http://127.0.0.1:43821/login/example-only-token",
+    "expires_at": "2026-09-05T00:05:00Z"
+  },
+  "continuation": {
+    "reason": "auth_poll",
+    "not_before_ms": 3000,
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "auth.login.status",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "flow_id": "flow_001"
+      },
+      "options": {
+        "timeout_ms": 5000
+      }
+    }
+  },
+  "meta": {
+    "duration_ms": 25,
+    "partial": false
+  },
+  "warnings": []
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "diagnose.snapshot input",
+  "type": "object",
+  "properties": {
+    "xid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "include_config": {
+      "type": "boolean"
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

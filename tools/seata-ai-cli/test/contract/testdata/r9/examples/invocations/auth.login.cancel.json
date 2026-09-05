@@ -1,0 +1,14 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "auth.login.cancel",
+  "context": {
+    "profile": "prod"
+  },
+  "input": {
+    "flow_id": "flow_001"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

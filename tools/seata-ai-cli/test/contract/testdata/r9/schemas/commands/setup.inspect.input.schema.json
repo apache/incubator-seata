@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "setup.inspect input",
+  "type": "object",
+  "properties": {
+    "root": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "max_parent_depth": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "default": 3
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

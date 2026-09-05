@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "connectivity.check invocation",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "contract_revision": {
+      "const": "R9"
+    },
+    "command": {
+      "const": "connectivity.check"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "cluster",
+          "vgroup"
+        ]
+      }
+    },
+    "input": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 120000,
+          "default": 30000
+        },
+        "client_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "protocol_version",
+    "contract_revision",
+    "command",
+    "context",
+    "input",
+    "options"
+  ],
+  "additionalProperties": false
+}

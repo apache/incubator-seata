@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "skills.read input",
+  "type": "object",
+  "properties": {
+    "skill_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "section": {
+      "type": "string",
+      "enum": [
+        "main",
+        "references",
+        "examples"
+      ]
+    },
+    "relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    }
+  },
+  "required": [
+    "skill_id"
+  ],
+  "additionalProperties": false
+}

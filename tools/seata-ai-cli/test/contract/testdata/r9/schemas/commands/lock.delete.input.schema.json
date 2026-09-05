@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lock.delete input",
+  "type": "object",
+  "properties": {
+    "xid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "branch_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 19,
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "resource_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "table_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "pk": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    }
+  },
+  "required": [
+    "xid",
+    "branch_id",
+    "resource_id",
+    "table_name",
+    "pk"
+  ],
+  "additionalProperties": false
+}

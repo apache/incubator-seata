@@ -1,0 +1,16 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "profile.update",
+  "context": {},
+  "input": {
+    "name": "prod",
+    "expected_revision": 1,
+    "patch": {
+      "name": "prod2"
+    }
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "root": "./exports",
+  "path": "snapshot.zip",
+  "format": "zip"
+}

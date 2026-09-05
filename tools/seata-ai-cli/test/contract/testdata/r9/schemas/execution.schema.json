@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "R9 Execution safe output minimum",
+  "type": "object",
+  "properties": {
+    "execution_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "client_request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+    },
+    "state_store_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "command": {
+      "enum": [
+        "branch.delete",
+        "branch.retry.pause",
+        "branch.retry.resume",
+        "lock.delete",
+        "transaction.delete",
+        "transaction.dispatch",
+        "transaction.retry.pause",
+        "transaction.retry.resume",
+        "transaction.status.recover"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "CREATED",
+        "PREPARED",
+        "AWAITING_CONFIRMATION",
+        "SEND_INTENT",
+        "RESPONSE_OBSERVED",
+        "FINAL"
+      ]
+    },
+    "request_phase": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "request_maybe_sent",
+        "response_complete"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "not_started",
+        "unknown",
+        "not_applied",
+        "applied",
+        "partially_applied"
+      ]
+    },
+    "response_ack": {
+      "type": "string",
+      "enum": [
+        "none",
+        "accepted",
+        "rejected_before_effect",
+        "ambiguous"
+      ]
+    },
+    "observation": {
+      "type": "string",
+      "enum": [
+        "postcondition_observed",
+        "precondition_still_observed",
+        "partial_state_observed",
+        "divergent_state_observed",
+        "unknown"
+      ]
+    },
+    "business_completion": {
+      "type": "string",
+      "enum": [
+        "not_claimed",
+        "in_progress",
+        "succeeded",
+        "failed",
+        "unknown"
+      ]
+    },
+    "causality": {
+      "const": "unproven"
+    },
+    "target_digest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "profile_revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "console_base_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "naming_base_endpoint": {
+          "type": "string",
+          "format": "uri"
+        },
+        "trust_digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "route_assurance": {
+          "type": "string",
+          "enum": [
+            "resolved_identity",
+            "selector_only"
+          ]
+        },
+        "adapter_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "adapter_digest": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "command_schema_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "profile_id",
+        "profile_revision",
+        "console_base_endpoint",
+        "naming_base_endpoint",
+        "trust_digest",
+        "namespace",
+        "route_assurance",
+        "adapter_id",
+        "adapter_digest",
+        "command_schema_version"
+      ],
+      "additionalProperties": true,
+      "oneOf": [
+        {
+          "required": [
+            "cluster"
+          ],
+          "not": {
+            "required": [
+              "vgroup"
+            ]
+          }
+        },
+        {
+          "required": [
+            "vgroup"
+          ],
+          "not": {
+            "required": [
+              "cluster"
+            ]
+          }
+        }
+      ]
+    },
+    "plan_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "record_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "send_intent_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "execution_id",
+    "client_request_id",
+    "state_store_id",
+    "command",
+    "state",
+    "request_phase",
+    "outcome",
+    "response_ack",
+    "observation",
+    "business_completion",
+    "causality",
+    "target_digest",
+    "target",
+    "plan_id",
+    "record_version",
+    "send_intent_at",
+    "created_at",
+    "updated_at"
+  ],
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "CREATED",
+              "PREPARED",
+              "AWAITING_CONFIRMATION"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "request_phase": {
+            "const": "not_started"
+          },
+          "outcome": {
+            "const": "not_started"
+          },
+          "send_intent_at": {
+            "const": null
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "SEND_INTENT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "request_phase": {
+            "const": "request_maybe_sent"
+          },
+          "outcome": {
+            "const": "unknown"
+          },
+          "send_intent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "RESPONSE_OBSERVED"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "request_phase": {
+            "const": "response_complete"
+          },
+          "send_intent_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  ]
+}

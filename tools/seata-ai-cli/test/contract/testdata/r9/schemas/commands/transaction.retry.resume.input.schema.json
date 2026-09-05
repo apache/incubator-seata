@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "transaction.retry.resume input",
+  "type": "object",
+  "properties": {
+    "xid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "expected_direction": {
+      "type": "string",
+      "enum": [
+        "commit",
+        "rollback"
+      ]
+    }
+  },
+  "required": [
+    "xid"
+  ],
+  "additionalProperties": false
+}

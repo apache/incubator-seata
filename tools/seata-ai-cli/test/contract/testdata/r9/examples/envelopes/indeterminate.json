@@ -1,0 +1,78 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "transaction.retry.resume",
+  "request_id": "req_example",
+  "timestamp": "2026-09-05T00:00:10Z",
+  "context": {
+    "profile": "prod"
+  },
+  "meta": {
+    "duration_ms": 10000,
+    "partial": false,
+    "client_request_id": "35bf7b3c-44d2-4ca8-8b6d-5b40c3e6d016",
+    "state_store_id": "store_001"
+  },
+  "warnings": [],
+  "ok": false,
+  "state": "indeterminate",
+  "error": {
+    "type": "indeterminate",
+    "subtype": "write_outcome_unknown",
+    "message": "Delivery outcome is unknown; reconcile only",
+    "retry": "read_only",
+    "details": {}
+  },
+  "data": {
+    "execution": {
+      "execution_id": "exec_001",
+      "client_request_id": "35bf7b3c-44d2-4ca8-8b6d-5b40c3e6d016",
+      "state_store_id": "store_001",
+      "command": "transaction.retry.resume",
+      "state": "SEND_INTENT",
+      "request_phase": "request_maybe_sent",
+      "outcome": "unknown",
+      "response_ack": "none",
+      "observation": "unknown",
+      "business_completion": "unknown",
+      "causality": "unproven",
+      "target_digest": "example-target-digest",
+      "target": {
+        "profile_id": "profile_001",
+        "profile_revision": 1,
+        "console_base_endpoint": "https://console.example.com",
+        "naming_base_endpoint": "https://naming.example.com",
+        "trust_digest": "example-trust-digest",
+        "namespace": "public",
+        "cluster": "default",
+        "route_assurance": "selector_only",
+        "adapter_id": "seata-src-41694e14",
+        "adapter_digest": "example-adapter-digest",
+        "command_schema_version": "R9"
+      },
+      "plan_id": "plan_001",
+      "record_version": 3,
+      "send_intent_at": "2026-09-05T00:00:05Z",
+      "created_at": "2026-09-05T00:00:00Z",
+      "updated_at": "2026-09-05T00:00:05Z"
+    }
+  },
+  "continuation": {
+    "reason": "write_reconcile",
+    "not_before_ms": 3000,
+    "invocation": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "execution.reconcile",
+      "context": {
+        "profile": "prod"
+      },
+      "input": {
+        "execution_id": "exec_001"
+      },
+      "options": {
+        "timeout_ms": 30000
+      }
+    }
+  }
+}

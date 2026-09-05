@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "transaction.dispatch invocation",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "contract_revision": {
+      "const": "R9"
+    },
+    "command": {
+      "const": "transaction.dispatch"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "profile"
+      ],
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "cluster",
+          "vgroup"
+        ]
+      }
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "xid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "expected_direction": {
+          "type": "string",
+          "enum": [
+            "commit",
+            "rollback"
+          ]
+        }
+      },
+      "required": [
+        "xid"
+      ],
+      "additionalProperties": false
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 120000,
+          "default": 30000
+        },
+        "client_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "confirm_high_risk": {
+          "type": "boolean",
+          "default": false
+        },
+        "plan_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "protocol_version",
+    "contract_revision",
+    "command",
+    "context",
+    "input",
+    "options"
+  ],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "options": {
+              "required": [
+                "dry_run"
+              ],
+              "properties": {
+                "dry_run": {
+                  "const": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "options": {
+            "required": [
+              "client_request_id"
+            ]
+          },
+          "input": {
+            "required": [
+              "expected_direction"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

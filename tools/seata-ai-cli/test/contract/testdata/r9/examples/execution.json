@@ -1,0 +1,32 @@
+{
+  "execution_id": "exec_001",
+  "client_request_id": "35bf7b3c-44d2-4ca8-8b6d-5b40c3e6d016",
+  "state_store_id": "store_001",
+  "command": "transaction.retry.resume",
+  "state": "SEND_INTENT",
+  "request_phase": "request_maybe_sent",
+  "outcome": "unknown",
+  "response_ack": "none",
+  "observation": "unknown",
+  "business_completion": "unknown",
+  "causality": "unproven",
+  "target_digest": "example-target-digest",
+  "target": {
+    "profile_id": "profile_001",
+    "profile_revision": 1,
+    "console_base_endpoint": "https://console.example.com",
+    "naming_base_endpoint": "https://naming.example.com",
+    "trust_digest": "example-trust-digest",
+    "namespace": "public",
+    "cluster": "default",
+    "route_assurance": "selector_only",
+    "adapter_id": "seata-src-41694e14",
+    "adapter_digest": "example-adapter-digest",
+    "command_schema_version": "R9"
+  },
+  "plan_id": "plan_001",
+  "record_version": 3,
+  "send_intent_at": "2026-09-05T00:00:05Z",
+  "created_at": "2026-09-05T00:00:00Z",
+  "updated_at": "2026-09-05T00:00:05Z"
+}
