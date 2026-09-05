@@ -70,16 +70,160 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <concat destfile="${project.build.directory}/LICENSE"
+                                        <!-- Split on semantic section markers instead of line
+                                             numbers, so component files can grow independently. -->
+                                        <concat destfile="${project.build.directory}/LICENSE-server-common.tmp"
                                                 encoding="UTF-8" fixlastline="true">
-                                            <filelist dir="${project.basedir}"
-                                                      files="LICENSE-server,LICENSE-namingserver"/>
+                                            <file file="${project.basedir}/LICENSE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+\r?\nSeata Subcomponents:.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
                                         </concat>
-                                        <concat destfile="${project.build.directory}/NOTICE"
+                                        <concat destfile="${project.build.directory}/LICENSE-namingserver-common.tmp"
                                                 encoding="UTF-8" fixlastline="true">
-                                            <filelist dir="${project.basedir}"
-                                                      files="NOTICE-server,NOTICE-namingserver"/>
+                                            <file file="${project.basedir}/LICENSE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+\r?\nSeata Subcomponents:.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
                                         </concat>
+                                        <condition property="license.common.headers.match">
+                                            <filesmatch file1="${project.build.directory}/LICENSE-server-common.tmp"
+                                                        file2="${project.build.directory}/LICENSE-namingserver-common.tmp"/>
+                                        </condition>
+                                        <fail unless="license.common.headers.match"
+                                              message="LICENSE-server and LICENSE-namingserver must have identical common license text"/>
+
+                                        <!-- Keep the common Apache License text once, then
+                                             retain component ownership for dependency terms. -->
+                                        <copy file="${project.build.directory}/LICENSE-server-common.tmp"
+                                              tofile="${project.build.directory}/LICENSE" overwrite="true"/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-server
+
+]]></echo>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/LICENSE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\nSeata Subcomponents:)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-namingserver
+
+]]></echo>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/LICENSE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\nSeata Subcomponents:)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+
+                                        <concat destfile="${project.build.directory}/NOTICE-server-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <concat destfile="${project.build.directory}/NOTICE-namingserver-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <condition property="notice.common.headers.match">
+                                            <filesmatch file1="${project.build.directory}/NOTICE-server-common.tmp"
+                                                        file2="${project.build.directory}/NOTICE-namingserver-common.tmp"/>
+                                        </condition>
+                                        <fail unless="notice.common.headers.match"
+                                              message="NOTICE-server and NOTICE-namingserver must have identical project notice header"/>
+
+                                        <!-- The project NOTICE header is common. Dependency
+                                             notices remain grouped by the component shipping them. -->
+                                        <copy file="${project.build.directory}/NOTICE-server-common.tmp"
+                                              tofile="${project.build.directory}/NOTICE" overwrite="true"/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-server
+
+]]></echo>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/NOTICE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\n)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-namingserver
+
+]]></echo>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/NOTICE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\n)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <delete>
+                                            <fileset dir="${project.build.directory}" includes="*-common.tmp"/>
+                                        </delete>
                                     </target>
                                 </configuration>
                             </execution>

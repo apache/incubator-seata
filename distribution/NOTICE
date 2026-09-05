@@ -4,6 +4,7 @@ Copyright 2023-2026 The Apache Software Foundation
 This product includes software developed at
 The Apache Software Foundation (http://www.apache.org/).
 
+Component: seata-server
 ========================================================================
 ant-1.10.12.jar, ant-launcher-1.10.12.jar
 ========================================================================
@@ -468,12 +469,8 @@ Copyright (c) 2012-2023 VMware, Inc.
 This product is licensed to you under the Apache License, Version 2.0
 (the "License"). You may not use this product except in compliance with
 the License.
-Apache Seata (Incubating)
-Copyright 2023-2026 The Apache Software Foundation
 
-This product includes software developed at
-The Apache Software Foundation (http://www.apache.org/).
-
+Component: seata-namingserver
 ========================================================================
 classmate-1.7.0.jar
 ========================================================================
