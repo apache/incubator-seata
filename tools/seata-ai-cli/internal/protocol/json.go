@@ -29,12 +29,19 @@ const MaxInput = 1 << 20
 
 // Decode rejects ambiguity before a schema validator or a handler sees input.
 // Numbers remain decimal tokens, including values above the float64 safe range.
-func Decode(r io.Reader) (any, error) {
-	b, err := io.ReadAll(io.LimitReader(r, MaxInput+1))
+func Decode(r io.Reader) (any, error) { return DecodeLimit(r, MaxInput) }
+
+// DecodeLimit is used for bounded server responses; canonical input always uses
+// Decode's fixed 1 MiB limit.
+func DecodeLimit(r io.Reader, limit int64) (any, error) {
+	if limit < 1 || limit > 16<<20 {
+		return nil, errors.New("invalid_input_limit")
+	}
+	b, err := io.ReadAll(io.LimitReader(r, limit+1))
 	if err != nil {
 		return nil, errors.New("input_read_failed")
 	}
-	if len(b) > MaxInput {
+	if int64(len(b)) > limit {
 		return nil, errors.New("input_too_large")
 	}
 	if !utf8.Valid(b) {
