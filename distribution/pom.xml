@@ -59,6 +59,34 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>aggregate-binary-license-and-notice</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <concat destfile="${project.build.directory}/LICENSE"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <filelist dir="${project.basedir}"
+                                                      files="LICENSE-server,LICENSE-namingserver"/>
+                                        </concat>
+                                        <concat destfile="${project.build.directory}/NOTICE"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <filelist dir="${project.basedir}"
+                                                      files="NOTICE-server,NOTICE-namingserver"/>
+                                        </concat>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>${maven-assembly-plugin.version}</version>
                         <configuration>

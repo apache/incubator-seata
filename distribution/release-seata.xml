@@ -48,14 +48,87 @@
             <includes>
                 <include>licenses/*</include>
             </includes>
+            <!-- Keep frontend license copies conservative; prune backend-only files
+                 that are neither referenced nor represented in this deliverable. -->
+            <excludes>
+                <exclude>licenses/Apache-1.1</exclude>
+                <exclude>licenses/CDDL-1.0</exclude>
+                <exclude>licenses/CDDL-1.1</exclude>
+                <exclude>licenses/LatencyUtils-BSD-2-Clause</exclude>
+                <exclude>licenses/Python-2.0</exclude>
+                <exclude>licenses/abego-treelayout-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr-stringtemplate3-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr2-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr3-BSD</exclude>
+                <exclude>licenses/antlr4-BSD</exclude>
+                <exclude>licenses/antlr4-ST4-BSD</exclude>
+                <exclude>licenses/asm-BSD-3-Clause</exclude>
+                <exclude>licenses/dexx-collections-MIT</exclude>
+                <exclude>licenses/h2-MPL-2.0</exclude>
+                <exclude>licenses/hamcrest-BSD-3-Clause</exclude>
+                <exclude>licenses/icu4j-Unicode</exclude>
+                <exclude>licenses/jedis-MIT</exclude>
+                <exclude>licenses/junit4-EPL-1.0</exclude>
+                <exclude>licenses/kryo-BSD-3-Clause</exclude>
+                <exclude>licenses/lz4-BSD-2-Clause</exclude>
+                <exclude>licenses/minlog-BSD-3-Clause</exclude>
+                <exclude>licenses/mxparser-IUELSL</exclude>
+                <exclude>licenses/postgresql-BSD-2-Clause</exclude>
+                <exclude>licenses/reflectasm-BSD-3-Clause</exclude>
+                <exclude>licenses/reflections-BSD-3-Clause</exclude>
+                <exclude>licenses/xstream-BSD-3-Clause</exclude>
+                <exclude>licenses/zstd-jni-BSD-2-Clause</exclude>
+            </excludes>
             <outputDirectory>seata-namingserver/</outputDirectory>
         </fileSet>
 
         <fileSet>
             <includes>
-                <include>licenses/*</include>
+                <include>licenses/Apache-1.1</include>
+                <include>licenses/CDDL-1.0</include>
+                <include>licenses/CDDL-1.1</include>
+                <include>licenses/EPL-1.0</include>
+                <include>licenses/EPL-2.0</include>
+                <include>licenses/asm-BSD-3-Clause</include>
+                <include>licenses/checker-qual-MIT</include>
+                <include>licenses/dexx-collections-MIT</include>
+                <include>licenses/hamcrest-BSD-3-Clause</include>
+                <include>licenses/janino-BSD-3-Clause</include>
+                <include>licenses/jedis-MIT</include>
+                <include>licenses/jul-to-slf4j-MIT</include>
+                <include>licenses/junit4-EPL-1.0</include>
+                <include>licenses/kryo-BSD-3-Clause</include>
+                <include>licenses/minlog-BSD-3-Clause</include>
+                <include>licenses/mxparser-IUELSL</include>
+                <include>licenses/postgresql-BSD-2-Clause</include>
+                <include>licenses/protobuf-java-BSD-3-Clause</include>
+                <include>licenses/reflectasm-BSD-3-Clause</include>
+                <include>licenses/reflections-BSD-3-Clause</include>
+                <include>licenses/slf4j-api-MIT</include>
+                <include>licenses/xstream-BSD-3-Clause</include>
+                <include>licenses/zstd-jni-BSD-2-Clause</include>
             </includes>
             <outputDirectory>seata-server/</outputDirectory>
+        </fileSet>
+
+        <!-- The root LICENSE is the union of both component LICENSE files. -->
+        <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
+            <excludes>
+                <exclude>licenses/LatencyUtils-BSD-2-Clause</exclude>
+                <exclude>licenses/Python-2.0</exclude>
+                <exclude>licenses/abego-treelayout-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr-stringtemplate3-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr2-BSD-3-Clause</exclude>
+                <exclude>licenses/antlr3-BSD</exclude>
+                <exclude>licenses/antlr4-BSD</exclude>
+                <exclude>licenses/antlr4-ST4-BSD</exclude>
+                <exclude>licenses/h2-MPL-2.0</exclude>
+                <exclude>licenses/icu4j-Unicode</exclude>
+                <exclude>licenses/lz4-BSD-2-Clause</exclude>
+            </excludes>
         </fileSet>
 
         <fileSet>
@@ -118,11 +191,11 @@
         </file>
 
         <file>
-            <source>LICENSE</source>
+            <source>target/LICENSE</source>
             <destName>LICENSE</destName>
         </file>
         <file>
-            <source>NOTICE</source>
+            <source>target/NOTICE</source>
             <destName>NOTICE</destName>
         </file>
         <file>

@@ -253,3 +253,24 @@
 
    Font Awesome 4.5.0 (https://github.com/FortAwesome/Font-Awesome/tree/v4.5.0)
    CSS is licensed under the MIT License.
+
+   The following Google Roboto Font files are licensed under the Apache
+   License 2.0 (https://fonts.google.com/specimen/Roboto):
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-regular.ttf
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-regular.woff
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-regular.woff2
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.ttf
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.woff
+   console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.woff2
+
+   The following font files are bundled with @alicloud/console-components
+   and are licensed under the MIT License (see
+   distribution/licenses/alicloud-console-components-MIT):
+   console/src/main/resources/static/console-fe/public/css/fonts/aliyun-console-font.eot
+   console/src/main/resources/static/console-fe/public/css/fonts/aliyun-console-font.ttf
+   console/src/main/resources/static/console-fe/public/css/fonts/aliyun-console-font.woff
+
+   The following icon font files from iconfont.cn (Alibaba) are licensed
+   under the MIT License (https://www.iconfont.cn):
+   console/src/main/resources/static/console-fe/public/css/fonts/font_515771_emcns5054x3whfr.ttf
+   console/src/main/resources/static/console-fe/public/css/fonts/font_515771_emcns5054x3whfr.woff

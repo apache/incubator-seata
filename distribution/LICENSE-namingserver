@@ -207,23 +207,44 @@ notices and license terms. Your use of the source code for the these
 subcomponents is subject to the terms and conditions of the following
 licenses.
 
+The following Google Roboto Font files in
+seata-namingserver/lib/seata-console-2.7.0.jar!/static/css/fonts/ are
+licensed under the Apache License 2.0
+(https://fonts.google.com/specimen/Roboto):
+
+    roboto-regular.ttf
+    roboto-regular.woff
+    roboto-regular.woff2
+    roboto-bold.ttf
+    roboto-bold.woff
+    roboto-bold.woff2
+
+The following font files in
+seata-namingserver/lib/seata-console-2.7.0.jar!/static/css/fonts/ are
+bundled with @alicloud/console-components and are licensed under the
+MIT License. See:licenses/alicloud-console-components-MIT
+
+    aliyun-console-font.eot
+    aliyun-console-font.ttf
+    aliyun-console-font.woff
+
+The following icon font files in
+seata-namingserver/lib/seata-console-2.7.0.jar!/static/css/fonts/ are
+from iconfont.cn (Alibaba) and are licensed under the MIT License
+(https://www.iconfont.cn):
+
+    font_515771_emcns5054x3whfr.ttf
+    font_515771_emcns5054x3whfr.woff
+
 ========================================================================
 Apache-2.0 licenses
 ========================================================================
 
     Bootstrap v3.0.3 Apache-2.0
     com.github.ben-manes.caffeine:caffeine 3.2.1 Apache-2.0
-    commons-codec:commons-codec 1.18.0 Apache-2.0
     commons-io:commons-io 2.21.0 Apache-2.0
-    commons-lang:commons-lang 2.6 Apache-2.0
     org.apache.commons:commons-lang3 3.17.0 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
-    org.apache.httpcomponents:httpasyncclient 4.1.5 Apache-2.0
-    org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
-    org.apache.httpcomponents:httpcore 4.4.16 Apache-2.0
-    org.apache.httpcomponents:httpcore-nio 4.4.16 Apache-2.0
-    org.apache.httpcomponents.core5:httpcore5 5.3.4 Apache-2.0
-    org.apache.httpcomponents.core5:httpcore5-h2 5.3.4 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.19.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-core 2.19.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-databind 2.19.1 Apache-2.0
@@ -303,8 +324,6 @@ Apache-2.0 licenses
     org.apache.tomcat.embed:tomcat-embed-websocket 11.0.22 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-core 11.0.22 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-el 11.0.22 Apache-2.0
-    org.jetbrains.kotlin:kotlin-stdlib 1.9.25 Apache-2.0
-    org.jetbrains.kotlin:kotlin-stdlib-common 1.9.25 Apache-2.0
     io.micrometer:micrometer-core 1.15.1 Apache-2.0
     io.micrometer:micrometer-jakarta9 1.15.1 Apache-2.0
     io.micrometer:micrometer-observation 1.15.1 Apache-2.0
@@ -323,16 +342,18 @@ Apache-2.0 licenses
     com.github.victools:jsonschema-module-jackson 4.38.0 Apache-2.0
     com.github.victools:jsonschema-generator 4.38.0 Apache-2.0
     org.springaicommunity:mcp-annotations 0.7.0 Apache-2.0
-    org.jetbrains:annotations 13.0 Apache-2.0
     com.fasterxml:classmate 1.7.0 Apache-2.0
     javax.validation:validation-api 2.0.1.Final Apache-2.0
     com.github.victools:jsonschema-module-swagger-2 4.38.0 Apache-2.0
     io.swagger.core.v3:swagger-annotations-jakarta 2.2.30 Apache-2.0
-    org.apache.httpcomponents.client5:httpclient5 5.4.3 Apache-2.0
     io.projectreactor:reactor-core 3.7.7 Apache-2.0
-    com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
     com.networknt:json-schema-validator 2.0.0 Apache-2.0
-    com.squareup.okio:okio 2.8.0 Apache-2.0
+
+========================================================================
+0BSD licenses
+========================================================================
+
+    tslib 2.8.1 0BSD see:licenses/tslib-OBSD
 
 ========================================================================
 BSD-2-Clause licenses
@@ -400,12 +421,6 @@ BSD-3-Clause licenses
     node-forge 1.3.3 BSD-3-Clause see:licenses/node-forge-BSD-3-Clause
 
 ========================================================================
-CDDL-1.1 licenses
-========================================================================
-
-    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.1 see:licenses/CDDL-1.1
-
-========================================================================
 EPL-1.0  licenses
 ========================================================================
 
@@ -431,7 +446,7 @@ MIT licenses
     io.modelcontextprotocol.sdk:mcp-core 0.16.0  MIT see:licenses/mcp-core-MIT
     io.modelcontextprotocol.sdk:mcp-json 0.16.0  MIT see:licenses/mcp-json-MIT
     io.modelcontextprotocol.sdk:mcp-spring-webmvc 0.16.0  MIT see:licenses/mcp-spring-webmvc-MIT
-    io.modelcontextprotocol.sdk:mcp-json-jackson2 0.16.0  MIT see:licenses/mcp-json-jackson-MIT
+    io.modelcontextprotocol.sdk:mcp-json-jackson2 0.16.0  MIT see:licenses/mcp-json-jackson2-MIT
     com.knuddels:jtokkit 1.1.0  MIT see:licenses/jtokkit-MIT
     org.reactivestreams:reactive-streams 1.0.4  MIT see:licenses/reactive-streams-MIT
 
