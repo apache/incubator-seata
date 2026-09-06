@@ -37,9 +37,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -48,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
@@ -1140,6 +1144,37 @@ public class NettyRemotingClientBehaviorTest {
     }
 
     @Test
+    public void testReconnectSchedulerSharedWithIndependentClients() throws Exception {
+        clearReconnectState();
+        TestNettyRemotingClient firstClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        TestNettyRemotingClient secondClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+
+        try {
+            firstClient.init();
+            assertEquals(1, reconnectClients().size());
+            ScheduledFuture<?> firstFuture = reconnectFuture();
+            assertNotNull(firstFuture);
+
+            secondClient.init();
+            assertEquals(2, reconnectClients().size());
+            assertSame(firstFuture, reconnectFuture());
+
+            secondClient.destroy();
+            assertEquals(1, reconnectClients().size());
+            assertSame(firstFuture, reconnectFuture());
+            assertFalse(firstFuture.isCancelled());
+
+            firstClient.destroy();
+            assertTrue(reconnectClients().isEmpty());
+            assertNull(reconnectFuture());
+        } finally {
+            secondClient.destroy();
+            firstClient.destroy();
+            clearReconnectState();
+        }
+    }
+
+    @Test
     public void testInitWithReconnectException() throws Exception {
         // Create a client that will throw exception during reconnect
         TestNettyRemotingClientWithReconnectException clientWithException =
@@ -1558,5 +1593,30 @@ public class NettyRemotingClientBehaviorTest {
         public NettyClientChannelManager getClientChannelManager() {
             return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Set<AbstractNettyRemotingClient> reconnectClients() throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("RECONNECT_CLIENTS");
+        field.setAccessible(true);
+        return (Set<AbstractNettyRemotingClient>) field.get(null);
+    }
+
+    private static ScheduledFuture<?> reconnectFuture() throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("reconnectFuture");
+        field.setAccessible(true);
+        return (ScheduledFuture<?>) field.get(null);
+    }
+
+    private static void clearReconnectState() throws Exception {
+        ScheduledFuture<?> future = reconnectFuture();
+        if (future != null) {
+            future.cancel(true);
+        }
+        reconnectClients().clear();
+
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("reconnectFuture");
+        field.setAccessible(true);
+        field.set(null, null);
     }
 }
