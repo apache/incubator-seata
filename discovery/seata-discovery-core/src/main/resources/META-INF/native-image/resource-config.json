@@ -1,0 +1,171 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/seata/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.discovery.loadbalance.LoadBalance\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.discovery.registry.RegistryProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alibaba.nacos.common.notify.EventPublisher\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.sun.jersey.client.proxy.ViewProxyProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.sun.jersey.spi.HeaderDelegateProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.sun.jersey.spi.inject.InjectableProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.chrono.AbstractChronology\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.chrono.Chronology\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.ws.rs.ext.MessageBodyReader\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.ws.rs.ext.MessageBodyWriter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.ws.rs.ext.RuntimeDelegate\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/javax.xml.datatype.DatatypeFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/jersey-client-components\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.commons.logging.LogFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.discovery.loadbalance.LoadBalance\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.discovery.registry.RegistryProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.assertj.core.presentation.Representation\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.engine.TestEngine\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherDiscoveryListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherSessionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.PostDiscoveryFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.TestExecutionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/spring.components\\E"
+  }, {
+    "pattern":"\\Q\\E"
+  }, {
+    "pattern":"\\Qapplication.conf\\E"
+  }, {
+    "pattern":"\\Qapplication.json\\E"
+  }, {
+    "pattern":"\\Qapplication.properties\\E"
+  }, {
+    "pattern":"\\Qcom/netflix/config/sources/config.properties\\E"
+  }, {
+    "pattern":"\\Qcom/netflix/discovery/util/DiscoveryBuildInfo.class\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jersey/spi/service/ServiceFinder.class\\E"
+  }, {
+    "pattern":"\\Qcommons-logging.properties\\E"
+  }, {
+    "pattern":"\\Qconfig.properties\\E"
+  }, {
+    "pattern":"\\Qeureka-client.properties\\E"
+  }, {
+    "pattern":"\\Qfile.conf.conf\\E"
+  }, {
+    "pattern":"\\Qfile.conf.properties\\E"
+  }, {
+    "pattern":"\\Qfile.conf.yml\\E"
+  }, {
+    "pattern":"\\Qfile.conf\\E"
+  }, {
+    "pattern":"\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }, {
+    "pattern":"\\Qjunit-platform.properties\\E"
+  }, {
+    "pattern":"\\Qlogback-test.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback-test.xml\\E"
+  }, {
+    "pattern":"\\Qlogback.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback.xml\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.AnnotationEngine\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.DoNotMockEnforcer\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.InstantiatorProvider2\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MemberAccessor\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockMaker\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockResolver\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockitoLogger\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.PluginSwitch\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.StackTraceCleanerProvider\\E"
+  }, {
+    "pattern":"\\Qmozilla/public-suffix-list.txt\\E"
+  }, {
+    "pattern":"\\Qnacos-version.txt\\E"
+  }, {
+    "pattern":"\\Qorg/apache/http/client/version.properties\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForEquals.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForHashCode.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForStatic.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/inject/MockMethodDispatcher.raw\\E"
+  }, {
+    "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+  }, {
+    "pattern":"\\Qreference.conf\\E"
+  }, {
+    "pattern":"\\Qregistry.conf\\E"
+  }, {
+    "pattern":"\\Qspring.properties\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/util/currency.data\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+  }, {
+    "pattern":"jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
+  }]},
+  "bundles":[]
+}

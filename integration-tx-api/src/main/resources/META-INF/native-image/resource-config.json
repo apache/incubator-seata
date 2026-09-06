@@ -1,0 +1,103 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/seata/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.context.ContextCore\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.model.TransactionManager\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.integration.tx.api.interceptor.parser.TargetClassParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.integration.tx.api.remoting.RemotingParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.context.ContextCore\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.model.TransactionManager\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.integration.tx.api.interceptor.parser.TargetClassParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.integration.tx.api.remoting.RemotingParser\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.assertj.core.presentation.Representation\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.engine.TestEngine\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherDiscoveryListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherSessionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.PostDiscoveryFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.TestExecutionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\Q\\E"
+  }, {
+    "pattern":"\\Qfile.conf\\E"
+  }, {
+    "pattern":"\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }, {
+    "pattern":"\\Qjunit-platform.properties\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.AnnotationEngine\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.DoNotMockEnforcer\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.InstantiatorProvider2\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MemberAccessor\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockMaker\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockResolver\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockitoLogger\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.PluginSwitch\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.StackTraceCleanerProvider\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForEquals.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForHashCode.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForStatic.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/inject/MockMethodDispatcher.raw\\E"
+  }, {
+    "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+  }, {
+    "pattern":"\\Qreference.conf\\E"
+  }, {
+    "pattern":"\\Qregistry.conf\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }]},
+  "bundles":[]
+}
