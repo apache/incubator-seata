@@ -26,10 +26,10 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-threadpool-loom</artifactId>
+    <artifactId>seata-spi-jdk21</artifactId>
     <packaging>jar</packaging>
-    <name>seata-threadpool-loom ${project.version}</name>
-    <description>Loom-backed thread pool provider for Seata managed thread pools</description>
+    <name>seata-spi-jdk21 ${project.version}</name>
+    <description>JDK 21+ SPI extensions for Seata (virtual thread pool provider)</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -39,8 +39,14 @@
     <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
-            <artifactId>seata-threadpool</artifactId>
+            <artifactId>seata-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

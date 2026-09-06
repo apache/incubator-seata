@@ -17,7 +17,7 @@
 package org.apache.seata.common.json;
 
 /**
- * Minimal JSON codec SPI for common module code that cannot depend on json-common-core.
+ * Minimal JSON codec SPI for common module code that cannot depend on seata-core.
  */
 public interface JsonCodec {
 

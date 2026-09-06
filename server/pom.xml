@@ -491,7 +491,7 @@
             <dependencies>
                 <dependency>
                     <groupId>${project.groupId}</groupId>
-                    <artifactId>seata-threadpool-loom</artifactId>
+                    <artifactId>seata-spi-jdk21</artifactId>
                     <version>${project.version}</version>
                 </dependency>
             </dependencies>

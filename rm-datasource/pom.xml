@@ -159,10 +159,5 @@
             <artifactId>oscarJDBC8</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>json-common-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 </project>

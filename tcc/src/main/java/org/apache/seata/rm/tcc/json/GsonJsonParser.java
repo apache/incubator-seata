@@ -22,7 +22,7 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.integration.tx.api.json.JsonParser;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.impl.GsonJsonSerializer} in json-common-core module instead.
+ * @deprecated use {@link org.apache.seata.common.json.impl.GsonJsonSerializer} in seata-common module instead.
  */
 @Deprecated
 @LoadLevel(name = Constants.GSON_JSON_PARSER_NAME)

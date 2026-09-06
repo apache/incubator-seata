@@ -28,7 +28,7 @@ import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
+import org.apache.seata.common.thread.PlatformThreadPoolProvider;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -104,13 +104,16 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-        executorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                "registry-etcd3",
-                THREAD_POOL_SIZE,
-                THREAD_POOL_SIZE,
-                Integer.MAX_VALUE,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+        executorService = new PlatformThreadPoolProvider()
+                .newThreadPoolExecutor(
+                        "registry-etcd3",
+                        THREAD_POOL_SIZE,
+                        THREAD_POOL_SIZE,
+                        Integer.MAX_VALUE,
+                        TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(),
+                        true,
+                        new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     }
 
     /**

@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in json-common-core module instead.
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in seata-common module instead.
  */
 @Deprecated
 public class JsonParserFactory {
