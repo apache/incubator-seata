@@ -28,6 +28,8 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.exception.BranchTransactionException;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.rpc.processor.Pair;
+import org.apache.seata.metrics.registry.Registry;
+import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.rm.datasource.ConnectionContext;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
@@ -47,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
@@ -130,6 +133,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
+        long start = System.nanoTime();
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
                 PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
@@ -144,6 +148,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
+        } finally {
+            Registry registry = getRegistry();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                        .increase(1);
+            }
         }
     }
 
@@ -159,6 +171,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
+        long start = System.nanoTime();
+        int totalDeleteRows = 0;
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -178,6 +192,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 paramsIndex++;
             }
             int deleteRows = deletePST.executeUpdate();
+            totalDeleteRows += deleteRows;
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
@@ -190,6 +205,16 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
+        } finally {
+            Registry registry = getRegistry();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                if (totalDeleteRows > 0) {
+                    registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                            .increase(totalDeleteRows);
+                }
+            }
         }
     }
 
@@ -300,6 +325,10 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         String rollbackCtx =
                 buildContext(parser.getName(), compressorType, UndoLogConstants.MAX_ALLOWED_PACKET, maxAllowedPacket);
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
+        Registry registry = getRegistry();
+        if (registry != null) {
+            registry.getSummary(UndoLogConstants.SUMMARY_UNDO_LOG_SIZE).increase(undoLogContent.length);
+        }
     }
 
     /**
@@ -585,5 +614,20 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     protected String getCheckUndoLogTableExistSql() {
         return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
+    }
+
+    /**
+     * Get the metrics registry instance.
+     * This method is protected to allow testing with Mockito spy.
+     *
+     * @return the Registry instance, or null if metrics are not enabled
+     */
+    protected Registry getRegistry() {
+        try {
+            return RegistryFactory.getInstance();
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to get metrics registry: {}", t.getMessage());
+            return null;
+        }
     }
 }
