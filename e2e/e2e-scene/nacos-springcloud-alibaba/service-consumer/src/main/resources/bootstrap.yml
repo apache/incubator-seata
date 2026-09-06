@@ -1,0 +1,29 @@
+spring:
+  enabled: true
+  application-id: consumer-service
+#    tx-service-group: test
+  application:
+    name: consumer-service
+    main:
+      allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos-server:8848
+        username: "nacos"
+        password: "nacos"
+      config:
+#        server-addr: nacos-server:8848
+#        username: "nacos"
+#        password: "nacos"
+        enabled: false
+
+server:
+  port: 8081
+ribbon:
+  ConnectTimeout: 100000
+  ReadTimeout: 1000000
+  OkToRetryOnAllOperations: false
+feign:
+  sentinel:
+    enabled: true

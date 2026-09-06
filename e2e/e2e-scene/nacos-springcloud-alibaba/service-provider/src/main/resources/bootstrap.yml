@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://db-mysql:3306/storage?useUnicode=true&characterEncoding=UTF-8&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    max-wait: 60000
+    max-active: 100
+    min-idle: 10
+    initial-size: 10
+
+  application:
+    name: provider-service
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    nacos:
+      discovery:
+        server-addr: nacos-server:8848
+        username: "nacos"
+        password: "nacos"
+      config:
+        enabled: false
+        server-addr: nacos-server:8848
+        username: "nacos"
+        password: "nacos"
+
+mybatis-plus:
+  mapper-locations: classpath:**/*Mapper.xml
+
+server:
+  port: 8080
