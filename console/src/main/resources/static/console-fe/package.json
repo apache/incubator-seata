@@ -92,7 +92,7 @@
     "flatted": "3.4.2",
     "swiper": "12.1.2",
     "node-fetch": "2.7.0",
-    "nanoid": "3.3.8",
+    "nanoid": "3.3.18",
     "ip": "2.0.1",
     "sha.js": "2.4.12",
     "cipher-base": "1.0.6",
@@ -102,16 +102,17 @@
     "serialize-javascript": "6.0.2",
     "node-forge": "1.4.0",
     "min-document": "^2.19.1",
-    "js-yaml": "^3.14.2",
+    "js-yaml": "^3.15.1",
     "qs": "^6.14.2",
     "tar": "7.5.11",
     "minimatch": "^3.1.4",
-    "svgo": "^3.3.3",
-    "brace-expansion": "^1.1.13",
+    "svgo": "^3.3.4",
+    "brace-expansion": "^1.1.16",
     "bn.js": "^4.12.3",
     "picomatch": "^4.0.4",
     "yaml": "^1.10.3",
     "@tootallnate/once": "^3.0.1",
-    "@peculiar/x509": "1.12.4"
+    "@peculiar/x509": "1.12.4",
+    "uuid": "11.1.1"
   }
 }
