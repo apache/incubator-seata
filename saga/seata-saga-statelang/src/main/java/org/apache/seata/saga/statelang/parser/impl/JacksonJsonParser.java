@@ -16,18 +16,9 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.saga.statelang.parser.JsonParser;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * JsonParser implement by Jackson
@@ -38,18 +29,6 @@ import java.util.List;
 @LoadLevel(name = JacksonJsonParser.NAME)
 public class JacksonJsonParser implements JsonParser {
 
-    private final ObjectMapper objectMapperWithAutoType = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")
-            .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
-            .setSerializationInclusion(Include.NON_NULL);
-
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .disableDefaultTyping()
-            .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
-            .setSerializationInclusion(Include.NON_NULL);
-
     public static final String NAME = "jackson";
 
     @Override
@@ -59,54 +38,21 @@ public class JacksonJsonParser implements JsonParser {
 
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
-        return toJsonString(o, false, prettyPrint);
+        return JsonUtil.toJSONString(o, false, prettyPrint);
     }
 
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return JsonUtil.useAutoType(json);
     }
 
     @Override
     public String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint) {
-        try {
-            if (o instanceof List && ((List) o).isEmpty()) {
-                return "[]";
-            }
-            if (prettyPrint) {
-                if (ignoreAutoType) {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
-                } else {
-                    return objectMapperWithAutoType
-                            .writerWithDefaultPrettyPrinter()
-                            .writeValueAsString(o);
-                }
-
-            } else {
-                if (ignoreAutoType) {
-                    return objectMapper.writeValueAsString(o);
-                } else {
-                    return objectMapperWithAutoType.writeValueAsString(o);
-                }
-            }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Parse object to json error", e);
-        }
+        return JsonUtil.toJSONString(o, ignoreAutoType, prettyPrint);
     }
 
     @Override
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
-        try {
-            if ("[]".equals(json)) {
-                return (T) (new ArrayList(0));
-            }
-            if (ignoreAutoType) {
-                return objectMapper.readValue(json, type);
-            } else {
-                return objectMapperWithAutoType.readValue(json, type);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Parse json to object error", e);
-        }
+        return JsonUtil.parseObject(json, type, ignoreAutoType);
     }
 }

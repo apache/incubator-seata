@@ -22,6 +22,14 @@ import org.junit.jupiter.api.Test;
 class SingleResultTest {
 
     @Test
+    void testNoArgConstructor() {
+        SingleResult<String> result = new SingleResult<>();
+        Assertions.assertEquals(SingleResult.SUCCESS_CODE, result.getCode());
+        Assertions.assertEquals(SingleResult.SUCCESS_MSG, result.getMessage());
+        Assertions.assertNull(result.getData());
+    }
+
+    @Test
     void testConstructor() {
         SingleResult<String> result = new SingleResult<>("200", "OK", "Data");
         Assertions.assertEquals("200", result.getCode());

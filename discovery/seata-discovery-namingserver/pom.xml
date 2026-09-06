@@ -47,6 +47,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>

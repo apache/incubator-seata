@@ -16,10 +16,8 @@
  */
 package org.apache.seata.integration.tx.api.util;
 
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.integration.tx.api.json.JsonParserFactory;
 
 import java.util.Objects;
@@ -30,10 +28,7 @@ import java.util.Objects;
 @Deprecated
 public class JsonUtil {
 
-    private static final String CONFIG_JSON_PARSER_NAME = ConfigurationFactory.getInstance()
-            .getConfig(
-                    ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
-                    DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+    private static final String CONFIG_JSON_PARSER_NAME = DefaultValues.BUSINESS_ACTION_CONTEXT_JSON_PARSER;
 
     public static String toJSONString(Object object) {
         return JsonParserFactory.getInstance(CONFIG_JSON_PARSER_NAME).toJSONString(object);

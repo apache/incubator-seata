@@ -17,11 +17,19 @@
 package org.apache.seata.serializer.fastjson2;
 
 import com.alibaba.fastjson2.JSONB;
+import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.json.Fastjson2ObjectReaderWarmup;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 
 @LoadLevel(name = "FASTJSON2")
-public class Fastjson2Serializer implements Serializer {
+public class Fastjson2Serializer implements Serializer, Initialize {
+
+    @Override
+    public void init() {
+        Fastjson2ObjectReaderWarmup.warmup(SerializerSecurityRegistry.getAllowClassType());
+    }
 
     @Override
     public <T> byte[] serialize(T t) {

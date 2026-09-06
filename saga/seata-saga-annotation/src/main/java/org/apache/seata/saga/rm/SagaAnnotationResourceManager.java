@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.rm;
 
+import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
@@ -23,12 +24,15 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
+import org.apache.seata.integration.tx.api.fence.hook.TccHook;
+import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
 import org.apache.seata.rm.AbstractResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -100,11 +104,44 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
                     String.format("SagaAnnotation resource is not available, resourceId: %s", resourceId));
         }
 
+        BusinessActionContext businessActionContext = null;
         try {
-            BusinessActionContext businessActionContext =
+            businessActionContext =
                     BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId, applicationData);
+            businessActionContext.setBranchType(branchType);
             Object[] args = this.getTwoPhaseRollbackArgs(resource, businessActionContext);
             BusinessActionContextUtil.setContext(businessActionContext);
+
+            // Anti-suspension & empty-rollback: decide whether to compensate based on the phase-one action status
+            // reported by ActionInterceptorHandler. When action status report is disabled, getActionStatus() returns
+            // null and compensation runs unconditionally (legacy behavior).
+            String actionStatus = businessActionContext.getActionStatus();
+            if (Constants.ACTION_STATUS_RUNNING.equals(actionStatus)) {
+                // phase one is still in progress (suspension); retry rollback later
+                LOGGER.info(
+                        "SagaAnnotation rollback retry for phase one still running, xid: {}, branchId: {}, resourceId: {}",
+                        xid,
+                        branchId,
+                        resourceId);
+                return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+            }
+            if (Constants.ACTION_STATUS_NONE.equals(actionStatus)
+                    || Constants.ACTION_STATUS_FAILED.equals(actionStatus)) {
+                // empty rollback: phase one never completed successfully, skip compensation
+                LOGGER.info(
+                        "SagaAnnotation empty rollback, actionStatus: {}, xid: {}, branchId: {}, resourceId: {}",
+                        actionStatus,
+                        xid,
+                        branchId,
+                        resourceId);
+                return BranchStatus.PhaseTwo_Rollbacked;
+            }
+
+            if (!doBeforeSagaAnnotationRollback(xid, branchId, resource.getActionName(), businessActionContext)) {
+                // before-rollback hook failed (e.g. tenant/datasource context switch failed);
+                // retry to avoid compensating against the wrong context
+                return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+            }
 
             boolean result;
             Object ret = compensationMethod.invoke(targetBean, args);
@@ -131,6 +168,7 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
             LOGGER.error(msg, ExceptionUtil.unwrap(t));
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } finally {
+            doAfterSagaAnnotationRollback(xid, branchId, resource.getActionName(), businessActionContext);
             BusinessActionContextUtil.clear();
         }
     }
@@ -163,5 +201,52 @@ public class SagaAnnotationResourceManager extends AbstractResourceManager {
             }
         }
         return args;
+    }
+
+    /**
+     * to do some business operations before saga annotation rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private boolean doBeforeSagaAnnotationRollback(
+            String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return true;
+        }
+        boolean allSuccess = true;
+        for (TccHook hook : hooks) {
+            try {
+                hook.beforeTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                allSuccess = false;
+                LOGGER.error("Failed execute beforeTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
+        return allSuccess;
+    }
+
+    /**
+     * to do some business operations after saga annotation rollback
+     * @param xid          the xid
+     * @param branchId     the branchId
+     * @param actionName   the actionName
+     * @param context      the business action context
+     */
+    private void doAfterSagaAnnotationRollback(
+            String xid, long branchId, String actionName, BusinessActionContext context) {
+        List<TccHook> hooks = TccHookManager.getHooks();
+        if (hooks.isEmpty()) {
+            return;
+        }
+        for (TccHook hook : hooks) {
+            try {
+                hook.afterTccRollback(xid, branchId, actionName, context);
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterTccRollback in hook {}", e.getMessage(), e);
+            }
+        }
     }
 }
