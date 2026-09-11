@@ -245,6 +245,7 @@ public class ChannelManager {
         if (IDENTIFIED_CHANNELS.containsKey(channel)) {
             RpcContext rpcContext = getContextFromIdentified(channel);
             rpcContext.release();
+            IDENTIFIED_CHANNELS.remove(channel);
         }
     }
 

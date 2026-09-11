@@ -21,6 +21,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.rpc.ChannelManager;
 import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -32,6 +33,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+
+import static io.seata.core.rpc.ChannelManager.releaseRpcContext;
 
 /**
  * Netty client pool manager.
@@ -143,6 +146,7 @@ class NettyClientChannelManager {
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
+                ChannelManager.releaseRpcContext(channel);
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {

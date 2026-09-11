@@ -29,6 +29,7 @@ import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /**
  * The type rpc context.
  *
@@ -74,6 +75,7 @@ public class RpcContext {
     public void release() {
         Integer clientPort = getClientPortFromChannel(channel);
         if (clientIDHolderMap != null) {
+            clientIDHolderMap.remove(channel);
             clientIDHolderMap = null;
         }
         if (clientRole == NettyPoolKey.TransactionRole.TMROLE && clientTMHolderMap != null) {
@@ -89,6 +91,7 @@ public class RpcContext {
         if (null != resourceSets) {
             resourceSets.clear();
         }
+
     }
 
     /**

@@ -34,12 +34,15 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.core.rpc.ChannelManager.releaseRpcContext;
 
 /**
  * The type Rpc remoting server.
@@ -188,6 +191,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("will destroy channel:{},address:{}", channel, serverAddress);
         }
+        ChannelManager.releaseRpcContext(channel);
         channel.disconnect();
         channel.close();
     }

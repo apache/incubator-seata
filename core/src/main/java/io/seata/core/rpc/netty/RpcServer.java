@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
+import static io.seata.core.rpc.ChannelManager.releaseRpcContext;
+
 /**
  * The type Abstract rpc server.
  *
@@ -135,6 +137,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("closeChannelHandlerContext channel:" + ctx.channel());
         }
+        ChannelManager.releaseRpcContext(ctx.channel());
         ctx.disconnect();
         ctx.close();
     }
@@ -334,6 +337,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         }
         if (null != rpcContext && null != rpcContext.getClientRole()) {
             rpcContext.release();
+            ChannelManager.releaseRpcContext(ctx.channel());
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);
             }
@@ -380,7 +384,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("channel exx:" + cause.getMessage() + ",channel:" + ctx.channel());
         }
-        ChannelManager.releaseRpcContext(ctx.channel());
+        releaseRpcContext(ctx.channel());
         super.exceptionCaught(ctx, cause);
     }
 }
