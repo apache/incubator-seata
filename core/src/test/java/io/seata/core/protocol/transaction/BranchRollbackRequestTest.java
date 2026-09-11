@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/04/16
+ * @author: slievrly
  */
 public class BranchRollbackRequestTest {
     @Test
@@ -35,8 +34,7 @@ public class BranchRollbackRequestTest {
         branchRollbackRequest.setResourceId("resource1");
         branchRollbackRequest.setApplicationData("app1");
 
-        Assertions.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
-            + "resourceId=resource1,applicationData=app1", branchRollbackRequest.toString());
+        Assertions.assertEquals("BranchRollbackRequest{xid='127.0.0.1:9999:39875642', branchId=1, branchType=AT, resourceId='resource1', applicationData='app1'}", branchRollbackRequest.toString());
 
     }
 

@@ -1,0 +1,17 @@
+replicaCount: 1
+
+namespace: default
+
+image:
+  repository: seataio/seata-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 30091
+
+env:
+  seataPort: "8091"
+  storeMode: "file"
+  serverNode: "1"

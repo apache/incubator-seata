@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcConstants;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
- * @date 2019/4/19
  */
 public class UndoLogManagerTest {
 
@@ -88,5 +87,4 @@ public class UndoLogManagerTest {
         AbstractUndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
         assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
-
 }

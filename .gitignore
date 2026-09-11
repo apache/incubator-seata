@@ -26,10 +26,16 @@ dependency-reduced-pom.xml
 *.diff
 *.patch
 *.tmp
-/distribution/bin
-/distribution/conf
-/distribution/lib
-/distribution/logs
+/distribution/bin/
+/distribution/conf/
+/distribution/lib/
+/distribution/ext/
+/distribution/logs/
+/distribution/*/bin/
+/distribution/*/conf/
+/distribution/*/lib/
+/distribution/*/logs/
+/distribution/*/ext/
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
@@ -37,6 +43,8 @@ dependency-reduced-pom.xml
 /sessionStore/
 /test/sessionStore/
 /distribution/sessionStore/
+/distribution/*/sessionStore/
+/file_store/
 
 # system ignore
 .DS_Store

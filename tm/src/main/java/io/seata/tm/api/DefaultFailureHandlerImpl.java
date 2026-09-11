@@ -17,20 +17,21 @@ package io.seata.tm.api;
 
 import java.util.concurrent.TimeUnit;
 
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.logger.StackTraceLogger;
+import io.seata.core.model.GlobalStatus;
+
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * The type Default failure handler.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/8
+ * @author slievrly
  */
 public class DefaultFailureHandlerImpl implements FailureHandler {
 
@@ -63,9 +64,16 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     }
 
     @Override
-    public void onRollbackFailure(GlobalTransaction tx, Throwable cause) {
-        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
+    public void onRollbackFailure(GlobalTransaction tx, Throwable originalException) {
+        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", originalException);
         timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onRollbacking(GlobalTransaction tx, Throwable originalException) {
+        StackTraceLogger.warn(LOGGER, originalException, "Retrying to rollback transaction[{}]", new String[] {tx.getXid()});
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.RollbackRetrying), SCHEDULE_INTERVAL_SECONDS,
+            TimeUnit.SECONDS);
     }
 
     protected class CheckTimerTask implements TimerTask {
@@ -87,9 +95,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
         public void run(Timeout timeout) throws Exception {
             if (!isStopped) {
                 if (++count > RETRY_MAX_TIMES) {
-                    LOGGER.error(
-                        "transaction[" + tx.getXid() + "] retry fetch status times exceed the limit [" + RETRY_MAX_TIMES
-                            + " times]");
+                    LOGGER.error("transaction [{}] retry fetch status times exceed the limit [{} times]", tx.getXid(), RETRY_MAX_TIMES);
                     return;
                 }
                 isStopped = shouldStop(tx, required);
@@ -101,7 +107,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     private boolean shouldStop(final GlobalTransaction tx, GlobalStatus required) {
         try {
             GlobalStatus status = tx.getStatus();
-            LOGGER.info("transaction[" + tx.getXid() + "] current status is [" + status + "]");
+            LOGGER.info("transaction [{}] current status is [{}]", tx.getXid(), status);
             if (status == required || status == GlobalStatus.Finished) {
                 return true;
             }

@@ -29,13 +29,16 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+
 /**
  * The type Load balance factory test.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/12
+ * @author slievrly
  */
 public class LoadBalanceFactoryTest {
+
+    private static final String XID = "XID";
 
     /**
      * Test get registry.
@@ -53,8 +56,8 @@ public class LoadBalanceFactoryTest {
         InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
         registryService.register(address1);
         registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        List<InetSocketAddress> addressList = registryService.lookup(DEFAULT_TX_GROUP);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertNotNull(balanceAddress);
     }
 
@@ -89,12 +92,12 @@ public class LoadBalanceFactoryTest {
         InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
         registryService.register(address1);
         registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        List<InetSocketAddress> addressList = registryService.lookup(DEFAULT_TX_GROUP);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertNotNull(balanceAddress);
         //wait trigger testUnRegistry
         TimeUnit.SECONDS.sleep(30);
-        List<InetSocketAddress> addressList1 = registryService.lookup("my_test_tx_group");
+        List<InetSocketAddress> addressList1 = registryService.lookup(DEFAULT_TX_GROUP);
         Assertions.assertEquals(1, addressList1.size());
     }
 
@@ -111,7 +114,7 @@ public class LoadBalanceFactoryTest {
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         List<InetSocketAddress> addressList = new ArrayList<>();
         addressList.add(address);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
+        InetSocketAddress balanceAddress = loadBalance.select(addressList, XID);
         Assertions.assertEquals(address, balanceAddress);
     }
 

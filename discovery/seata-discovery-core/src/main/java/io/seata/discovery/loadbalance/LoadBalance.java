@@ -20,8 +20,7 @@ import java.util.List;
 /**
  * The interface Load balance.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/12
+ * @author slievrly
  */
 public interface LoadBalance {
 
@@ -30,8 +29,9 @@ public interface LoadBalance {
      *
      * @param <T>      the type parameter
      * @param invokers the invokers
+     * @param xid      the xid
      * @return the t
      * @throws Exception the exception
      */
-    <T> T select(List<T> invokers) throws Exception;
+    <T> T select(List<T> invokers, String xid) throws Exception;
 }

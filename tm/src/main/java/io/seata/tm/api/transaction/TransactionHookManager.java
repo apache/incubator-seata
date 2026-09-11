@@ -21,17 +21,20 @@ import java.util.List;
 
 /**
  * @author guoyao
- * @date 2019/3/4
  */
 public final class TransactionHookManager {
+
+    private TransactionHookManager() {
+
+    }
 
     private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
 
     /**
      * get the current hooks
      *
-     * @return
-     * @throws IllegalStateException
+     * @return TransactionHook list
+     * @throws IllegalStateException IllegalStateException
      */
     public static List<TransactionHook> getHooks() throws IllegalStateException {
         List<TransactionHook> hooks = LOCAL_HOOKS.get();
@@ -45,7 +48,7 @@ public final class TransactionHookManager {
     /**
      * add new hook
      *
-     * @param transactionHook
+     * @param transactionHook transactionHook
      */
     public static void registerHook(TransactionHook transactionHook) {
         if (transactionHook == null) {

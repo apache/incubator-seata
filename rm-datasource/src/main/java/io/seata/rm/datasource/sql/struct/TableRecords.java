@@ -15,26 +15,44 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.JDBCType;
+import java.sql.NClob;
+import java.sql.Ref;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Set;
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
+import javax.sql.rowset.serial.SerialJavaObject;
+import javax.sql.rowset.serial.SerialRef;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.exception.TableMetaException;
+import io.seata.rm.datasource.sql.serial.SerialArray;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.TableMeta;
+
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
+import static io.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.convertOffSetTime;
+import static io.seata.rm.datasource.util.OffsetTimeUtils.timeToOffsetDateTime;
 
 /**
  * The type Table records.
  *
  * @author sharajava
  */
-public class TableRecords {
+public class TableRecords implements java.io.Serializable {
+
+    private static final long serialVersionUID = 4441667803166771721L;
 
     private transient TableMeta tableMeta;
 
@@ -101,7 +119,7 @@ public class TableRecords {
      */
     public void setTableMeta(TableMeta tableMeta) {
         if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
+            throw new ShouldNeverHappenException("tableMeta has already been set");
         }
         this.tableMeta = tableMeta;
         this.tableName = tableMeta.getTableName();
@@ -128,19 +146,20 @@ public class TableRecords {
     /**
      * Pk rows list.
      *
-     * @return the list
+     * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
      */
-    public List<Field> pkRows() {
-        final String pkName = getTableMeta().getPkName();
-        List<Field> pkRows = new ArrayList<>();
+    public List<Map<String,Field>> pkRows() {
+        final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
+        List<Map<String,Field>> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
+            Map<String,Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
-                if (field.getName().equalsIgnoreCase(pkName)) {
-                    pkRows.add(field);
-                    break;
+                if (primaryKeyMap.containsKey(field.getName())) {
+                    rowMap.put(field.getName(),field);
                 }
             }
+            pkRows.add(rowMap);
         }
         return pkRows;
     }
@@ -175,34 +194,63 @@ public class TableRecords {
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        Set<String> ignoreCasePKs = tmeta.getCaseInsensitivePKs();
         int columnCount = resultSetMetaData.getColumnCount();
 
         while (resultSet.next()) {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = tmeta.getColumnMeta(colName);
+                ColumnMeta col = getColumnMeta(tmeta,colName);
+                int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
-                    field.setKeyType(KeyType.PrimaryKey);
+                if (ignoreCasePKs.contains(colName)) {
+                    field.setKeyType(KeyType.PRIMARY_KEY);
                 }
-                field.setType(col.getDataType());
+                field.setType(dataType);
                 // mysql will not run in this code
                 // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
-                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                if (dataType == Types.BLOB) {
                     Blob blob = resultSet.getBlob(i);
                     if (blob != null) {
                         field.setValue(new SerialBlob(blob));
                     }
-
-                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                } else if (dataType == Types.CLOB) {
                     Clob clob = resultSet.getClob(i);
-                    if (clob != null){
+                    if (clob != null) {
                         field.setValue(new SerialClob(clob));
                     }
+                } else if (dataType == Types.NCLOB) {
+                    NClob object = resultSet.getNClob(i);
+                    if (object != null) {
+                        field.setValue(new SerialClob(object));
+                    }
+                } else if (dataType == Types.ARRAY) {
+                    Array array = resultSet.getArray(i);
+                    if (array != null) {
+                        field.setValue(new SerialArray(array));
+                    }
+                } else if (dataType == Types.REF) {
+                    Ref ref = resultSet.getRef(i);
+                    if (ref != null) {
+                        field.setValue(new SerialRef(ref));
+                    }
+                } else if (dataType == Types.DATALINK) {
+                    java.net.URL url = resultSet.getURL(i);
+                    if (url != null) {
+                        field.setValue(new SerialDatalink(url));
+                    }
+                } else if (dataType == Types.JAVA_OBJECT) {
+                    Object object = resultSet.getObject(i);
+                    if (object != null) {
+                        field.setValue(new SerialJavaObject(object));
+                    }
+                } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
+                    field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
                 } else {
-                    field.setValue(resultSet.getObject(i));
+                    // JDBCType.DISTINCT, JDBCType.STRUCT etc...
+                    field.setValue(holdSerialDataType(resultSet.getObject(i)));
                 }
 
                 fields.add(field);
@@ -214,6 +262,50 @@ public class TableRecords {
             records.add(row);
         }
         return records;
+    }
+
+    /**
+     * check if the column is null and return
+     *
+     * @param tmeta the table meta
+     * @param colName the column nmae
+     */
+    private static ColumnMeta getColumnMeta(TableMeta tmeta , String colName) throws SQLException {
+        ColumnMeta col = tmeta.getColumnMeta(colName);
+        if (col == null) {
+            throw new TableMetaException(tmeta.getTableName(), colName);
+        }
+        return col;
+    }
+
+    /**
+     * since there is no parameterless constructor for Blob, Clob and NClob just like mysql,
+     * it needs to be converted to Serial_ type
+     *
+     * @param data the sql data
+     * @return Serializable Data
+     * @throws SQLException the sql exception
+     */
+    public static Object holdSerialDataType(Object data) throws SQLException {
+        if (null == data) {
+            return null;
+        }
+
+        if (data instanceof Blob) {
+            Blob blob = (Blob) data;
+            return new SerialBlob(blob);
+        }
+
+        if (data instanceof NClob) {
+            NClob nClob = (NClob) data;
+            return new SerialClob(nClob);
+        }
+
+        if (data instanceof Clob) {
+            Clob clob = (Clob) data;
+            return new SerialClob(clob);
+        }
+        return data;
     }
 
     public static class EmptyTableRecords extends TableRecords {
@@ -230,7 +322,7 @@ public class TableRecords {
         }
 
         @Override
-        public List<Field> pkRows() {
+        public List<Map<String,Field>> pkRows() {
             return new ArrayList<>();
         }
 

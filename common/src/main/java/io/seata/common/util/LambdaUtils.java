@@ -24,7 +24,6 @@ import java.util.function.Predicate;
  * The type Lambda util.
  *
  * @author zjinlei
- * @date 2019 /10/29
  */
 public class LambdaUtils {
 

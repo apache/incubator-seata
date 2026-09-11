@@ -22,11 +22,11 @@ import org.junit.jupiter.api.Test;
  * A unit test for {@link BranchType}
  *
  * @author Lay
- * @date 2019/3/6
  */
 public class BranchTypeTest {
 
     private static final int AT_ORDINAL = 0;
+    private static final String AT_NAME = "AT";
     private static final int NONE = 99;
 
     @Test
@@ -43,14 +43,20 @@ public class BranchTypeTest {
 
     @Test
     public void testGetWithByte() {
-        BranchType branchStatus = BranchType.get((byte) AT_ORDINAL);
-        Assertions.assertEquals(branchStatus, BranchType.AT);
+        BranchType type = BranchType.get((byte) AT_ORDINAL);
+        Assertions.assertEquals(type, BranchType.AT);
     }
 
     @Test
     public void testGetWithInt() {
-        BranchType branchStatus = BranchType.get(AT_ORDINAL);
-        Assertions.assertEquals(branchStatus, BranchType.AT);
+        BranchType type = BranchType.get(AT_ORDINAL);
+        Assertions.assertEquals(type, BranchType.AT);
+    }
+
+    @Test
+    public void testGetWithName() {
+        BranchType type = BranchType.get(AT_NAME);
+        Assertions.assertEquals(type, BranchType.AT);
     }
 
     @Test

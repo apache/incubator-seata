@@ -1,0 +1,26 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.saga.statelang.parser.JsonParser"
+    },
+    "name": "io.seata.saga.statelang.parser.impl.FastjsonParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.saga.statelang.parser.JsonParser"
+    },
+    "name": "io.seata.saga.statelang.parser.impl.JacksonJsonParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

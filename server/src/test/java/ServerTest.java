@@ -15,7 +15,7 @@
  */
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
-import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.NettyRemotingServer;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
@@ -26,8 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Server test.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/4
+ * @author slievrly
  */
 public class ServerTest {
 
@@ -42,12 +41,12 @@ public class ServerTest {
      */
     public static void main(String[] args) {
 
-        RpcServer rpcServer = new RpcServer(workingThreads);
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-        UUIDGenerator.init(1);
+        NettyRemotingServer nettyServer = new NettyRemotingServer(workingThreads);
+        nettyServer.setHandler(DefaultCoordinator.getInstance(nettyServer));
+        UUIDGenerator.init(1L);
         XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(rpcServer.getListenPort());
-        rpcServer.init();
+        XID.setPort(nettyServer.getListenPort());
+        nettyServer.init();
         System.exit(0);
     }
 

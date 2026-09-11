@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.metrics.registry.Registry"
+    },
+    "name": "io.seata.metrics.registry.compact.CompactRegistry",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

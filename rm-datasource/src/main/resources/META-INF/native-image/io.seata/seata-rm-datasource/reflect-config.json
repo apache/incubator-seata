@@ -1,0 +1,654 @@
+[
+  {
+    "condition": {
+      "typeReachable": "com.mysql.jdbc.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "oracle.jdbc.driver.OracleDriver"
+    },
+    "name": "io.seata.rm.datasource.exec.oracle.OracleInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "org.postgresql.Driver"
+    },
+    "name": "io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor",
+    "allDeclaredConstructors": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.BranchUndoLog"
+    },
+    "name": "io.seata.rm.datasource.undo.BranchUndoLog",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.Row"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.Row",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableRecords"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.TableRecords",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.Field"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.Field",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableRecords$EmptyTableRecords"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.TableRecords$EmptyTableRecords",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.SQLUndoLog"
+    },
+    "name": "io.seata.rm.datasource.undo.SQLUndoLog",
+    "allPublicClasses": true,
+    "allPublicConstructors": true,
+    "allDeclaredConstructors": true,
+    "allDeclaredMethods": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true,
+    "allPublicFields": true,
+    "allDeclaredClasses": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache"
+    },
+    "name": "com.github.benmanes.caffeine.cache.SIMSW",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.github.benmanes.caffeine.cache.Caffeine",
+          "com.github.benmanes.caffeine.cache.AsyncCacheLoader",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.cache.AbstractTableMetaCache"
+    },
+    "name": "com.github.benmanes.caffeine.cache.PDWMS",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.util.XAUtils"
+    },
+    "name": "oracle.jdbc.driver.T4CXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.sql.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.util.XAUtils"
+    },
+    "name": "oracle.jdbc.xa.client.OracleXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.sql.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.Util",
+    "methods": [
+      {
+        "name": "isJdbc4",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.Connection",
+    "methods": [
+      {
+        "name": "getPinGlobalTxToPhysicalConnection",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.JDBC4SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.jdbc.jdbc2.optional.MysqlXAConnection",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "com.mysql.jdbc.Connection",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.JdbcConnection",
+    "methods": [
+      {
+        "name": "getPropertySet",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.PropertySet",
+    "methods": [
+      {
+        "name": "getBooleanReadableProperty",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.ReadableProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.conf.RuntimeProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.api.jdbc.JdbcConnection",
+    "methods": [
+      {
+        "name": "getPropertySet",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.api.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.api.conf.PropertySet",
+    "methods": [
+      {
+        "name": "getBooleanReadableProperty",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.mysql.cj.api.jdbc.JdbcConnection"
+    },
+    "name": "com.mysql.cj.api.conf.ReadableProperty",
+    "methods": [
+      {
+        "name": "getValue",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.SuspendableXAConnection",
+    "methods": [
+      {
+        "name": "getInstance",
+        "parameterTypes": [
+          "com.mysql.cj.jdbc.JdbcConnection"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.alibaba.druid.util.MySqlUtils"
+    },
+    "name": "com.mysql.cj.jdbc.MysqlXAConnection",
+    "methods": [
+      {
+        "name": "getInstance",
+        "parameterTypes": [
+          "com.mysql.cj.jdbc.JdbcConnection",
+          "boolean"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.rm.datasource.DataSourceManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.rm.datasource.xa.ResourceManagerXA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.rm.RMHandlerAT",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.rm.RMHandlerXA",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.mysql.MySQLInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.oracle.OracleInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.exec.InsertExecutor"
+    },
+    "name": "io.seata.rm.datasource.exec.postgresql.PostgresqlInsertExecutor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.rm.datasource.StatementProxy",
+          "io.seata.rm.datasource.exec.StatementCallback",
+          "io.seata.sqlparser.SQLRecognizer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.sql.struct.TableMetaCache"
+    },
+    "name": "io.seata.rm.datasource.sql.struct.cache.PostgresqlTableMetaCache",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.MySQLUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.OracleUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoExecutorHolder"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.PostgresqlUndoExecutorHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.OracleUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogManager"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.PostgresqlUndoLogManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.JacksonUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.KryoUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.datasource.undo.UndoLogParser"
+    },
+    "name": "io.seata.rm.datasource.undo.parser.FstUndoLogParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.KeywordChecker"
+    },
+    "name": "io.seata.rm.datasource.undo.postgresql.keyword.PostgresqlKeywordChecker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

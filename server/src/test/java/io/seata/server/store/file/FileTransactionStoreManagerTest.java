@@ -15,19 +15,6 @@
  */
 package io.seata.server.store.file;
 
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionManager;
-import io.seata.server.session.file.FileBasedSessionManager;
-import io.seata.server.store.StoreConfig;
-import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionWriteStore;
-import org.assertj.core.util.Files;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import java.io.File;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -35,15 +22,34 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.assertj.core.util.Files;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import io.seata.common.util.BufferUtils;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionManager;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.storage.file.session.FileSessionManager;
+import io.seata.server.storage.file.store.FileTransactionStoreManager;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.TransactionStoreManager;
+
 /**
  * @author ggndnn
  */
+@SpringBootTest
 public class FileTransactionStoreManagerTest {
     @Test
     public void testBigDataWrite() throws Exception {
         File seataFile = Files.newTemporaryFile();
+        FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
-            FileTransactionStoreManager fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
+            fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
             BranchSession branchSessionA = Mockito.mock(BranchSession.class);
             GlobalSession global = new GlobalSession();
             Mockito.when(branchSessionA.encode())
@@ -65,6 +71,9 @@ public class FileTransactionStoreManagerTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
+            if (fileTransactionStoreManager != null) {
+                fileTransactionStoreManager.shutdown();
+            }
             Assertions.assertTrue(seataFile.delete());
         }
     }
@@ -74,6 +83,8 @@ public class FileTransactionStoreManagerTest {
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
+        FileSessionManager sessionManager = null;
+        FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
@@ -95,10 +106,11 @@ public class FileTransactionStoreManagerTest {
             SessionManager sessionManagerMock = Mockito.mock(SessionManager.class);
             Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any()))
                     .thenReturn(timeoutSessions);
-            FileTransactionStoreManager fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), sessionManagerMock);
+            fileTransactionStoreManager = new FileTransactionStoreManager(
+                seataFile.getAbsolutePath(), sessionManagerMock);
             Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
 
-            FileBasedSessionManager sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
+            sessionManager = new FileSessionManager(seataFile.getName(), seataFile.getParent());
             sessionManager.reload();
             Collection<GlobalSession> globalSessions = sessionManager.allSessions();
             Assertions.assertNotNull(globalSessions);
@@ -111,6 +123,12 @@ public class FileTransactionStoreManagerTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
+            if (fileTransactionStoreManager != null) {
+                fileTransactionStoreManager.shutdown();
+            }
+            if (sessionManager != null) {
+                sessionManager.destroy();
+            }
             Assertions.assertTrue(seataFile.delete());
         }
     }
@@ -125,6 +143,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // applicationDataBytes.length
                 + 4 // xidBytes.size
                 + 1 // statusCode
+                + 1 // lockstatus
                 + 1; //branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
@@ -149,7 +168,8 @@ public class FileTransactionStoreManagerTest {
         }
         byteBuffer.put((byte) 0);
         byteBuffer.put((byte) 0);
-        byteBuffer.flip();
+        byteBuffer.put((byte) 0);
+        BufferUtils.flip(byteBuffer);
         byte[] bytes = new byte[byteBuffer.limit()];
         byteBuffer.get(bytes);
         return bytes;

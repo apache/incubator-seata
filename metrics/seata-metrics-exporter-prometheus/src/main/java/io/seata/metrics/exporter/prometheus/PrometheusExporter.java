@@ -30,14 +30,16 @@ import io.seata.metrics.Measurement;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.registry.Registry;
 
+import static io.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
+import static io.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
+
 /**
  * Exporter for Prometheus
  *
  * @author zhengyangyong
  */
-@LoadLevel(name = "Prometheus", order = 1)
+@LoadLevel(name = "prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {
-    private static final String METRICS_EXPORTER_PROMETHEUS_PORT = "exporter-prometheus-port";
 
     private final HTTPServer server;
 
@@ -45,7 +47,7 @@ public class PrometheusExporter extends Collector implements Collector.Describab
 
     public PrometheusExporter() throws IOException {
         int port = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9898);
+            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT);
         this.server = new HTTPServer(port, true);
         this.register();
     }
@@ -63,8 +65,9 @@ public class PrometheusExporter extends Collector implements Collector.Describab
             List<Sample> samples = new ArrayList<>();
             measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
 
-            if (samples.size() != 0) {
-                familySamples.add(new MetricFamilySamples("seata", Type.UNTYPED, "seata", samples));
+            if (!samples.isEmpty()) {
+                Type unknownType = getUnknownType();
+                familySamples.add(new MetricFamilySamples("seata", unknownType, "seata", samples));
             }
         }
         return familySamples;
@@ -80,6 +83,21 @@ public class PrometheusExporter extends Collector implements Collector.Describab
         }
         return new Sample(prometheusName, labelNames, labelValues, measurement.getValue(),
             (long)measurement.getTimestamp());
+    }
+
+    /**
+     * Compatible with high and low versions of 'io.prometheus:simpleclient'
+     *
+     * @return the unknown collector type
+     */
+    public static Type getUnknownType() {
+        Type unknownType;
+        try {
+            unknownType = Type.valueOf("UNKNOWN");
+        } catch (IllegalArgumentException e) {
+            unknownType = Type.valueOf("UNTYPED");
+        }
+        return unknownType;
     }
 
     @Override

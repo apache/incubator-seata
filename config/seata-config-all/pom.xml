@@ -24,6 +24,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-config-all</artifactId>
     <name>seata-config-all ${project.version}</name>
+    <description>config-all for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
@@ -49,6 +50,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-consul</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-config-spring-cloud</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.saga.engine.pcext.StateHandlerInterceptor"
+    },
+    "name": "io.seata.saga.engine.pcext.interceptors.InSagaBranchHandlerInterceptor",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

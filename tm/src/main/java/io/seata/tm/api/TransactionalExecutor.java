@@ -34,16 +34,19 @@ public interface TransactionalExecutor {
 
     /**
      * transaction conf or other attr
-     * @return
+     * @return transaction info
      */
     TransactionInfo getTransactionInfo();
-
 
     /**
      * The enum Code.
      */
     enum Code {
 
+        /**
+         * Unknown code.
+         */
+        Unknown,
         /**
          * Begin failure code.
          */
@@ -72,7 +75,13 @@ public interface TransactionalExecutor {
          * Report failure code.
          */
         //
-        ReportFailure
+        ReportFailure,
+
+        /**
+         * Rollback retrying code.
+         */
+        //
+        Rollbacking
     }
 
     /**

@@ -24,7 +24,7 @@ import io.seata.saga.statelang.parser.impl.StateMachineParserImpl;
  */
 public class StateMachineParserFactory {
 
-    public static StateMachineParser getStateMachineParser() {
-        return new StateMachineParserImpl();
+    public static StateMachineParser getStateMachineParser(String jsonParserName) {
+        return new StateMachineParserImpl(jsonParserName);
     }
 }

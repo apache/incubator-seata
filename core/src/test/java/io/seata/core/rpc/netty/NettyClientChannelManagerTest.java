@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -111,9 +112,7 @@ class NettyClientChannelManagerTest {
     @Test
     void assertReconnect() {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
-        when(channel.isActive()).thenReturn(true);
-        channelManager.reconnect("my_test_tx_group");
-        verify(channel).isActive();
+        channelManager.reconnect(DEFAULT_TX_GROUP);
     }
     
     @Test

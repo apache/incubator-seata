@@ -19,8 +19,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
-import java.nio.ByteBuffer;
-
 /**
  * The type Global report request.
  *
@@ -59,5 +57,15 @@ public class GlobalReportRequest extends AbstractGlobalEndRequest {
      */
     public void setGlobalStatus(GlobalStatus globalStatus) {
         this.globalStatus = globalStatus;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("GlobalReportRequest{");
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(",globalStatus=").append(globalStatus);
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

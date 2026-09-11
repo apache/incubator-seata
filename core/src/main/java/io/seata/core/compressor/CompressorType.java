@@ -28,7 +28,37 @@ public enum CompressorType {
     /**
      * The gzip.
      */
-    GZIP((byte) 1);
+    GZIP((byte) 1),
+
+    /**
+     * The zip.
+     */
+    ZIP((byte) 2),
+
+    /**
+     * The sevenz.
+     */
+    SEVENZ((byte) 3),
+
+    /**
+     * The bzip2.
+     */
+    BZIP2((byte) 4),
+
+    /**
+     * The lz4.
+     */
+    LZ4((byte) 5),
+
+    /**
+     * The deflater.
+     */
+    DEFLATER((byte) 6),
+
+    /**
+     * The zstd.
+     */
+    ZSTD((byte) 7);
 
     private final byte code;
 

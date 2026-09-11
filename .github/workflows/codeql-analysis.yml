@@ -1,0 +1,44 @@
+name: "CodeQL"
+
+on:
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ 2.x, develop ]
+  schedule:
+    - cron: '36 19 * * 6'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'java' ]
+
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+
+      # step 2: Initializes the CodeQL tools for scanning.
+      - name: "Initialize CodeQL"
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      # step 3
+      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
+      # If this step fails, then you should remove it and run the build manually (see below)
+      - name: "Autobuild"
+        uses: github/codeql-action/autobuild@v2
+
+      # step 4
+      - name: "Perform CodeQL Analysis"
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:${{matrix.language}}"

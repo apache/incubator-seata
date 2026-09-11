@@ -16,17 +16,19 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import io.seata.common.util.StringUtils;
 
 /**
  * The interface Configuration.
  *
- * @param <T> the type parameter
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/20
+ * @author slievrly
  */
-public interface Configuration<T> {
+public interface Configuration {
 
+    Map<String, String> ENV_MAP = System.getenv();
     /**
      * Gets short.
      *
@@ -35,7 +37,7 @@ public interface Configuration<T> {
      * @param timeoutMills the timeout mills
      * @return the short
      */
-    short getShort(String dataId, int defaultValue, long timeoutMills);
+    short getShort(String dataId, short defaultValue, long timeoutMills);
 
     /**
      * Gets short.
@@ -131,7 +133,7 @@ public interface Configuration<T> {
      * @param dataId       the data id
      * @param defaultValue the default value
      * @param timeoutMills the timeout mills
-     * @return he duration
+     * @return the duration
      */
     Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
 
@@ -209,6 +211,16 @@ public interface Configuration<T> {
     boolean putConfig(String dataId, String content, long timeoutMills);
 
     /**
+     * Get latest config.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the Latest config
+     */
+    String getLatestConfig(String dataId, String defaultValue, long timeoutMills);
+
+    /**
      * Put config boolean.
      *
      * @param dataId  the data id
@@ -259,7 +271,7 @@ public interface Configuration<T> {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void addConfigListener(String dataId, T listener);
+    void addConfigListener(String dataId, ConfigurationChangeListener listener);
 
     /**
      * Remove config listener.
@@ -267,7 +279,7 @@ public interface Configuration<T> {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void removeConfigListener(String dataId, T listener);
+    void removeConfigListener(String dataId, ConfigurationChangeListener listener);
 
     /**
      * Gets config listeners.
@@ -275,7 +287,7 @@ public interface Configuration<T> {
      * @param dataId the data id
      * @return the config listeners
      */
-    List<T> getConfigListeners(String dataId);
+    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
 
     /**
      * Gets config from sys pro.
@@ -283,7 +295,19 @@ public interface Configuration<T> {
      * @param dataId the data id
      * @return the config from sys pro
      */
-    default String getConfigFromSysPro(String dataId) {
+    default String getConfigFromSys(String dataId) {
+        if (StringUtils.isBlank(dataId)) {
+            return null;
+        }
+        String content = ENV_MAP.get(dataId);
+        if (null != content) {
+            return content;
+        }
+        String envDataId = dataId.toUpperCase().replace(".", "_");
+        content = ENV_MAP.get(envDataId);
+        if (null != content) {
+            return content;
+        }
         return System.getProperty(dataId);
     }
 

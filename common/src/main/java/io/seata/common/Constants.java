@@ -20,92 +20,155 @@ import java.nio.charset.Charset;
 /**
  * The type Constants.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9 17:14
+ * @author slievrly
  */
-public class Constants {
+public interface Constants {
+
     /**
      * The constant IP_PORT_SPLIT_CHAR.
      */
-    public static final String IP_PORT_SPLIT_CHAR = ":";
+    String IP_PORT_SPLIT_CHAR = ":";
     /**
      * The constant CLIENT_ID_SPLIT_CHAR.
      */
-    public static final String CLIENT_ID_SPLIT_CHAR = ":";
+    String CLIENT_ID_SPLIT_CHAR = ":";
     /**
      * The constant ENDPOINT_BEGIN_CHAR.
      */
-    public static final String ENDPOINT_BEGIN_CHAR = "/";
+    String ENDPOINT_BEGIN_CHAR = "/";
     /**
      * The constant DBKEYS_SPLIT_CHAR.
      */
-    public static final String DBKEYS_SPLIT_CHAR = ",";
+    String DBKEYS_SPLIT_CHAR = ",";
 
-    /** the start time of transaction */
-    public static final String START_TIME  = "start-time";
+    /**
+     * The constant ROW_LOCK_KEY_SPLIT_CHAR.
+     */
+    String ROW_LOCK_KEY_SPLIT_CHAR = ";";
+
+    /**
+     * The constant HIDE_KEY_PREFIX_CHAR.
+     */
+    String HIDE_KEY_PREFIX_CHAR = ".";
+
+    /**
+     * the start time of transaction
+     */
+    String START_TIME = "start-time";
 
     /**
      * app name
      */
-    public static final String APP_NAME = "appName";
+    String APP_NAME = "appName";
 
     /**
      * TCC start time
      */
-    public static final String ACTION_START_TIME = "action-start-time";
+    String ACTION_START_TIME = "action-start-time";
 
     /**
      * TCC name
      */
-    public final static String ACTION_NAME = "actionName";
+    String ACTION_NAME = "actionName";
+
+    /**
+     * Use TCC fence
+     */
+    String USE_TCC_FENCE = "useTCCFence";
 
     /**
      * phase one method name
      */
-    public final static String PREPARE_METHOD = "sys::prepare";
+    String PREPARE_METHOD = "sys::prepare";
 
     /**
      * phase two commit method name
      */
-    public final static String COMMIT_METHOD = "sys::commit";
+    String COMMIT_METHOD = "sys::commit";
 
     /**
      * phase two rollback method name
      */
-    public final static String ROLLBACK_METHOD = "sys::rollback";
+    String ROLLBACK_METHOD = "sys::rollback";
 
     /**
      * host ip
      */
-    public final static String HOST_NAME = "host-name";
-
-    /**
-     * The constant TCC_METHOD_RESULT.
-     */
-    public final static String TCC_METHOD_RESULT = "result";
-
-    /**
-     * The constant TCC_METHOD_ARGUMENTS.
-     */
-    public final static String TCC_METHOD_ARGUMENTS = "arguments";
-
-    /**
-     * transaction context
-     */
-    public final static String TCC_ACTIVITY_CONTEXT = "activityContext";
+    String HOST_NAME = "host-name";
 
     /**
      * branch context
      */
-    public final static String TCC_ACTION_CONTEXT = "actionContext";
+    String TCC_ACTION_CONTEXT = "actionContext";
 
     /**
      * default charset name
      */
-    public static final String DEFAULT_CHARSET_NAME = "UTF-8";
-    
+    String DEFAULT_CHARSET_NAME = "UTF-8";
+
     /**
      * default charset is utf-8
      */
-    public static final Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
+    Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_CHARSET_NAME);
+    /**
+     * The constant OBJECT_KEY_SPRING_APPLICATION_CONTEXT
+     */
+    String OBJECT_KEY_SPRING_APPLICATION_CONTEXT = "springApplicationContext";
+    /**
+     * The constant OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT
+     */
+    String OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT = "springConfigurableEnvironment";
+    /**
+     * The constant BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER
+     */
+    String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
+    /**
+     * The constant BEAN_NAME_FAILURE_HANDLER
+     */
+    String BEAN_NAME_FAILURE_HANDLER = "failureHandler";
+    /**
+     * The constant SAGA_TRANS_NAME_PREFIX
+     */
+    String SAGA_TRANS_NAME_PREFIX = "$Saga_";
+
+    /**
+     * The constant RETRY_ROLLBACKING
+     */
+    String RETRY_ROLLBACKING = "RetryRollbacking";
+
+    /**
+     * The constant RETRY_COMMITTING
+     */
+    String RETRY_COMMITTING = "RetryCommitting";
+
+    /**
+     * The constant ASYNC_COMMITTING
+     */
+    String ASYNC_COMMITTING = "AsyncCommitting";
+
+    /**
+     * The constant TX_TIMEOUT_CHECK
+     */
+    String TX_TIMEOUT_CHECK = "TxTimeoutCheck";
+
+    /**
+     * The constant UNDOLOG_DELETE
+     */
+    String UNDOLOG_DELETE = "UndologDelete";
+
+    /**
+     * The constant AUTO_COMMIT
+     */
+    String AUTO_COMMIT = "autoCommit";
+
+    /**
+     * The constant SKIP_CHECK_LOCK
+     */
+    String SKIP_CHECK_LOCK = "skipCheckLock";
+
+    /**
+     * The constant REGISTRY_TYPE_SPLIT_CHAR.
+     */
+    String REGISTRY_TYPE_SPLIT_CHAR = ",";
+
 }

@@ -22,11 +22,12 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch register response.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 
     private long branchId;
+
 
     /**
      * Gets branch id.
@@ -53,16 +54,11 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("BranchRegisterResponse: branchId=");
-        result.append(branchId);
-        result.append(",");
-        result.append("result code =");
-        result.append(getResultCode());
-        result.append(",");
-        result.append("getMsg =");
-        result.append(getMsg());
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder("BranchRegisterResponse{");
+        sb.append("branchId=").append(branchId);
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

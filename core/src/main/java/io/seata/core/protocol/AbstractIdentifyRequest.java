@@ -26,7 +26,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
     /**
      * The Version.
      */
-    protected String version = Version.CURRENT;
+    protected String version = Version.getCurrent();
 
     /**
      * The Application id.
@@ -50,8 +50,7 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
      * @param transactionServiceGroup the transaction service group
      */
     public AbstractIdentifyRequest(String applicationId, String transactionServiceGroup) {
-        this.applicationId = applicationId;
-        this.transactionServiceGroup = transactionServiceGroup;
+        this(applicationId, transactionServiceGroup, null);
     }
 
     /**
@@ -139,4 +138,15 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
         this.extraData = extraData;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("version='").append(version).append('\'');
+        sb.append(", applicationId='").append(applicationId).append('\'');
+        sb.append(", transactionServiceGroup='").append(transactionServiceGroup).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

@@ -21,42 +21,57 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * the TCC parameters that need to be passed to  the BusinessActivityContext；
+ * the TCC parameters that need to be passed to the action context;
  * <p>
- * add this annotation on the parameters of the try method, and the parameters will be passed to  the
- * BusinessActivityContext
+ * add this annotation on the parameters of the try method, and the parameters will be passed to the action context
  *
  * @author zhangsen
+ * @see io.seata.rm.tcc.interceptor.ActionContextUtil
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 public @interface BusinessActionContextParameter {
 
     /**
-     * parameter's name
+     * parameter's name. Synonym for {@link #paramName()}.
      *
-     * @return the string
+     * @return the name of the param or field
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getParamNameFromAnnotation
+     */
+    String value() default "";
+
+    /**
+     * parameter's name. Synonym for {@link #value()}.
+     *
+     * @return the name of the param or field
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getParamNameFromAnnotation
      */
     String paramName() default "";
 
     /**
      * if it is a sharding param ?
      *
-     * @return boolean boolean
+     * @return the boolean
+     * @deprecated This property is no longer in use.
      */
+    @Deprecated
     boolean isShardingParam() default false;
 
     /**
      * Specify the index of the parameter in the List
      *
-     * @return int int
+     * @return the index of the List
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#getByIndex
      */
     int index() default -1;
 
     /**
-     * if get the parameter from the property of the object ?
+     * whether get the parameter from the property of the object
+     * if {@code index >= 0}, the object get from the List and then do get the parameter from the property of the object
      *
-     * @return boolean boolean
+     * @return the boolean
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#loadParamByAnnotationAndPutToContext
+     * @see io.seata.rm.tcc.interceptor.ActionContextUtil#fetchContextFromObject
      */
     boolean isParamInProperty() default false;
 }

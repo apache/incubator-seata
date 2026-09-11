@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.store.db;
 
+import io.seata.common.util.BeanUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -26,7 +27,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import io.seata.common.exception.StoreException;
-import io.seata.saga.engine.store.utils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +107,7 @@ public class AbstractStore {
             }
 
             for (int i = 0; i < args.length; i++) {
-                stmt.setObject((i + 1), args[i]);
+                stmt.setObject(i + 1, args[i]);
             }
             resultSet = stmt.executeQuery();
             List<T> list = new ArrayList<>();
@@ -171,7 +171,7 @@ public class AbstractStore {
             }
 
             for (int i = 0; i < args.length; i++) {
-                stmt.setObject((i + 1), args[i]);
+                stmt.setObject(i + 1, args[i]);
             }
             int count = stmt.executeUpdate();
             if (!connection.getAutoCommit()) {

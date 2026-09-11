@@ -35,7 +35,7 @@ public class AppTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppTest.class);
 
     private static final String APPLICATION_ID = "my_test_app";
-    private static final String TX_SERVICE_GROUP = "my_test_tx_group";
+    private static final String TX_SERVICE_GROUP = "default_tx_group";
     private static final String TX_NAME = "my_tx_instance";
     private static final int TX_TIME_OUT = 60000;
 

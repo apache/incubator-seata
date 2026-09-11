@@ -37,7 +37,7 @@ public class TransactionManagerHolder {
         static {
             try {
                 INSTANCE = EnhancedServiceLoader.load(TransactionManager.class);
-                LOGGER.info("TransactionManager Singleton " + INSTANCE);
+                LOGGER.info("TransactionManager Singleton {}", INSTANCE);
             } catch (Throwable anyEx) {
                 LOGGER.error("Failed to load TransactionManager Singleton! ", anyEx);
             }

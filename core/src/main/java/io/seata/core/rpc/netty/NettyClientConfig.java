@@ -16,11 +16,20 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportServerType;
+
+import static io.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
  * The type Netty client config.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NettyClientConfig extends NettyBaseConfig {
 
@@ -32,26 +41,24 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private final boolean useConnPool = false;
+    private static final long RPC_RM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
+    private static final long RPC_TM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
     private static int maxInactiveChannelCheck = 10;
     private static final int MAX_NOT_WRITEABLE_RETRY = 2000;
     private static final int MAX_CHECK_ALIVE_RETRY = 300;
-    private static final int CHECK_ALIVE_INTERNAL = 10;
+    private static final int CHECK_ALIVE_INTERVAL = 10;
     private static final String SOCKET_ADDRESS_START_CHAR = "/";
-    private static final int DEFAULT_SELECTOR_THREAD_SIZE = 1;
     private static final long MAX_ACQUIRE_CONN_MILLS = 60 * 1000L;
-    private static final String DEFAULT_SELECTOR_THREAD_PREFIX = "NettyClientSelector";
-    private static final String DEFAULT_WORKER_THREAD_PREFIX = "NettyClientWorkerThread";
     private static final String RPC_DISPATCH_THREAD_PREFIX = "rpcDispatch";
     private static final int DEFAULT_MAX_POOL_ACTIVE = 1;
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
+    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**
      * Gets connect timeout millis.
@@ -211,21 +218,21 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Gets rpc sendAsyncRequestWithResponse time out.
+     * Gets rpc RM sendAsyncRequestWithResponse time out.
      *
-     * @return the rpc sendAsyncRequestWithResponse time out
+     * @return the rpc RM sendAsyncRequestWithResponse time out
      */
-    public static int getRpcRequestTimeout() {
-        return RPC_REQUEST_TIMEOUT;
+    public static long getRpcRmRequestTimeout() {
+        return RPC_RM_REQUEST_TIMEOUT;
     }
 
     /**
-     * Is use conn pool boolean.
+     * Gets rpc TM sendAsyncRequestWithResponse time out.
      *
-     * @return the boolean
+     * @return the rpc TM sendAsyncRequestWithResponse time out
      */
-    public boolean isUseConnPool() {
-        return useConnPool;
+    public static long getRpcTmRequestTimeout() {
+        return RPC_TM_REQUEST_TIMEOUT;
     }
 
     /**
@@ -319,12 +326,12 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Gets check alive internal.
+     * Gets check alive interval.
      *
-     * @return the check alive internal
+     * @return the check alive interval
      */
-    public static int getCheckAliveInternal() {
-        return CHECK_ALIVE_INTERNAL;
+    public static int getCheckAliveInterval() {
+        return CHECK_ALIVE_INTERVAL;
     }
 
     /**
@@ -342,7 +349,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the client selector thread size
      */
     public int getClientSelectorThreadSize() {
-        return CONFIG.getInt("transport.thread-factory.client-selector-thread-size", DEFAULT_SELECTOR_THREAD_SIZE);
+        return CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, DEFAULT_SELECTOR_THREAD_SIZE);
     }
 
     /**
@@ -360,8 +367,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientSelectorThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.client-selector-thread-prefix",
-            DEFAULT_SELECTOR_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
     }
 
     /**
@@ -370,7 +376,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientWorkerThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.client-worker-thread-prefix", DEFAULT_WORKER_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
     }
 
     /**
@@ -443,5 +449,10 @@ public class NettyClientConfig extends NettyBaseConfig {
      */
     public String getRmDispatchThreadPrefix() {
         return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.RMROLE.name();
+    }
+
+    @Deprecated
+    public static boolean isEnableClientBatchSendRequest() {
+        return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }
 }

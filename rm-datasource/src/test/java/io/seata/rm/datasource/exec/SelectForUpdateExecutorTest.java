@@ -32,14 +32,13 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockConnectionProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/10/15
  */
 public class SelectForUpdateExecutorTest {
 
@@ -51,6 +50,7 @@ public class SelectForUpdateExecutorTest {
 
     @BeforeAll
     public static void init() {
+        RootContext.unbind();
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom"},
@@ -92,18 +92,16 @@ public class SelectForUpdateExecutorTest {
 
     @Test
     public void testDoExecute() throws Throwable {
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
+        Assertions.assertThrows(RuntimeException.class, () -> selectForUpdateExecutor.doExecute((Object) null));
         RootContext.bind("xid");
         Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
+            selectForUpdateExecutor.doExecute((Object) null);
         });
         RootContext.unbind();
 
         RootContext.bindGlobalLockFlag();
         Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
+            selectForUpdateExecutor.doExecute((Object) null);
         });
         RootContext.unbindGlobalLockFlag();
 
@@ -116,9 +114,7 @@ public class SelectForUpdateExecutorTest {
         selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
 
         RootContext.bind("xid");
-        Assertions.assertThrows(LockWaitTimeoutException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
+        Assertions.assertThrows(LockWaitTimeoutException.class, () -> selectForUpdateExecutor.doExecute((Object) null));
         RootContext.unbind();
     }
 }

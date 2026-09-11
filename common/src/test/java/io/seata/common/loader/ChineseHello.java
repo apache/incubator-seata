@@ -19,7 +19,6 @@ package io.seata.common.loader;
  * The type Chinese hello.
  *
  * @author Otis.z
- * @date 2019 /2/26
  */
 @LoadLevel(name = "ChineseHello", order = Integer.MIN_VALUE)
 public class ChineseHello implements Hello {

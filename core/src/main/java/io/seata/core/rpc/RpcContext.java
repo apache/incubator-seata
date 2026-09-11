@@ -15,7 +15,14 @@
  */
 package io.seata.core.rpc;
 
-import java.net.SocketAddress;
+import io.netty.channel.Channel;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.core.rpc.netty.ChannelUtil;
+import io.seata.core.rpc.netty.NettyPoolKey;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -33,8 +40,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type rpc context.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/07
+ * @author slievrly
  */
 public class RpcContext {
 
@@ -73,7 +79,7 @@ public class RpcContext {
      * Release.
      */
     public void release() {
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         if (clientIDHolderMap != null) {
             clientIDHolderMap.remove(channel);
             clientIDHolderMap = null;
@@ -88,7 +94,7 @@ public class RpcContext {
             }
             clientRMHolderMap = null;
         }
-        if (null != resourceSets) {
+        if (resourceSets != null) {
             resourceSets.clear();
         }
 
@@ -104,7 +110,7 @@ public class RpcContext {
             throw new IllegalStateException();
         }
         this.clientTMHolderMap = clientTMHolderMap;
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         this.clientTMHolderMap.put(clientPort, this);
     }
 
@@ -128,10 +134,10 @@ public class RpcContext {
      * @param portMap    the client rm holder map
      */
     public void holdInResourceManagerChannels(String resourceId, ConcurrentMap<Integer, RpcContext> portMap) {
-        if (null == this.clientRMHolderMap) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+        if (this.clientRMHolderMap == null) {
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         portMap.put(clientPort, this);
         this.clientRMHolderMap.put(resourceId, portMap);
     }
@@ -143,11 +149,11 @@ public class RpcContext {
      * @param clientPort the client port
      */
     public void holdInResourceManagerChannels(String resourceId, Integer clientPort) {
-        if (null == this.clientRMHolderMap) {
-            this.clientRMHolderMap = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+        if (this.clientRMHolderMap == null) {
+            this.clientRMHolderMap = new ConcurrentHashMap<>();
         }
-        clientRMHolderMap.putIfAbsent(resourceId, new ConcurrentHashMap<Integer, RpcContext>());
-        ConcurrentMap<Integer, RpcContext> portMap = clientRMHolderMap.get(resourceId);
+        ConcurrentMap<Integer, RpcContext> portMap = CollectionUtils.computeIfAbsent(clientRMHolderMap, resourceId,
+            key -> new ConcurrentHashMap<>());
         portMap.put(clientPort, this);
     }
 
@@ -269,28 +275,6 @@ public class RpcContext {
         this.version = version;
     }
 
-    private static String getAddressFromChannel(Channel channel) {
-        SocketAddress socketAddress = channel.remoteAddress();
-        String address = socketAddress.toString();
-        if (socketAddress.toString().indexOf(Constants.ENDPOINT_BEGIN_CHAR) == 0) {
-            address = socketAddress.toString().substring(Constants.ENDPOINT_BEGIN_CHAR.length());
-        }
-        return address;
-    }
-
-    private static Integer getClientPortFromChannel(Channel channel) {
-        String address = getAddressFromChannel(channel);
-        Integer port = 0;
-        try {
-            if (address.contains(Constants.IP_PORT_SPLIT_CHAR)) {
-                port = Integer.parseInt(address.substring(address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR) + 1));
-            }
-        } catch (NumberFormatException exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        return port;
-    }
-
     /**
      * Gets get resource sets.
      *
@@ -315,7 +299,10 @@ public class RpcContext {
      * @param resource the resource
      */
     public void addResource(String resource) {
-        if (null == resource) {
+        if (StringUtils.isBlank(resource)) {
+            return;
+        }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
         this.resourceSets.add(resource);
@@ -324,14 +311,14 @@ public class RpcContext {
     /**
      * Add resources.
      *
-     * @param resource the resource
+     * @param resources the resources
      */
-    public void addResources(Set<String> resource) {
-        if (null == resource) { return; }
-        if (null == resourceSets) {
+    public void addResources(Set<String> resources) {
+        if (resources == null) { return; }
+        if (resourceSets == null) {
             this.resourceSets = new HashSet<String>();
         }
-        this.resourceSets.addAll(resource);
+        this.resourceSets.addAll(resources);
     }
 
     /**

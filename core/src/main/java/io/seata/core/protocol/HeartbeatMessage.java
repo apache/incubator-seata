@@ -20,10 +20,9 @@ import java.io.Serializable;
 /**
  * The type Heartbeat message.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
+ * @author slievrly
  */
-public class HeartbeatMessage implements Serializable {
+public class HeartbeatMessage implements MessageTypeAware, Serializable {
     private static final long serialVersionUID = -985316399527884899L;
     private boolean ping = true;
     /**
@@ -37,6 +36,11 @@ public class HeartbeatMessage implements Serializable {
 
     private HeartbeatMessage(boolean ping) {
         this.ping = ping;
+    }
+
+    @Override
+    public short getTypeCode() {
+        return MessageType.TYPE_HEARTBEAT_MSG;
     }
 
     @Override

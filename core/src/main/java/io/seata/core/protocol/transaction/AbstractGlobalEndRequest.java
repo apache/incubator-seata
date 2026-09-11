@@ -22,7 +22,7 @@ package io.seata.core.protocol.transaction;
  */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC {
 
-    private String xid;
+    protected String xid;
 
     /**
      * The Extra data.
@@ -67,13 +67,11 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("xid=");
-        result.append(xid);
-        result.append(",");
-        result.append("extraData=");
-        result.append(extraData);
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("xid='").append(xid).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

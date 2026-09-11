@@ -25,15 +25,13 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Message future.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
+ * @author slievrly
  */
 public class MessageFuture {
     private RpcMessage requestMessage;
     private long timeout;
     private long start = System.currentTimeMillis();
-    private static final Object NULL = new Object();
-    private transient CompletableFuture origin = new CompletableFuture();
+    private transient CompletableFuture<Object> origin = new CompletableFuture<>();
 
     /**
      * Is timeout boolean.
@@ -58,10 +56,13 @@ public class MessageFuture {
         Object result = null;
         try {
             result = origin.get(timeout, unit);
+            if (result instanceof TimeoutException) {
+                throw (TimeoutException)result;
+            }
         } catch (ExecutionException e) {
             throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
         } catch (TimeoutException e) {
-            throw new TimeoutException("cost " + (System.currentTimeMillis() - start) + " ms");
+            throw new TimeoutException(String.format("%s ,cost: %d ms", e.getMessage(), System.currentTimeMillis() - start));
         }
 
         if (result instanceof RuntimeException) {

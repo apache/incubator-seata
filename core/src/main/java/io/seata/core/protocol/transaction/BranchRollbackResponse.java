@@ -20,7 +20,7 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch rollback response.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class BranchRollbackResponse extends AbstractBranchEndResponse {
 

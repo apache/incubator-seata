@@ -20,12 +20,21 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch report response.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class BranchReportResponse extends AbstractTransactionResponse {
 
     @Override
     public short getTypeCode() {
         return MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BranchReportResponse{");
+        sb.append("resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

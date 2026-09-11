@@ -1,0 +1,362 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.rpc.RegisterCheckAuthHandler"
+    },
+    "name": "io.seata.server.auth.DefaultCheckAuthHandler",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.DataSourceProvider"
+    },
+    "name": "io.seata.server.store.DbcpDataSourceProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.DataSourceProvider"
+    },
+    "name": "io.seata.server.store.DruidDataSourceProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.db.DataSourceProvider"
+    },
+    "name": "io.seata.server.store.HikariDataSourceProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.DistributedLocker"
+    },
+    "name": "io.seata.server.storage.redis.lock.RedisDistributedLocker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.store.DistributedLocker"
+    },
+    "name": "io.seata.server.storage.db.lock.DataBaseDistributedLocker",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.coordinator.AbstractCore"
+    },
+    "name": "io.seata.server.transaction.at.ATCore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.core.rpc.RemotingServer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.coordinator.AbstractCore"
+    },
+    "name": "io.seata.server.transaction.tcc.TccCore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.core.rpc.RemotingServer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.coordinator.AbstractCore"
+    },
+    "name": "io.seata.server.transaction.saga.SagaCore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.core.rpc.RemotingServer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.coordinator.AbstractCore"
+    },
+    "name": "io.seata.server.transaction.xa.XACore",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "io.seata.core.rpc.RemotingServer"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.lock.LockManager"
+    },
+    "name": "io.seata.server.storage.db.lock.DataBaseLockManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.lock.LockManager"
+    },
+    "name": "io.seata.server.storage.file.lock.FileLockManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.lock.LockManager"
+    },
+    "name": "io.seata.server.storage.redis.lock.RedisLockManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.session.SessionManager"
+    },
+    "name": "io.seata.server.storage.file.session.FileSessionManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.session.SessionManager"
+    },
+    "name": "io.seata.server.storage.db.session.DataBaseSessionManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.server.session.SessionManager"
+    },
+    "name": "io.seata.server.storage.redis.session.RedisSessionManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      },
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Integer",
+    "methods": [
+      {
+        "name": "parseInteger",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Long",
+    "methods": [
+      {
+        "name": "parseLong",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Boolean",
+    "methods": [
+      {
+        "name": "parseBoolean",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Byte",
+    "methods": [
+      {
+        "name": "parseByte",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Short",
+    "methods": [
+      {
+        "name": "parseShort",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Float",
+    "methods": [
+      {
+        "name": "parseFloat",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "com.google.inject.internal.TypeConverterBindingProcessor"
+    },
+    "name": "java.lang.Double",
+    "methods": [
+      {
+        "name": "parseDouble",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.channel.socket.nio.SelectorProviderUtil"
+    },
+    "name": "java.nio.channels.spi.SelectorProvider",
+    "methods": [
+      {
+        "name": "openServerSocketChannel",
+        "parameterTypes": [
+          "java.net.ProtocolFamily"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.channel.DefaultChannelConfig"
+    },
+    "name": "io.netty.buffer.ByteBufAllocator"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.channel.DefaultChannelConfig"
+    },
+    "name": "io.netty.buffer.ByteBufUtil"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.util.ResourceLeakDetector"
+    },
+    "name": "io.netty.buffer.AbstractByteBufAllocator",
+    "allDeclaredMethods": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.util.ResourceLeakDetector"
+    },
+    "name": "io.netty.buffer.AdvancedLeakAwareByteBuf",
+    "allDeclaredMethods": true
+  },
+  {
+    "condition": {
+      "typeReachable": "io.netty.util.ResourceLeakDetector"
+    },
+    "name": "io.netty.util.ReferenceCountUtil",
+    "allDeclaredMethods": true
+  }
+]

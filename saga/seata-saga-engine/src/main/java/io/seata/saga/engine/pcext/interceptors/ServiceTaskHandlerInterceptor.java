@@ -15,27 +15,29 @@
  */
 package io.seata.saga.engine.pcext.interceptors;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.evaluation.expression.ExpressionEvaluator;
 import io.seata.saga.engine.exception.EngineExecutionException;
-import io.seata.saga.engine.expression.Expression;
-import io.seata.saga.engine.expression.ExpressionFactory;
-import io.seata.saga.engine.expression.ExpressionFactoryManager;
-import io.seata.saga.engine.expression.seq.SequenceExpression;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
+import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
+import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
@@ -50,152 +52,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
- * ServiceTaskHandler Interceptor
+ * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
  *
  * @author lorne.cl
  */
+@LoadLevel(name = "ServiceTask", order = 100)
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskHandlerInterceptor.class);
 
-    private static List<Object> createInputParams(ExpressionFactoryManager expressionFactoryManager,
-                                                  StateInstanceImpl stateInstance,
-                                                  ServiceTaskStateImpl serviceTaskState, Object variablesFrom) {
-
-        List<Object> inputAssignments = serviceTaskState.getInput();
-        if (inputAssignments == null || inputAssignments.size() == 0) {
-            return new ArrayList<>(0);
-        }
-
-        List<Object> inputExpressions = serviceTaskState.getInputExpressions();
-        if (inputExpressions == null) {
-            synchronized (serviceTaskState) {
-                inputExpressions = serviceTaskState.getInputExpressions();
-                if (inputExpressions == null) {
-                    inputExpressions = new ArrayList<>(inputAssignments.size());
-                    for (Object inputAssignment : inputAssignments) {
-                        inputExpressions.add(createValueExpression(expressionFactoryManager, inputAssignment));
-                    }
-                }
-                serviceTaskState.setInputExpressions(inputExpressions);
-            }
-        }
-        List<Object> inputValues = new ArrayList<>(inputExpressions.size());
-        for (Object valueExpression : inputExpressions) {
-            Object value = getValue(valueExpression, variablesFrom, stateInstance);
-            inputValues.add(value);
-        }
-
-        return inputValues;
-    }
-
-    public static Map<String, Object> createOutputParams(ExpressionFactoryManager expressionFactoryManager,
-                                                         ServiceTaskStateImpl serviceTaskState, Object variablesFrom) {
-
-        Map<String, Object> outputAssignments = serviceTaskState.getOutput();
-        if (outputAssignments == null || outputAssignments.size() == 0) {
-            return new LinkedHashMap<>(0);
-        }
-
-        Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
-        if (outputExpressions == null) {
-            synchronized (serviceTaskState) {
-                outputExpressions = serviceTaskState.getOutputExpressions();
-                if (outputExpressions == null) {
-                    outputExpressions = new LinkedHashMap<>(outputAssignments.size());
-                    for (String paramName : outputAssignments.keySet()) {
-                        outputExpressions.put(paramName,
-                            createValueExpression(expressionFactoryManager, outputAssignments.get(paramName)));
-                    }
-                }
-                serviceTaskState.setOutputExpressions(outputExpressions);
-            }
-        }
-        Map<String, Object> outputValues = new LinkedHashMap<>(outputExpressions.size());
-        for (String paramName : outputExpressions.keySet()) {
-            outputValues.put(paramName, getValue(outputExpressions.get(paramName), variablesFrom, null));
-        }
-        return outputValues;
-    }
-
-    private static Object getValue(Object valueExpression, Object variablesFrom, StateInstance stateInstance) {
-        if (valueExpression instanceof Expression) {
-            Object value = ((Expression)valueExpression).getValue(variablesFrom);
-            if (value != null && stateInstance != null && StringUtils.isEmpty(stateInstance.getBusinessKey())
-                && valueExpression instanceof SequenceExpression) {
-                stateInstance.setBusinessKey(String.valueOf(value));
-            }
-            return value;
-        } else if (valueExpression instanceof Map) {
-            Map<String, Object> mapValueExpression = (Map<String, Object>)valueExpression;
-            Map<String, Object> mapValue = new LinkedHashMap<>();
-            for (String paramName : mapValueExpression.keySet()) {
-                Object value = getValue(mapValueExpression.get(paramName), variablesFrom, stateInstance);
-                if (value != null) {
-                    mapValue.put(paramName, value);
-                }
-            }
-            return mapValue;
-        } else if (valueExpression instanceof List) {
-            List<Object> listValueExpression = (List<Object>)valueExpression;
-            List<Object> listValue = new ArrayList<>(listValueExpression.size());
-            for (Object aValueExpression : listValueExpression) {
-                listValue.add(getValue(aValueExpression, variablesFrom, stateInstance));
-            }
-            return listValue;
-        } else {
-            return valueExpression;
-        }
-    }
-
-    private static Object createValueExpression(ExpressionFactoryManager expressionFactoryManager,
-                                                Object paramAssignment) {
-
-        Object valueExpression;
-
-        if (paramAssignment instanceof Expression) {
-            valueExpression = paramAssignment;
-        } else if (paramAssignment instanceof Map) {
-            Map<String, Object> paramMapAssignment = (Map<String, Object>)paramAssignment;
-            Map<String, Object> paramMap = new LinkedHashMap<>(paramMapAssignment.size());
-            for (String paramName : paramMapAssignment.keySet()) {
-                Object valueAssignment = paramMapAssignment.get(paramName);
-                paramMap.put(paramName, createValueExpression(expressionFactoryManager, valueAssignment));
-            }
-            valueExpression = paramMap;
-        } else if (paramAssignment instanceof List) {
-            List<Object> paramListAssignment = (List<Object>)paramAssignment;
-            List<Object> paramList = new ArrayList<>(paramListAssignment.size());
-            for (Object aParamAssignment : paramListAssignment) {
-                paramList.add(createValueExpression(expressionFactoryManager, aParamAssignment));
-            }
-            valueExpression = paramList;
-        } else if (paramAssignment instanceof String && ((String)paramAssignment).startsWith("$")) {
-
-            String expressionStr = (String)paramAssignment;
-            int expTypeStart = expressionStr.indexOf("$");
-            int expTypeEnd = expressionStr.indexOf(".", expTypeStart);
-
-            String expressionType = null;
-            if (expTypeStart >= 0 && expTypeEnd > expTypeStart) {
-                expressionType = expressionStr.substring(expTypeStart + 1, expTypeEnd);
-            }
-
-            int expEnd = expressionStr.length();
-            String expressionContent = null;
-            if (expTypeEnd > 0 && expEnd > expTypeEnd) {
-                expressionContent = expressionStr.substring(expTypeEnd + 1, expEnd);
-            }
-
-            ExpressionFactory expressionFactory = expressionFactoryManager.getExpressionFactory(expressionType);
-            if (expressionFactory == null) {
-                throw new IllegalArgumentException("Cannot get ExpressionFactory by Type[" + expressionType + "]");
-            }
-            valueExpression = expressionFactory.createExpression(expressionContent);
-        } else {
-            valueExpression = paramAssignment;
-        }
-        return valueExpression;
+    @Override
+    public boolean match(Class<? extends InterceptableStateHandler> clazz) {
+        return clazz != null &&
+                (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
+                || SubStateMachineHandler.class.isAssignableFrom(clazz));
     }
 
     @Override
@@ -208,6 +78,20 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
+        if (EngineUtils.isTimeout(stateMachineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
+            String message = "Saga Transaction [stateMachineInstanceId:" + stateMachineInstance.getId()
+                    + "] has timed out, stop execution now.";
+
+            LOGGER.error(message);
+
+            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(null,
+                    FrameworkErrorCode.StateMachineExecutionTimeout, message, stateMachineInstance, instruction.getStateName());
+
+            EngineUtils.failStateMachine(context, exception);
+
+            throw exception;
+        }
+
         StateInstanceImpl stateInstance = new StateInstanceImpl();
 
         Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
@@ -216,12 +100,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         List<Object> serviceInputParams = null;
         if (contextVariables != null) {
             try {
-                serviceInputParams = createInputParams(stateMachineConfig.getExpressionFactoryManager(), stateInstance,
+                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionFactoryManager(), stateInstance,
                     state, contextVariables);
             } catch (Exception e) {
 
                 String message = "Task [" + state.getName()
-                    + "] input parameters assign failed, please check from/to expression:" + e.getMessage();
+                    + "] input parameters assign failed, please check 'Input' expression:" + e.getMessage();
 
                 EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
                     FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, state.getName());
@@ -237,12 +121,21 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
         stateInstance.setStateMachineInstance(stateMachineInstance);
-        stateInstance.setName(state.getName());
+        Object isForCompensation = state.isForCompensation();
+        if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE) && !Boolean.TRUE.equals(isForCompensation)) {
+            stateInstance.setName(LoopTaskUtils.generateLoopStateName(context, state.getName()));
+            StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(stateMachineInstance,
+                stateInstance.getName());
+            stateInstance.setStateIdRetriedFor(
+                lastRetriedStateInstance == null ? null : lastRetriedStateInstance.getId());
+        } else {
+            stateInstance.setName(state.getName());
+            stateInstance.setStateIdRetriedFor(
+                (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
+        }
         stateInstance.setGmtStarted(new Date());
+        stateInstance.setGmtUpdated(stateInstance.getGmtStarted());
         stateInstance.setStatus(ExecutionStatus.RU);
-
-        stateInstance.setStateIdRetriedFor(
-            (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
 
         if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
@@ -257,7 +150,6 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceMethod(state.getServiceMethod());
         stateInstance.setServiceType(state.getServiceType());
 
-        Object isForCompensation = state.isForCompensation();
         if (isForCompensation != null && (Boolean)isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());
@@ -277,7 +169,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             && StringUtils.isEmpty(stateInstance.getStateIdRetriedFor()) && !state.isForCompensation()) {
 
             List<StateInstance> stateList = stateMachineInstance.getStateList();
-            if (stateList != null && stateList.size() > 0) {
+            if (CollectionUtils.isNotEmpty(stateList)) {
                 for (int i = stateList.size() - 1; i >= 0; i--) {
                     StateInstance executedState = stateList.get(i);
 
@@ -295,7 +187,20 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist()
             && stateMachineConfig.getStateLogStore() != null) {
 
-            stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            try {
+                stateMachineConfig.getStateLogStore().recordStateStarted(stateInstance, context);
+            } catch (Exception e) {
+
+                String message = "Record state[" + state.getName() + "] started failed, stateMachineInstance[" + stateMachineInstance
+                        .getId() + "], Reason: " + e.getMessage();
+
+                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
+                        FrameworkErrorCode.ExceptionCaught, message, stateMachineInstance, state.getName());
+
+                EngineUtils.failStateMachine(context, exception);
+
+                throw exception;
+            }
         }
 
         if (StringUtils.isEmpty(stateInstance.getId())) {
@@ -314,7 +219,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-        if (stateInstance == null) {
+        if (stateInstance == null || !stateMachineInstance.isRunning()) {
+            LOGGER.warn("StateMachineInstance[id:" + stateMachineInstance.getId() + "] is end. stop running");
             return;
         }
 
@@ -343,14 +249,14 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         Object serviceOutputParams = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         if (serviceOutputParams != null) {
             try {
-                Map<String, Object> outputVariablesToContext = createOutputParams(
+                Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
                     stateMachineConfig.getExpressionFactoryManager(), state, serviceOutputParams);
-                if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
+                if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
             } catch (Exception e) {
                 String message = "Task [" + state.getName()
-                    + "] output parameters assign failed, please check from/to expression:" + e.getMessage();
+                    + "] output parameters assign failed, please check 'Output' expression:" + e.getMessage();
 
                 EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
                     FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, stateInstance);
@@ -358,6 +264,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist()
                     && stateMachineConfig.getStateLogStore() != null) {
 
+                    stateInstance.setGmtEnd(new Date());
                     stateMachineConfig.getStateLogStore().recordStateFinished(stateInstance, context);
                 }
 
@@ -378,7 +285,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
 
         if (exp != null && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
-            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {//如果存在异常没有catch则需要退出状态机执行
+            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
+            //If there is an exception and there is no catch, need to exit the state machine to execute.
 
             context.removeVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH);
             EngineUtils.failStateMachine(context, exp);
@@ -388,19 +296,16 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private void decideExecutionStatus(ProcessContext context, StateInstance stateInstance, ServiceTaskStateImpl state,
                                        Exception exp) {
-
         Map<String, String> statusMatchList = state.getStatus();
-        if (statusMatchList != null && statusMatchList.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(statusMatchList)) {
             if (state.isAsync()) {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
                         "Service[{}.{}] is execute asynchronously, null return value collected, so user defined "
-                            + "Status Matching skipped. stateName: {}, branchId: {}",
-                        state.getServiceName(), state.getServiceMethod(), state.getName(), stateInstance.getId());
+                            + "Status Matching skipped. stateName: {}, branchId: {}", state.getServiceName(),
+                        state.getServiceMethod(), state.getName(), stateInstance.getId());
                 }
             } else {
-
                 StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
@@ -410,11 +315,12 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                            for (String expressionStr : statusMatchList.keySet()) {
-
-                                String statusVal = statusMatchList.get(expressionStr);
-                                Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(),
-                                    expressionStr);
+                            String expressionStr, statusVal;
+                            Evaluator evaluator;
+                            for (Map.Entry<String, String> entry : statusMatchList.entrySet()) {
+                                expressionStr = entry.getKey();
+                                statusVal = entry.getValue();
+                                evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
                                 if (evaluator != null) {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }

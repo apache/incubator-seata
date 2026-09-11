@@ -1,0 +1,57 @@
+.editor {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fff;
+}
+
+.editorHd {
+  padding: 8px;
+  border: 1px solid #e6e9ed;
+}
+
+.editorBd {
+  flex: 1;
+  overflow: auto;
+}
+
+.editorSidebar,
+.editorContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.editorSidebar {
+  background: #fafafa;
+
+  &:first-child {
+    border-right: 1px solid #e6e9ed;
+  }
+
+  &:last-child {
+    border-left: 1px solid #e6e9ed;
+  }
+}
+
+.flow,
+.mind,
+.koni {
+  flex: 1;
+  // https://github.com/philipwalton/flexbugs/issues/197#issuecomment-378908438
+  height: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+:global {
+  .ReactCodeMirror {
+    flex: 1;
+  
+    .CodeMirror {
+      height: 100%;
+    }
+  }
+}
+

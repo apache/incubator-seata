@@ -15,9 +15,11 @@
  */
 package io.seata.saga.engine.strategy.impl;
 
-import java.util.Date;
 import java.util.List;
 
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
+import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.strategy.StatusDecisionStrategy;
 import io.seata.saga.engine.utils.ExceptionUtils;
@@ -88,18 +90,15 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
     /**
      * set machine status based on state list
      *
-     * @param stateMachineInstance
-     * @param stateList
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param stateList the state instance list
      */
-    public static boolean setMachineStatusBasedOnStateList(StateMachineInstance stateMachineInstance,
-                                                           List<StateInstance> stateList) {
+    public static void setMachineStatusBasedOnStateListAndException(StateMachineInstance stateMachineInstance,
+                                                                    List<StateInstance> stateList, Exception exp) {
         boolean hasSetStatus = false;
-        if (stateList != null && stateList.size() > 0) {
-
-            boolean hasSuccessedUpdateService = false;
-
-            boolean hasUnsuccessedAct = false;
+        boolean hasSuccessUpdateService = false;
+        if (CollectionUtils.isNotEmpty(stateList)) {
+            boolean hasUnsuccessService = false;
 
             for (int i = stateList.size() - 1; i >= 0; i--) {
                 StateInstance stateInstance = stateList.get(i);
@@ -113,18 +112,18 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                 } else if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     if (DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())) {
                         if (stateInstance.isForUpdate() && !stateInstance.isForCompensation()) {
-                            hasSuccessedUpdateService = true;
+                            hasSuccessUpdateService = true;
                         }
                     }
                 } else if (ExecutionStatus.SK.equals(stateInstance.getStatus())) {
                     // ignore
                 } else {
-                    hasUnsuccessedAct = true;
+                    hasUnsuccessService = true;
                 }
             }
 
-            if (!hasSetStatus && hasUnsuccessedAct) {
-                if (hasSuccessedUpdateService) {
+            if (!hasSetStatus && hasUnsuccessService) {
+                if (hasSuccessUpdateService) {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);
                 } else {
                     stateMachineInstance.setStatus(ExecutionStatus.FA);
@@ -132,7 +131,10 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                 hasSetStatus = true;
             }
         }
-        return hasSetStatus;
+
+        if (!hasSetStatus) {
+            setMachineStatusBasedOnException(stateMachineInstance, exp, hasSuccessUpdateService);
+        }
     }
 
     /**
@@ -141,9 +143,15 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
      * @param stateMachineInstance
      * @param exp
      */
-    public static void setMachineStatusBasedOnException(StateMachineInstance stateMachineInstance, Exception exp) {
+    public static void setMachineStatusBasedOnException(StateMachineInstance stateMachineInstance, Exception exp,
+                                                        boolean hasSuccessUpdateService) {
         if (exp == null) {
             stateMachineInstance.setStatus(ExecutionStatus.SU);
+        } else if (exp instanceof EngineExecutionException
+                && FrameworkErrorCode.StateMachineExecutionTimeout.equals(((EngineExecutionException)exp).getErrcode())) {
+            stateMachineInstance.setStatus(ExecutionStatus.UN);
+        } else if (hasSuccessUpdateService) {
+            stateMachineInstance.setStatus(ExecutionStatus.UN);
         } else {
             NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
             if (t != null) {
@@ -168,7 +176,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             decideMachineCompensateStatus(stateMachineInstance, compensationHolder);
         } else {
             Object failEndStateFlag = context.getVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG);
-            boolean isComeFromFailEndState = (failEndStateFlag != null && (Boolean)failEndStateFlag);
+            boolean isComeFromFailEndState = failEndStateFlag != null && (Boolean)failEndStateFlag;
             decideMachineForwardExecutionStatus(stateMachineInstance, exp, isComeFromFailEndState);
         }
 
@@ -194,18 +202,15 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
             stateMachineInstance.setCompensationStatus(ExecutionStatus.UN);
         }
-        stateMachineInstance.setRunning(false);
-        stateMachineInstance.setGmtEnd(new Date());
-        stateMachineInstance.setException(exp);
     }
 
     /**
      * Determine the forward execution state of the state machine
      *
-     * @param stateMachineInstance
-     * @param exp
-     * @param specialPolicy
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param exp the exception
+     * @param specialPolicy the special policy
+     * @return the boolean
      */
     @Override
     public boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,
@@ -217,11 +222,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
             List<StateInstance> stateList = stateMachineInstance.getStateList();
 
-            boolean hasSetStatus = setMachineStatusBasedOnStateList(stateMachineInstance, stateList);
-
-            if (!hasSetStatus) {
-                setMachineStatusBasedOnException(stateMachineInstance, exp);
-            }
+            setMachineStatusBasedOnStateListAndException(stateMachineInstance, stateList, exp);
 
             if (specialPolicy && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
                 for (StateInstance stateInstance : stateMachineInstance.getStateList()) {

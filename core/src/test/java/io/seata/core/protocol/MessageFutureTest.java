@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Message future test.
  *
  * @author guoyao
- * @date 2019 /3/2
  */
 public class MessageFutureTest {
 
@@ -50,16 +49,16 @@ public class MessageFutureTest {
     @Test
     public void testFieldSetGet() {
         String fromJson = "{\n" +
-                "\t\"requestMessage\":{\n" +
-                "\t\t\"body\":\"" + BODY_FIELD + "\",\n" +
-                "\t\t\"codec\":" + CODEC_FIELD + ",\n" +
-                "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
-                "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
-                "\t\t\"id\":" + ID_FIELD + ",\n" +
-                "\t\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
-                "\t},\n" +
-                "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
-                "}";
+            "\t\"requestMessage\":{\n" +
+            "\t\t\"body\":\"" + BODY_FIELD + "\",\n" +
+            "\t\t\"codec\":" + CODEC_FIELD + ",\n" +
+            "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
+            "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
+            "\t\t\"id\":" + ID_FIELD + ",\n" +
+            "\t\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+            "\t},\n" +
+            "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
+            "}";
         MessageFuture fromJsonFuture = JSON.parseObject(fromJson, MessageFuture.class);
         assertThat(fromJsonFuture.getTimeout()).isEqualTo(TIME_OUT_FIELD);
         MessageFuture toJsonFuture = new MessageFuture();

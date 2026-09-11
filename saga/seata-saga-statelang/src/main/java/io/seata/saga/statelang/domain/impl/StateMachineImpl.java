@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.RecoverStrategy;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 
@@ -37,8 +38,10 @@ public class StateMachineImpl implements StateMachine {
     private String version;
     private String startState;
     private Status status = Status.AC;
-    private String recoverStrategy;
+    private RecoverStrategy recoverStrategy;
     private boolean isPersist = true;
+    private Boolean retryPersistModeUpdate;
+    private Boolean compensatePersistModeUpdate;
     private String type = "STATE_LANG";
     private transient String content;
     private Date gmtCreate;
@@ -67,6 +70,7 @@ public class StateMachineImpl implements StateMachine {
         return startState;
     }
 
+    @Override
     public void setStartState(String startState) {
         this.startState = startState;
     }
@@ -150,12 +154,12 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public String getRecoverStrategy() {
+    public RecoverStrategy getRecoverStrategy() {
         return recoverStrategy;
     }
 
     @Override
-    public void setRecoverStrategy(String recoverStrategy) {
+    public void setRecoverStrategy(RecoverStrategy recoverStrategy) {
         this.recoverStrategy = recoverStrategy;
     }
 
@@ -164,6 +168,7 @@ public class StateMachineImpl implements StateMachine {
         return content;
     }
 
+    @Override
     public void setContent(String content) {
         this.content = content;
     }
@@ -185,5 +190,23 @@ public class StateMachineImpl implements StateMachine {
     @Override
     public void setGmtCreate(Date gmtCreate) {
         this.gmtCreate = gmtCreate;
+    }
+
+    @Override
+    public Boolean isRetryPersistModeUpdate() {
+        return retryPersistModeUpdate;
+    }
+
+    public void setRetryPersistModeUpdate(Boolean retryPersistModeUpdate) {
+        this.retryPersistModeUpdate = retryPersistModeUpdate;
+    }
+
+    @Override
+    public Boolean isCompensatePersistModeUpdate() {
+        return compensatePersistModeUpdate;
+    }
+
+    public void setCompensatePersistModeUpdate(Boolean compensatePersistModeUpdate) {
+        this.compensatePersistModeUpdate = compensatePersistModeUpdate;
     }
 }

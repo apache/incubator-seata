@@ -38,7 +38,7 @@ public class BranchRegisterResponseTest {
         branchRegisterResponse.setResultCode(ResultCode.Success);
         branchRegisterResponse.setMsg("");
         Assertions.assertEquals(
-            "BranchRegisterResponse: branchId=123457,result code =Success,getMsg =",
+            "BranchRegisterResponse{branchId=123457, resultCode=Success, msg=''}",
             branchRegisterResponse.toString());
 
     }

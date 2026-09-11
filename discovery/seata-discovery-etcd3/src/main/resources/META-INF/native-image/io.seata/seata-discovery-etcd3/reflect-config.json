@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.discovery.registry.RegistryProvider"
+    },
+    "name": "io.seata.discovery.registry.etcd3.EtcdRegistryProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

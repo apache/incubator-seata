@@ -66,8 +66,9 @@ public interface HierarchicalProcessContext extends ProcessContext {
      * Remove variable locally.
      *
      * @param name the name
+     * @return the removed variable or null
      */
-    void removeVariableLocally(String name);
+    Object removeVariableLocally(String name);
 
     /**
      * Clear locally.

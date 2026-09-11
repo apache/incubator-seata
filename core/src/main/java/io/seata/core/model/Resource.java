@@ -39,9 +39,9 @@ public interface Resource {
     String getResourceId();
 
     /**
-     * get resource type, AT、TCC etc.
+     * get resource type, AT, TCC, SAGA and XA
      *
-     * @return
+     * @return branch type
      */
     BranchType getBranchType();
 

@@ -24,5 +24,12 @@ import io.seata.saga.statelang.domain.ServiceTaskState;
  */
 public interface ServiceInvoker {
 
-    Object invoke(ServiceTaskState serviceTaskState, Object... input);
+    /**
+     * invoke service
+     * @param serviceTaskState the service task state
+     * @param input optional params
+     * @return the invoker result
+     * @throws Throwable the throwable
+     */
+    Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable;
 }

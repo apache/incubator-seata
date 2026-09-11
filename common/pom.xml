@@ -26,6 +26,7 @@
     <artifactId>seata-common</artifactId>
     <packaging>jar</packaging>
     <name>seata-common ${project.version}</name>
+    <description>common library for Seata built with Maven</description>
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
@@ -36,16 +37,8 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
         </dependency>
     </dependencies>
 </project>

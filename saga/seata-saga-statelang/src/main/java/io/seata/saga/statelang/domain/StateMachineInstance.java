@@ -233,14 +233,14 @@ public interface StateMachineInstance {
     /**
      * Gets get context.
      *
-     * @return
+     * @return the state machine context
      */
     Map<String, Object> getContext();
 
     /**
      * Sets set context.
      *
-     * @param context
+     * @param context the key and value context
      */
     void setContext(Map<String, Object> context);
 

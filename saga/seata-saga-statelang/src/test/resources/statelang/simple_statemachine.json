@@ -8,6 +8,21 @@
       "Type": "ServiceTask",
       "ServiceName": "is.seata.saga.DemoService",
       "ServiceMethod": "foo",
+      "IsPersist": false,
+      "Next": "ScriptState"
+    },
+    "ScriptState": {
+      "Type": "ScriptTask",
+      "ScriptType": "groovy",
+      "ScriptContent": "return 'hello ' + inputA",
+      "Input": [
+        {
+          "inputA": "$.data1"
+        }
+      ],
+      "Output": {
+        "scriptStateResult": "$.#root"
+      },
       "Next": "ChoiceState"
     },
     "ChoiceState": {
@@ -48,6 +63,14 @@
       "Output": {
         "firstMatchStateResult": "$.#root"
       },
+      "Retry": [
+        {
+          "Exceptions": ["java.lang.Exception"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 1.5
+        }
+      ],
       "Catch": [
         {
           "Exceptions": [
@@ -62,7 +85,8 @@
       "Type": "ServiceTask",
       "ServiceName": "is.seata.saga.DemoService",
       "ServiceMethod": "compensateBar",
-      "isForCompensation": true,
+      "IsForCompensation": true,
+      "IsForUpdate": true,
       "Input": [
         {
           "input": "$.data"

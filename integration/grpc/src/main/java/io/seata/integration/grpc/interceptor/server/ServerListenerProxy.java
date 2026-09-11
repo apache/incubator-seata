@@ -18,6 +18,7 @@ package io.seata.integration.grpc.interceptor.server;
 import io.grpc.ServerCall;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 
 import java.util.Objects;
 
@@ -43,6 +44,7 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     @Override
     public void onHalfClose() {
+        RootContext.unbind();
         if (StringUtils.isNotBlank(xid)) {
             RootContext.bind(xid);
         }
@@ -51,17 +53,11 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
 
     @Override
     public void onCancel() {
-        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            RootContext.unbind();
-        }
         target.onCancel();
     }
 
     @Override
     public void onComplete() {
-        if (StringUtils.isNotBlank(xid) && RootContext.inGlobalTransaction()) {
-            RootContext.unbind();
-        }
         target.onComplete();
     }
 
@@ -69,4 +65,6 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     public void onReady() {
         target.onReady();
     }
+
+
 }

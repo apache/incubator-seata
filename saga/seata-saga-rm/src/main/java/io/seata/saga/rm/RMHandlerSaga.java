@@ -36,7 +36,7 @@ public class RMHandlerSaga extends AbstractRMHandler {
     /**
      * get SAGA resource manager
      *
-     * @return
+     * @return the resource manager
      */
     @Override
     protected ResourceManager getResourceManager() {

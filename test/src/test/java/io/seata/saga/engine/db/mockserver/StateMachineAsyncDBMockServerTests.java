@@ -15,10 +15,10 @@
  */
 package io.seata.saga.engine.db.mockserver;
 
-import io.seata.saga.engine.AsyncCallback;
+import io.seata.common.LockAndCallback;
+import io.seata.common.SagaCostPrint;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.mock.DemoService.People;
-import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.junit.jupiter.api.Assertions;
@@ -32,6 +32,7 @@ import java.util.Map;
 
 /**
  * State machine async tests with db log store
+ *
  * @author lorne.cl
  */
 public class StateMachineAsyncDBMockServerTests {
@@ -40,145 +41,155 @@ public class StateMachineAsyncDBMockServerTests {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+                "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
     }
 
     @Test
     public void testSimpleCatchesStateMachine() throws Exception {
-
-        long start  = System.currentTimeMillis();
-
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 1);
-        paramMap.put("barThrowException", "true");
-
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        SagaCostPrint.executeAndPrint("4-1", () -> {
+            Map<String, Object> paramMap = new HashMap<>(2);
+            paramMap.put("a", 1);
+            paramMap.put("barThrowException", "true");
 
-        waittingForFinish(inst);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
+            Assertions.assertNotNull(inst.getException());
+            Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
+        });
+    }
 
+    @Test
+    public void testSimpleRetryStateMachine() throws Exception {
+        String stateMachineName = "simpleRetryStateMachine";
 
-        Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        SagaCostPrint.executeAndPrint("4-2", () -> {
+            Map<String, Object> paramMap = new HashMap<>(2);
+            paramMap.put("a", 1);
+            paramMap.put("barThrowException", "true");
+
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
+
+            Assertions.assertNotNull(inst.getException());
+            Assertions.assertEquals(ExecutionStatus.FA, inst.getStatus());
+        });
     }
 
     @Test
     public void testStatusMatchingStateMachine() throws Exception {
-
-        long start  = System.currentTimeMillis();
-
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 1);
-        paramMap.put("barThrowException", "true");
-
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        SagaCostPrint.executeAndPrint("4-3", () -> {
+            Map<String, Object> paramMap = new HashMap<>(2);
+            paramMap.put("a", 1);
+            paramMap.put("barThrowException", "true");
 
-        waittingForFinish(inst);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
-
-
-        Assertions.assertNotNull(inst.getException());
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+            Assertions.assertNotNull(inst.getException());
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        });
     }
 
     @Test
     public void testCompensationStateMachine() throws Exception {
-
-        long start  = System.currentTimeMillis();
-
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 1);
-        paramMap.put("barThrowException", "true");
-
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        SagaCostPrint.executeAndPrint("4-4", () -> {
+            Map<String, Object> paramMap = new HashMap<>(1);
+            paramMap.put("a", 1);
+            paramMap.put("barThrowException", "true");
 
-        waittingForFinish(inst);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
-
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+        });
     }
 
     @Test
     public void testCompensationAndSubStateMachine() throws Exception {
-
-        long start  = System.currentTimeMillis();
-
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 2);
-        paramMap.put("barThrowException", "true");
-
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        SagaCostPrint.executeAndPrint("4-5", () -> {
+            Map<String, Object> paramMap = new HashMap<>(2);
+            paramMap.put("a", 2);
+            paramMap.put("barThrowException", "true");
 
-        waittingForFinish(inst);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
-
-        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        });
     }
 
     @Test
-    public void testStateMachineWithComplextParams() {
+    public void testCompensationAndSubStateMachineWithLayout() throws Exception {
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        long start  = System.currentTimeMillis();
+        SagaCostPrint.executeAndPrint("4-6", () -> {
+            Map<String, Object> paramMap = new HashMap<>(1);
+            paramMap.put("a", 2);
+            paramMap.put("barThrowException", "true");
 
-        Map<String, Object> paramMap = new HashMap<>(1);
-        People people = new People();
-        people.setName("lilei");
-        people.setAge(18);
-        paramMap.put("people", people);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        String stateMachineName = "simpleStateMachineWithComplexParams";
-
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
-
-        waittingForFinish(inst);
-
-        long cost = System.currentTimeMillis() - start;
-
-        People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
-        Assertions.assertNotNull(peopleResult);
-        Assertions.assertTrue(people.getName().equals(people.getName()));
-
-        System.out.println("====== cost :" + cost);
-
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+        });
     }
 
     @Test
-    public void testSimpleStateMachineWithAsyncState() {
+    public void testStateMachineWithComplexParams() throws Exception {
+        String stateMachineName = "simpleStateMachineWithComplexParamsJackson";
 
-        long start  = System.currentTimeMillis();
+        SagaCostPrint.executeAndPrint("4-7", () -> {
+            People people = new People();
+            people.setName("lilei");
+            people.setAge(18);
 
-        Map<String, Object> paramMap = new HashMap<>(1);
-        paramMap.put("a", 1);
+            Map<String, Object> paramMap = new HashMap<>(1);
+            paramMap.put("people", people);
 
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
+
+            People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
+            Assertions.assertNotNull(peopleResult);
+            Assertions.assertEquals(people.getName(), peopleResult.getName());
+
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        });
+    }
+
+    @Test
+    public void testSimpleStateMachineWithAsyncState() throws Exception {
         String stateMachineName = "simpleStateMachineWithAsyncState";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+        SagaCostPrint.executeAndPrint("4-8", () -> {
+            Map<String, Object> paramMap = new HashMap<>(1);
+            paramMap.put("a", 1);
 
-        waittingForFinish(inst);
+            LockAndCallback lockAndCallback = new LockAndCallback();
+            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            lockAndCallback.waittingForFinish(inst);
 
-        long cost = System.currentTimeMillis() - start;
-        System.out.println("====== cost :" + cost);
-
-        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
+        });
 
         try {
             Thread.sleep(500);
@@ -186,33 +197,4 @@ public class StateMachineAsyncDBMockServerTests {
             e.printStackTrace();
         }
     }
-
-    private void waittingForFinish(StateMachineInstance inst){
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private volatile Object lock = new Object();
-    private AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
-                lock.notifyAll();
-            }
-        }
-
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
-                lock.notifyAll();
-            }
-        }
-    };
 }

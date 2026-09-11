@@ -43,21 +43,23 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 
-import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import io.seata.rm.datasource.sql.SQLType;
+
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.mock.MockDataSource;
+import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
+import io.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -65,6 +67,12 @@ import org.mockito.Mockito;
  * The type Undo executor test.
  */
 public class UndoExecutorTest {
+
+    MockConnection connection = new MockConnection();
+    MockDataSource dataSource = new MockDataSource();
+    DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
+    ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, connection);
+
 
     /**
      * Test field.
@@ -75,7 +83,7 @@ public class UndoExecutorTest {
         f.setName("name");
         f.setValue("x");
         f.setType(Types.VARCHAR);
-        f.setKeyType(KeyType.PrimaryKey);
+        f.setKeyType(KeyType.PRIMARY_KEY);
 
         String s = JSON.toJSONString(f, SerializerFeature.WriteDateUseDateFormat);
 
@@ -99,7 +107,7 @@ public class UndoExecutorTest {
         Row beforeRow = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -124,7 +132,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(213);
@@ -148,11 +156,11 @@ public class UndoExecutorTest {
         SQLUndoLog.setAfterImage(afterImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-        MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
-        spy.executeOn(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connectionProxy);
+        Assertions.assertEquals(JdbcConstants.MYSQL,connectionProxy.getDbType());
+        spy.executeOn(connectionProxy);
     }
 
     /**
@@ -171,7 +179,7 @@ public class UndoExecutorTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -192,7 +200,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -217,11 +225,11 @@ public class UndoExecutorTest {
         SQLUndoLog.setAfterImage(afterImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-        MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
-        spy.executeOn(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connectionProxy);
+        Assertions.assertEquals(JdbcConstants.MYSQL,connectionProxy.getDbType());
+        spy.executeOn(connectionProxy);
     }
 
     /**
@@ -240,7 +248,7 @@ public class UndoExecutorTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -261,7 +269,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -286,11 +294,12 @@ public class UndoExecutorTest {
         SQLUndoLog.setBeforeImage(beforeImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-        MockConnection connection = new MockConnection();
+
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
-        spy.executeOn(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connectionProxy);
+        Assertions.assertEquals(JdbcConstants.MYSQL,connectionProxy.getDbType());
+        spy.executeOn(connectionProxy);
     }
 
     /**
@@ -318,8 +327,8 @@ public class UndoExecutorTest {
         }
 
         @Override
-        public String getPkName() {
-            return mockPK;
+        public List<String> getPrimaryKeyOnlyName(){
+            return Arrays.asList(new String[]{mockPK});
         }
     }
 

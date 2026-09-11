@@ -1,0 +1,55 @@
+name: "Publish Docker Image"
+
+on:
+  push:
+    branches: [ snapshot, "*.*.*" ]
+    #tags: [ "*" ]
+
+  #This schedule only takes effect in the default branch
+  schedule:
+    - cron: '0 16 * * *' #GMT+0
+
+jobs:
+  # job 1
+  publish-images-to-dockerhub:
+    name: "Publish images to DockerHub"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [ 8, 17 ]
+    steps:
+      # step 1
+      - name: "Checkout"
+        uses: actions/checkout@v3
+      # step 2
+      - name: "Setup Java JDK"
+        uses: actions/setup-java@v3.12.0
+        with:
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+      # step 3
+      - name: "Print maven version"
+        run: ./mvnw -version
+      # step 4 based on java8
+      - name: "Publish images to DockerHub based on java8"
+        if: matrix.java == 8
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          if [ "${{ github.ref_name }}" == "develop" ] || [ "${{ github.ref_name }}" == "snapshot"  || [ "${{ github.ref_name }}" == "2.x" ]; then
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage                                    -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          else
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342      -Pimage,release-image-based-on-java8       -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean package -Dimage.name=openjdk:8u342-slim -Pimage,release-image-based-on-java8-slim  -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          fi
+      # step 4 based on java17
+      - name: "Publish images to DockerHub based on java17"
+        if: ${{ matrix.java == 17 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
+        env:
+          REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2       -Pimage,release-image-based-on-java17      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean package -Dimage.name=openjdk:17.0.2-slim  -Pimage,release-image-based-on-java17-slim -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;

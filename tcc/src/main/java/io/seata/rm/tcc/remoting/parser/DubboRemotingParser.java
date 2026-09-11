@@ -49,11 +49,11 @@ public class DubboRemotingParser extends AbstractedRemotingParser {
         try {
             RemotingDesc serviceBeanDesc = new RemotingDesc();
             Class<?> interfaceClass = (Class<?>)ReflectionUtil.invokeMethod(bean, "getInterfaceClass");
-            String interfaceClassName = (String)ReflectionUtil.getFieldValue(bean, "interfaceName");
+            String interfaceClassName = ReflectionUtil.getFieldValue(bean, "interfaceName");
             String version = (String)ReflectionUtil.invokeMethod(bean, "getVersion");
             String group = (String)ReflectionUtil.invokeMethod(bean, "getGroup");
-            serviceBeanDesc.setInterfaceClass(interfaceClass);
-            serviceBeanDesc.setInterfaceClassName(interfaceClassName);
+            serviceBeanDesc.setServiceClass(interfaceClass);
+            serviceBeanDesc.setServiceClassName(interfaceClassName);
             serviceBeanDesc.setUniqueId(version);
             serviceBeanDesc.setGroup(group);
             serviceBeanDesc.setProtocol(Protocols.DUBBO);

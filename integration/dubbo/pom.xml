@@ -25,18 +25,20 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-dubbo</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>seata-dubbo ${project.version}</name>
+    <description>apache dubbo integration for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.dubbo</groupId>
-            <artifactId>dubbo</artifactId>
+            <groupId>org.apache.dubbo.extensions</groupId>
+            <artifactId>dubbo-filter-seata</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

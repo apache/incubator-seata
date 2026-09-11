@@ -15,14 +15,19 @@
  */
 package io.seata.server.session;
 
+import java.util.stream.Stream;
+
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
-import java.util.stream.Stream;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Branch session test.
@@ -30,7 +35,13 @@ import java.util.stream.Stream;
  * @author tianming.xm @gmail.com
  * @since 2019 /1/23
  */
+@SpringBootTest
 public class BranchSessionTest {
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) {
+
+    }
 
     /**
      * Codec test.
@@ -58,19 +69,17 @@ public class BranchSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    static Stream<Arguments> branchSessionProvider() {
+     static Stream<Arguments> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(1L);
         branchSession.setClientId("c1");
-        branchSession.setResourceGroupId("my_test_tx_group");
+        branchSession.setResourceGroupId(DEFAULT_TX_GROUP);
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return Stream.of(
-                Arguments.of(branchSession)
-        );
+        return Stream.of(Arguments.of(branchSession));
     }
 }

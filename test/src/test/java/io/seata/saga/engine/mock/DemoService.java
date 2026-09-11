@@ -15,7 +15,7 @@
  */
 package io.seata.saga.engine.mock;
 
-import io.seata.saga.engine.exception.EngineExecutionException;
+import java.net.ConnectException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,12 +28,20 @@ public class DemoService {
         if(input == null){
             return null;
         }
+        Integer sleepTime = (Integer) input.get("sleepTime");
+        if(sleepTime != null){
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new DemoException(e);
+            }
+        }
         if("true".equals(input.get("throwException"))){
-            throw new EngineExecutionException("foo execute failed");
+            throw new DemoException("foo execute failed");
         }
         if("true".equals(input.get("throwExceptionRandomly"))){
             if(Math.random() > 0.5){
-                throw new EngineExecutionException("foo execute failed");
+                throw new DemoException("foo execute failed");
             }
         }
         return input;
@@ -44,11 +52,11 @@ public class DemoService {
             return null;
         }
         if("true".equals(input.get("throwException"))){
-            throw new EngineExecutionException("compensateFoo execute failed");
+            throw new DemoException("compensateFoo execute failed");
         }
         if("true".equals(input.get("throwExceptionRandomly"))){
             if(Math.random() > 0.8){
-                throw new EngineExecutionException("compensateFoo execute failed");
+                throw new DemoException("compensateFoo execute failed");
             }
         }
         return input;
@@ -58,12 +66,20 @@ public class DemoService {
         if(input == null){
             return null;
         }
+        Integer sleepTime = (Integer) input.get("sleepTime");
+        if(sleepTime != null){
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new DemoException(e);
+            }
+        }
         if("true".equals(input.get("throwException"))){
-            throw new EngineExecutionException("bar execute failed");
+            throw new DemoException("bar execute failed");
         }
         if("true".equals(input.get("throwExceptionRandomly"))){
             if(Math.random() > 0.5){
-                throw new EngineExecutionException("bar execute failed");
+                throw new DemoException("bar execute failed");
             }
         }
         return input;
@@ -74,11 +90,11 @@ public class DemoService {
             return null;
         }
         if("true".equals(input.get("throwException"))){
-            throw new EngineExecutionException("compensateBar execute failed");
+            throw new DemoException("compensateBar execute failed");
         }
         if("true".equals(input.get("throwExceptionRandomly"))){
             if(Math.random() > 0.8){
-                throw new EngineExecutionException("compensateBar execute failed");
+                throw new DemoException("compensateBar execute failed");
             }
         }
         return input;
@@ -90,6 +106,17 @@ public class DemoService {
 
     public Career interfaceParameterMethod(Career career){
         return career;
+    }
+
+    public Map<String, Object> randomExceptionMethod(Map<String, Object> input) {
+
+        double random = Math.random();
+        if (random > 0.5) {
+            throw new DemoException("randomExceptionMethod execute failed");
+        }
+        else {
+            throw new RuntimeException(new ConnectException("Connect Exception"));
+        }
     }
 
     public static class People {

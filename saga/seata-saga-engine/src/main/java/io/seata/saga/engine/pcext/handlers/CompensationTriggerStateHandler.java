@@ -18,6 +18,7 @@ package io.seata.saga.engine.pcext.handlers;
 import java.util.List;
 import java.util.Stack;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateHandler;
@@ -47,20 +48,20 @@ public class CompensationTriggerStateHandler implements StateHandler {
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
         StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        List<StateInstance> stateInstanceList = null;
-        if (stateMachineInstance != null) {
-            stateInstanceList = stateMachineInstance.getStateList();
-        } else if (stateMachineConfig.getStateLogStore() != null) {
+        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
             stateInstanceList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(
                 stateMachineInstance.getId());
         }
 
         List<StateInstance> stateListToBeCompensated = CompensationHolder.findStateInstListToBeCompensated(context,
             stateInstanceList);
-        if (stateListToBeCompensated != null && stateListToBeCompensated.size() > 0) {
-
+        if (CollectionUtils.isNotEmpty(stateListToBeCompensated)) {
             //Clear exceptions that occur during forward execution
-            context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            Exception e = (Exception)context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            if (e != null) {
+                stateMachineInstance.setException(e);
+            }
 
             Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
                 .getStateStackNeedCompensation();

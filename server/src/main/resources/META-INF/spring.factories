@@ -1,0 +1,4 @@
+org.springframework.context.ApplicationListener=\
+io.seata.server.spring.listener.ServerApplicationListener
+org.springframework.context.ApplicationContextInitializer=\
+io.seata.server.spring.listener.SeataPropertiesLoader

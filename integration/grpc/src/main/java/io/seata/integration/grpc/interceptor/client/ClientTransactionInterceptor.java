@@ -23,7 +23,6 @@ import io.grpc.ForwardingClientCall;
 import io.grpc.ForwardingClientCallListener;
 import io.grpc.Metadata;
 import io.grpc.MethodDescriptor;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
@@ -43,7 +42,7 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
 
             @Override
             public void start(Listener<RespT> responseListener, Metadata headers) {
-                if (StringUtils.isNotBlank(xid)) {
+                if (xid != null) {
                     headers.put(GrpcHeaderKey.HEADER_KEY, xid);
                 }
                 super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {

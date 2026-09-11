@@ -34,8 +34,6 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private String serviceMethod;
     private List<String> parameterTypes;
     private Method method;
-    private List<Object> inputExpressions;
-    private Map<String, Object> outputExpressions;
     private Map<Object, String> statusEvaluators;
     private boolean isAsync;
 
@@ -85,22 +83,6 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
 
     public void setMethod(Method method) {
         this.method = method;
-    }
-
-    public List<Object> getInputExpressions() {
-        return inputExpressions;
-    }
-
-    public void setInputExpressions(List<Object> inputExpressions) {
-        this.inputExpressions = inputExpressions;
-    }
-
-    public Map<String, Object> getOutputExpressions() {
-        return outputExpressions;
-    }
-
-    public void setOutputExpressions(Map<String, Object> outputExpressions) {
-        this.outputExpressions = outputExpressions;
     }
 
     public Map<Object, String> getStatusEvaluators() {

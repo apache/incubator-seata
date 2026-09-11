@@ -15,62 +15,65 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.seata.common.DefaultValues;
+import io.seata.core.constants.ConfigurationKeys;
+
+import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
+import static io.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
+import static io.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+import static io.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 
 /**
  * The type Netty server config.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
 public class NettyServerConfig extends NettyBaseConfig {
 
-    private int serverSelectorThreads = WORKER_THREAD_SIZE;
-    private int serverSocketSendBufSize = 153600;
-    private int serverSocketResvBufSize = 153600;
-    private int serverWorkerThreads = WORKER_THREAD_SIZE;
-    private int soBackLogSize = 1024;
-    private int writeBufferHighWaterMark = 67108864;
-    private int writeBufferLowWaterMark = 1048576;
+    private int serverSelectorThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int serverSocketSendBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
+    private int serverSocketResvBufSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
+    private int serverWorkerThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int soBackLogSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
+    private int writeBufferHighWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
+    private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private static final int DEFAULT_LISTEN_PORT = 8091;
-    private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private boolean enableServerPooledByteBufAllocator = true;
-    private int serverChannelMaxIdleTimeSeconds = 30;
-    private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
+    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
+    private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
-    private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
-    private static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
-    private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
-
-    /**
-     * Shutdown timeout default 1s
-     */
-    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
+    private static int minServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
+    private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
+    private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
+    private static int keepAliveTime = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
+    private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
+    private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WORKER_THREAD_SIZE)));
+    private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
+        DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
     /**
      * The Server channel clazz.
      */
-    public final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
+    public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
 
-    /**
-     * The constant DIRECT_BYTE_BUF_ALLOCATOR.
-     */
-    public static final PooledByteBufAllocator DIRECT_BYTE_BUF_ALLOCATOR =
-        new PooledByteBufAllocator(
-            true,
-            WORKER_THREAD_SIZE,
-            WORKER_THREAD_SIZE,
-            2048 * 64,
-            10,
-            512,
-            256,
-            64,
-            true,
-            0
-        );
 
     /**
      * Gets server selector threads.
@@ -228,24 +231,6 @@ public class NettyServerConfig extends NettyBaseConfig {
     }
 
     /**
-     * Is enable server pooled byte buf allocator boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isEnableServerPooledByteBufAllocator() {
-        return enableServerPooledByteBufAllocator;
-    }
-
-    /**
-     * Sets enable server pooled byte buf allocator.
-     *
-     * @param enableServerPooledByteBufAllocator the enable server pooled byte buf allocator
-     */
-    public void setEnableServerPooledByteBufAllocator(boolean enableServerPooledByteBufAllocator) {
-        this.enableServerPooledByteBufAllocator = enableServerPooledByteBufAllocator;
-    }
-
-    /**
      * Gets server channel max idle time seconds.
      *
      * @return the server channel max idle time seconds
@@ -259,8 +244,8 @@ public class NettyServerConfig extends NettyBaseConfig {
      *
      * @return the rpc request timeout
      */
-    public static int getRpcRequestTimeout() {
-        return RPC_REQUEST_TIMEOUT;
+    public static long getRpcRequestTimeout() {
+        return RPC_TC_REQUEST_TIMEOUT;
     }
 
     /**
@@ -269,7 +254,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getBossThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.boss-thread-prefix", DEFAULT_BOSS_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX, DEFAULT_BOSS_THREAD_PREFIX);
     }
 
     /**
@@ -278,8 +263,8 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getWorkerThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.worker-thread-prefix",
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
+            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
@@ -288,7 +273,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getExecutorThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.server-executor-thread-prefix",
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX,
             DEFAULT_EXECUTOR_THREAD_PREFIX);
     }
 
@@ -298,7 +283,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the int
      */
     public int getBossThreadSize() {
-        return CONFIG.getInt("transport.thread-factory.boss-thread-size", DEFAULT_BOSS_THREAD_SIZE);
+        return CONFIG.getInt(ConfigurationKeys.BOSS_THREAD_SIZE, DEFAULT_BOSS_THREAD_SIZE);
     }
 
     /**
@@ -307,6 +292,48 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the int
      */
     public int getServerShutdownWaitTime() {
-        return CONFIG.getInt("transport.shutdown.wait", DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+        return CONFIG.getInt(ConfigurationKeys.SHUTDOWN_WAIT, DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+    }
+
+    public static int getMinServerPoolSize() {
+        return minServerPoolSize;
+    }
+
+    public static int getMaxServerPoolSize() {
+        return maxServerPoolSize;
+    }
+
+    public static int getMaxTaskQueueSize() {
+        return maxTaskQueueSize;
+    }
+
+    public static int getKeepAliveTime() {
+        return keepAliveTime;
+    }
+
+    /**
+     * Get the min size for branch result thread pool
+     *
+     * @return the int
+     */
+    public static int getMinBranchResultPoolSize() {
+        return minBranchResultPoolSize;
+    }
+    /**
+     * Get the max size for branch result thread pool
+     *
+     * @return the int
+     */
+    public static int getMaxBranchResultPoolSize() {
+        return maxBranchResultPoolSize;
+    }
+
+    /**
+     * Get the tc server batch send response enable
+     *
+     * @return true or false
+     */
+    public static boolean isEnableTcServerBatchSendResponse() {
+        return ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
     }
 }

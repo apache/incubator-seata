@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
  * The type Abstract locker.
  *
  * @author zhangsen
- * @date 2019 -05-15
  */
 public abstract class AbstractLocker implements Locker {
 
@@ -53,17 +52,22 @@ public abstract class AbstractLocker implements Locker {
             return lockDOs;
         }
         for (RowLock rowLock : locks) {
-            LockDO lockDO = new LockDO();
-            lockDO.setBranchId(rowLock.getBranchId());
-            lockDO.setPk(rowLock.getPk());
-            lockDO.setResourceId(rowLock.getResourceId());
-            lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
-            lockDO.setXid(rowLock.getXid());
-            lockDO.setTransactionId(rowLock.getTransactionId());
-            lockDO.setTableName(rowLock.getTableName());
+            LockDO lockDO = convertToLockDO(rowLock);
             lockDOs.add(lockDO);
         }
         return lockDOs;
+    }
+
+    protected LockDO convertToLockDO(RowLock rowLock) {
+        LockDO lockDO = new LockDO();
+        lockDO.setBranchId(rowLock.getBranchId());
+        lockDO.setPk(rowLock.getPk());
+        lockDO.setResourceId(rowLock.getResourceId());
+        lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
+        lockDO.setXid(rowLock.getXid());
+        lockDO.setTransactionId(rowLock.getTransactionId());
+        lockDO.setTableName(rowLock.getTableName());
+        return lockDO;
     }
 
     /**
@@ -83,4 +87,15 @@ public abstract class AbstractLocker implements Locker {
     public void cleanAllLocks() {
 
     }
+
+    @Override
+    public boolean releaseLock(String xid, Long branchId) {
+        return false;
+    }
+
+    @Override
+    public boolean releaseLock(String xid) {
+        return false;
+    }
+
 }

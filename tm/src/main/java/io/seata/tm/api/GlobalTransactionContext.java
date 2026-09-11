@@ -32,11 +32,10 @@ public class GlobalTransactionContext {
     /**
      * Try to create a new GlobalTransaction.
      *
-     * @return
+     * @return the new global transaction
      */
-    private static GlobalTransaction createNew() {
-        GlobalTransaction tx = new DefaultGlobalTransaction();
-        return tx;
+    public static GlobalTransaction createNew() {
+        return new DefaultGlobalTransaction();
     }
 
     /**
@@ -44,7 +43,7 @@ public class GlobalTransactionContext {
      *
      * @return null if no transaction context there.
      */
-    private static GlobalTransaction getCurrent() {
+    public static GlobalTransaction getCurrent() {
         String xid = RootContext.getXID();
         if (xid == null) {
             return null;
@@ -73,12 +72,11 @@ public class GlobalTransactionContext {
      * @throws TransactionException the transaction exception
      */
     public static GlobalTransaction reload(String xid) throws TransactionException {
-        GlobalTransaction tx = new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
+        return new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
             @Override
             public void begin(int timeout, String name) throws TransactionException {
                 throw new IllegalStateException("Never BEGIN on a RELOADED GlobalTransaction. ");
             }
         };
-        return tx;
     }
 }

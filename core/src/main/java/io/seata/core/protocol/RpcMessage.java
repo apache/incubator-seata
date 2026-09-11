@@ -15,16 +15,18 @@
  */
 package io.seata.core.protocol;
 
+import io.seata.common.util.StringUtils;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * The type Rpc message.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
+ * @author slievrly
  */
-public class RpcMessage {
+public class RpcMessage implements Serializable {
 
     private int id;
     private byte messageType;
@@ -165,5 +167,10 @@ public class RpcMessage {
      */
     public void setMessageType(byte messageType) {
         this.messageType = messageType;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

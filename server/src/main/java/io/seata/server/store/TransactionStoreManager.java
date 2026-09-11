@@ -15,6 +15,7 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * The interface Transaction store manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface TransactionStoreManager {
 
@@ -55,6 +56,22 @@ public interface TransactionStoreManager {
     GlobalSession readSession(String xid, boolean withBranchSessions);
 
     /**
+     * Read session global session by sort by timeout begin status.
+     *
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    List<GlobalSession> readSortByTimeoutBeginSessions(boolean withBranchSessions);
+    /**
+     * Read session global session.
+     *
+     * @param statuses the statuses
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session list
+     */
+    List<GlobalSession> readSession(GlobalStatus[] statuses, boolean withBranchSessions);
+
+    /**
      * Read session by status list.
      *
      * @param sessionCondition the session condition
@@ -66,13 +83,6 @@ public interface TransactionStoreManager {
      * Shutdown.
      */
     void shutdown();
-
-    /**
-     * Gets current max session id.
-     *
-     * @return the current max session id
-     */
-    long getCurrentMaxSessionId();
 
 
     /**

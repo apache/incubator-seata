@@ -15,6 +15,7 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
-import io.seata.saga.engine.pcext.InterceptibleStateHandler;
+import io.seata.saga.engine.pcext.InterceptableStateHandler;
 import io.seata.saga.engine.pcext.StateHandler;
 import io.seata.saga.engine.pcext.StateHandlerInterceptor;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -46,11 +47,11 @@ import org.springframework.util.StringUtils;
  *
  * @author lorne.cl
  */
-public class SubStateMachineHandler implements StateHandler, InterceptibleStateHandler {
+public class SubStateMachineHandler implements StateHandler, InterceptableStateHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SubStateMachineHandler.class);
 
-    private List<StateHandlerInterceptor> interceptors;
+    private List<StateHandlerInterceptor> interceptors = new ArrayList<>();
 
     private static ExecutionStatus decideStatus(StateMachineInstance stateMachineInstance, boolean isForward) {
 
@@ -91,15 +92,15 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
         try {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(">>>>>>>>>>>>>>>>>>>>>> Start to execute SubStateMachine [{}] by state[{}]",
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>> Start to execute SubStateMachine [{}] by state[{}]",
                     subStateMachine.getStateMachineName(), subStateMachine.getName());
             }
             StateMachineInstance subStateMachineInstance = callSubStateMachine(startParams, engine, context,
                 stateInstance, subStateMachine);
 
             Map<String, Object> outputParams = subStateMachineInstance.getEndParams();
-            boolean isForward = DomainConstants.VAR_NAME_OPERATION_NAME.equals(
+            boolean isForward = DomainConstants.OPERATION_NAME_FORWARD.equals(
                 context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME));
             ExecutionStatus callSubMachineStatus = decideStatus(subStateMachineInstance, isForward);
             stateInstance.setStatus(callSubMachineStatus);
@@ -107,8 +108,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
             context.setVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS, outputParams);
             stateInstance.setOutputParams(outputParams);
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
                     "<<<<<<<<<<<<<<<<<<<<<< SubStateMachine[{}] execute finish with status[{}], compensateStatus[{}]",
                     subStateMachine.getStateMachineName(), subStateMachineInstance.getStatus(),
                     subStateMachineInstance.getCompensationStatus());
@@ -136,14 +137,14 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
             context.setVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
-            ServiceTaskStateHandler.handleException(context, subStateMachine, e);
+            EngineUtils.handleException(context, subStateMachine, e);
         }
     }
 
     private StateMachineInstance callSubStateMachine(Map<String, Object> startParams, StateMachineEngine engine,
                                                      ProcessContext context, StateInstance stateInstance,
                                                      SubStateMachine subStateMachine) {
-        if (!context.hasVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD)) {
+        if (!Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD))) {
             return startNewStateMachine(startParams, engine, stateInstance, subStateMachine);
         } else {
             context.removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
@@ -189,15 +190,21 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
             return engine.forward(subInstId, startParams);
         } else {
-            throw new ForwardInvalidException(
-                "Cannot find sub statemachine [" + subStateMachine.getStateMachineName() + "]",
-                FrameworkErrorCode.ObjectNotExists);
+            originalStateInst.setStateMachineInstance(stateInstance.getStateMachineInstance());
+            return startNewStateMachine(startParams, engine, originalStateInst, subStateMachine);
         }
     }
 
     @Override
     public List<StateHandlerInterceptor> getInterceptors() {
         return interceptors;
+    }
+
+    @Override
+    public void addInterceptor(StateHandlerInterceptor interceptor) {
+        if (interceptors != null && !interceptors.contains(interceptor)) {
+            interceptors.add(interceptor);
+        }
     }
 
     public void setInterceptors(List<StateHandlerInterceptor> interceptors) {

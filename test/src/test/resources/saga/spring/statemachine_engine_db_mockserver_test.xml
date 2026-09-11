@@ -50,7 +50,7 @@
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
 		<property name="applicationId" value="test_saga"></property>
-		<property name="txServiceGroup" value="my_test_tx_group"></property>
+		<property name="txServiceGroup" value="default_tx_group"></property>
 		<property name="sagaTransactionalTemplate" ref="mockSagaTransactionTemplate"/>
 	</bean>
 	<bean id="threadExecutor"
@@ -58,6 +58,11 @@
 		<property name="threadNamePrefix" value="SAGA_ASYNC_EXE_" />
 		<property name="corePoolSize" value="1" />
 		<property name="maxPoolSize" value="20" />
+		<property name="queueCapacity" value="100" />
+		<property name="rejectedExecutionHandler" ref="callerRunsPolicy" />
+	</bean>
+
+	<bean name="callerRunsPolicy" class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy">
 	</bean>
 
 	<bean class="io.seata.saga.rm.StateMachineEngineHolder">

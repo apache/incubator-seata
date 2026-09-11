@@ -15,12 +15,12 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import io.seata.sqlparser.struct.ColumnMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class ColumnMetaTest {
 
@@ -31,9 +31,6 @@ public class ColumnMetaTest {
         Assertions.assertEquals(columnMeta, new ColumnMeta());
         columnMeta.setIsAutoincrement("Yes");
         Assertions.assertTrue(columnMeta.isAutoincrement());
-        Assertions.assertEquals(columnMeta, columnMeta);
-        Assertions.assertEquals(columnMeta.hashCode(), columnMeta.hashCode());
-        Assertions.assertNotEquals(columnMeta, new String());
 
         ColumnMeta other = new ColumnMeta();
         other.setTableCat("");

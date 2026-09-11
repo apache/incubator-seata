@@ -42,7 +42,7 @@ public class ServiceTaskStateParser extends AbstractTaskStateParser implements S
         serviceTaskState.setServiceType((String)nodeMap.get("ServiceType"));
         serviceTaskState.setParameterTypes((List<String>)nodeMap.get("ParameterTypes"));
         Object isAsync = nodeMap.get("IsAsync");
-        if (isAsync != null && Boolean.TRUE.equals(isAsync)) {
+        if (Boolean.TRUE.equals(isAsync)) {
             serviceTaskState.setAsync(true);
         }
 

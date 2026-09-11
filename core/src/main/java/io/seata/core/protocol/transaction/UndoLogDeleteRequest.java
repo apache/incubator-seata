@@ -25,7 +25,6 @@ import java.io.Serializable;
  * The type to delete undolog  request.
  *
  * @author github-ygy
- * @date 2019-6-14
  */
 public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM implements Serializable {
 
@@ -79,10 +78,11 @@ public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM impleme
 
     @Override
     public String toString() {
-        return "UndoLogDeleteRequest{" +
-                "resourceId='" + resourceId + '\'' +
-                ", saveDays=" + saveDays +
-                ", branchType=" + branchType +
-                '}';
+        final StringBuilder sb = new StringBuilder("UndoLogDeleteRequest{");
+        sb.append("resourceId='").append(resourceId).append('\'');
+        sb.append(", saveDays=").append(saveDays);
+        sb.append(", branchType=").append(branchType);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class GlobalTransactionContextTest {
     private static final String DEFAULT_XID = "1234567890";
@@ -68,7 +67,7 @@ class GlobalTransactionContextTest {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx = GlobalTransactionContext.reload(DEFAULT_XID);
         GlobalTransaction finalTx = tx;
-        Assertions.assertThrows(IllegalStateException.class, () -> finalTx.begin());
+        Assertions.assertThrows(IllegalStateException.class, finalTx::begin);
 
     }
 }

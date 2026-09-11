@@ -15,12 +15,12 @@
  */
 package io.seata.tm;
 
-import io.seata.core.rpc.netty.TmRpcClient;
+import io.seata.core.rpc.netty.TmNettyRemotingClient;
 
 /**
  * The type Tm client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class TMClient {
 
@@ -31,8 +31,20 @@ public class TMClient {
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {
-        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-        tmRpcClient.init();
+        init(applicationId, transactionServiceGroup, null, null);
+    }
+
+    /**
+     * Init.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param accessKey               the access key
+     * @param secretKey               the secret key
+     */
+    public static void init(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup, accessKey, secretKey);
+        tmNettyRemotingClient.init();
     }
 
 }

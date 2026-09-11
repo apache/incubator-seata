@@ -14,7 +14,7 @@
                     "fooInput": "$.[a]"
                 }
             ],
-            "output": {
+            "Output": {
                 "fooResult": "$.#root"
             }
         },
@@ -42,13 +42,13 @@
                     "throwException": "$.[barThrowException]"
                 }
             ],
-            "output": {
+            "Output": {
                 "barResult": "$.#root"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.common.exception.FrameworkException"
+                        "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "Fail"
                 }
@@ -64,7 +64,7 @@
                     "fooInput": "$.[fooResult]"
                 }
             ],
-            "output": {
+            "Output": {
                 "fooResult": "$.#root"
             },
             "Next": "Succeed"

@@ -50,17 +50,12 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
 
     @Override
     public String toString() {
-        StringBuilder result = new StringBuilder();
-        result.append("globalStatus=");
-        result.append(globalStatus);
-        result.append(",");
-        result.append("ResultCode=");
-        result.append(getResultCode());
-        result.append(",");
-        result.append("Msg=");
-        result.append(getMsg());
-
-        return result.toString();
+        final StringBuilder sb = new StringBuilder(this.getClass().getSimpleName());
+        sb.append('{');
+        sb.append("globalStatus=").append(globalStatus);
+        sb.append(", resultCode=").append(resultCode);
+        sb.append(", msg='").append(msg).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
-
 }

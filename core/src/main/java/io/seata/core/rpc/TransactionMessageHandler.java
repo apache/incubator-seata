@@ -21,7 +21,7 @@ import io.seata.core.protocol.AbstractResultMessage;
 /**
  * To handle the received RPC message on upper level.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface TransactionMessageHandler {
 

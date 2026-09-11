@@ -68,6 +68,21 @@ public class Id {
         return this;
     }
 
+    public String getMeterKey() {
+        StringBuilder builder = new StringBuilder(name);
+        builder.append("(");
+        if (tags.size() == 0) {
+            builder.append(")");
+            return builder.toString();
+        }
+        for (Entry<String, String> tag : tags.entrySet()) {
+            builder.append(String.format("%s,", tag.getValue()));
+        }
+        builder.delete(builder.length() - 1, builder.length());
+        builder.append(")");
+        return builder.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(name);

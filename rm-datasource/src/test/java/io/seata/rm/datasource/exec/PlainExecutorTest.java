@@ -31,13 +31,10 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/18
  */
 public class PlainExecutorTest {
 
     private PlainExecutor plainExecutor;
-
-    private StatementProxy statementProxy;
 
     @BeforeEach
     public void init() throws SQLException {
@@ -62,14 +59,14 @@ public class PlainExecutorTest {
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-        statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        StatementProxy statementProxy = new StatementProxy(connectionProxy, mockStatement);
 
         plainExecutor = new PlainExecutor(statementProxy, (statement, args) -> null);
     }
 
     @Test
     public void testExecute() throws Throwable {
-        plainExecutor.execute(null);
+        plainExecutor.execute((Object) null);
     }
 
 }

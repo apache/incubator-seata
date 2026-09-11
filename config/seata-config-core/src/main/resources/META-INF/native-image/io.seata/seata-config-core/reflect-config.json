@@ -1,0 +1,56 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.file.FileConfig"
+    },
+    "name": "io.seata.config.file.SimpleFileConfig",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.io.File",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.file.FileConfig"
+    },
+    "name": "io.seata.config.file.YamlFileConfig",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": [
+          "java.io.File",
+          "java.lang.String"
+        ]
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.processor.Processor"
+    },
+    "name": "io.seata.config.processor.ProcessorProperties",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.processor.Processor"
+    },
+    "name": "io.seata.config.processor.ProcessorYaml",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

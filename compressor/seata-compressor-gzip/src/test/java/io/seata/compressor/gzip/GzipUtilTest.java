@@ -32,7 +32,7 @@ public class GzipUtilTest {
         });
 
         byte[] compress = GzipUtil.compress("aa".getBytes());
-        int head = ((int) compress[0] & 0xff) | ((compress[1] << 8 ) & 0xff00);
+        int head = ((int) compress[0] & 0xff) | ((compress[1] << 8) & 0xff00);
         Assertions.assertEquals(GZIPInputStream.GZIP_MAGIC, head);
     }
 
@@ -52,6 +52,16 @@ public class GzipUtilTest {
             GzipUtil.decompress(bytes);
         });
 
+    }
+
+    @Test
+    public void test_compressEqualDecompress() {
+
+        byte[] compress = GzipUtil.compress("aa".getBytes());
+
+        byte[] decompress = GzipUtil.decompress(compress);
+
+        Assertions.assertEquals("aa", new String(decompress));
     }
 
 }

@@ -21,7 +21,7 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.file.FileTransactionStoreManager;
+import io.seata.server.storage.file.store.FileTransactionStoreManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,6 +127,12 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
+                    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
+                            throws TransactionException {
+                        return null;
+                    }
+
+                    @Override
                     public void onBegin(GlobalSession globalSession) throws TransactionException {
 
                     }
@@ -161,7 +167,12 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public void onEnd(GlobalSession globalSession) throws TransactionException {
+                    public void onSuccessEnd(GlobalSession globalSession) throws TransactionException {
+
+                    }
+
+                    @Override
+                    public void onFailEnd(GlobalSession globalSession) throws TransactionException {
 
                     }
                 });

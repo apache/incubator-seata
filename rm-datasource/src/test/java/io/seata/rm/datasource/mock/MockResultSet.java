@@ -15,22 +15,23 @@
  */
 package io.seata.rm.datasource.mock;
 
-import com.alibaba.druid.util.jdbc.ResultSetBase;
-
-import com.google.common.collect.Lists;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.druid.util.jdbc.ResultSetBase;
+
+import com.google.common.collect.Lists;
+import io.seata.sqlparser.struct.ColumnMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author will
- * @date 2019/8/14
  */
 public class MockResultSet extends ResultSetBase {
 
@@ -56,39 +57,41 @@ public class MockResultSet extends ResultSetBase {
      */
     public MockResultSet(Statement statement) {
         super(statement);
-        this.rows = new ArrayList<Object[]>();
+        this.rows = new ArrayList<>();
+        this.columnMetas = Lists.newArrayList();
     }
 
     /**
      * mock result set
-     * @param mockColumnLables
+     * @param mockColumnLabels
      * @param mockReturnValue
      * @return
      */
-    public MockResultSet mockResultSet(List<String> mockColumnLables, Object[][] mockReturnValue){
-
-        this.columnLabels = mockColumnLables;
-        this.columnMetas = Lists.newArrayList();
-
+    public MockResultSet mockResultSet(List<String> mockColumnLabels, Object[][] mockReturnValue){
+        this.columnLabels = mockColumnLabels;
         for (int i = 0; i < mockReturnValue.length; i++) {
             Object[] row = mockReturnValue[i];
             this.getRows().add(row);
         }
-
-        for (int i = 0; i < mockColumnLables.size(); i++) {
-            ColumnMeta columnMeta = new ColumnMeta();
-            columnMeta.setColumnName(mockColumnLables.get(i));
-            this.columnMetas.add(columnMeta);
-        }
-
-        //init mock result set meta data
-        metaData = new MockResultSetMetaData(columnMetas);
-
         return this;
     }
 
+    public void mockResultSetMetaData(Object[][] mockColumnsMetasReturnValue) {
+        for (Object[] meta : mockColumnsMetasReturnValue) {
+            ColumnMeta columnMeta = new ColumnMeta();
+            columnMeta.setTableName(meta[2].toString());
+            columnMeta.setColumnName(meta[3].toString());
+            this.columnMetas.add(columnMeta);
+        }
+    }
+
+    @Override
+    public ResultSetMetaData getMetaData() throws SQLException {
+        return new MockResultSetMetaData(columnMetas);
+    }
+
     public MockResultSetMetaData getMockMetaData() {
-        return (MockResultSetMetaData)metaData;
+        return new MockResultSetMetaData(columnMetas);
     }
 
     @Override
@@ -106,7 +109,16 @@ public class MockResultSet extends ResultSetBase {
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
-        return columnLabels.indexOf(columnLabel) + 1;
+        if (columnLabels.indexOf(columnLabel) != -1) {
+            return columnLabels.indexOf(columnLabel) + 1;
+        }
+        if (columnLabels.indexOf(columnLabel.toLowerCase()) != -1) {
+            return columnLabels.indexOf(columnLabel.toLowerCase()) + 1;
+        }
+        if (columnLabels.indexOf(columnLabel.toUpperCase()) != -1) {
+            return columnLabels.indexOf(columnLabel.toUpperCase()) + 1;
+        }
+        return -1;
     }
 
     @Override
@@ -133,8 +145,7 @@ public class MockResultSet extends ResultSetBase {
 
     public Object getObjectInternal(int columnIndex) {
         Object[] row = rows.get(rowIndex);
-        Object obj = row[columnIndex - 1];
-        return obj;
+        return row[columnIndex - 1];
     }
 
     @Override

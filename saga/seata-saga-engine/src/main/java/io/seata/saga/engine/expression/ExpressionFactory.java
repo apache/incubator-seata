@@ -25,8 +25,8 @@ public interface ExpressionFactory {
     /**
      * create expression
      *
-     * @param expression
-     * @return
+     * @param expression the expression
+     * @return the expression
      */
     Expression createExpression(String expression);
 }

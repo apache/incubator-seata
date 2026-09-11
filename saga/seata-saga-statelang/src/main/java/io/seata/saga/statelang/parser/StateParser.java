@@ -27,8 +27,8 @@ public interface StateParser<T extends State> {
     /**
      * Parse an object (such as Json) into a State model
      *
-     * @param node
-     * @return
+     * @param node an object json
+     * @return the state model
      */
     T parse(Object node);
 }

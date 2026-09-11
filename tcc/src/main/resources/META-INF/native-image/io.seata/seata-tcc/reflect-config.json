@@ -1,0 +1,98 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.api.util.HSFApiConsumerBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.api.util.HSFApiProviderBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.spring.util.HSFSpringConsumerBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser"
+    },
+    "name": "com.taobao.hsf.app.spring.util.HSFSpringProviderBean"
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.core.model.ResourceManager"
+    },
+    "name": "io.seata.rm.tcc.TCCResourceManager",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.AbstractRMHandler"
+    },
+    "name": "io.seata.rm.tcc.RMHandlerTCC",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.RemotingParser"
+    },
+    "name": "io.seata.rm.tcc.remoting.parser.DubboRemotingParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.RemotingParser"
+    },
+    "name": "io.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.RemotingParser"
+    },
+    "name": "io.seata.rm.tcc.remoting.parser.SofaRpcRemotingParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.rm.tcc.remoting.RemotingParser"
+    },
+    "name": "io.seata.rm.tcc.remoting.parser.HSFRemotingParser",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

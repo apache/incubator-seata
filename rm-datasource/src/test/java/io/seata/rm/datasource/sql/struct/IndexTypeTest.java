@@ -15,12 +15,12 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import io.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class IndexTypeTest {
 

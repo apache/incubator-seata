@@ -22,14 +22,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.util.CollectionUtils;
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.exception.ForwardInvalidException;
 import io.seata.saga.engine.pcext.StateInstruction;
-import io.seata.saga.engine.pcext.interceptors.ServiceTaskHandlerInterceptor;
 import io.seata.saga.engine.pcext.utils.EngineUtils;
+import io.seata.saga.engine.pcext.utils.LoopTaskUtils;
+import io.seata.saga.engine.pcext.utils.ParameterUtils;
 import io.seata.saga.engine.utils.ProcessContextBuilder;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.ProcessType;
@@ -39,8 +41,10 @@ import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
+import io.seata.saga.statelang.domain.impl.LoopStartStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.slf4j.Logger;
@@ -59,12 +63,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private StateMachineConfig stateMachineConfig;
 
     private static void nullSafeCopy(Map<String, Object> srcMap, Map<String, Object> destMap) {
-        for (String key : srcMap.keySet()) {
-            Object value = srcMap.get(key);
+        srcMap.forEach((key, value) -> {
             if (value != null) {
                 destMap.put(key, value);
             }
-        }
+        });
     }
 
     @Override
@@ -98,53 +101,66 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
     private StateMachineInstance startInternal(String stateMachineName, String tenantId, String businessKey,
                                                Map<String, Object> startParams, boolean async, AsyncCallback callback)
-        throws EngineExecutionException {
+            throws EngineExecutionException {
+        try {
+            if (async && !stateMachineConfig.isEnableAsync()) {
+                throw new EngineExecutionException(
+                    "Asynchronous start is disabled. please set StateMachineConfig.enableAsync=true first.",
+                    FrameworkErrorCode.AsynchronousStartDisabled);
+            }
 
-        if (async && !stateMachineConfig.isEnableAsync()) {
-            throw new EngineExecutionException(
-                "Asynchronous start is disabled. please set StateMachineConfig.enableAsync=true first.",
-                FrameworkErrorCode.AsynchronousStartDisabled);
+            if (StringUtils.isEmpty(tenantId)) {
+                tenantId = stateMachineConfig.getDefaultTenantId();
+            }
+
+            StateMachineInstance instance = createMachineInstance(stateMachineName, tenantId, businessKey, startParams);
+
+            ProcessContextBuilder contextBuilder = ProcessContextBuilder.create().withProcessType(ProcessType.STATE_LANG)
+                .withOperationName(DomainConstants.OPERATION_NAME_START).withAsyncCallback(callback).withInstruction(
+                    new StateInstruction(stateMachineName, tenantId)).withStateMachineInstance(instance)
+                .withStateMachineConfig(getStateMachineConfig()).withStateMachineEngine(this);
+
+            Map<String, Object> contextVariables;
+            if (startParams != null) {
+                contextVariables = new ConcurrentHashMap<>(startParams.size());
+                nullSafeCopy(startParams, contextVariables);
+            } else {
+                contextVariables = new ConcurrentHashMap<>();
+            }
+            instance.setContext(contextVariables);
+
+            contextBuilder.withStateMachineContextVariables(contextVariables);
+
+            contextBuilder.withIsAsyncExecution(async);
+
+            ProcessContext processContext = contextBuilder.build();
+
+            if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
+                stateMachineConfig.getStateLogStore().recordStateMachineStarted(instance, processContext);
+            }
+            if (StringUtils.isEmpty(instance.getId())) {
+                instance.setId(
+                    stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
+            }
+
+            StateInstruction stateInstruction = processContext.getInstruction(StateInstruction.class);
+            Loop loop = LoopTaskUtils.getLoopConfig(processContext, stateInstruction.getState(processContext));
+            if (null != loop) {
+                stateInstruction.setTemporaryState(new LoopStartStateImpl());
+            }
+
+            if (async) {
+                stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
+            } else {
+                stateMachineConfig.getProcessCtrlEventPublisher().publish(processContext);
+            }
+
+            return instance;
+        } finally {
+            if (stateMachineConfig.getStateLogStore() != null) {
+                stateMachineConfig.getStateLogStore().clearUp();
+            }
         }
-
-        if (StringUtils.isEmpty(tenantId)) {
-            tenantId = stateMachineConfig.getDefaultTenantId();
-        }
-
-        StateMachineInstance instance = createMachineInstance(stateMachineName, tenantId, businessKey, startParams);
-
-        ProcessContextBuilder contextBuilder = ProcessContextBuilder.create().withProcessType(ProcessType.STATE_LANG)
-            .withOperationName(DomainConstants.OPERATION_NAME_START).withAsyncCallback(callback).withInstruction(
-                new StateInstruction(stateMachineName, tenantId)).withStateMachineInstance(instance)
-            .withStateMachineConfig(getStateMachineConfig()).withStateMachineEngine(this);
-
-        Map<String, Object> contextVariables;
-        if (startParams != null) {
-            contextVariables = new ConcurrentHashMap<>(startParams.size());
-            nullSafeCopy(startParams, contextVariables);
-        } else {
-            contextVariables = new ConcurrentHashMap<>();
-        }
-        instance.setContext(contextVariables);
-
-        contextBuilder.withStateMachineContextVariables(contextVariables);
-
-        ProcessContext processContext = contextBuilder.build();
-
-        if (instance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
-            stateMachineConfig.getStateLogStore().recordStateMachineStarted(instance, processContext);
-        }
-        if (StringUtils.isEmpty(instance.getId())) {
-            instance.setId(
-                stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
-        }
-
-        if (async) {
-            stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(processContext);
-        } else {
-            stateMachineConfig.getProcessCtrlEventPublisher().publish(processContext);
-        }
-
-        return instance;
     }
 
     private StateMachineInstance createMachineInstance(String stateMachineName, String tenantId, String businessKey,
@@ -163,13 +179,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setBusinessKey(businessKey);
 
         inst.setStartParams(startParams);
-        if (StringUtils.hasText(businessKey) && startParams != null) {
-            startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
-        }
+        if (startParams != null) {
+            if (StringUtils.hasText(businessKey)) {
+                startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
+            }
 
-        if (StringUtils.hasText((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
-            inst.setParentId((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
-            startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            String parentId = (String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID);
+            if (StringUtils.hasText(parentId)) {
+                inst.setParentId(parentId);
+                startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
+            }
         }
 
         inst.setStatus(ExecutionStatus.RU);
@@ -177,7 +196,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         inst.setRunning(true);
 
         inst.setGmtStarted(new Date());
-        inst.setGmtStarted(inst.getGmtStarted());
+        inst.setGmtUpdated(inst.getGmtStarted());
 
         return inst;
     }
@@ -209,11 +228,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             return stateMachineInstance;
         }
 
-        ExecutionStatus[] acceptStatus = new ExecutionStatus[] {ExecutionStatus.FA, ExecutionStatus.UN};
+        ExecutionStatus[] acceptStatus = new ExecutionStatus[] {ExecutionStatus.FA, ExecutionStatus.UN, ExecutionStatus.RU};
         checkStatus(stateMachineInstance, acceptStatus, null, stateMachineInstance.getStatus(), null, "forward");
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
-        if (actList == null || actList.size() == 0) {
+        if (CollectionUtils.isEmpty(actList)) {
             throw new ForwardInvalidException("StateMachineInstance[id:" + stateMachineInstId
                 + "] has no stateInstance, pls start a new StateMachine execution instead",
                 FrameworkErrorCode.OperationDenied);
@@ -232,9 +251,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withStateMachineInstance(stateMachineInstance).withStateInstance(lastForwardState).withStateMachineConfig(
                 getStateMachineConfig()).withStateMachineEngine(this);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext context = contextBuilder.build();
 
-        Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
+        Map<String, Object> contextVariables = getStateMachineContextVariables(stateMachineInstance);
 
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
@@ -246,6 +267,13 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, concurrentContextVariables);
         stateMachineInstance.setContext(concurrentContextVariables);
+
+        String originStateName = EngineUtils.getOriginStateName(lastForwardState);
+        State lastState = stateMachineInstance.getStateMachine().getState(originStateName);
+        Loop loop = LoopTaskUtils.getLoopConfig(context, lastState);
+        if (null != loop && ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
+            lastForwardState = LoopTaskUtils.findOutLastNeedForwardStateInstance(context);
+        }
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
             lastForwardState.getId());
@@ -259,10 +287,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             lastForwardState.setIgnoreStatus(true);
         }
 
-        if (stateMachineInstance.getStateMachine().isPersist()) {
-            stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
-        }
-
         try {
             StateInstruction inst = new StateInstruction();
             inst.setTenantId(stateMachineInstance.getTenantId());
@@ -270,9 +294,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             if (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
 
                 String next = null;
-                State state = stateMachineInstance.getStateMachine().getState(lastForwardState.getName());
-                if (state != null && state instanceof AbstractTaskState) {
-                    next = ((AbstractTaskState)state).getNext();
+                State state = stateMachineInstance.getStateMachine().getState(EngineUtils.getOriginStateName(lastForwardState));
+                if (state instanceof AbstractTaskState) {
+                    next = state.getNext();
                 }
                 if (StringUtils.isEmpty(next)) {
                     LOGGER.warn(
@@ -283,12 +307,31 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 inst.setStateName(next);
             } else {
 
-                inst.setStateName(lastForwardState.getName());
+                if (ExecutionStatus.RU.equals(lastForwardState.getStatus())
+                        && !EngineUtils.isTimeout(lastForwardState.getGmtStarted(), stateMachineConfig.getServiceInvokeTimeout())) {
+                    throw new EngineExecutionException(
+                            "State [" + lastForwardState.getName() + "] is running, operation[forward] denied", FrameworkErrorCode.OperationDenied);
+                }
+
+                inst.setStateName(EngineUtils.getOriginStateName(lastForwardState));
             }
             context.setInstruction(inst);
 
             stateMachineInstance.setStatus(ExecutionStatus.RU);
             stateMachineInstance.setRunning(true);
+
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Operation [forward] started  stateMachineInstance[id:" + stateMachineInstance.getId() + "]");
+            }
+
+            if (stateMachineInstance.getStateMachine().isPersist()) {
+                stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
+            }
+
+            loop = LoopTaskUtils.getLoopConfig(context, inst.getState(context));
+            if (null != loop) {
+                inst.setTemporaryState(new LoopStartStateImpl());
+            }
 
             if (async) {
                 stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(context);
@@ -296,64 +339,61 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                 stateMachineConfig.getProcessCtrlEventPublisher().publish(context);
             }
         } catch (EngineExecutionException e) {
-            LOGGER.error("Operate [forward] failed", e);
+            LOGGER.error("Operation [forward] failed", e);
             throw e;
         }
         return stateMachineInstance;
     }
 
-    private Map<String, Object> getStateMachineContextVariables(ProcessContext context,
-                                                                StateMachineInstance stateMachineInstance) {
-
+    private Map<String, Object> getStateMachineContextVariables(StateMachineInstance stateMachineInstance) {
         Map<String, Object> contextVariables = stateMachineInstance.getEndParams();
-        if (contextVariables == null || contextVariables.size() == 0) {
-            contextVariables = stateMachineInstance.getStartParams();
+        if (CollectionUtils.isEmpty(contextVariables)) {
+            contextVariables = replayContextVariables(stateMachineInstance);
         }
-        if (contextVariables == null) {
-            contextVariables = new HashMap<>();
+        return contextVariables;
+    }
+
+    protected Map<String, Object> replayContextVariables(StateMachineInstance stateMachineInstance) {
+        Map<String, Object> contextVariables = new HashMap<>();
+        if (stateMachineInstance.getStartParams() != null) {
+            contextVariables.putAll(stateMachineInstance.getStartParams());
         }
 
-        if (stateMachineInstance.isRunning()) {
-            List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
-            if (stateInstanceList == null || stateInstanceList.size() == 0) {
-                return contextVariables;
-            }
+        List<StateInstance> stateInstanceList = stateMachineInstance.getStateList();
+        if (CollectionUtils.isEmpty(stateInstanceList)) {
+            return contextVariables;
+        }
 
-            for (StateInstance stateInstance : stateInstanceList) {
-                Object serviceOutputParams = stateInstance.getOutputParams();
-                if (serviceOutputParams != null) {
-                    ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
-                        stateInstance.getName());
-                    if (state == null) {
-                        throw new EngineExecutionException(
+        for (StateInstance stateInstance : stateInstanceList) {
+            Object serviceOutputParams = stateInstance.getOutputParams();
+            if (serviceOutputParams != null) {
+                ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
+                        EngineUtils.getOriginStateName(stateInstance));
+                if (state == null) {
+                    throw new EngineExecutionException(
                             "Cannot find State by state name [" + stateInstance.getName() + "], may be this is a bug",
                             FrameworkErrorCode.ObjectNotExists);
-                    }
-
-                    if (state.getOutput() != null && state.getOutput().size() > 0) {
-                        try {
-                            Map<String, Object> outputVariablesToContext = ServiceTaskHandlerInterceptor
-                                .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
-                                    serviceOutputParams);
-                            if (outputVariablesToContext != null && outputVariablesToContext.size() > 0) {
-                                contextVariables.putAll(outputVariablesToContext);
-                            }
-
-                            if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
-
-                                ((Map<String, Object>)context.getVariable(
-                                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).put(
-                                    state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY,
-                                    stateInstance.getBusinessKey());
-                            }
-                        } catch (Exception e) {
-                            throw new EngineExecutionException(e, "Context variables replay faied",
-                                FrameworkErrorCode.ContextVariableReplayFailed);
-                        }
-                    }
-
                 }
 
+                if (CollectionUtils.isNotEmpty(state.getOutput())) {
+                    try {
+                        Map<String, Object> outputVariablesToContext = ParameterUtils
+                                .createOutputParams(stateMachineConfig.getExpressionFactoryManager(), state,
+                                        serviceOutputParams);
+                        if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
+                            contextVariables.putAll(outputVariablesToContext);
+                        }
+
+                        if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
+                            contextVariables.put(
+                                    state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY,
+                                    stateInstance.getBusinessKey());
+                        }
+                    } catch (Exception e) {
+                        throw new EngineExecutionException(e, "Context variables replay faied",
+                                FrameworkErrorCode.ContextVariableReplayFailed);
+                    }
+                }
             }
         }
         return contextVariables;
@@ -362,8 +402,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * Find the last instance of the forward execution state
      *
-     * @param stateInstanceList
-     * @return
+     * @param stateInstanceList the state instance list
+     * @return the state instance
      */
     public StateInstance findOutLastForwardStateInstance(List<StateInstance> stateInstanceList) {
         StateInstance lastForwardStateInstance = null;
@@ -386,8 +426,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                     List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore()
                         .queryStateMachineInstanceByParentId(EngineUtils.generateParentId(finalState));
-                    if (subInst != null && subInst.size() > 0) {
-
+                    if (CollectionUtils.isNotEmpty(subInst)) {
                         if (ExecutionStatus.SU.equals(subInst.get(0).getCompensationStatus())) {
                             continue;
                         }
@@ -457,9 +496,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             .withStateMachineInstance(stateMachineInstance).withStateMachineConfig(getStateMachineConfig())
             .withStateMachineEngine(this);
 
+        contextBuilder.withIsAsyncExecution(async);
+
         ProcessContext context = contextBuilder.build();
 
-        Map<String, Object> contextVariables = getStateMachineContextVariables(context, stateMachineInstance);
+        Map<String, Object> contextVariables = getStateMachineContextVariables(stateMachineInstance);
 
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
@@ -476,6 +517,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         tempCompensationTriggerState.setStateMachine(stateMachineInstance.getStateMachine());
 
         stateMachineInstance.setRunning(true);
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Operation [compensate] start.  stateMachineInstance[id:" + stateMachineInstance.getId() + "]");
+        }
+
         if (stateMachineInstance.getStateMachine().isPersist()) {
             stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
         }
@@ -494,7 +540,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
 
         } catch (EngineExecutionException e) {
-            LOGGER.error("Operate [compensate] failed", e);
+            LOGGER.error("Operation [compensate] failed", e);
             throw e;
         }
 
@@ -502,8 +548,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     }
 
     @Override
-    public StateMachineInstance skipAndForward(String stateMachineInstId) throws EngineExecutionException {
-        return forwardInternal(stateMachineInstId, null, false, true, null);
+    public StateMachineInstance skipAndForward(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException {
+        return forwardInternal(stateMachineInstId, replaceParams, false, true, null);
     }
 
     @Override
@@ -515,10 +561,11 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * override state machine instance
      *
-     * @param instId
-     * @return
+     * @param instId the state instance id
+     * @return the state machine instance
      */
-    protected StateMachineInstance reloadStateMachineInstance(String instId) {
+    @Override
+    public StateMachineInstance reloadStateMachineInstance(String instId) {
 
         StateMachineInstance inst = stateMachineConfig.getStateLogStore().getStateMachineInstance(instId);
         if (inst != null) {
@@ -533,13 +580,17 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             }
 
             List<StateInstance> stateList = inst.getStateList();
-            if (stateList == null || stateList.size() == 0) {
+            if (CollectionUtils.isEmpty(stateList)) {
                 stateList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(instId);
-                if (stateList != null && stateList.size() > 0) {
+                if (CollectionUtils.isNotEmpty(stateList)) {
                     for (StateInstance tmpStateInstance : stateList) {
                         inst.putStateInstance(tmpStateInstance.getId(), tmpStateInstance);
                     }
                 }
+            }
+
+            if (CollectionUtils.isEmpty(inst.getEndParams())) {
+                inst.setEndParams(replayContextVariables(inst));
             }
         }
         return inst;
@@ -548,13 +599,13 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     /**
      * Check if the status is legal
      *
-     * @param stateMachineInstance
-     * @param acceptStatus
-     * @param denyStatus
-     * @param status
-     * @param compenStatus
-     * @param operation
-     * @return
+     * @param stateMachineInstance the state machine instance
+     * @param acceptStatus accept status
+     * @param denyStatus deny status
+     * @param status execution status
+     * @param compenStatus compensate status
+     * @param operation the operation
+     * @return the boolean
      */
     protected boolean checkStatus(StateMachineInstance stateMachineInstance, ExecutionStatus[] acceptStatus,
                                   ExecutionStatus[] denyStatus, ExecutionStatus status, ExecutionStatus compenStatus,
@@ -573,9 +624,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             throw new EngineExecutionException(message, FrameworkErrorCode.OperationDenied);
         }
 
-        if (stateMachineInstance.isRunning()) {
+        if (stateMachineInstance.isRunning() && !EngineUtils.isTimeout(stateMachineInstance.getGmtUpdated(), stateMachineConfig.getTransOperationTimeout())) {
             throw new EngineExecutionException(
-                "StateMachineInstance[id:" + stateMachineInstance.getId() + "]is running，operation[" + operation
+                "StateMachineInstance [id:" + stateMachineInstance.getId() + "] is running, operation[" + operation
                     + "] denied", FrameworkErrorCode.OperationDenied);
         }
 

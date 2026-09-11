@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class DefaultGlobalTransactionTest {
     private static final String DEFAULT_XID = "1234567890";
@@ -71,15 +70,14 @@ class DefaultGlobalTransactionTest {
         RootContext.unbind();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> {
-            tx.commit();});
+        Assertions.assertThrows(TransactionException.class, tx::commit);
     }
 
     @Test
     public void commitNoXIDExceptionTest() throws TransactionException {
         RootContext.unbind();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assertions.assertThrows(IllegalStateException.class, () -> tx.commit());
+        Assertions.assertThrows(IllegalStateException.class, tx::commit);
     }
 
 
@@ -88,7 +86,7 @@ class DefaultGlobalTransactionTest {
         RootContext.unbind();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
+        Assertions.assertThrows(TransactionException.class, tx::rollback);
     }
 
     @Test
@@ -96,7 +94,7 @@ class DefaultGlobalTransactionTest {
         RootContext.unbind();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
+        Assertions.assertThrows(TransactionException.class, tx::rollback);
     }
 
 }

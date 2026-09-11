@@ -35,7 +35,7 @@ public class BranchRegisterRequestTest {
         branchRegisterRequest.setBranchType(BranchType.AT);
         branchRegisterRequest.setResourceId("resource1");
         branchRegisterRequest.setLockKey("lock_key_1");
-        Assertions.assertEquals("xid=127.0.0.1:8091:1249853,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
+        Assertions.assertEquals("BranchRegisterRequest{xid='127.0.0.1:8091:1249853', branchType=AT, resourceId='resource1', lockKey='lock_key_1', applicationData='null'}",
             branchRegisterRequest.toString());
 
     }

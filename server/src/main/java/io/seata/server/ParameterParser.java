@@ -19,64 +19,94 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.server.env.ContainerHelper;
+import io.seata.server.store.StoreConfig;
 
 import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
 
 /**
  * The type Parameter parser.
  *
- * @author xingfudeshi@gmail.com
- * @date 2019/05/30
+ * @author xingfudeshi @gmail.com
  */
 public class ParameterParser {
-    private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
-    private static final int SERVER_DEFAULT_PORT = 8091;
-    private static final String SERVER_DEFAULT_STORE_MODE = "file";
-    private static final int SERVER_DEFAULT_NODE = 1;
+
+    private static final String PROGRAM_NAME
+        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Parameter(names = "--help", help = true)
     private boolean help;
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
-    private int port = SERVER_DEFAULT_PORT;
-    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
+    private int port;
+    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db, redis", order = 3)
     private String storeMode;
-    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
-    private int serverNode = SERVER_DEFAULT_NODE;
-    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.", order = 5)
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3.it will be generated according to the snowflake by default", order = 4)
+    private Long serverNode;
+    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
+        order = 5)
     private String seataEnv;
+    @Parameter(names = {"--sessionStoreMode", "-ssm"}, description = "session log store mode : file, db, redis",
+        order = 6)
+    private String sessionStoreMode;
+    @Parameter(names = {"--lockStoreMode", "-lsm"}, description = "lock log store mode : file, db, redis", order = 7)
+    private String lockStoreMode;
 
     /**
      * Instantiates a new Parameter parser.
      *
      * @param args the args
      */
-    public ParameterParser(String[] args) {
+    public ParameterParser(String... args) {
         this.init(args);
     }
 
+    /**
+     * startup args > docker env
+     * @param args
+     */
     private void init(String[] args) {
         try {
-            JCommander jCommander = JCommander.newBuilder().addObject(this).build();
-            jCommander.parse(args);
-            if (help) {
-                jCommander.setProgramName(PROGRAM_NAME);
-                jCommander.usage();
-                System.exit(0);
-            }
+            getCommandParameters(args);
+            getEnvParameters();
             if (StringUtils.isNotBlank(seataEnv)) {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
-            if(StringUtils.isBlank(storeMode)){
-                storeMode= ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
-            }
+            StoreConfig.setStartupParameter(storeMode, sessionStoreMode, lockStoreMode);
         } catch (ParameterException e) {
             printError(e);
         }
 
+    }
+
+    private void getCommandParameters(String[] args) {
+        JCommander jCommander = JCommander.newBuilder().addObject(this).build();
+        jCommander.parse(args);
+        if (help) {
+            jCommander.setProgramName(PROGRAM_NAME);
+            jCommander.usage();
+            System.exit(0);
+        }
+    }
+
+    private void getEnvParameters() {
+        if (StringUtils.isBlank(seataEnv)) {
+            seataEnv = ContainerHelper.getEnv();
+        }
+        if (StringUtils.isBlank(host)) {
+            host = ContainerHelper.getHost();
+        }
+        if (port == 0) {
+            port = ContainerHelper.getPort();
+        }
+        if (serverNode == null) {
+            serverNode = ContainerHelper.getServerNode();
+        }
     }
 
     private void printError(ParameterException e) {
@@ -114,6 +144,24 @@ public class ParameterParser {
     }
 
     /**
+     * Gets lock store mode.
+     *
+     * @return the store mode
+     */
+    public String getLockStoreMode() {
+        return lockStoreMode;
+    }
+
+    /**
+     * Gets session store mode.
+     *
+     * @return the store mode
+     */
+    public String getSessionStoreMode() {
+        return sessionStoreMode;
+    }
+
+    /**
      * Is help boolean.
      *
      * @return the boolean
@@ -127,7 +175,7 @@ public class ParameterParser {
      *
      * @return the server node
      */
-    public int getServerNode() {
+    public Long getServerNode() {
         return serverNode;
     }
 
@@ -139,4 +187,14 @@ public class ParameterParser {
     public String getSeataEnv() {
         return seataEnv;
     }
+
+    /**
+     * Clean up.
+     */
+    public void cleanUp() {
+        if (null != System.getProperty(ENV_PROPERTY_KEY)) {
+            System.clearProperty(ENV_PROPERTY_KEY);
+        }
+    }
+
 }

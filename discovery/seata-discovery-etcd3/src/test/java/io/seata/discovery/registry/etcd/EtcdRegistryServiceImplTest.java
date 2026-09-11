@@ -18,7 +18,7 @@ package io.seata.discovery.registry.etcd;
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.Watch;
-import io.etcd.jetcd.launcher.junit.EtcdClusterResource;
+import io.etcd.jetcd.launcher.junit4.EtcdClusterResource;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.watch.WatchResponse;
@@ -36,11 +36,11 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static io.netty.util.CharsetUtil.UTF_8;
+import static io.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/26
  */
 @Disabled
 public class EtcdRegistryServiceImplTest {
@@ -49,13 +49,13 @@ public class EtcdRegistryServiceImplTest {
     @Rule
     private final static EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
 
-    private final Client client = Client.builder().endpoints(etcd.cluster().getClientEndpoints()).build();
+    private final Client client = Client.builder().endpoints(etcd.getClientEndpoints()).build();
     private final static String HOST = "127.0.0.1";
     private final static int PORT = 8091;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
-        System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, etcd.cluster().getClientEndpoints().get(0).toString());
+        System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, etcd.getClientEndpoints().get(0).toString());
     }
 
     @AfterAll
@@ -149,7 +149,7 @@ public class EtcdRegistryServiceImplTest {
         //1.register
         registryService.register(inetSocketAddress);
         //2.lookup
-        List<InetSocketAddress> inetSocketAddresses = registryService.lookup("my_test_tx_group");
+        List<InetSocketAddress> inetSocketAddresses = registryService.lookup(DEFAULT_TX_GROUP);
         assertThat(inetSocketAddresses).size().isEqualTo(1);
     }
 

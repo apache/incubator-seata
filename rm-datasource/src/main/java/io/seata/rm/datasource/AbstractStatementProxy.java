@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource;
 
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,6 +46,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * The Target sql.
      */
     protected String targetSQL;
+
+    /**
+     * The cache of scrollable generatedKeys
+     */
+    protected CachedRowSet scrollableGeneratedKeysCache;
 
     /**
      * Instantiates a new Abstract statement proxy.
@@ -222,7 +229,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void clearBatch() throws SQLException {
         targetStatement.clearBatch();
-
+        targetSQL = null;
     }
 
     @Override
@@ -242,7 +249,15 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
 
     @Override
     public ResultSet getGeneratedKeys() throws SQLException {
-        return targetStatement.getGeneratedKeys();
+        ResultSet rs = targetStatement.getGeneratedKeys();
+        if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
+            //Conditions for flushing the cache:
+            //1.originally not cached
+            //2.the original ResultSet was not traversed, including executed repeatedly
+            scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
+            scrollableGeneratedKeysCache.populate(rs);
+        }
+        return scrollableGeneratedKeysCache;
     }
 
     @Override

@@ -27,7 +27,7 @@ import io.seata.rm.datasource.StatementProxy;
  * @param <T> the type parameter
  * @param <S> the type parameter
  */
-public class PlainExecutor<T, S extends Statement> implements Executor {
+public class PlainExecutor<T, S extends Statement> implements Executor<T> {
 
     private StatementProxy<S> statementProxy;
 

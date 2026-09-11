@@ -15,15 +15,17 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.util.NumberUtils;
 import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
+import io.seata.saga.statelang.domain.TaskState.Loop;
 import io.seata.saga.statelang.domain.TaskState.Retry;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.ExceptionMatchImpl;
+import io.seata.saga.statelang.domain.impl.AbstractTaskState.LoopImpl;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.RetryImpl;
 
 /**
@@ -37,61 +39,113 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
 
         parseBaseAttributes(state, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
 
-        state.setCompensateState((String)nodeMap.get("CompensateState"));
-        state.setForCompensation("true".equals(nodeMap.get("IsForCompensation")));
-        state.setForUpdate("true".equals(nodeMap.get("IsForUpdate")));
+        state.setCompensateState((String) nodeMap.get("CompensateState"));
+        state.setForCompensation(Boolean.TRUE.equals(nodeMap.get("IsForCompensation")));
+        state.setForUpdate(Boolean.TRUE.equals(nodeMap.get("IsForUpdate")));
         Object isPersist = nodeMap.get("IsPersist");
         if (Boolean.FALSE.equals(isPersist)) {
             state.setPersist(false);
         }
 
-        Map<String, Object> retryMap = (Map<String, Object>)nodeMap.get("Retry");
-        if (retryMap != null) {
-            state.setRetry(parseRetry(retryMap));
+        // customize if update origin or append new retryStateInstLog
+        Object isRetryPersistModeUpdate = nodeMap.get("IsRetryPersistModeUpdate");
+        if (isRetryPersistModeUpdate instanceof Boolean) {
+            state.setRetryPersistModeUpdate(Boolean.TRUE.equals(isRetryPersistModeUpdate));
         }
 
-        List<Object> catchList = (List<Object>)nodeMap.get("Catch");
+        // customize if update last or append new compensateStateInstLog
+        Object isCompensatePersistModeUpdate = nodeMap.get("IsCompensatePersistModeUpdate");
+        if (isCompensatePersistModeUpdate instanceof Boolean) {
+            state.setCompensatePersistModeUpdate(Boolean.TRUE.equals(isCompensatePersistModeUpdate));
+        }
+
+        List<Object> retryList = (List<Object>) nodeMap.get("Retry");
+        if (retryList != null) {
+            state.setRetry(parseRetry(retryList));
+        }
+
+        List<Object> catchList = (List<Object>) nodeMap.get("Catch");
         if (catchList != null) {
             state.setCatches(parseCatch(catchList));
         }
 
-        List<Object> inputList = (List<Object>)nodeMap.get("Input");
+        List<Object> inputList = (List<Object>) nodeMap.get("Input");
         if (inputList != null) {
             state.setInput(inputList);
         }
 
-        Map<String, Object> outputMap = (Map<String, Object>)nodeMap.get("Output");
+        Map<String, Object> outputMap = (Map<String, Object>) nodeMap.get("Output");
         if (outputMap != null) {
             state.setOutput(outputMap);
         }
 
-        Map<String/* expression */, String /* status */> statusMap = (Map<String, String>)nodeMap.get("Status");
+        Map<String/* expression */, String /* status */> statusMap = (Map<String, String>) nodeMap.get("Status");
         if (statusMap != null) {
             state.setStatus(statusMap);
         }
+
+        Object loopObj = nodeMap.get("Loop");
+        if (loopObj != null) {
+            state.setLoop(parseLoop(loopObj));
+        }
     }
 
-    protected Retry parseRetry(Map<String, Object> retryMap) {
-        RetryImpl retry = new RetryImpl();
-        retry.setIntervalSeconds(((Double)retryMap.get("IntervalSeconds")).intValue());
-        retry.setMaxAttempts(((Double)retryMap.get("MaxAttempts")).intValue());
-        retry.setBackoffRate(new BigDecimal((Double)retryMap.get("BackoffRate")));
-        return retry;
+    protected List<Retry> parseRetry(List<Object> retryList) {
+        if (retryList != null) {
+            List<Retry> retries = new ArrayList<>(retryList.size());
+            for (Object retryObj : retryList) {
+                Map<String, Object> retryMap = (Map<String, Object>) retryObj;
+                RetryImpl retry = new RetryImpl();
+                retry.setExceptions((List<String>) retryMap.get("Exceptions"));
+
+                Object intervalSeconds = retryMap.get("IntervalSeconds");
+                if (intervalSeconds instanceof Number) {
+                    retry.setIntervalSeconds(((Number) intervalSeconds).doubleValue());
+                }
+
+                retry.setMaxAttempts((Integer) retryMap.get("MaxAttempts"));
+
+                Object backoffRate = retryMap.get("BackoffRate");
+                if (backoffRate instanceof Number) {
+                    retry.setBackoffRate(((Number) backoffRate).doubleValue());
+                }
+
+                retries.add(retry);
+            }
+            return retries;
+        }
+        return new ArrayList<>(0);
     }
 
     protected List<ExceptionMatch> parseCatch(List<Object> catchList) {
 
         List<ExceptionMatch> exceptionMatchList = new ArrayList<>(catchList.size());
         for (Object exceptionMatchObj : catchList) {
-            Map<String, Object> exceptionMatchMap = (Map<String, Object>)exceptionMatchObj;
+            Map<String, Object> exceptionMatchMap = (Map<String, Object>) exceptionMatchObj;
             ExceptionMatchImpl exceptionMatch = new ExceptionMatchImpl();
-            exceptionMatch.setExceptions((List<String>)exceptionMatchMap.get("Exceptions"));
-            exceptionMatch.setNext((String)exceptionMatchMap.get("Next"));
+            exceptionMatch.setExceptions((List<String>) exceptionMatchMap.get("Exceptions"));
+            exceptionMatch.setNext((String) exceptionMatchMap.get("Next"));
 
             exceptionMatchList.add(exceptionMatch);
         }
         return exceptionMatchList;
+    }
+
+    protected Loop parseLoop(Object loopObj) {
+        Map<String, Object> loopMap = (Map<String, Object>)loopObj;
+        LoopImpl loop = new LoopImpl();
+
+        Object parallel = loopMap.get("Parallel");
+        loop.setParallel(NumberUtils.toInt(parallel.toString(), 1));
+
+        loop.setCollection((String)loopMap.get("Collection"));
+        loop.setElementVariableName((String)loopMap.getOrDefault("ElementVariableName", "loopElement"));
+        loop.setElementIndexName((String)loopMap.getOrDefault("ElementIndexName", "loopCounter"));
+        loop.setCompletionCondition(
+            (String)loopMap.getOrDefault("CompletionCondition", "[nrOfInstances] == [nrOfCompletedInstances]"));
+        return loop;
+
     }
 }

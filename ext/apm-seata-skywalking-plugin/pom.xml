@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright 1999-2019 Seata.io Group.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>apm-seata-skywalking-plugin</artifactId>
+    <packaging>jar</packaging>
+    <name>apm-seata-skywalking-plugin ${project.version}</name>
+    <description>skywalking plugin for Seata built with Maven</description>
+
+    <properties>
+        <skywalking.version>8.6.0</skywalking.version>
+
+        <maven-antrun-plugin.skip>true</maven-antrun-plugin.skip>
+        <agent.dir>${project.build.directory}/ext/skywalking-agent/</agent.dir>
+        <agent-plugins.dir>${agent.dir}/plugins/</agent-plugins.dir>
+        <agent-config.dir>${agent.dir}/config</agent-config.dir>
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.skywalking</groupId>
+            <artifactId>apm-agent-core</artifactId>
+            <version>${skywalking.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-all</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-server</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <includes>
+                                    <include>net.bytebuddy:*</include>
+                                </includes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.bytebuddy</pattern>
+                                    <shadedPattern>org.apache.skywalking.apm.dependencies.net.bytebuddy</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-agent</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <destFileName>skywalking-agent.jar</destFileName>
+                                    <outputDirectory>${agent.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>io.seata</groupId>
+                                    <artifactId>apm-seata-skywalking-plugin</artifactId>
+                                    <version>${project.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-jdbc-commons</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-mysql-commons</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-mysql-5.x-plugin</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-mysql-6.x-plugin</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.skywalking</groupId>
+                                    <artifactId>apm-mysql-8.x-plugin</artifactId>
+                                    <version>${skywalking.version}</version>
+                                    <outputDirectory>${agent-plugins.dir}</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>${maven-antrun-plugin.version}</version>
+                    <configuration>
+                        <skip>${maven-antrun-plugin.skip}</skip>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <tasks>
+                                    <copy overwrite="true" file="${project.basedir}/config/agent.config" tofile="${agent-config.dir}/agent.config" />
+                                </tasks>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>release-seata</id>
+            <properties>
+                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
+            </properties>
+        </profile>
+    </profiles>
+</project>

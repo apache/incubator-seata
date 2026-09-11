@@ -15,24 +15,30 @@
  */
 package io.seata.tm.api.transaction;
 
-import io.seata.common.util.CollectionUtils;
-
 import java.io.Serializable;
 import java.util.Set;
 
+import io.seata.common.LockStrategyMode;
+import io.seata.common.util.CollectionUtils;
+
 /**
  * @author guoyao
- * @date 2019/4/17
  */
 public final class TransactionInfo implements Serializable {
-
-    public static final int DEFAULT_TIME_OUT = 60000;
 
     private int timeOut;
 
     private String name;
 
     private Set<RollbackRule> rollbackRules;
+
+    private Propagation propagation;
+
+    private int lockRetryInterval;
+
+    private int lockRetryTimes;
+
+    private LockStrategyMode lockStrategyMode;
 
     public int getTimeOut() {
         return timeOut;
@@ -74,6 +80,43 @@ public final class TransactionInfo implements Serializable {
             }
         }
 
-        return winner == null || !(winner instanceof NoRollbackRule);
+        return !(winner instanceof NoRollbackRule);
     }
+
+    public Propagation getPropagation() {
+        if (this.propagation != null) {
+            return this.propagation;
+        }
+        //default propagation
+        return Propagation.REQUIRED;
+    }
+
+    public void setPropagation(Propagation propagation) {
+        this.propagation = propagation;
+    }
+
+    public int getLockRetryInterval() {
+        return lockRetryInterval;
+    }
+
+    public void setLockRetryInterval(int lockRetryInterval) {
+        this.lockRetryInterval = lockRetryInterval;
+    }
+
+    public int getLockRetryTimes() {
+        return lockRetryTimes;
+    }
+
+    public void setLockRetryTimes(int lockRetryTimes) {
+        this.lockRetryTimes = lockRetryTimes;
+    }
+
+    public LockStrategyMode getLockStrategyMode() {
+        return lockStrategyMode;
+    }
+
+    public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
+        this.lockStrategyMode = lockStrategyMode;
+    }
+
 }

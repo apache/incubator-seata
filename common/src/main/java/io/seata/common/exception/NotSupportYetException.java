@@ -18,7 +18,7 @@ package io.seata.common.exception;
 /**
  * The type Not support yet exception.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NotSupportYetException extends RuntimeException {
 
@@ -26,7 +26,7 @@ public class NotSupportYetException extends RuntimeException {
      * Instantiates a new Not support yet exception.
      */
     public NotSupportYetException() {
-        super();
+        this("currently not supported, may be supported in future");
     }
 
     /**

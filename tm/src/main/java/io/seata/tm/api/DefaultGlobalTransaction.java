@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -23,8 +22,12 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static io.seata.common.DefaultValues.DEFAULT_TM_COMMIT_RETRY_COUNT;
+import static io.seata.common.DefaultValues.DEFAULT_TM_ROLLBACK_RETRY_COUNT;
 
 /**
  * The type Default global transaction.
@@ -47,11 +50,18 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
+    /**
+     * Used to calculate the timeout
+     *
+     * @see System#currentTimeMillis();
+     */
+    private long createTime;
+
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.
@@ -86,18 +96,19 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
+        this.createTime = System.currentTimeMillis();
         if (role != GlobalTransactionRole.Launcher) {
-            check();
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
-        }
-        if (RootContext.getXID() != null) {
-            throw new IllegalStateException();
+        assertXIDNull();
+        String currentXid = RootContext.getXID();
+        if (currentXid != null) {
+            throw new IllegalStateException("Global transaction already exists," +
+                " can't begin a new global transaction, currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -105,9 +116,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
-
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void commit() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
@@ -117,36 +128,35 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
+        assertXIDNotNull();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("transaction {} will be commit", xid);
         }
-        int retry = COMMIT_RETRY_COUNT;
+        int retry = COMMIT_RETRY_COUNT <= 0 ? DEFAULT_TM_COMMIT_RETRY_COUNT : COMMIT_RETRY_COUNT;
         try {
             while (retry > 0) {
                 try {
+                    retry--;
                     status = transactionManager.commit(xid);
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global commit", ex);
                     }
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (xid.equals(RootContext.getXID())) {
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] commit status: {}", xid, status);
         }
-
     }
 
+    @SuppressWarnings("lgtm[java/constant-comparison]")
     @Override
     public void rollback() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
@@ -156,33 +166,67 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
+        assertXIDNotNull();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("transaction {} will be rollback", xid);
         }
-
-        int retry = ROLLBACK_RETRY_COUNT;
+        int retry = ROLLBACK_RETRY_COUNT <= 0 ? DEFAULT_TM_ROLLBACK_RETRY_COUNT : ROLLBACK_RETRY_COUNT;
         try {
             while (retry > 0) {
                 try {
+                    retry--;
                     status = transactionManager.rollback(xid);
                     break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global rollback", ex);
                     }
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (xid.equals(RootContext.getXID())) {
+                suspend(true);
             }
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("[{}] rollback status: {}", xid, status);
+        }
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend() throws TransactionException {
+        return suspend(false);
+    }
+
+    @Override
+    public SuspendedResourcesHolder suspend(boolean clean) throws TransactionException {
+        // In order to associate the following logs with XID, first get and then unbind.
+        String xid = RootContext.getXID();
+        if (xid != null) {
+            if (LOGGER.isInfoEnabled()) {
+                if (clean) {
+                    LOGGER.info("transaction end, xid = {}", xid);
+                } else {
+                    LOGGER.info("suspending current transaction, xid = {}", xid);
+                }
+            }
+            RootContext.unbind();
+            return clean ? null : new SuspendedResourcesHolder(xid);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {
+        if (suspendedResourcesHolder == null) {
+            return;
+        }
+        String xid = suspendedResourcesHolder.getXid();
+        RootContext.bind(xid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
         }
     }
 
@@ -202,9 +246,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
+
         if (globalStatus == null) {
             throw new IllegalStateException();
         }
@@ -214,17 +257,35 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-            }
+        if (xid.equals(RootContext.getXID())) {
+            suspend(true);
         }
     }
 
-    private void check() {
-        if (xid == null) {
-            throw new ShouldNeverHappenException();
-        }
+    @Override
+    public GlobalStatus getLocalStatus() {
+        return status;
+    }
 
+    @Override
+    public GlobalTransactionRole getGlobalTransactionRole() {
+        return role;
+    }
+
+    @Override
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    private void assertXIDNotNull() {
+        if (xid == null) {
+            throw new IllegalStateException();
+        }
+    }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
     }
 }

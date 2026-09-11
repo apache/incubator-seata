@@ -27,42 +27,42 @@ public interface State {
     /**
      * name
      *
-     * @return
+     * @return the state name
      */
     String getName();
 
     /**
      * comment
      *
-     * @return
+     * @return the state comment
      */
     String getComment();
 
     /**
      * type
      *
-     * @return
+     * @return the state type
      */
     String getType();
 
     /**
      * next state name
      *
-     * @return
+     * @return the next state name
      */
     String getNext();
 
     /**
      * extension properties
      *
-     * @return
+     * @return the state extensions
      */
     Map<String, Object> getExtensions();
 
     /**
      * state machine instance
      *
-     * @return
+     * @return the state machine
      */
     StateMachine getStateMachine();
 }

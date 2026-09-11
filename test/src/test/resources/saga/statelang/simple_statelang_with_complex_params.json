@@ -1,6 +1,6 @@
 {
     "Name": "simpleStateMachineWithComplexParams",
-    "Comment": "带复杂参数的测试状态机定义",
+    "Comment": "带复杂参数的测试状态机定义fastjson格式",
     "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {

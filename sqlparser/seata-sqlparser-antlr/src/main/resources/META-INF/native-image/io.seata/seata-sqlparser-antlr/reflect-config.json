@@ -1,0 +1,38 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.antlr.SQLOperateRecognizerHolder"
+    },
+    "name": "io.seata.sqlparser.antlr.mysql.MySQLOperateRecognizerHolder",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.SQLRecognizerFactory"
+    },
+    "name": "io.seata.sqlparser.antlr.AntlrDelegatingSQLRecognizerFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  },
+  {
+    "condition": {
+      "typeReachable": "io.seata.sqlparser.antlr.AntlrDelegatingSQLRecognizerFactory"
+    },
+    "name": "io.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

@@ -31,15 +31,19 @@ import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.rpc.TransportProtocolType;
+import io.seata.core.rpc.TransportServerType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+
 /**
  * The type Netty base config.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/24
+ * @author slievrly
  */
 public class NettyBaseConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);
@@ -51,18 +55,17 @@ public class NettyBaseConfig {
     /**
      * The constant BOSS_THREAD_PREFIX.
      */
-    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig("transport.thread-factory.boss-thread-prefix");
+    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX);
 
     /**
      * The constant WORKER_THREAD_PREFIX.
      */
-    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(
-        "transport.thread-factory.worker-thread-prefix");
+    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX);
 
     /**
      * The constant SHARE_BOSS_WORKER.
      */
-    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean("transport.thread-factory.share-boss-worker");
+    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
 
     /**
      * The constant WORKER_THREAD_SIZE.
@@ -92,6 +95,7 @@ public class NettyBaseConfig {
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;
 
+
     /**
      * The constant MAX_WRITE_IDLE_SECONDS.
      */
@@ -108,16 +112,16 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig("transport.type",TransportProtocolType.TCP.name()));
-        String workerThreadSize = CONFIG.getConfig("transport.thread-factory.worker-thread-size");
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
+        String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
-        } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
+        } else if (WorkThreadMode.getModeByName(workerThreadSize) != null) {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server",TransportServerType.NIO.name()));
+        TRANSPORT_SERVER_TYPE = TransportServerType.getType(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
@@ -161,7 +165,7 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
-        boolean enableHeartbeat = CONFIG.getBoolean("transport.heartbeat", false);
+        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, DEFAULT_TRANSPORT_HEARTBEAT);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
         } else {
@@ -180,7 +184,7 @@ public class NettyBaseConfig {
     /**
      * The enum Work thread mode.
      */
-    enum WorkThreadMode {
+    public enum WorkThreadMode {
 
         /**
          * Auto work thread mode.
@@ -221,18 +225,12 @@ public class NettyBaseConfig {
          * @return the mode by name
          */
         public static WorkThreadMode getModeByName(String name) {
-            if (Auto.name().equalsIgnoreCase(name)) {
-                return Auto;
-            } else if (Pin.name().equalsIgnoreCase(name)) {
-                return Pin;
-            } else if (BusyPin.name().equalsIgnoreCase(name)) {
-                return BusyPin;
-            } else if (Default.name().equalsIgnoreCase(name)) {
-                return Default;
-            } else {
-                return null;
+            for (WorkThreadMode mode : values()) {
+                if (mode.name().equalsIgnoreCase(name)) {
+                    return mode;
+                }
             }
+            return null;
         }
-
     }
 }

@@ -24,12 +24,12 @@ import java.net.UnknownHostException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * The type Net util test.
  *
  * @author Otis.z
- * @date 2019 /2/26
  */
 public class NetUtilTest {
 
@@ -132,7 +132,6 @@ public class NetUtilTest {
         r = r | (Long.parseLong(split[1]) << 32);
         r = r | (Long.parseLong(split[2]) << 24);
         r = r | (Long.parseLong(split[3]) << 16);
-        r = r | 0;
         assertThat(NetUtil.toLong("127.0.0.1")).isEqualTo(r);
 
     }
@@ -159,6 +158,27 @@ public class NetUtilTest {
     @Test
     public void testGetLocalAddress() {
         assertThat(NetUtil.getLocalAddress()).isNotNull();
+    }
+
+    @Test
+    public void testIsValidIp() {
+        String localIp = "127.0.0.1";
+        String someIp = "8.210.212.91";
+        String someHostName = "seata.io";
+        String unknownHost = "knownHost";
+        assertThat(NetUtil.isValidIp(localIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(localIp, false)).isFalse();
+
+        assertThat(NetUtil.isValidIp(someIp, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someIp, false)).isTrue();
+
+        assertThat(NetUtil.isValidIp(someHostName, true)).isTrue();
+        assertThat(NetUtil.isValidIp(someHostName, false)).isTrue();
+
+        assertThatThrownBy(() -> {
+            NetUtil.isValidIp(unknownHost, false);
+        }).isInstanceOf(RuntimeException.class).hasMessageContaining("UnknownHostException");
+
     }
 
 }

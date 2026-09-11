@@ -23,7 +23,6 @@ import java.util.Properties;
 /**
  * Mock connection
  * @author will
- * @date 2019/8/14
  */
 public class MockConnection extends com.alibaba.druid.mock.MockConnection {
 
@@ -63,5 +62,10 @@ public class MockConnection extends com.alibaba.druid.mock.MockConnection {
     @Override
     public MockDriver getDriver() {
         return mockDriver;
+    }
+
+    @Override
+    public String getSchema() {
+        return null;
     }
 }

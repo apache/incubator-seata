@@ -1,0 +1,14 @@
+[
+  {
+    "condition": {
+      "typeReachable": "io.seata.config.ExtConfigurationProvider"
+    },
+    "name": "io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider",
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
+  }
+]

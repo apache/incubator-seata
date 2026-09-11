@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
  * A unit test for {@link GlobalBeginResponse}
  *
  * @author liujc
- * @date 2019/3/22 11:09
  **/
 public class GlobalBeginResponseTest {
     private final String XID = "test_xid";

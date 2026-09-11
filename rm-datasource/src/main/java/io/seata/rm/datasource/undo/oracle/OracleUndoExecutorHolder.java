@@ -15,40 +15,32 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The Type OracleUndoExecutorHolder
  *
- * @author: Zhibei Hao丶
+ * @author Zhibei Hao
  */
-public class OracleUndoExecutorHolder implements UndoExecutorHolder
-{
-  private final String ORACLE = "oracle";
-  @Override
-  public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoInsertExecutor(sqlUndoLog);
-  }
+@LoadLevel(name = JdbcConstants.ORACLE)
+public class OracleUndoExecutorHolder implements UndoExecutorHolder {
 
-  @Override
-  public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoUpdateExecutor(sqlUndoLog);
-  }
+    @Override
+    public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoInsertExecutor(sqlUndoLog);
+    }
 
-  @Override
-  public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoDeleteExecutor(sqlUndoLog);
-  }
+    @Override
+    public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoUpdateExecutor(sqlUndoLog);
+    }
 
-
-  @Override
-  public String getDbType()
-  {
-    return ORACLE;
-  }
+    @Override
+    public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoDeleteExecutor(sqlUndoLog);
+    }
 }

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
 
@@ -23,11 +24,12 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  */
 public class KryoUndoLogParserTest extends BaseUndoLogParserTest {
 
-    KryoUndoLogParser parser = new KryoUndoLogParser();
+    KryoUndoLogParser parser = (KryoUndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, KryoUndoLogParser.NAME);
 
     @Override
     public UndoLogParser getParser() {
         return parser;
     }
+
 
 }

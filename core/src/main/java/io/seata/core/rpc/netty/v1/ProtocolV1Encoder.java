@@ -18,12 +18,13 @@ package io.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.seata.core.codec.Codec;
-import io.seata.core.codec.CodecFactory;
+import io.seata.core.serializer.Serializer;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.serializer.SerializerServiceLoader;
+import io.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ import java.util.Map;
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
  * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
- * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
+ * |   code    |colVer|    (head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
  * |                                   Head Map [Optional]                                         |
@@ -91,8 +92,8 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
-                    Codec codec = CodecFactory.getCodec(rpcMessage.getCodec());
-                    bodyBytes = codec.encode(rpcMessage.getBody());
+                    Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
+                    bodyBytes = serializer.serialize(rpcMessage.getBody());
                     Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                     bodyBytes = compressor.compress(bodyBytes);
                     fullLength += bodyBytes.length;

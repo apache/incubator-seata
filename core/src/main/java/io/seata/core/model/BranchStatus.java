@@ -15,8 +15,6 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
@@ -91,7 +89,19 @@ public enum BranchStatus {
      * The Phase two rollback failed unretryable.
      * description:Rollback logic is failed but NOT retryable.
      */
-    PhaseTwo_RollbackFailed_Unretryable(10);
+    PhaseTwo_RollbackFailed_Unretryable(10),
+
+    /**
+     * The Phase two commit failed retryable because of XAException.XAER_NOTA.
+     * description:Commit logic is failed because of XAException.XAER_NOTA but retryable.
+     */
+    PhaseTwo_CommitFailed_XAER_NOTA_Retryable(11),
+
+    /**
+     * The Phase two rollback failed retryable because of XAException.XAER_NOTA.
+     * description:rollback logic is failed because of XAException.XAER_NOTA but retryable.
+     */
+    PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12);
 
     private int code;
 
@@ -108,13 +118,6 @@ public enum BranchStatus {
         return code;
     }
 
-    private static final Map<Integer, BranchStatus> MAP = new HashMap<>(values().length);
-
-    static {
-        for (BranchStatus status : values()) {
-            MAP.put(status.getCode(), status);
-        }
-    }
 
     /**
      * Get branch status.
@@ -133,12 +136,13 @@ public enum BranchStatus {
      * @return the branch status
      */
     public static BranchStatus get(int code) {
-        BranchStatus status = MAP.get(code);
-
-        if (null == status) {
+        BranchStatus value = null;
+        try {
+            value = BranchStatus.values()[code];
+        } catch (Exception e) {
             throw new ShouldNeverHappenException("Unknown BranchStatus[" + code + "]");
         }
-
-        return status;
+        return value;
     }
+
 }

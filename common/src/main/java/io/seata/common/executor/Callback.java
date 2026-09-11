@@ -30,6 +30,6 @@ public interface Callback<T> {
      * @return the t
      * @throws Throwable the throwable
      */
-    public T execute() throws Throwable;
+    T execute() throws Throwable;
 }
 

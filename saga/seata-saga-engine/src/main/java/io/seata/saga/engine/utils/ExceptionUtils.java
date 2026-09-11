@@ -27,11 +27,11 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  */
 public class ExceptionUtils {
 
-    public static final String CONNECT_TIMED_OUT = "connect timed out";
+    public static final String CONNECT_TIMED_OUT                     = "connect timed out";
     public static final String CONNECT_TIME_OUT_EXCEPTION_CLASS_NAME = "ConnectTimeoutException";
-    public static final String READ_TIME_OUT_EXCEPTION_CLASS_NAME = "ReadTimeoutException";
-    public static final String CONNECT_EXCEPTION_CLASS_NAME = "ConnectException";
-    public static final int MAX_CAUSE_DEP = 20;
+    public static final String READ_TIME_OUT_EXCEPTION_CLASS_NAME    = "ReadTimeoutException";
+    public static final String CONNECT_EXCEPTION_CLASS_NAME          = "ConnectException";
+    public static final int    MAX_CAUSE_DEP                         = 20;
 
     public static EngineExecutionException createEngineExecutionException(Exception e, FrameworkErrorCode code,
                                                                           String message,
@@ -72,8 +72,8 @@ public class ExceptionUtils {
     /**
      * getNetExceptionType
      *
-     * @param throwable
-     * @return
+     * @param throwable the throwable
+     * @return the net exception type
      */
     public static NetExceptionType getNetExceptionType(Throwable throwable) {
 
@@ -119,12 +119,22 @@ public class ExceptionUtils {
          */
         CONNECT_TIMEOUT_EXCEPTION,
         /**
-         * read timeout from remote（request has sent）
+         * read timeout from remote(request has sent)
          */
         READ_TIMEOUT_EXCEPTION,
         /**
          * not a network exception
          */
         NOT_NET_EXCEPTION
+    }
+
+    /**
+     * Determine if the it is network exception
+     * @param throwable the throwable
+     * @return the boolean
+     */
+    public static boolean isNetException(Throwable throwable) {
+        NetExceptionType netExceptionType = getNetExceptionType(throwable);
+        return netExceptionType != null && netExceptionType != NetExceptionType.NOT_NET_EXCEPTION;
     }
 }

@@ -16,9 +16,14 @@
 package io.seata.config;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -26,10 +31,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigFuture.ConfigOperation;
+import io.seata.config.file.FileConfig;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,40 +43,49 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
-public class FileConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private final Config fileConfig;
+    private FileConfig fileConfig;
 
     private ExecutorService configOperateExecutor;
 
-    private ExecutorService configChangeExecutor;
-
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
-
-    private static final int CORE_CONFIG_CHANGE_THREAD = 1;
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
-    private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+    private static final long LISTENER_CONFIG_INTERVAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
-    
-    private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
+    public static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
+    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
+            8);
+
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
+
+    private final String targetFilePath;
+
+    private volatile long targetFileLastModified;
+
+    private final String name;
+
+    private final FileListener fileListener = new FileListener();
+
+    private final boolean allowDynamicRefresh;
 
     /**
-     * Instantiates a new File configuration.
+     * Note that:this constructor is only used to create proxy with CGLIB
+     * see io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider#provide
      */
     public FileConfiguration() {
-        this(null);
+        this.name = null;
+        this.targetFilePath = null;
+        this.allowDynamicRefresh = false;
     }
 
     /**
@@ -79,91 +94,186 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
-        if (null == name) {
-            fileConfig = ConfigFactory.load();
-        }
-        else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length())));
-            fileConfig = ConfigFactory.load(appConfig);
+        this(name, true);
+    }
+
+    /**
+     * Instantiates a new File configuration.
+     * For seata-server side the conf file should always exists.
+     * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
+     * @param name                the name
+     * @param allowDynamicRefresh the allow dynamic refresh
+     */
+    public FileConfiguration(String name, boolean allowDynamicRefresh) {
+        File file = getConfigFile(name);
+        if (file == null) {
+            targetFilePath = null;
+            fileConfig = FileConfigFactory.load();
+            this.allowDynamicRefresh = false;
         } else {
-            fileConfig = ConfigFactory.load(name);
+            targetFilePath = file.getPath();
+            fileConfig = FileConfigFactory.load(file, name);
+            targetFileLastModified = new File(targetFilePath).lastModified();
+            this.allowDynamicRefresh = allowDynamicRefresh;
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The file name of the operation is {}", name);
+            }
         }
+        this.name = name;
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
-        configChangeExecutor = new ThreadPoolExecutor(CORE_CONFIG_CHANGE_THREAD, CORE_CONFIG_CHANGE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configChange", CORE_CONFIG_CHANGE_THREAD));
-        configChangeExecutor.submit(new ConfigChangeRunnable());
+                Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
+    }
+
+    private File getConfigFile(String name) {
+        try {
+            if (name == null) {
+                throw new IllegalArgumentException("name can't be null");
+            }
+
+            boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
+            String filePath = filePathCustom ? name.substring(SYS_FILE_RESOURCE_PREFIX.length()) : name;
+            String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
+
+            File targetFile = getFileFromFileSystem(decodedPath);
+            if (targetFile != null) {
+                return targetFile;
+            }
+
+            if (!filePathCustom) {
+                targetFile = getFileFromClasspath(name);
+                if (targetFile != null) {
+                    return targetFile;
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("decode name error: {}", e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+    private File getFileFromFileSystem(String decodedPath) {
+
+        // run with jar file and not package third lib into jar file, this.getClass().getClassLoader() will be null
+        URL resourceUrl = this.getClass().getClassLoader().getResource("");
+        String[] tryPaths = null;
+        if (resourceUrl != null) {
+            tryPaths = new String[]{
+                // first: project dir
+                resourceUrl.getPath() + decodedPath,
+                // second: system path
+                decodedPath
+            };
+        } else {
+            tryPaths = new String[]{
+                decodedPath
+            };
+        }
+
+
+        for (String tryPath : tryPaths) {
+            File targetFile = new File(tryPath);
+            if (targetFile.exists()) {
+                return targetFile;
+            }
+
+            // try to append config suffix
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                targetFile = new File(tryPath + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (targetFile.exists()) {
+                    return targetFile;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private File getFileFromClasspath(String name) throws UnsupportedEncodingException {
+        URL resource = this.getClass().getClassLoader().getResource(name);
+        if (resource == null) {
+            for (String s : FileConfigFactory.getSuffixSet()) {
+                resource = this.getClass().getClassLoader().getResource(name + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + s);
+                if (resource != null) {
+                    String path = resource.getPath();
+                    path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
+                    return new File(path);
+                }
+            }
+        } else {
+            String path = resource.getPath();
+            path = URLDecoder.decode(path, StandardCharsets.UTF_8.name());
+            return new File(path);
+        }
+
+        return null;
     }
 
     @Override
-    public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String value;
-        if ((value = getConfigFromSysPro(dataId)) != null) {
+    public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value = getConfigFromSys(dataId);
+        if (value != null) {
             return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        Object getValue = configFuture.get();
+        return getValue == null ? null : String.valueOf(getValue);
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
-        configListenersMap.putIfAbsent(dataId, new ArrayList<ConfigChangeListener>());
-        configListenersMap.get(dataId).add(listener);
-        listenedConfigMap.putIfAbsent(dataId, getConfig(dataId));
-        if (null != listener.getExecutor()) {
-            ConfigChangeRunnable configChangeTask = new ConfigChangeRunnable(dataId, listener);
-            listener.getExecutor().submit(configChangeTask);
-        }
-    }
-
-    @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-        List<ConfigChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        List<ConfigChangeListener> newChangeListenerList = new ArrayList<>();
-        for (ConfigChangeListener changeListener : configChangeListeners) {
-            if (!changeListener.equals(listener)) {
-                newChangeListenerList.add(changeListener);
-            }
-        }
-        configListenersMap.put(dataId, newChangeListenerList);
-        if (newChangeListenerList.isEmpty()) {
-            listenedConfigMap.remove(dataId);
-        }
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().shutdownNow();
-        }
+        configListenersMap.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
+                .add(listener);
+        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
 
+        // Start config change listener for the dataId.
+        fileListener.addListener(dataId, listener);
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (StringUtils.isBlank(dataId) || listener == null) {
+            return;
+        }
+        Set<ConfigurationChangeListener> configListeners = getConfigListeners(dataId);
+        if (CollectionUtils.isNotEmpty(configListeners)) {
+            configListeners.remove(listener);
+            if (configListeners.isEmpty()) {
+                configListenersMap.remove(dataId);
+                listenedConfigMap.remove(dataId);
+            }
+        }
+        listener.onShutDown();
+    }
+
+    @Override
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
     }
 
@@ -190,12 +300,22 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
         @Override
         public void run() {
-            if (null != configFuture) {
+            if (configFuture != null) {
                 if (configFuture.isTimeout()) {
                     setFailResult(configFuture);
                     return;
                 }
                 try {
+                    if (allowDynamicRefresh) {
+                        long tempLastModified = new File(targetFilePath).lastModified();
+                        if (tempLastModified > targetFileLastModified) {
+                            FileConfig tempConfig = FileConfigFactory.load(new File(targetFilePath), name);
+                            if (tempConfig != null) {
+                                fileConfig = tempConfig;
+                                targetFileLastModified = tempLastModified;
+                            }
+                        }
+                    }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
                         String result = fileConfig.getString(configFuture.getDataId());
                         configFuture.setResult(result);
@@ -211,8 +331,10 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     }
                 } catch (Exception e) {
                     setFailResult(configFuture);
-                    LOGGER.warn("Could not found property {}, try to use default value instead.",
-                        configFuture.getDataId());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Could not found property {}, try to use default value instead. exception:{}",
+                                configFuture.getDataId(), e.getMessage());
+                    }
                 }
             }
         }
@@ -228,80 +350,71 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     }
 
+    public FileConfig getFileConfig() {
+        return fileConfig;
+    }
+
     /**
-     * The type Config change runnable.
+     * The type FileListener.
      */
-    class ConfigChangeRunnable implements Runnable {
+    class FileListener implements ConfigurationChangeListener {
 
-        private String dataId;
-        private ConfigChangeListener listener;
+        private final Map<String, Set<ConfigurationChangeListener>> dataIdMap = new HashMap<>();
 
-        /**
-         * Instantiates a new Config change runnable.
-         */
-        public ConfigChangeRunnable() {
-        }
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+                TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                new NamedThreadFactory("fileListener", MAX_LISTENER_THREAD));
 
         /**
-         * Instantiates a new Config change runnable.
-         *
-         * @param dataId   the data id
-         * @param listener the listener
+         * Instantiates a new FileListener.
          */
-        public ConfigChangeRunnable(String dataId, ConfigChangeListener listener) {
+        FileListener() {}
 
-            if (null == listener.getExecutor()) {
-                throw new IllegalArgumentException("getExecutor is null.");
+        public synchronized void addListener(String dataId, ConfigurationChangeListener listener) {
+            // only the first time add listener will trigger on process event
+            if (dataIdMap.isEmpty()) {
+                fileListener.onProcessEvent(new ConfigurationChangeEvent());
             }
-            this.dataId = dataId;
-            this.listener = listener;
+
+            dataIdMap.computeIfAbsent(dataId, value -> new HashSet<>()).add(listener);
         }
 
         @Override
-        public void run() {
-            while (true) {
-                try {
-                    Map<String, List<ConfigChangeListener>> configListenerMap;
-                    if (null != dataId && null != listener) {
-                        configListenerMap = new ConcurrentHashMap<>(8);
-                        configListenerMap.put(dataId, new ArrayList<>());
-                        configListenerMap.get(dataId).add(listener);
-                    } else {
-                        configListenerMap = configListenersMap;
-                    }
-                    for (Map.Entry<String, List<ConfigChangeListener>> entry : configListenerMap.entrySet()) {
-                        String configId = entry.getKey();
-                        String currentConfig = getConfig(configId);
-                        if (ObjectUtils.notEqual(currentConfig, listenedConfigMap.get(configId))) {
-                            listenedConfigMap.put(configId, currentConfig);
-                            notifyAllListener(configId, configListenerMap.get(configId));
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            Boolean enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
+            while (enabled) {
+                for (String dataId : dataIdMap.keySet()) {
+                    try {
+                        String currentConfig =
+                                ConfigurationFactory.getInstance().getLatestConfig(dataId, null, DEFAULT_CONFIG_TIMEOUT);
+                        if (StringUtils.isNotBlank(currentConfig)) {
+                            String oldConfig = listenedConfigMap.get(dataId);
+                            if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
+                                listenedConfigMap.put(dataId, currentConfig);
+                                event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
 
+                                for (ConfigurationChangeListener listener : dataIdMap.get(dataId)) {
+                                    listener.onChangeEvent(event);
+                                }
+                            }
                         }
+                    } catch (Exception exx) {
+                        LOGGER.error("fileListener execute error, dataId :{}", dataId, exx);
                     }
-                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
-                } catch (Exception exx) {
-                    LOGGER.error(exx.getMessage());
                 }
-
+                try {
+                    Thread.sleep(LISTENER_CONFIG_INTERVAL);
+                } catch (InterruptedException e) {
+                    LOGGER.error("fileListener thread sleep error:{}", e.getMessage());
+                }
+                enabled = Boolean.valueOf(System.getProperty("file.listener.enabled", "true"));
             }
         }
 
-        private void notifyAllListener(String dataId, List<ConfigChangeListener> configChangeListeners) {
-            List<ConfigChangeListener> needNotifyListeners = new ArrayList<>();
-            if (null != dataId && null != listener) {
-                needNotifyListeners.addAll(configChangeListeners);
-            } else {
-                for (ConfigChangeListener configChangeListener : configChangeListeners) {
-                    if (null == configChangeListener.getExecutor()) {
-                        needNotifyListeners.add(configChangeListener);
-                    }
-                }
-            }
-            for (ConfigChangeListener configChangeListener : needNotifyListeners) {
-                configChangeListener.receiveConfigInfo(listenedConfigMap.get(dataId));
-            }
+        @Override
+        public ExecutorService getExecutorService() {
+            return executor;
         }
-
     }
 
 }

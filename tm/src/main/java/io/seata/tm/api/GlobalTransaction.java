@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
+import io.seata.tm.api.transaction.SuspendedResourcesHolder;
 
 /**
  * Global transaction.
@@ -69,6 +70,35 @@ public interface GlobalTransaction {
     void rollback() throws TransactionException;
 
     /**
+     * Suspend the global transaction.
+     *
+     * @return the SuspendedResourcesHolder which holds the suspend resources
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * @see SuspendedResourcesHolder
+     */
+    SuspendedResourcesHolder suspend() throws TransactionException;
+
+    /**
+     * Suspend the global transaction.
+     *
+     * @param clean the clean if true, clean the transaction context. otherwise,supend only
+     * @return the SuspendedResourcesHolder which holds the suspend resources
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * @see SuspendedResourcesHolder
+     */
+    SuspendedResourcesHolder suspend(boolean clean) throws TransactionException;
+
+    /**
+     * Resume the global transaction.
+     *
+     * @param suspendedResourcesHolder the suspended resources to resume
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * out.
+     * @see SuspendedResourcesHolder
+     */
+    void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException;
+
+    /**
      * Ask TC for current status of the corresponding global transaction.
      *
      * @return Status of the corresponding global transaction.
@@ -95,4 +125,26 @@ public interface GlobalTransaction {
      */
     void globalReport(GlobalStatus globalStatus) throws TransactionException;
 
+    /**
+     * local status of the global transaction.
+     *
+     * @return Status of the corresponding global transaction.
+     * @see GlobalStatus
+     */
+    GlobalStatus getLocalStatus();
+
+    /**
+     * get global transaction role.
+     *
+     * @return global transaction Role.
+     * @see GlobalTransactionRole
+     */
+    GlobalTransactionRole getGlobalTransactionRole();
+
+    /**
+     * get create time
+     *
+     * @return create time
+     */
+    long getCreateTime();
 }

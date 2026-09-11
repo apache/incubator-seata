@@ -15,47 +15,71 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.List;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.spring.annotation.GlobalTransactionScanner;
+import io.seata.spring.annotation.ScannerChecker;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.util.SpringUtils;
+import io.seata.tm.api.DefaultFailureHandlerImpl;
+import io.seata.tm.api.FailureHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
+import static io.seata.common.Constants.BEAN_NAME_FAILURE_HANDLER;
+import static io.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
+
 /**
+ * The type Seata auto configuration
+ *
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
-@ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
-@ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
-@Configuration
-@EnableConfigurationProperties({SeataProperties.class})
+@ConditionalOnProperty(prefix = SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
+@AutoConfigureAfter({SeataCoreAutoConfiguration.class})
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
-    @Autowired
-    private SeataProperties seataProperties;
 
-    @Bean
-    public SpringUtils springUtils() {
-        return new SpringUtils();
+    @Bean(BEAN_NAME_FAILURE_HANDLER)
+    @ConditionalOnMissingBean(FailureHandler.class)
+    public FailureHandler failureHandler() {
+        return new DefaultFailureHandlerImpl();
     }
 
     @Bean
-    @DependsOn({"springUtils"})
+    @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public GlobalTransactionScanner globalTransactionScanner() {
+    public static GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
+            ConfigurableListableBeanFactory beanFactory,
+            @Autowired(required = false) List<ScannerChecker> scannerCheckers) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Automatically configure Seata");
         }
-        return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup());
+
+        // set bean factory
+        GlobalTransactionScanner.setBeanFactory(beanFactory);
+
+        // add checkers
+        // '/META-INF/services/io.seata.spring.annotation.ScannerChecker'
+        GlobalTransactionScanner.addScannerCheckers(EnhancedServiceLoader.loadAll(ScannerChecker.class));
+        // spring beans
+        GlobalTransactionScanner.addScannerCheckers(scannerCheckers);
+
+        // add scannable packages
+        GlobalTransactionScanner.addScannablePackages(seataProperties.getScanPackages());
+        // add excludeBeanNames
+        GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
+        //set accessKey and secretKey
+        GlobalTransactionScanner.setAccessKey(seataProperties.getAccessKey());
+        GlobalTransactionScanner.setSecretKey(seataProperties.getSecretKey());
+        // create global transaction scanner
+        return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(), failureHandler);
     }
-
-
 }

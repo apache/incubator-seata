@@ -1,0 +1,6 @@
+io.seata.rm.datasource.sql.handler.oracle.OracleEscapeHandler
+io.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler
+io.seata.rm.datasource.sql.handler.postgresql.PostgresqlEscapeHandler
+io.seata.rm.datasource.sql.handler.mariadb.MariadbEscapeHandler
+io.seata.rm.datasource.sql.handler.dm.DmEscapeHandler
+io.seata.rm.datasource.sql.handler.polardbx.PolarDBXEscapeHandler

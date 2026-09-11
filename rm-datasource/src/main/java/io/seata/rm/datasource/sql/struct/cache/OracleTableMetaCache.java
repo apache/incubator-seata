@@ -15,91 +15,87 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.IndexMeta;
-import io.seata.rm.datasource.sql.struct.IndexType;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
+import io.seata.sqlparser.struct.ColumnMeta;
+import io.seata.sqlparser.struct.IndexMeta;
+import io.seata.sqlparser.struct.IndexType;
+import io.seata.sqlparser.struct.TableMeta;
+import io.seata.sqlparser.util.JdbcConstants;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Table meta cache.
  *
  * @author ygy
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleTableMetaCache extends AbstractTableMetaCache {
 
-    private static volatile TableMetaCache tableMetaCache = null;
+    @Override
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
+        cacheKey.append(".");
 
-    private OracleTableMetaCache() {
-    }
+        //separate it to schemaName and tableName
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
 
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (OracleTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new OracleTableMetaCache();
-                }
-            }
+        //oracle does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        if (defaultTableName.contains("\"")) {
+            cacheKey.append(defaultTableName.replace("\"", ""));
+        } else {
+            // oracle default store in upper case
+            cacheKey.append(defaultTableName.toUpperCase());
         }
-        return tableMetaCache;
+
+        return cacheKey.toString();
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        java.sql.Statement stmt = null;
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
+            return resultSetMetaToSchema(connection.getMetaData(), tableName);
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
-    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
-        if(tableName.contains("\"")){
-            tableName = tableName.replace("\"", "");
+        if (schemaName.contains("\"")) {
             schemaName = schemaName.replace("\"", "");
-        }else{
-            tableName = tableName.toUpperCase();
+        } else {
+            schemaName = schemaName.toUpperCase();
         }
 
-        ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-        ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName);
+        if (tableName.contains("\"")) {
+            tableName = tableName.replace("\"", "");
 
-        try {
+        } else {
+            tableName = tableName.toUpperCase();
+        }
+        tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
+
+        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -119,7 +115,11 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
+                col.setCaseSensitive(StringUtils.hasLowerCase(col.getColumnName()));
 
+                if (tm.getAllColumns().containsKey(col.getColumnName())) {
+                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 
@@ -142,41 +142,58 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                     index.setType(rsIndex.getShort("TYPE"));
                     index.setOrdinalPosition(rsIndex.getShort("ORDINAL_POSITION"));
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
-                    index.setCardinality(rsIndex.getInt("CARDINALITY"));
+                    index.setCardinality(rsIndex.getLong("CARDINALITY"));
                     index.getValues().add(col);
                     if (!index.isNonUnique()) {
-                        index.setIndextype(IndexType.Unique);
+                        index.setIndextype(IndexType.UNIQUE);
                     } else {
-                        index.setIndextype(IndexType.Normal);
+                        index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
 
                 }
             }
-
+            if (tm.getAllIndexes().isEmpty()) {
+                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+            }
+            // when we create a primary key constraint oracle will uses and existing unique index.
+            // if we create a unique index before create a primary constraint in the same column will cause the problem
+            // that primary key constraint name was different from the unique name.
+            List<String> pkcol = new ArrayList<>();
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getString("PK_NAME");
-                if (tm.getAllIndexes().containsKey(pkIndexName)) {
-                    IndexMeta index = tm.getAllIndexes().get(pkIndexName);
+                String pkConstraintName = rsPrimary.getString("PK_NAME");
+                if (tm.getAllIndexes().containsKey(pkConstraintName)) {
+                    IndexMeta index = tm.getAllIndexes().get(pkConstraintName);
                     index.setIndextype(IndexType.PRIMARY);
+                } else {
+                    //save the columns that constraint primary key name was different from unique index name
+                    pkcol.add(rsPrimary.getString("COLUMN_NAME"));
                 }
             }
-            if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
-            if (rsPrimary != null) {
-                rsPrimary.close();
+            //find the index that belong to the primary key constraint
+            if (!pkcol.isEmpty()) {
+                int matchCols = 0;
+                for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {
+                    IndexMeta index = entry.getValue();
+                    // only the unique index and all the unique index's columes same as primary key columes,
+                    // it belongs to primary key
+                    if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
+                        for (ColumnMeta col : index.getValues()) {
+                            if (pkcol.contains(col.getColumnName())) {
+                                matchCols++;
+                            }
+                        }
+                        if (matchCols == pkcol.size()) {
+                            index.setIndextype(IndexType.PRIMARY);
+                            // each table only has one primary key
+                            break;
+                        } else {
+                            matchCols = 0;
+                        }
+                    }
+                }
             }
         }
-
         return tm;
     }
-
 }

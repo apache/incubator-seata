@@ -15,9 +15,6 @@
  */
 package io.seata.core.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Status of global transaction.
  *
@@ -29,104 +26,117 @@ public enum GlobalStatus {
      * Un known global status.
      */
     // Unknown
-    UnKnown(0),
+    UnKnown(0, "an ambiguous transaction state, usually use before begin"),
 
     /**
      * The Begin.
      */
     // PHASE 1: can accept new branch registering.
-    Begin(1),
+    Begin(1, "global transaction start"),
 
     /**
      * PHASE 2: Running Status: may be changed any time.
      */
     // Committing.
-    Committing(2),
+    Committing(2, "2Phase committing"),
 
     /**
      * The Commit retrying.
      */
     // Retrying commit after a recoverable failure.
-    CommitRetrying(3),
+    CommitRetrying(3, "2Phase committing failure retry"),
 
     /**
      * Rollbacking global status.
      */
     // Rollbacking
-    Rollbacking(4),
+    Rollbacking(4, "2Phase rollbacking"),
 
     /**
      * The Rollback retrying.
      */
     // Retrying rollback after a recoverable failure.
-    RollbackRetrying(5),
+    RollbackRetrying(5, "2Phase rollbacking failure retry"),
 
     /**
      * The Timeout rollbacking.
      */
     // Rollbacking since timeout
-    TimeoutRollbacking(6),
+    TimeoutRollbacking(6, "after global transaction timeout rollbacking"),
 
     /**
      * The Timeout rollback retrying.
      */
     // Retrying rollback (since timeout) after a recoverable failure.
-    TimeoutRollbackRetrying(7),
+    TimeoutRollbackRetrying(7, "after global transaction timeout rollback retrying"),
 
     /**
      * All branches can be async committed. The committing is NOT done yet, but it can be seen as committed for TM/RM
      * client.
      */
-    AsyncCommitting(8),
+    AsyncCommitting(8, "2Phase committing, used for AT mode"),
 
     /**
      * PHASE 2: Final Status: will NOT change any more.
      */
     // Finally: global transaction is successfully committed.
-    Committed(9),
+    Committed(9, "global transaction completed with status committed"),
 
     /**
      * The Commit failed.
      */
     // Finally: failed to commit
-    CommitFailed(10),
+    CommitFailed(10, "2Phase commit failed"),
 
     /**
      * The Rollbacked.
      */
     // Finally: global transaction is successfully rollbacked.
-    Rollbacked(11),
+    Rollbacked(11, "global transaction completed with status rollbacked"),
 
     /**
      * The Rollback failed.
      */
     // Finally: failed to rollback
-    RollbackFailed(12),
+    RollbackFailed(12, "global transaction completed but rollback failed"),
 
     /**
      * The Timeout rollbacked.
      */
     // Finally: global transaction is successfully rollbacked since timeout.
-    TimeoutRollbacked(13),
+    TimeoutRollbacked(13, "global transaction completed with rollback due to timeout"),
 
     /**
      * The Timeout rollback failed.
      */
     // Finally: failed to rollback since timeout
-    TimeoutRollbackFailed(14),
+    TimeoutRollbackFailed(14, "global transaction was rollbacking due to timeout, but failed"),
 
     /**
      * The Finished.
      */
     // Not managed in session MAP any more
-    Finished(15);
+    Finished(15, "ambiguous transaction status for non-exist transaction and global report for Saga"),
 
-    private int code;
+    /**
+     * The commit retry Timeout .
+     */
+    // Finally: failed to commit since retry timeout
+    CommitRetryTimeout(16, "global transaction still failed after commit failure and retries for some time"),
 
-    GlobalStatus(int code) {
+    /**
+     * The rollback retry Timeout .
+     */
+    // Finally: failed to rollback since retry timeout
+    RollbackRetryTimeout(17, "global transaction still failed after commit failure and retries for some time");
+
+    private final int code;
+    private final String desc;
+
+    GlobalStatus(int code, String desc) {
         this.code = code;
+        this.desc = desc;
     }
-
 
     /**
      * Gets code.
@@ -135,16 +145,6 @@ public enum GlobalStatus {
      */
     public int getCode() {
         return code;
-    }
-
-
-
-    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
-
-    static {
-        for (GlobalStatus status : values()) {
-            MAP.put(status.code, status);
-        }
     }
 
     /**
@@ -164,12 +164,52 @@ public enum GlobalStatus {
      * @return the global status
      */
     public static GlobalStatus get(int code) {
-        GlobalStatus status = MAP.get(code);
-
-        if (null == status) {
+        GlobalStatus value = null;
+        try {
+            value = GlobalStatus.values()[code];
+        } catch (Exception e) {
             throw new IllegalArgumentException("Unknown GlobalStatus[" + code + "]");
         }
+        return value;
+    }
 
-        return status;
+    /**
+     * Is one phase timeout boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isOnePhaseTimeout(GlobalStatus status) {
+        if (status == TimeoutRollbacking || status == TimeoutRollbackRetrying || status == TimeoutRollbacked || status == TimeoutRollbackFailed) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is two phase success boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isTwoPhaseSuccess(GlobalStatus status) {
+        if (status == GlobalStatus.Committed || status == GlobalStatus.Rollbacked
+            || status == GlobalStatus.TimeoutRollbacked) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Is two phase heuristic boolean.
+     *
+     * @param status the status
+     * @return the boolean
+     */
+    public static boolean isTwoPhaseHeuristic(GlobalStatus status) {
+        if (status == GlobalStatus.Finished) {
+            return true;
+        }
+        return false;
     }
 }

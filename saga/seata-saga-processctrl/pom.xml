@@ -27,5 +27,6 @@
     <name>seata-saga-processctrl ${project.version}</name>
     <artifactId>seata-saga-processctrl</artifactId>
     <packaging>jar</packaging>
+    <description>saga-processctrl for Seata built with Maven</description>
 
 </project>

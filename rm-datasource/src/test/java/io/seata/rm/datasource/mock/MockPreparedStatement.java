@@ -24,7 +24,6 @@ import com.alibaba.druid.util.jdbc.PreparedStatementBase;
 
 /**
  * @author will
- * @date 2019/10/17
  */
 public class MockPreparedStatement extends PreparedStatementBase implements MockStatementBase {
 

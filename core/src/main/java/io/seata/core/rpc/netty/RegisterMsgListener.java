@@ -21,9 +21,9 @@ import io.seata.core.protocol.AbstractMessage;
 /**
  * The interface Register msg listener.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /11/29
+ * @author slievrly
  */
+@Deprecated
 public interface RegisterMsgListener {
 
     /**

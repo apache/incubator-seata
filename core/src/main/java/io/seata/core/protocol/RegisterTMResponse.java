@@ -20,8 +20,7 @@ import java.io.Serializable;
 /**
  * The type Register tm response.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/15
+ * @author slievrly
  */
 public class RegisterTMResponse extends AbstractIdentifyResponse implements Serializable {
 
