@@ -36,7 +36,7 @@ import java.util.List;
 
 public abstract class BaseUndoLogParserTest extends BaseH2Test {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public abstract UndoLogParser getParser();
 
@@ -82,7 +82,7 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test {
 
         Assertions.assertNotNull(bs);
 
-        LOGGER.info("data size:{}", bs.length);
+        logger.info("data size:{}", bs.length);
 
         BranchUndoLog dstLog = getParser().decode(bs);
 
@@ -156,7 +156,7 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test {
             Assertions.assertEquals(originLog.getBranchId(), dstLog.getBranchId());
         }
         long end = System.currentTimeMillis();
-        LOGGER.info("elapsed time {} ms.", (end - start));
+        logger.info("elapsed time {} ms.", (end - start));
     }
 
     @Test

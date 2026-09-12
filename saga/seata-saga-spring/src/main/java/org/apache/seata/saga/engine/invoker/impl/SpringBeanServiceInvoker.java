@@ -17,8 +17,7 @@
 package org.apache.seata.saga.engine.invoker.impl;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -54,8 +53,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBeanServiceInvoker.class);
 
-    private final ResourceLock METHOD_LOCK = new ResourceLock();
-    private final ResourceLock RETRY_LOCK = new ResourceLock();
+    private final ResourceLock methodLock = new ResourceLock();
+    private final ResourceLock retryLock = new ResourceLock();
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
@@ -109,7 +108,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Method method = state.getMethod();
         if (method == null) {
-            try (ResourceLock ignored = METHOD_LOCK.obtain()) {
+            try (ResourceLock ignored = methodLock.obtain()) {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
@@ -200,7 +199,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 } else {
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
-                        try (ResourceLock ignored = RETRY_LOCK.obtain()) {
+                        try (ResourceLock ignored = retryLock.obtain()) {
                             exceptionClasses = retryConfig.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -315,16 +314,12 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else if (isPrimitive(paramType)) {
             return value;
         } else {
-            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(getSagaJsonParser());
-            if (jsonSerializer == null) {
-                throw new RuntimeException("Cannot get JsonSerializer by name : " + getSagaJsonParser());
-            }
-            String jsonValue = jsonSerializer.toJSONString(value, true, false);
+            String jsonValue = JsonUtil.toJSONString(value, true, false);
 
             // compatible history autoType serialize json
-            boolean useAutoType = jsonSerializer.useAutoType(jsonValue);
+            boolean useAutoType = JsonUtil.useAutoType(jsonValue);
 
-            return jsonSerializer.parseObject(jsonValue, paramType, !useAutoType);
+            return JsonUtil.parseObject(jsonValue, paramType, !useAutoType);
         }
     }
 
@@ -372,10 +367,18 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         }
     }
 
+    /**
+     * @deprecated Use {@code json.serializerType} to configure the JSON serializer.
+     */
+    @Deprecated
     public String getSagaJsonParser() {
         return sagaJsonParser;
     }
 
+    /**
+     * @deprecated Use {@code json.serializerType} to configure the JSON serializer.
+     */
+    @Deprecated
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
     }

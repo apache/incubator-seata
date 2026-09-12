@@ -21,6 +21,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.Buffer;
+import org.apache.seata.common.json.TestingJsonCodec;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -502,16 +504,7 @@ public class HttpClientUtilTest {
         hooksField.setAccessible(true);
         Map<Thread, Thread> hooks = (Map<Thread, Thread>) hooksField.get(null);
         Thread targetHook = hooks.keySet().stream()
-                .filter(h -> {
-                    try {
-                        Field targetField = Thread.class.getDeclaredField("target");
-                        targetField.setAccessible(true);
-                        Object target = targetField.get(h);
-                        return target != null && target.toString().contains("HttpClientUtil");
-                    } catch (Exception e) {
-                        return false;
-                    }
-                })
+                .filter(h -> h.getName().contains("http-client-shutdown"))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("No HttpClientUtil shutdown hook found"));
 
@@ -564,6 +557,23 @@ public class HttpClientUtilTest {
         assertEquals("POST", request.method());
         assertNotNull(request.body());
         assertTrue(request.body().contentLength() > 0);
+    }
+
+    @Test
+    void testCreateRequestBody_UsesJsonCodecForJsonParams() throws Exception {
+        Method createRequestBodyMethod =
+                HttpClientUtil.class.getDeclaredMethod("createRequestBody", Map.class, String.class);
+        createRequestBodyMethod.setAccessible(true);
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        RequestBody requestBody = (RequestBody) createRequestBodyMethod.invoke(null, params, "application/json");
+
+        Buffer buffer = new Buffer();
+        requestBody.writeTo(buffer);
+        assertEquals("application", requestBody.contentType().type());
+        assertEquals("json", requestBody.contentType().subtype());
+        assertTrue(buffer.readUtf8().startsWith(TestingJsonCodec.SERIALIZED_PREFIX));
     }
 
     @Test

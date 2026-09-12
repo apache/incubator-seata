@@ -51,7 +51,7 @@ class Iframe extends React.PureComponent<PropsType, StateType> {
           height: '98%',
           overflow: 'auto',
         }}
-        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
       />
     );
   }

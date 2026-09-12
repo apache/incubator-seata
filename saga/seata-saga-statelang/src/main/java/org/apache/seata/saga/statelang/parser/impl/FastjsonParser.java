@@ -16,9 +16,7 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.saga.statelang.parser.JsonParser;
 
@@ -31,25 +29,6 @@ import org.apache.seata.saga.statelang.parser.JsonParser;
 @LoadLevel(name = FastjsonParser.NAME)
 public class FastjsonParser implements JsonParser {
 
-    private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
-        SerializerFeature.DisableCircularReferenceDetect,
-        SerializerFeature.WriteDateUseDateFormat,
-        SerializerFeature.WriteClassName
-    };
-
-    private static final SerializerFeature[] SERIALIZER_FEATURES_PRETTY = new SerializerFeature[] {
-        SerializerFeature.DisableCircularReferenceDetect,
-        SerializerFeature.WriteDateUseDateFormat,
-        SerializerFeature.WriteClassName,
-        SerializerFeature.PrettyFormat
-    };
-
-    private static final SerializerFeature[] FEATURES_PRETTY = new SerializerFeature[] {
-        SerializerFeature.DisableCircularReferenceDetect,
-        SerializerFeature.WriteDateUseDateFormat,
-        SerializerFeature.PrettyFormat
-    };
-
     public static final String NAME = "fastjson";
 
     @Override
@@ -59,37 +38,21 @@ public class FastjsonParser implements JsonParser {
 
     @Override
     public boolean useAutoType(String json) {
-        return json != null && json.contains("\"@type\"");
+        return JsonUtil.useAutoType(json);
     }
 
     @Override
     public String toJsonString(Object o, boolean prettyPrint) {
-        return toJsonString(o, false, prettyPrint);
+        return JsonUtil.toJSONString(o, false, prettyPrint);
     }
 
     @Override
     public String toJsonString(Object o, boolean ignoreAutoType, boolean prettyPrint) {
-        if (prettyPrint) {
-            if (ignoreAutoType) {
-                return JSON.toJSONString(o, FEATURES_PRETTY);
-            } else {
-                return JSON.toJSONString(o, SERIALIZER_FEATURES_PRETTY);
-            }
-        } else {
-            if (ignoreAutoType) {
-                return JSON.toJSONString(o);
-            } else {
-                return JSON.toJSONString(o, SERIALIZER_FEATURES);
-            }
-        }
+        return JsonUtil.toJSONString(o, ignoreAutoType, prettyPrint);
     }
 
     @Override
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
-        if (ignoreAutoType) {
-            return JSON.parseObject(json, type, Feature.IgnoreAutoType, Feature.OrderedField);
-        } else {
-            return JSON.parseObject(json, type, Feature.SupportAutoType, Feature.OrderedField);
-        }
+        return JsonUtil.parseObject(json, type, ignoreAutoType);
     }
 }

@@ -56,8 +56,10 @@ public class CommonFenceStoreSqls {
 
     /**
      * The constant QUERY_END_STATUS_BY_DATE.
+     * Selects distinct xids so the query limit bounds the number of distinct xids returned,
+     * which keeps the limit comparison in the cleanup loop consistent (one xid may have multiple branch rows).
      */
-    protected static final String QUERY_END_STATUS_BY_DATE = "select xid, branch_id, status, gmt_create, gmt_modified "
+    protected static final String QUERY_END_STATUS_BY_DATE = "select distinct xid "
             + " from " + LOCAL_TCC_LOG_PLACEHOLD
             + " where  gmt_modified < ? "
             + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED
@@ -86,16 +88,14 @@ public class CommonFenceStoreSqls {
             "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid = ? and  branch_id = ? ";
 
     /**
-     * The constant DELETE_BY_BRANCH_ID_AND_XID.
+     * The constant DELETE_BY_BRANCH_XIDS.
+     * The gmt_modified and status predicates must match {@link #QUERY_END_STATUS_BY_DATE}: deleting by xid alone
+     * would also remove sibling branch rows of the same global transaction that are still in a non-end status
+     * (e.g. TRIED) or not yet expired, which must be preserved.
      */
-    protected static final String DELETE_BY_BRANCH_XIDS =
-            "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid in (" + PRAMETER_PLACEHOLD + ")";
-
-    /**
-     * The constant DELETE_BY_DATE_AND_STATUS.
-     */
-    protected static final String DELETE_BY_DATE_AND_STATUS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD
-            + " where gmt_modified < ? "
+    protected static final String DELETE_BY_BRANCH_XIDS = "delete from " + LOCAL_TCC_LOG_PLACEHOLD + " where xid in ("
+            + PRAMETER_PLACEHOLD + ")"
+            + " and gmt_modified < ? "
             + " and status in (" + CommonFenceConstant.STATUS_COMMITTED + " , " + CommonFenceConstant.STATUS_ROLLBACKED
             + " , " + CommonFenceConstant.STATUS_SUSPENDED + ")";
 

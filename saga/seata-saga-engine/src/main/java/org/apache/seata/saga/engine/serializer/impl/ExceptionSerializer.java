@@ -16,6 +16,8 @@
  */
 package org.apache.seata.saga.engine.serializer.impl;
 
+import org.apache.seata.common.exception.ErrorCode;
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.saga.engine.serializer.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Exception serializer
@@ -33,6 +38,31 @@ import java.io.ObjectOutputStream;
 public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionSerializer.class);
+
+    private static final List<String> ALLOWED_CLASS_PREFIXES =
+            Arrays.asList("java.", "javax.", "org.apache.seata.", "[B", "io.seata.", "org.springframework.");
+
+    static boolean isClassAllowed(String className) {
+        if (className.startsWith("[")) {
+            String stripped = className;
+            while (stripped.startsWith("[")) {
+                stripped = stripped.substring(1);
+            }
+            if (stripped.length() == 1) {
+                return true;
+            }
+            if (stripped.startsWith("L") && stripped.endsWith(";")) {
+                return isClassAllowed(stripped.substring(1, stripped.length() - 1));
+            }
+            return false;
+        }
+        for (String prefix : ALLOWED_CLASS_PREFIXES) {
+            if (className.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static byte[] serializeByObjectOutput(Object o) {
 
@@ -66,7 +96,17 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
         Object result = null;
         if (bytes != null) {
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            try (ObjectInputStream ois = new ObjectInputStream(bais)) {
+            try (ObjectInputStream ois = new ObjectInputStream(bais) {
+                @Override
+                protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+                    if (!isClassAllowed(desc.getName())) {
+                        throw new SeataRuntimeException(
+                                ErrorCode.ERR_DESERIALIZATION_SECURITY,
+                                "Failed to deserialize object: " + desc.getName() + " is not permitted");
+                    }
+                    return super.resolveClass(desc);
+                }
+            }) {
                 result = ois.readObject();
             } catch (IOException e) {
                 LOGGER.error("deserialize failed:", e);

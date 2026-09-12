@@ -21,6 +21,7 @@ import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
@@ -34,6 +35,7 @@ import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.mock.MockResultSet;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.Null;
@@ -62,9 +64,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -819,6 +826,106 @@ public class MySQLInsertExecutorTest {
         Map<String, List> map = (Map<String, List>) resp;
         Assertions.assertEquals(map.size(), 1);
         Assertions.assertEquals(map.get("ID").size(), 3);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testParsePkValuesWithSpatialFunctions() throws Exception {
+        String sql =
+                "INSERT INTO test_table (id, name, geo) VALUES (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'))), (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')))";
+
+        Map<Integer, ArrayList<Object>> mockParameters = new HashMap<>();
+        mockParameters.put(1, Lists.newArrayList(10));
+        mockParameters.put(2, Lists.newArrayList("A"));
+        mockParameters.put(3, Lists.newArrayList(111));
+        mockParameters.put(4, Lists.newArrayList(222));
+        mockParameters.put(5, Lists.newArrayList(20));
+        mockParameters.put(6, Lists.newArrayList("B"));
+        mockParameters.put(7, Lists.newArrayList(333));
+        mockParameters.put(8, Lists.newArrayList(444));
+
+        PreparedStatementProxy statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getParameters()).thenReturn(mockParameters);
+
+        SQLStatement statement = new MySqlStatementParser(sql).parseStatement();
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, statement);
+
+        MySQLInsertExecutor executor = spy(new MySQLInsertExecutor(statementProxy, (st, args) -> null, recognizer));
+
+        Map<String, Integer> testPkIndexMap = new HashMap<>();
+        testPkIndexMap.put("id", 0);
+        doReturn(testPkIndexMap).when(executor).getPkIndex();
+        doReturn("mysql").when(executor).getDbType();
+
+        Map<String, List<Object>> pkValuesMap = executor.parsePkValuesFromStatement();
+
+        assertNotNull(pkValuesMap);
+
+        List<Object> pkValues = pkValuesMap.get("id");
+        assertNotNull(pkValues);
+        assertEquals(2, pkValues.size());
+        assertEquals(10, pkValues.get(0));
+        assertEquals(20, pkValues.get(1));
+    }
+
+    @Test
+    public void testParsePkValues_MissingParameter_ThrowsException() {
+        String sql = "INSERT INTO test_table (id, name) VALUES (?, ?)";
+
+        Map<Integer, ArrayList<Object>> mockParameters = new HashMap<>();
+
+        PreparedStatementProxy statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getParameters()).thenReturn(mockParameters);
+
+        SQLStatement statement = new MySqlStatementParser(sql).parseStatement();
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, statement);
+
+        MySQLInsertExecutor executor = spy(new MySQLInsertExecutor(statementProxy, (st, args) -> null, recognizer));
+
+        Map<String, Integer> testPkIndexMap = new HashMap<>();
+        testPkIndexMap.put("id", 0);
+        doReturn(testPkIndexMap).when(executor).getPkIndex();
+        doReturn("mysql").when(executor).getDbType();
+
+        SQLParsingException exception = assertThrows(SQLParsingException.class, executor::parsePkValuesFromStatement);
+
+        assertTrue(exception.getMessage().contains("Failed to find PreparedStatement parameter mapping"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testParsePkValues_WithSpatialFunctionBeforePk() {
+        String sql =
+                "INSERT INTO test_table (name, geo, id) VALUES (?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')), ?)";
+
+        Map<Integer, ArrayList<Object>> mockParameters = new HashMap<>();
+        mockParameters.put(1, Lists.newArrayList("A"));
+        mockParameters.put(2, Lists.newArrayList(111));
+        mockParameters.put(3, Lists.newArrayList(222));
+        mockParameters.put(4, Lists.newArrayList(10));
+
+        PreparedStatementProxy statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getParameters()).thenReturn(mockParameters);
+
+        SQLStatement statement = new MySqlStatementParser(sql).parseStatement();
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, statement);
+
+        MySQLInsertExecutor executor = spy(new MySQLInsertExecutor(statementProxy, (st, args) -> null, recognizer));
+
+        Map<String, Integer> testPkIndexMap = new HashMap<>();
+        testPkIndexMap.put("id", 2);
+        doReturn(testPkIndexMap).when(executor).getPkIndex();
+        doReturn("mysql").when(executor).getDbType();
+
+        Map<String, List<Object>> pkValuesMap = executor.parsePkValuesFromStatement();
+
+        assertNotNull(pkValuesMap);
+
+        List<Object> pkValues = pkValuesMap.get("id");
+        assertNotNull(pkValues);
+        assertEquals(1, pkValues.size());
+
+        assertEquals(10, pkValues.get(0));
     }
 
     private List<String> mockInsertColumns() {

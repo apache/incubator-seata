@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
@@ -48,9 +48,10 @@ public class MockGrpcServerTest {
     @BeforeAll
     public static void before() {
         ConfigurationFactory.reload();
-        ConfigurationTestHelper.putConfig(
+        System.setProperty(
                 ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.GRPC.value);
+        System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, Protocol.GRPC.value);
+        ConfigurationCache.clear();
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
@@ -59,8 +60,9 @@ public class MockGrpcServerTest {
     @AfterAll
     public static void after() {
         // MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty(ConfigurationKeys.TRANSPORT_PROTOCOL);
+        ConfigurationCache.clear();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
     }

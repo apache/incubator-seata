@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
+            <artifactId>seata-rpc-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
