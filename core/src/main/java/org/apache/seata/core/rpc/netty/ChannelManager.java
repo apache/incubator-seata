@@ -22,17 +22,22 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.IncompatibleVersionException;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.rpc.RpcContext;
+import org.apache.seata.core.rpc.netty.loadbalance.ServerLoadBalance;
+import org.apache.seata.core.rpc.netty.loadbalance.ServerLoadBalanceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -361,6 +366,111 @@ public class ChannelManager {
      * @return Corresponding channel, NULL if not found.
      */
     public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp) {
+        return getChannel(resourceId, clientId, tryOtherApp, null);
+    }
+
+    /**
+     * Gets channel with transaction context for server-side load balancing.
+     *
+     * Only AT and TCC branch types support server-side load balancing.
+     * XA is excluded because its second-phase operations are bound to the local database connection
+     * of the original RM. SAGA is excluded because its state machine execution context is held
+     * in memory with no distributed lock protection. For XA/SAGA and unconfigured AT/TCC,
+     * the original priority-based channel selection logic is used.
+     *
+     * @param resourceId Resource ID
+     * @param clientId   Client ID - ApplicationId:IP:Port
+     * @param tryOtherApp try other app
+     * @param branchType branch type, determines whether and which LB algorithm to use
+     * @return Corresponding channel, NULL if not found.
+     */
+    public static Channel getChannel(String resourceId, String clientId, boolean tryOtherApp, BranchType branchType) {
+        // XA and SAGA do not support server-side load balancing, use original priority-based logic
+        if (branchType != BranchType.AT && branchType != BranchType.TCC) {
+            return getChannelByPriority(resourceId, clientId, tryOtherApp);
+        }
+
+        // If no load balance algorithm is configured for this branch type, use original logic
+        ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(branchType);
+        if (loadBalance == null) {
+            return getChannelByPriority(resourceId, clientId, tryOtherApp);
+        }
+
+        String[] clientIdInfo = readClientId(clientId);
+        if (clientIdInfo == null || clientIdInfo.length != 3) {
+            throw new FrameworkException("Invalid Client ID: " + clientId);
+        }
+
+        if (StringUtils.isBlank(resourceId)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("No channel is available, resourceId is null or empty");
+            }
+            return null;
+        }
+
+        String targetApplicationId = clientIdInfo[0];
+        ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap =
+                RM_CHANNELS.get(resourceId);
+
+        if (targetApplicationId == null || applicationIdMap == null || applicationIdMap.isEmpty()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("No channel is available for resource[{}]", resourceId);
+            }
+            return null;
+        }
+
+        List<RpcContext> candidates = collectCandidates(applicationIdMap, targetApplicationId, tryOtherApp);
+        if (CollectionUtils.isEmpty(candidates)) {
+            return null;
+        }
+        if (candidates.size() == 1) {
+            return candidates.get(0).getChannel();
+        }
+        RpcContext selected = loadBalance.select(candidates);
+        return selected == null ? null : selected.getChannel();
+    }
+
+    private static List<RpcContext> collectCandidates(
+            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap,
+            String targetApplicationId,
+            boolean tryOtherApp) {
+        List<RpcContext> candidates = new ArrayList<>();
+        ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap = applicationIdMap.get(targetApplicationId);
+        collectActiveContexts(ipMap, candidates);
+        if (tryOtherApp) {
+            for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> appEntry :
+                    applicationIdMap.entrySet()) {
+                if (appEntry.getKey().equals(targetApplicationId)) {
+                    continue;
+                }
+                collectActiveContexts(appEntry.getValue(), candidates);
+            }
+        }
+        return candidates;
+    }
+
+    private static void collectActiveContexts(
+            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap, List<RpcContext> candidates) {
+        if (ipMap == null || ipMap.isEmpty()) {
+            return;
+        }
+        for (ConcurrentMap<Integer, RpcContext> portMap : ipMap.values()) {
+            if (portMap == null || portMap.isEmpty()) {
+                continue;
+            }
+            for (ConcurrentMap.Entry<Integer, RpcContext> entry : portMap.entrySet()) {
+                RpcContext rpcContext = entry.getValue();
+                Channel channel = rpcContext.getChannel();
+                if (channel.isActive()) {
+                    candidates.add(rpcContext);
+                } else if (portMap.remove(entry.getKey(), rpcContext) && LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Removed inactive {}", channel);
+                }
+            }
+        }
+    }
+
+    private static Channel getChannelByPriority(String resourceId, String clientId, boolean tryOtherApp) {
         Channel resultChannel = null;
 
         String[] clientIdInfo = readClientId(clientId);
@@ -556,16 +666,44 @@ public class ChannelManager {
      * @return the rm channels,key:resourceId,value:channel
      */
     public static Map<String, Channel> getRmChannels() {
+        return getRmChannels(null);
+    }
+
+    /**
+     * get rm channels by branch type.
+     *
+     * Only AT and TCC branch types support server-side load balancing.
+     * For other branch types or when no LB algorithm is configured, the original logic is used.
+     *
+     * @param branchType branch type, determines whether and which LB algorithm to use
+     * @return the rm channels,key:resourceId,value:channel
+     */
+    public static Map<String, Channel> getRmChannels(BranchType branchType) {
         if (RM_CHANNELS.isEmpty()) {
             return Collections.emptyMap();
         }
         Map<String, Channel> channels = new HashMap<>(RM_CHANNELS.size());
+        ServerLoadBalance loadBalance = ServerLoadBalanceFactory.getInstance(branchType);
         RM_CHANNELS.forEach((resourceId, value) -> {
-            Channel channel = tryOtherApp(value, null);
-            if (channel == null) {
-                return;
+            Channel channel = null;
+            if (loadBalance != null) {
+                List<RpcContext> candidates = new ArrayList<>();
+                for (ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> ipMap : value.values()) {
+                    collectActiveContexts(ipMap, candidates);
+                }
+                if (CollectionUtils.isNotEmpty(candidates)) {
+                    RpcContext selected = candidates.size() == 1 ? candidates.get(0) : loadBalance.select(candidates);
+                    if (selected != null) {
+                        channel = selected.getChannel();
+                    }
+                }
             }
-            channels.put(resourceId, channel);
+            if (channel == null) {
+                channel = tryOtherApp(value, null);
+            }
+            if (channel != null) {
+                channels.put(resourceId, channel);
+            }
         });
         return channels;
     }
