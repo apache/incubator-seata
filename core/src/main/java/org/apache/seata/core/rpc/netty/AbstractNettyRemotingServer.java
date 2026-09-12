@@ -215,6 +215,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             }
             if (rpcContext != null && rpcContext.getClientRole() != null) {
                 rpcContext.release();
+                ChannelManager.releaseRpcContext(ctx.channel());
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);
                 }
