@@ -58,7 +58,7 @@ public class DefaultFileLockStore implements FileLockStore {
         for (BranchSession branchSession : globalSession.getBranchSessions()) {
             try {
                 MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                releaseLockResult = releaseBranchLock(branchSession);
+                releaseLockResult &= releaseBranchLock(branchSession);
             } finally {
                 MDC.remove(MDC_KEY_BRANCH_ID);
             }

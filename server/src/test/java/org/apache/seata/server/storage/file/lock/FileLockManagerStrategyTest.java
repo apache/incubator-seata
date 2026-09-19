@@ -27,6 +27,7 @@ import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.file.spi.FileLockStore;
+import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,7 +113,7 @@ class FileLockManagerStrategyTest {
     }
 
     @Test
-    void testDefaultGlobalReleaseContinuesAfterFailureAndReturnsLastSuccess() throws Exception {
+    void testDefaultGlobalReleasePreservesFailureAndContinues() throws Exception {
         FileLockManager lockManager = install(new DefaultFileLockStore());
         GlobalSession globalSession = new GlobalSession("app", "group", "tx", 60000);
         BranchSession successfulOwner = branchSession(globalSession.getTransactionId(), 2L, "t_order:2");
@@ -120,7 +121,7 @@ class FileLockManagerStrategyTest {
         globalSession.add(successfulOwner);
         Assertions.assertTrue(lockManager.acquireLock(successfulOwner));
 
-        Assertions.assertTrue(lockManager.releaseGlobalSessionLock(globalSession));
+        Assertions.assertFalse(lockManager.releaseGlobalSessionLock(globalSession));
 
         Assertions.assertTrue(successfulOwner.getLockHolder().isEmpty());
         Assertions.assertTrue(
@@ -128,7 +129,7 @@ class FileLockManagerStrategyTest {
     }
 
     @Test
-    void testDefaultGlobalReleaseReturnsFinalFailureAfterEarlierSuccess() throws Exception {
+    void testDefaultGlobalReleasePreservesFailureAfterEarlierSuccess() throws Exception {
         FileLockManager lockManager = install(new DefaultFileLockStore());
         GlobalSession globalSession = new GlobalSession("app", "group", "tx", 60000);
         BranchSession successfulOwner = branchSession(globalSession.getTransactionId(), 1L, "t_order:1");
@@ -141,6 +142,30 @@ class FileLockManagerStrategyTest {
         Assertions.assertTrue(successfulOwner.getLockHolder().isEmpty());
         Assertions.assertTrue(
                 lockManager.isLockable(xid(2001L), successfulOwner.getResourceId(), successfulOwner.getLockKey()));
+    }
+
+    @Test
+    void testDefaultGlobalReleaseSucceedsWithoutBranches() throws Exception {
+        FileLockManager lockManager = install(new DefaultFileLockStore());
+        GlobalSession globalSession = new GlobalSession("app", "group", "tx", 60000);
+
+        Assertions.assertTrue(lockManager.releaseGlobalSessionLock(globalSession));
+    }
+
+    @Test
+    void testRaftLocalGlobalReleasePreservesFailureAndContinues() throws Exception {
+        RaftLockManager lockManager = new RaftLockManager();
+        GlobalSession globalSession = new GlobalSession("app", "group", "tx", 60000);
+        BranchSession successfulOwner = branchSession(globalSession.getTransactionId(), 2L, "t_order:2");
+        globalSession.add(failingOwner());
+        globalSession.add(successfulOwner);
+        Assertions.assertTrue(lockManager.acquireLock(successfulOwner));
+
+        Assertions.assertFalse(lockManager.localReleaseGlobalSessionLock(globalSession));
+
+        Assertions.assertTrue(successfulOwner.getLockHolder().isEmpty());
+        Assertions.assertTrue(
+                lockManager.isLockable(xid(2002L), successfulOwner.getResourceId(), successfulOwner.getLockKey()));
     }
 
     private BranchSession branchSession(long transactionId, long branchId, String lockKey) {
