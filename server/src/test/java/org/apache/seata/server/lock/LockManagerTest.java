@@ -61,11 +61,15 @@ public class LockManagerTest extends BaseSpringBootTest {
     private GlobalLockService globalLockService;
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {}
+    public static void setUp(ApplicationContext context) {
+        // Lock queries use historical sessions that must not be removed by timeout recovery.
+        DefaultCoordinator.getInstance().destroy();
+        SessionHolder.init();
+    }
 
     @AfterAll
     public static void tearDown() {
-        DefaultCoordinator.getInstance().destroy();
+        SessionHolder.destroy();
     }
 
     /**

@@ -116,6 +116,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void beforeClass(ApplicationContext context) throws Exception {
+        // Tests invoke recovery handlers explicitly; scheduled retries must not change their sessions.
+        DefaultCoordinator.getInstance().destroy();
+        SessionHolder.init();
         EnhancedServiceLoader.unload(AbstractCore.class);
         XID.setIpAddress(NetUtil.getLocalIp());
         remotingServer = new MockServerMessageSender();
@@ -262,6 +265,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
+        defaultCoordinator.destroy();
     }
 
     @AfterEach
