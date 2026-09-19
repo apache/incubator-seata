@@ -24,6 +24,7 @@ import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.lock.Locker;
+import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.db.lock.DataBaseLockManager;
 import org.apache.seata.server.storage.file.lock.FileLockManager;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
@@ -78,6 +80,34 @@ class LockerManagerFactoryTest {
         Assertions.assertSame(locker, lockManager.getLocker(branchSession));
         lockManager.releaseLock(branchSession);
         org.mockito.Mockito.verify(lockStore).releaseBranchLock(branchSession);
+    }
+
+    @Test
+    void testManagerWideOperationsUseLockerWithoutBranchSession() throws Exception {
+        FileLockStore lockStore = Mockito.mock(FileLockStore.class);
+        Locker locker = Mockito.mock(Locker.class);
+        Mockito.when(lockStore.getLocker(null)).thenReturn(locker);
+        Mockito.when(locker.isLockable(Mockito.anyList())).thenReturn(true, false);
+        LockerManagerFactory.init(LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {lockStore});
+        FileLockManager lockManager = (FileLockManager) LockerManagerFactory.getLockManager();
+        String xid = "127.0.0.1:8091:4001";
+        String resourceId = "jdbc:mysql://127.0.0.1/db";
+
+        Assertions.assertTrue(lockManager.isLockable(xid, resourceId, "t_order:4"));
+        Assertions.assertFalse(lockManager.isLockable(xid, resourceId, "t_order:4"));
+        lockManager.updateLockStatus(xid, LockStatus.Rollbacking);
+        lockManager.cleanAllLocks();
+
+        Mockito.verify(lockStore, Mockito.times(4)).getLocker(null);
+        Mockito.verify(locker, Mockito.times(2))
+                .isLockable(Mockito.argThat(locks -> locks.size() == 1
+                        && xid.equals(locks.get(0).getXid())
+                        && resourceId.equals(locks.get(0).getResourceId())
+                        && "t_order".equals(locks.get(0).getTableName())
+                        && "4".equals(locks.get(0).getPk())));
+        Mockito.verify(locker).updateLockStatus(xid, LockStatus.Rollbacking);
+        Mockito.verify(locker).cleanAllLocks();
+        Mockito.verifyNoMoreInteractions(lockStore, locker);
     }
 
     @Test

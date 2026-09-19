@@ -27,10 +27,16 @@ import org.apache.seata.server.session.GlobalSession;
 public interface FileLockStore {
 
     /**
-     * Gets a locker for the supplied branch session.
+     * Gets a locker for the supplied branch session or for operations without a branch session.
      *
-     * @param branchSession the branch session
-     * @return the locker
+     * <p>When {@code branchSession} is {@code null}, the returned locker must support
+     * {@link Locker#isLockable(java.util.List)}, {@link Locker#cleanAllLocks()}, and
+     * {@link Locker#updateLockStatus(String, org.apache.seata.core.model.LockStatus)}.
+     * These operations use the runtime's lock store without a branch owner. Branch lock acquisition
+     * receives a non-null session.
+     *
+     * @param branchSession the branch session, or {@code null} for operations without a branch session
+     * @return the non-null locker
      */
     Locker getLocker(BranchSession branchSession);
 
@@ -47,7 +53,7 @@ public interface FileLockStore {
      * Releases locks owned by a global session.
      *
      * @param globalSession the global session
-     * @return whether the locks were released
+     * @return whether all locks owned by the global session were released
      * @throws TransactionException if the locks cannot be released
      */
     boolean releaseGlobalLock(GlobalSession globalSession) throws TransactionException;

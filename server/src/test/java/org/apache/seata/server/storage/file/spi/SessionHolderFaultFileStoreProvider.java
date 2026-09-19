@@ -39,6 +39,7 @@ public final class SessionHolderFaultFileStoreProvider implements FileStoreProvi
     private static FileLockStore lockStore;
     private static FileStoreContext lastContext;
     private static int closeCount;
+    private static Runnable backgroundStopAction;
 
     public static void configure(
             FailurePoint point,
@@ -53,6 +54,11 @@ public final class SessionHolderFaultFileStoreProvider implements FileStoreProvi
         lockStore = configuredLockStore;
         lastContext = null;
         closeCount = 0;
+        backgroundStopAction = null;
+    }
+
+    public static void onBackgroundStop(Runnable action) {
+        backgroundStopAction = action;
     }
 
     public static int closeCount() {
@@ -75,6 +81,7 @@ public final class SessionHolderFaultFileStoreProvider implements FileStoreProvi
         }
         return new FileStoreRuntime() {
             private boolean closed;
+            private boolean backgroundStarted;
 
             @Override
             public SessionManager sessionManager() {
@@ -103,6 +110,7 @@ public final class SessionHolderFaultFileStoreProvider implements FileStoreProvi
 
             @Override
             public void startBackgroundServices() {
+                backgroundStarted = true;
                 if (failurePoint == FailurePoint.BACKGROUND) {
                     throw startupFailure;
                 }
@@ -115,6 +123,9 @@ public final class SessionHolderFaultFileStoreProvider implements FileStoreProvi
                 }
                 closed = true;
                 closeCount++;
+                if (backgroundStarted && backgroundStopAction != null) {
+                    backgroundStopAction.run();
+                }
                 if (closeFailure != null) {
                     throw closeFailure;
                 }

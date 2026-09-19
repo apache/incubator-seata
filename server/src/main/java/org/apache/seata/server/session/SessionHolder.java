@@ -204,11 +204,12 @@ public class SessionHolder {
     private static void rollbackFailedFileInitialization(
             Throwable startupFailure, FileStoreRuntime runtime, boolean lockManagerInstalled) {
         try {
+            // Runtime-owned services may still need the installed lock manager while stopping.
+            cleanup(startupFailure, runtime == null ? null : runtime::close);
             if (lockManagerInstalled) {
                 cleanup(startupFailure, LockerManagerFactory::destroy);
                 cleanup(startupFailure, () -> EnhancedServiceLoader.unload(LockManager.class));
             }
-            cleanup(startupFailure, runtime == null ? null : runtime::close);
         } finally {
             clearFileModeReferences();
         }
@@ -221,7 +222,9 @@ public class SessionHolder {
         try {
             action.run();
         } catch (RuntimeException | Error cleanupFailure) {
-            failure.addSuppressed(cleanupFailure);
+            if (failure != cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
         }
     }
 
@@ -555,6 +558,11 @@ public class SessionHolder {
         FileStoreRuntime runtime = FILE_STORE_RUNTIME;
         if (runtime != null) {
             try {
+                runtime.close();
+            } catch (RuntimeException | Error runtimeFailure) {
+                failure = appendFailure(failure, runtimeFailure);
+            }
+            try {
                 LockerManagerFactory.destroy();
             } catch (RuntimeException | Error facadeFailure) {
                 failure = appendFailure(failure, facadeFailure);
@@ -563,11 +571,6 @@ public class SessionHolder {
                 EnhancedServiceLoader.unload(LockManager.class);
             } catch (RuntimeException | Error unloadFailure) {
                 failure = appendFailure(failure, unloadFailure);
-            }
-            try {
-                runtime.close();
-            } catch (RuntimeException | Error runtimeFailure) {
-                failure = appendFailure(failure, runtimeFailure);
             } finally {
                 clearFileModeReferences();
             }

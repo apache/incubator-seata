@@ -51,6 +51,11 @@ public interface FileStoreRuntime extends AutoCloseable {
 
     /**
      * Closes resources owned by this runtime.
+     *
+     * <p>Stop and await termination of runtime-owned background services before closing resources
+     * they use, including when startup only partially completed. The lock manager installed for this
+     * runtime remains available during this call and is uninstalled afterwards. Closing must also
+     * be safe before lock-manager installation or recovery, and repeated calls must be harmless.
      */
     @Override
     void close();
