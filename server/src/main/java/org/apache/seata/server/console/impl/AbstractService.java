@@ -42,8 +42,6 @@ import java.util.stream.Stream;
 public abstract class AbstractService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractService.class);
 
-    protected final LockManager lockManager = LockerManagerFactory.getLockManager();
-
     protected static final List<GlobalStatus> RETRY_COMMIT_STATUS = Arrays.asList(GlobalStatus.CommitRetrying);
 
     protected static final List<GlobalStatus> RETRY_ROLLBACK_STATUS = Arrays.asList(
@@ -73,6 +71,10 @@ public abstract class AbstractService {
 
     protected static final List<GlobalStatus> FINISH_STATUS =
             Arrays.asList(GlobalStatus.Committed, GlobalStatus.Finished, GlobalStatus.Rollbacked);
+
+    protected LockManager getLockManager() {
+        return LockerManagerFactory.getLockManager();
+    }
 
     protected void commonCheck(String xid, String branchId) {
         if (StringUtils.isBlank(xid)) {

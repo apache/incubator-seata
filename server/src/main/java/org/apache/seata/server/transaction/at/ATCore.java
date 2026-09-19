@@ -25,6 +25,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 
@@ -103,7 +104,7 @@ public class ATCore extends AbstractCore {
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
             throws TransactionException {
-        return lockManager.isLockable(xid, resourceId, lockKeys);
+        return LockerManagerFactory.getLockManager().isLockable(xid, resourceId, lockKeys);
     }
 
     @Override

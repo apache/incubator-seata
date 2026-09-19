@@ -18,20 +18,26 @@ package org.apache.seata.server.session.redis;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.store.StoreMode;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
+import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 import redis.clients.jedis.Jedis;
 
 import java.io.IOException;
@@ -49,21 +55,46 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     private String lockValue = "127.1.1.1:9081";
     private static DistributedLocker distributedLocker;
     private static Jedis jedis;
+    private static SessionMode originalSessionMode;
+    private static LockMode originalLockMode;
 
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
+        originalSessionMode = (SessionMode) ReflectionTestUtils.getField(StoreConfig.class, "sessionMode");
+        originalLockMode = (LockMode) ReflectionTestUtils.getField(StoreConfig.class, "lockMode");
+        // The tests own scheduled-lock keys, so stop the coordinator before switching stores.
+        DefaultCoordinator.getInstance().destroy();
+        LockerManagerFactory.destroy();
+        StoreConfig.setStartupParameter(null, SessionMode.REDIS.getName(), LockMode.REDIS.getName());
+        ConfigurationCache.clear();
         EnhancedServiceLoader.unload(DistributedLocker.class);
         DistributedLockerFactory.cleanLocker();
+        SessionHolder.init(SessionMode.REDIS);
+        LockerManagerFactory.init(LockMode.REDIS);
         distributedLocker = DistributedLockerFactory.getDistributedLocker(StoreMode.REDIS.getName());
         jedis = JedisPooledFactory.getJedisInstance();
     }
 
     @AfterAll
     public static void after() throws IOException {
-        EnhancedServiceLoader.unload(DistributedLocker.class);
-        DistributedLockerFactory.cleanLocker();
-        DistributedLockerFactory.getDistributedLocker(StoreMode.FILE.getName());
-        jedis.close();
+        try {
+            if (jedis != null) {
+                jedis.close();
+            }
+        } finally {
+            try {
+                SessionHolder.destroy();
+            } finally {
+                LockerManagerFactory.destroy();
+                EnhancedServiceLoader.unload(DistributedLocker.class);
+                DistributedLockerFactory.cleanLocker();
+                ReflectionTestUtils.setField(StoreConfig.class, "sessionMode", originalSessionMode);
+                ReflectionTestUtils.setField(StoreConfig.class, "lockMode", originalLockMode);
+                ConfigurationCache.clear();
+                SessionHolder.init();
+                LockerManagerFactory.init();
+            }
+        }
     }
 
     @Test
@@ -80,9 +111,8 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void test_acquireScheduledLock_success_() {
+    public void testAcquireScheduledLockViaSessionHolder() {
         String lockKey = retryRollbacking2;
-        SessionHolder.init(SessionMode.REDIS);
 
         boolean accquire = SessionHolder.acquireDistributedLock(lockKey);
         Assertions.assertTrue(accquire);
@@ -96,14 +126,14 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     @Test
     public void test_acquireLock_concurrent() {
         // acquire the lock success
-        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
+        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000L));
         Assertions.assertTrue(accquire);
         String lockValueExisted = jedis.get(retryRollbacking);
         Assertions.assertEquals(lockValue, lockValueExisted);
 
         // concurrent acquire
         for (int i = 0; i < 10; i++) {
-            boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000l));
+            boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000L));
             Assertions.assertFalse(b);
         }
 
@@ -127,7 +157,7 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
         }
 
         // other2 acquire the lock
-        boolean e = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
+        boolean e = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000L));
         Assertions.assertTrue(e);
 
         // clear
@@ -138,7 +168,7 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     public void test_acquireLock_false() {
         String set = jedis.set(retryCommiting, lockValue);
         Assertions.assertEquals("OK", set);
-        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
+        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000L));
         Assertions.assertFalse(acquire);
     }
 }

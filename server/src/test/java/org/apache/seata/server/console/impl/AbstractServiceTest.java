@@ -20,9 +20,12 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.lock.LockManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,19 +37,44 @@ import java.util.List;
 
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("checkstyle:AbstractClassName")
 public class AbstractServiceTest extends BaseSpringBootTest {
 
     private TestAbstractService service;
     private GlobalSession mockGlobalSession;
     private BranchSession mockBranchSession;
 
-    private static class TestAbstractService extends AbstractService {}
+    private static class TestAbstractService extends AbstractService {
+        private LockManager currentLockManager() {
+            return getLockManager();
+        }
+    }
 
     @BeforeEach
     public void setUp() {
         service = new TestAbstractService();
         mockGlobalSession = mock(GlobalSession.class);
         mockBranchSession = mock(BranchSession.class);
+    }
+
+    @AfterEach
+    public void tearDown() {
+        LockerManagerFactory.destroy();
+    }
+
+    @Test
+    public void testConstructionDoesNotInitializeLockManager() throws Exception {
+        LockerManagerFactory.destroy();
+
+        TestAbstractService uninitializedService = new TestAbstractService();
+
+        java.lang.reflect.Field field = LockerManagerFactory.class.getDeclaredField("LOCK_MANAGER");
+        field.setAccessible(true);
+        Assertions.assertNull(field.get(null));
+
+        LockManager current = mock(LockManager.class);
+        field.set(null, current);
+        Assertions.assertSame(current, uninitializedService.currentLockManager());
     }
 
     @Test
