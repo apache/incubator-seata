@@ -54,7 +54,6 @@
                 <exclude>licenses/Apache-1.1</exclude>
                 <exclude>licenses/CDDL-1.0</exclude>
                 <exclude>licenses/CDDL-1.1</exclude>
-                <exclude>licenses/LatencyUtils-BSD-2-Clause</exclude>
                 <exclude>licenses/Python-2.0</exclude>
                 <exclude>licenses/abego-treelayout-BSD-3-Clause</exclude>
                 <exclude>licenses/antlr-stringtemplate3-BSD-3-Clause</exclude>
@@ -117,7 +116,6 @@
                 <include>licenses/*</include>
             </includes>
             <excludes>
-                <exclude>licenses/LatencyUtils-BSD-2-Clause</exclude>
                 <exclude>licenses/Python-2.0</exclude>
                 <exclude>licenses/abego-treelayout-BSD-3-Clause</exclude>
                 <exclude>licenses/antlr-stringtemplate3-BSD-3-Clause</exclude>

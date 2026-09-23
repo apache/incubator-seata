@@ -23,7 +23,7 @@ const childProcess = require('child_process')
 const designerDir = path.join(__dirname, '../../../../../../../saga/seata-saga-statemachine-designer');
 if (!fs.existsSync(path.join(designerDir, "dist"))) {
   // if seata-saga-statemachine-designer not build, build this
-  childProcess.execSync('cd ' + designerDir + '&& npm install && npm run build')
+  childProcess.execSync('cd ' + designerDir + '&& npm ci && npm run build')
 }
 
 // copy file
