@@ -27,6 +27,7 @@ import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
+import org.apache.seata.server.controller.ConnectionPoolController;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.instance.SeataInstanceStrategy;
 import org.apache.seata.server.lock.LockerManagerFactory;
@@ -55,6 +56,9 @@ public class Server {
 
     @Resource
     SeataInstanceStrategy seataInstanceStrategy;
+
+    @Resource
+    private ConnectionPoolController connectionPoolController;
 
     /**
      * The entry point of application.
@@ -127,6 +131,7 @@ public class Server {
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
+        connectionPoolController.setNettyRemotingServer(nettyRemotingServer);
     }
 
     static String getRegistryConfig(String dataId) {
