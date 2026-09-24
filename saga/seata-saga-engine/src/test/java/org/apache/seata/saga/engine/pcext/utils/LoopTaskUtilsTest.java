@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
+import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.pcext.StateInstruction;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -24,11 +25,15 @@ import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.StateType;
+import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -245,6 +250,33 @@ public class LoopTaskUtilsTest {
 
         assertNotNull(childContext);
         assertEquals(7, childContext.getVariable(DomainConstants.LOOP_COUNTER));
+    }
+
+    @Test
+    public void putContextToParentSkipsSubContextsWithoutStateInstanceTest() {
+        ProcessContextImpl context = new ProcessContextImpl();
+        Map<String, Object> contextVariables = new LinkedHashMap<>();
+        context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, contextVariables);
+
+        StateMachineConfig stateMachineConfig = mock(StateMachineConfig.class);
+        context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG, stateMachineConfig);
+
+        AbstractTaskState state = mock(AbstractTaskState.class);
+        when(state.getOutput()).thenReturn(Collections.emptyMap());
+
+        ProcessContextImpl subContextWithoutState = new ProcessContextImpl();
+
+        ProcessContextImpl subContextWithState = new ProcessContextImpl();
+        StateInstance stateInstance = mock(StateInstance.class);
+        when(stateInstance.getOutputParams()).thenReturn(Collections.singletonMap("fooResult", "ok"));
+        subContextWithState.setVariable(DomainConstants.VAR_NAME_STATE_INST, stateInstance);
+
+        List<ProcessContext> subContextList = Arrays.asList(subContextWithoutState, subContextWithState);
+
+        LoopTaskUtils.putContextToParent(context, subContextList, state);
+
+        assertEquals(
+                Collections.singletonList(Collections.emptyMap()), contextVariables.get(DomainConstants.LOOP_RESULT));
     }
 
     // ========== Additional Tests: Coverage for findOutLastRetriedStateInstance ==========

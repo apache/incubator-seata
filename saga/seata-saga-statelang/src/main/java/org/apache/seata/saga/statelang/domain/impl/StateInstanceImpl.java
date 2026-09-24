@@ -48,6 +48,8 @@ public class StateInstanceImpl implements StateInstance {
     private Object serializedInputParams;
     private Object outputParams;
     private Object serializedOutputParams;
+    private Object extensionParams;
+    private Object serializedExtensionParams;
     private ExecutionStatus status;
     private String stateIdCompensatedFor;
     private String stateIdRetriedFor;
@@ -307,5 +309,25 @@ public class StateInstanceImpl implements StateInstance {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Object getExtensionParams() {
+        return extensionParams;
+    }
+
+    @Override
+    public void setExtensionParams(Object extensionParams) {
+        this.extensionParams = extensionParams;
+    }
+
+    @Override
+    public Object getSerializedExtensionParams() {
+        return serializedExtensionParams;
+    }
+
+    @Override
+    public void setSerializedExtensionParams(Object serializedExtensionParams) {
+        this.serializedExtensionParams = serializedExtensionParams;
     }
 }

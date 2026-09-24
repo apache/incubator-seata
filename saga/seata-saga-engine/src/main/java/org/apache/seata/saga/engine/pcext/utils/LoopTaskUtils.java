@@ -317,6 +317,9 @@ public class LoopTaskUtils {
             for (ProcessContext subProcessContext : subContextList) {
                 StateInstance stateInstance =
                         (StateInstance) subProcessContext.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+                if (stateInstance == null) {
+                    continue;
+                }
 
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
                         stateMachineConfig.getExpressionResolver(),

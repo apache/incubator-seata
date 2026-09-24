@@ -17,9 +17,13 @@
 package org.apache.seata.saga.engine.store.db;
 
 import org.apache.seata.saga.engine.config.DbStateMachineConfig;
+import org.apache.seata.saga.engine.pcext.StateInstruction;
 import org.apache.seata.saga.engine.sequence.UUIDSeqGenerator;
 import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateInstance;
+import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.apache.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -30,6 +34,7 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -144,5 +149,45 @@ public class DbAndReportTcStateLogStoreTest {
         ProcessContextImpl context = new ProcessContextImpl();
         context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST, new StateMachineInstanceImpl());
         Assertions.assertDoesNotThrow(() -> dbAndReportTcStateLogStore.clearUp(context));
+    }
+
+    @Test
+    public void testRecordStateStartedWithExtensionParams() {
+        StateInstanceImpl stateInstance = new StateInstanceImpl();
+        Map<String, Object> extensionParams = new HashMap<>();
+        extensionParams.put("test_key", "test_value");
+        stateInstance.setExtensionParams(extensionParams);
+
+        StateMachineInstanceImpl stateMachineInstance = new StateMachineInstanceImpl();
+        StateMachine stateMachine = Mockito.mock(StateMachine.class);
+        stateMachineInstance.setStateMachine(stateMachine);
+        stateInstance.setStateMachineInstance(stateMachineInstance);
+
+        ProcessContextImpl context = new ProcessContextImpl();
+        context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG, new DbStateMachineConfig());
+
+        StateInstruction instruction = Mockito.mock(StateInstruction.class);
+        ServiceTaskStateImpl state = Mockito.mock(ServiceTaskStateImpl.class);
+
+        Mockito.when(instruction.getState(any())).thenReturn(state);
+        context.setInstruction(instruction);
+
+        Assertions.assertDoesNotThrow(() -> dbAndReportTcStateLogStore.recordStateStarted(stateInstance, context));
+        Assertions.assertNotNull(stateInstance.getSerializedExtensionParams());
+    }
+
+    @Test
+    public void testGetStateInstanceWithExtensionParams() {
+        StateInstanceImpl mockStateInstance = new StateInstanceImpl();
+        mockStateInstance.setSerializedInputParams("{\"input\":\"val\"}");
+        mockStateInstance.setSerializedOutputParams("{\"output\":\"val\"}");
+        mockStateInstance.setSerializedExtensionParams("{\"ext_key\":\"ext_value\"}");
+
+        Mockito.doReturn(mockStateInstance).when(dbAndReportTcStateLogStore).selectOne(any(), any(), any(), any());
+
+        StateInstance result = dbAndReportTcStateLogStore.getStateInstance("test_machine_id", "test_state_id");
+
+        Assertions.assertNotNull(result);
+        Assertions.assertNotNull(result.getExtensionParams());
     }
 }

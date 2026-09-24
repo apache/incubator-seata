@@ -50,7 +50,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -1151,6 +1153,41 @@ public class StateMachineDBTests extends AbstractServerTest {
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 8);
 
         ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithLoopCompensateCollectionMutated() throws Exception {
+        String stateMachineName = "simpleLoopTestStateMachine";
+
+        SagaCostPrint.executeAndPrint("3-33-mutated", () -> {
+            List<Integer> mutatingList = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4, 5)) {
+                private int callCount = 0;
+
+                @Override
+                public Iterator<Integer> iterator() {
+                    callCount++;
+                    if (callCount > 2) {
+                        return Arrays.asList(1, 2).iterator();
+                    }
+                    return super.iterator();
+                }
+
+                @Override
+                public int size() {
+                    return callCount > 2 ? 2 : 5;
+                }
+            };
+
+            Map<String, Object> paramMap = new HashMap<>(3);
+            paramMap.put("a", 1);
+            paramMap.put("collection", mutatingList);
+            paramMap.put("barThrowException", "true");
+
+            StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+            Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
+            Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
+        });
     }
 
     private void doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(Map<String, Object> paramMap, int i)

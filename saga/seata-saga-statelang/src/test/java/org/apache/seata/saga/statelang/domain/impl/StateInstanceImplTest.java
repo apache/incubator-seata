@@ -54,6 +54,8 @@ public class StateInstanceImplTest {
         instance.setSerializedInputParams("serialized_input");
         instance.setOutputParams("output");
         instance.setSerializedOutputParams("serialized_output");
+        instance.setExtensionParams("extension_params");
+        instance.setSerializedExtensionParams("serialized_extension_params");
         instance.setStateIdCompensatedFor("COMPENSATE_FOR_1");
         instance.setStateIdRetriedFor("RETRY_FOR_1");
         instance.setCompensationState(compensationState);
@@ -77,6 +79,8 @@ public class StateInstanceImplTest {
         assertEquals("serialized_input", instance.getSerializedInputParams());
         assertEquals("output", instance.getOutputParams());
         assertEquals("serialized_output", instance.getSerializedOutputParams());
+        assertEquals("extension_params", instance.getExtensionParams());
+        assertEquals("serialized_extension_params", instance.getSerializedExtensionParams());
         assertEquals("COMPENSATE_FOR_1", instance.getStateIdCompensatedFor());
         assertEquals("RETRY_FOR_1", instance.getStateIdRetriedFor());
         assertSame(compensationState, instance.getCompensationState());
@@ -96,6 +100,7 @@ public class StateInstanceImplTest {
     @Test
     public void testGetCompensationStatus() {
         StateInstanceImpl instance = new StateInstanceImpl();
+        Assertions.assertNull(instance.getCompensationStatus());
 
         StateInstanceImpl compensationState = new StateInstanceImpl();
         compensationState.setStatus(ExecutionStatus.FA);

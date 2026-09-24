@@ -29,8 +29,12 @@ import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -308,5 +312,76 @@ public class SubStateMachineHandlerTest {
 
         verify(engine).forward(eq("subInstId"), any());
         verify(context).removeVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD);
+    }
+
+    @Test
+    public void processWithLoopElementAndLoggerTest() throws Exception {
+        HierarchicalProcessContext context = mock(HierarchicalProcessContext.class);
+        StateInstruction instruction = mock(StateInstruction.class);
+        SubStateMachineImpl subStateMachine = mock(SubStateMachineImpl.class);
+        StateMachineEngine engine = mock(StateMachineEngine.class);
+        StateMachineInstance parentSmInstance = mock(StateMachineInstance.class);
+        StateInstance stateInstance = mock(StateInstance.class);
+        StateMachineInstance subSmInstance = mock(StateMachineInstance.class);
+
+        when(context.getInstruction(StateInstruction.class)).thenReturn(instruction);
+        when(instruction.getState(context)).thenReturn(subStateMachine);
+        when(context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_ENGINE)).thenReturn(engine);
+        when(context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST)).thenReturn(parentSmInstance);
+        when(context.getVariable(DomainConstants.VAR_NAME_STATE_INST)).thenReturn(stateInstance);
+        when(context.getVariable(DomainConstants.VAR_NAME_LOOP_ELEMENT)).thenReturn("testLoopElement");
+        when(subStateMachine.getStateMachineName()).thenReturn("subMachine");
+        when(subStateMachine.getName()).thenReturn("subState");
+        when(engine.start(eq("subMachine"), any(), any())).thenReturn(subSmInstance);
+        when(subSmInstance.getEndParams()).thenReturn(new HashMap<>());
+        when(subSmInstance.getStatus()).thenReturn(ExecutionStatus.SU);
+        when(stateInstance.getStateMachineInstance()).thenReturn(parentSmInstance);
+
+        Field loggerField = getLoggerField();
+        Logger originalLogger = (Logger) loggerField.get(null);
+        Logger mockLogger = mock(Logger.class);
+        when(mockLogger.isDebugEnabled()).thenReturn(true);
+
+        try {
+            loggerField.set(null, mockLogger);
+        } catch (IllegalAccessException ignored) {
+        }
+
+        try {
+            handler.process(context);
+
+            @SuppressWarnings("unchecked")
+            ArgumentCaptor<Map<String, Object>> captor = ArgumentCaptor.forClass(Map.class);
+            verify(engine).start(eq("subMachine"), any(), captor.capture());
+
+            Map<String, Object> capturedParams = captor.getValue();
+            assertEquals("testLoopElement", capturedParams.get(DomainConstants.VAR_NAME_LOOP_ELEMENT));
+
+            if (loggerField.get(null) == mockLogger) {
+                verify(mockLogger)
+                        .debug(
+                                ">>>>>>>>>>>>>>>>>>>>>> Start to execute SubStateMachine [{}] by state[{}]",
+                                "subMachine",
+                                "subState");
+            }
+        } finally {
+            try {
+                loggerField.set(null, originalLogger);
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+    }
+
+    private static Field getLoggerField() throws NoSuchFieldException {
+        Field loggerField = SubStateMachineHandler.class.getDeclaredField("LOGGER");
+        loggerField.setAccessible(true);
+
+        try {
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(loggerField, loggerField.getModifiers() & ~Modifier.FINAL);
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        }
+        return loggerField;
     }
 }
