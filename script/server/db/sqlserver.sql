@@ -122,6 +122,6 @@ CREATE TABLE [vgroup_table]
 (
     [vGroup]    nvarchar(255) NOT NULL,
     [namespace] nvarchar(255) NOT NULL,
-    [cluster]   nvarchar(255) NOT NULL,
-    CONSTRAINT uk_vgroup_namespace_cluster UNIQUE ([vGroup], [namespace], [cluster])
+    [cluster_name]   nvarchar(255) NOT NULL,
+    CONSTRAINT uk_vgroup_namespace_cluster_name UNIQUE ([vGroup], [namespace], [cluster_name])
 )
