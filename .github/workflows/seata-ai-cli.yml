@@ -1,0 +1,59 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Seata AI CLI foundation
+on:
+  pull_request:
+    paths:
+      - 'tools/seata-ai-cli/**'
+      - '.github/workflows/seata-ai-cli.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux-foundation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tools/seata-ai-cli
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+          cache-dependency-path: tools/seata-ai-cli/package-lock.json
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.11'
+      - name: Verify isolated toolchain
+        run: |
+          npm install --global --ignore-scripts npm@11.17.0
+          node --version
+          npm --version
+          /usr/bin/flock --version
+      - name: Install pinned development dependencies
+        run: |
+          npm ci --ignore-scripts
+          python -m pip install -r test/requirements.txt
+      - name: Typecheck, protocol and fault tests
+        run: npm test
+      - name: Independent Python contracts
+        run: npm run test:contract:python
+      - name: Install and verify the actual tarball
+        run: npm run test:install
