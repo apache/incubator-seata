@@ -1,0 +1,58 @@
+{
+  "plan_id": "plan_001",
+  "plan_format_version": 1,
+  "command": "transaction.retry.resume",
+  "target": {
+    "profile_id": "profile_001",
+    "profile_revision": 1,
+    "console_base_endpoint": "https://console.example.com",
+    "naming_base_endpoint": "https://naming.example.com",
+    "trust_digest": "example-trust-digest",
+    "namespace": "public",
+    "cluster": "default",
+    "route_assurance": "selector_only",
+    "adapter_id": "seata-src-41694e14",
+    "adapter_digest": "example-adapter-digest",
+    "command_schema_version": "R9"
+  },
+  "normalized_input": {
+    "xid": "10.0.0.1:8091:123",
+    "expected_direction": "rollback"
+  },
+  "expected_direction": "rollback",
+  "resolved_direction": "rollback",
+  "before": {
+    "global_status": "StopRollbackOrRollbackRetry"
+  },
+  "preconditions": [
+    {
+      "global_status": "StopRollbackOrRollbackRetry"
+    }
+  ],
+  "effects": [
+    {
+      "kind": "enable_retry",
+      "direction": "rollback"
+    }
+  ],
+  "possible_partial_effects": [
+    {
+      "kind": "rm_rollback_may_progress"
+    }
+  ],
+  "risk": "high_risk_write",
+  "reversibility": {
+    "kind": "not_business_reversible",
+    "limitations": [
+      "No compensation promise"
+    ]
+  },
+  "material_digest": "example-material-digest",
+  "created_at": "2026-09-05T00:00:00Z",
+  "expires_at": "2026-09-05T00:02:00Z",
+  "consumed_by": null,
+  "limitations": [
+    "client-side precondition only; no server CAS",
+    "synthetic example; not a certified target"
+  ]
+}

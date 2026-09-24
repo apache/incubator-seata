@@ -1,0 +1,16 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "diagnose.snapshot.export",
+  "context": {
+    "profile": "prod"
+  },
+  "input": {
+    "root": "./exports",
+    "path": "snapshot.zip",
+    "format": "zip"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

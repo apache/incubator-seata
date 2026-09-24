@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "diagnose.snapshot.export input",
+  "type": "object",
+  "properties": {
+    "xid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "include_config": {
+      "type": "boolean"
+    },
+    "root": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "json",
+        "zip"
+      ]
+    },
+    "overwrite": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "root",
+    "path",
+    "format"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,24 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "profile.create",
+  "context": {},
+  "input": {
+    "config": {
+      "name": "prod",
+      "environment": "production",
+      "management": {
+        "console_endpoint": "https://console.example.com",
+        "naming_endpoint": "https://naming.example.com",
+        "compatibility_id": "seata-src-41694e14"
+      },
+      "target": {
+        "namespace": "public",
+        "cluster": "default"
+      }
+    }
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

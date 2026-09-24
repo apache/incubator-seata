@@ -1,0 +1,40 @@
+{
+  "name": "seata-ai-cli-development",
+  "version": "0.1.0-r11.0",
+  "private": true,
+  "description": "Seata AI CLI R11 development implementation",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
+  "bin": {
+    "seata-ai": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "schemas/",
+    "api/",
+    "compatibility/",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "npm-shrinkwrap.json"
+  ],
+  "scripts": {
+    "build": "node scripts/generate.mjs && tsc",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "test:contract:python": "python3 scripts/verify-contract.py",
+    "test:install": "node test/install.mjs",
+    "check": "npm test && npm run test:contract:python && npm run test:install"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "commander": "15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "typescript": "5.9.3"
+  }
+}

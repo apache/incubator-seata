@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "skills.install input",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "boolean",
+      "const": true
+    },
+    "host_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9_-]+$"
+    }
+  },
+  "required": [],
+  "additionalProperties": false
+}

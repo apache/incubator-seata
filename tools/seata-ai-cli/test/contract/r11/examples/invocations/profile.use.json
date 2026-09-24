@@ -1,0 +1,12 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "profile.use",
+  "context": {},
+  "input": {
+    "name": "prod"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

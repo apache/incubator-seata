@@ -1,0 +1,12 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "skills.read",
+  "context": {},
+  "input": {
+    "skill_id": "seata-shared"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

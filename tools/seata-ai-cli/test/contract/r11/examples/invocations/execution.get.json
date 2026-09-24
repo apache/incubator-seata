@@ -1,0 +1,12 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "execution.get",
+  "context": {},
+  "input": {
+    "execution_id": "exec_001"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "manifest_version": 1,
+  "contract_revision": "R9",
+  "reviewed_at": "2026-09-05",
+  "certified_combinations": [],
+  "source_baselines": [
+    {
+      "id": "seata-src-41694e14",
+      "commit": "41694e140b40894aa3aae4cfe6ecffed9b321a36",
+      "repository": "apache/incubator-seata",
+      "evidence_level": "source_inspected",
+      "production_write_enabled": false,
+      "source_refs": [
+        "S01",
+        "S02",
+        "S03",
+        "S04",
+        "S05",
+        "S06",
+        "S07",
+        "S08",
+        "S09",
+        "S10",
+        "S18",
+        "S19",
+        "S20",
+        "S21"
+      ]
+    }
+  ],
+  "release_gates": [
+    "COMPAT-01",
+    "EXEC-01",
+    "AUTH-01",
+    "PLATFORM-01",
+    "HOST-01",
+    "RELEASE-01"
+  ],
+  "first_integration_target": {
+    "seata_release_tag": null,
+    "console_image_digest": null,
+    "naming_image_digest": null,
+    "tc_image_digest": null,
+    "branch_mode": "AT",
+    "session_store_mode": "db",
+    "lock_mode": "db",
+    "status": "not_evaluated"
+  }
+}
