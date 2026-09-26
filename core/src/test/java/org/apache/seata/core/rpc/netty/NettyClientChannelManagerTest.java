@@ -127,8 +127,26 @@ class NettyClientChannelManagerTest {
 
     @Test
     void assertReconnect() {
-        channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
+        String address = "127.0.0.1:8091";
+        channelManager.getChannels().put(address, channel);
+        setupPoolFactory(nettyPoolKey, newChannel);
+
         channelManager.reconnect(DEFAULT_TX_GROUP);
+
+        verify(poolableFactory).makeObject(nettyPoolKey);
+        Assertions.assertSame(newChannel, channelManager.getChannels().get(address));
+    }
+
+    @Test
+    void assertReconnectReusesActiveChannel() {
+        String address = "127.0.0.1:8091";
+        channelManager.getChannels().put(address, channel);
+        when(channel.isActive()).thenReturn(true);
+
+        channelManager.reconnect(DEFAULT_TX_GROUP);
+
+        Assertions.assertSame(channel, channelManager.getChannels().get(address));
+        org.mockito.Mockito.verifyNoInteractions(poolKeyFunction, poolableFactory);
     }
 
     @Test
