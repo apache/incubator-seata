@@ -14,7 +14,8 @@
 // limitations under the License.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -37,8 +38,23 @@ const run = (args, input) =>
     input,
     encoding: "utf8",
     cwd: "/tmp",
+    env: { ...process.env, SEATA_AI_STATE_DIR: mkdtempSync(resolve(tmpdir(), "seata-protocol-")) },
     timeout: 10000,
   });
+
+test("public invoke schema describes the same optional export support as target commands", () => {
+  const result = run(["schema", "system.invoke"]);
+  assert.equal(result.status, 0, result.stderr);
+  const schema = JSON.parse(result.stdout).data.invocation_schema.properties.input;
+  const accepts = ajv.compile(schema);
+  for (const spec of registry.filter(s => s.id !== "system.invoke")) {
+    const example = json("test/contract/r11/examples/invocations/" + spec.id + ".json");
+    assert.equal(accepts({ invocation: example }), true, spec.id);
+    example.options.export = "evidence.json";
+    const supported = ["read", "sensitive_read", "diagnostic_read"].includes(spec.risk) && !spec.id.startsWith("auth.");
+    assert.equal(accepts({ invocation: example }), supported, spec.id);
+  }
+});
 
 test("all 57 IDs and 56 independently supplied invocation schemas match", () => {
   assert.equal(registry.length, 57);
@@ -48,7 +64,11 @@ test("all 57 IDs and 56 independently supplied invocation schemas match", () => 
     const oracle = json(
       "test/contract/r11/schemas/invocations/" + spec.id + ".schema.json",
     );
-    assert.equal(canonical(spec.invocation), canonical(oracle), spec.id);
+    // The approved optional export extension must leave the independent R11
+    // baseline unchanged when omitted.
+    const baseline = structuredClone(spec.invocation);
+    delete baseline.properties.options.properties.export;
+    assert.equal(canonical(baseline), canonical(oracle), spec.id);
     const example = json(
       "test/contract/r11/examples/invocations/" + spec.id + ".json",
     );
@@ -82,6 +102,24 @@ test("all 57 IDs and 56 independently supplied invocation schemas match", () => 
       );
     ajv.compile(outputSchemas[spec.id]);
   }
+});
+test("published capability backends use only the ten R11 static IDs", () => {
+  const result = run(["capabilities"]);
+  assert.equal(result.status, 0, result.stderr);
+  const data = JSON.parse(result.stdout).data;
+  const allowed = new Set(["local", "local_auth", "console_auth", "naming_management", "credential_store",
+    "execution_store", "filesystem", "environment", "rules", "embedded_skills"]);
+  for (const command of data.commands)
+    for (const id of command.backends.split(/[,/]/).map(value => value.trim()).filter(Boolean))
+      assert.ok(allowed.has(id), `${command.command_id}: unexpected Backend ID ${id}`);
+  const byId = new Map(data.commands.map(command => [command.command_id, command]));
+  assert.equal(byId.get("transaction.trace").backends, "naming_management");
+  assert.equal(byId.get("diagnose.run").backends, "rules / naming_management");
+  assert.equal(byId.get("diagnose.snapshot").backends, "naming_management / filesystem");
+  assert.equal(byId.get("diagnose.snapshot.export").backends, "filesystem / naming_management");
+  assert.deepEqual(data.runtime.optional_sources, {
+    logs: "not_implemented", metrics: "not_implemented", database: "not_implemented", config_center: "not_implemented",
+  });
 });
 test("output DTOs reject incomplete successful payloads", () => {
   for (const id of [
@@ -209,7 +247,8 @@ test("real process produces exactly one envelope on the required stream", () => 
   for (const [args, exit, stream] of [
     [["version"], 0, "stdout"],
     [["version", "--bad"], 2, "stderr"],
-    [["transaction", "get", "--profile", "p", "--xid", "x"], 6, "stderr"],
+    [["transaction", "get", "--profile", "p", "--xid", "x"], 3, "stderr"],
+    [["transaction", "delete", "--profile", "p", "--xid", "x", "--dry-run"], 6, "stderr"],
   ]) {
     const child = run(args);
     assert.equal(child.status, exit, child.stderr);

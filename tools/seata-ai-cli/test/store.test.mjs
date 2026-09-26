@@ -20,7 +20,7 @@ import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { StateStore } from "../dist/adapter/statestore/client.js";
 import { profileConfig, endpoint } from "../dist/app/profile.js";
-import { digest } from "../dist/protocol/value.js";
+import { canonical, digest } from "../dist/protocol/value.js";
 import {
   commitSendPermit,
   sendWithPermit,
@@ -29,6 +29,7 @@ import {
 import http from "node:http";
 import { once } from "node:events";
 import { spawnSync } from "node:child_process";
+import { DatabaseSync } from "node:sqlite";
 
 const config = (name) =>
   profileConfig(
@@ -65,6 +66,148 @@ async function credential(store) {
   await store.call("flow.activate", { flow_id: flow.flow_id, credential_ref });
   return credential_ref;
 }
+
+test("expired and abandoned login flows cannot activate staged credentials or revive on heartbeat", async t => {
+  const { a, path } = await fixture(t);
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  for (const scenario of ["expired", "abandoned"]) {
+    const { flow } = await a.call("flow.create", { name: "p" });
+    await a.call("flow.submit", { flow_id: flow.flow_id });
+    const staged = await a.call("flow.stage", { flow_id: flow.flow_id, provider: "protected_file" });
+    // Move persisted timestamps, not the production clock, to exercise recovery
+    // after elapsed wall time without a five-minute sleep or a runtime test hook.
+    const past = new Date(Date.now() - 60000).toISOString();
+    if (scenario === "expired") db.prepare("UPDATE auth_flows SET expires_at=? WHERE flow_id=?").run(past, flow.flow_id);
+    else db.prepare("UPDATE auth_flows SET heartbeat_at=? WHERE flow_id=?").run(past, flow.flow_id);
+    const status = await a.call("flow.status", { name: "p", flow_id: flow.flow_id });
+    assert.equal(status.flow_state, scenario === "expired" ? "expired" : "failed");
+    assert.equal(status.reason.subtype, scenario === "expired" ? "auth_flow_expired" : "helper_unavailable");
+    assert.ok(status.terminal_at);
+    assert.equal(db.prepare("SELECT status FROM credential_metadata WHERE credential_ref=?").get(staged.credential_ref).status, "cleanup_pending");
+    await assert.rejects(a.call("flow.activate", { flow_id: flow.flow_id, credential_ref: staged.credential_ref }), { subtype: "state_changed" });
+    await assert.rejects(a.call("flow.submit", { flow_id: flow.flow_id }), { subtype: "state_changed" });
+    assert.equal((await a.call("flow.heartbeat", { flow_id: flow.flow_id, helper_instance_id: flow.helper_instance_id })).active, false);
+    assert.equal((await a.call("auth.binding", { name: "p" })).credential, null);
+    assert.deepEqual(await a.call("flow.status", { name: "p", flow_id: flow.flow_id }), status);
+  }
+});
+
+test("terminal flow history expires independently of the current authenticated credential", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  await a.call("flow.cancel", { name: "p", flow_id: flow.flow_id });
+  const active = await credential(a);
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  db.prepare("UPDATE auth_flows SET terminal_at=? WHERE flow_id=?")
+    .run(new Date(Date.now() - 23 * 3600000).toISOString(), flow.flow_id);
+  assert.equal((await a.call("flow.status", { name: "p", flow_id: flow.flow_id })).flow_state, "cancelled");
+  db.prepare("UPDATE auth_flows SET terminal_at=? WHERE flow_id=?")
+    .run(new Date(Date.now() - 25 * 3600000).toISOString(), flow.flow_id);
+  await assert.rejects(a.call("flow.status", { name: "p", flow_id: flow.flow_id }), { subtype: "auth_flow_not_found" });
+  assert.equal((await a.call("auth.binding", { name: "p" })).credential.credential_ref, active);
+});
+
+test("a flow first observed after its 24-hour expiry retention is not revived by a late read", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  const expiredAt = new Date(Date.now() - 25 * 3600000).toISOString();
+  db.prepare("UPDATE auth_flows SET expires_at=?,heartbeat_at=? WHERE flow_id=?")
+    .run(expiredAt, expiredAt, flow.flow_id);
+  await assert.rejects(a.call("flow.status", { name: "p", flow_id: flow.flow_id }), { subtype: "auth_flow_not_found" });
+  assert.equal(db.prepare("SELECT count(*) AS n FROM auth_flows WHERE flow_id=?").get(flow.flow_id).n, 0);
+  await assert.rejects(a.call("flow.cancel", { name: "p", flow_id: flow.flow_id }), { subtype: "auth_flow_not_found" });
+});
+
+test("an abandoned helper's retention starts at the missed heartbeat deadline", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  const heartbeatAt = new Date(Date.now() - 60000).toISOString();
+  db.prepare("UPDATE auth_flows SET heartbeat_at=? WHERE flow_id=?").run(heartbeatAt, flow.flow_id);
+  const status = await a.call("flow.status", { name: "p", flow_id: flow.flow_id });
+  assert.equal(status.flow_state, "failed");
+  assert.equal(status.reason.subtype, "helper_unavailable");
+  assert.equal(status.terminal_at, new Date(Date.parse(heartbeatAt) + 10000).toISOString());
+});
+
+test("expired flow history stays hidden while its credential binding remains active", async t => {
+  const { a, path } = await fixture(t);
+  const reference = await credential(a);
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  const flowId = db.prepare("SELECT flow_id FROM credential_metadata WHERE credential_ref=?").get(reference).flow_id;
+  db.prepare("UPDATE auth_flows SET terminal_at=? WHERE flow_id=?")
+    .run(new Date(Date.now() - 25 * 3600000).toISOString(), flowId);
+  await assert.rejects(a.call("flow.status", { name: "p", flow_id: flowId }), { subtype: "auth_flow_not_found" });
+  await assert.rejects(a.call("flow.cancel", { name: "p", flow_id: flowId }), { subtype: "auth_flow_not_found" });
+  assert.equal(db.prepare("SELECT count(*) AS n FROM auth_flows WHERE flow_id=?").get(flowId).n, 1);
+  assert.equal((await a.call("auth.binding", { name: "p" })).credential.credential_ref, reference);
+});
+
+test("a late helper failure cannot restart retention for an already expired flow", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  const expiredAt = new Date(Date.now() - 25 * 3600000).toISOString();
+  db.prepare("UPDATE auth_flows SET expires_at=?,heartbeat_at=? WHERE flow_id=?")
+    .run(expiredAt, expiredAt, flow.flow_id);
+  await a.call("flow.fail", { flow_id: flow.flow_id, helper_instance_id: flow.helper_instance_id, reason: "login_rejected" });
+  await assert.rejects(a.call("flow.status", { name: "p", flow_id: flow.flow_id }), { subtype: "auth_flow_not_found" });
+  assert.equal(db.prepare("SELECT count(*) AS n FROM auth_flows WHERE flow_id=?").get(flow.flow_id).n, 0);
+});
+
+test("a failed flow queues its staged credential for immediate cleanup", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  await a.call("flow.submit", { flow_id: flow.flow_id });
+  const staged = await a.call("flow.stage", { flow_id: flow.flow_id, provider: "protected_file" });
+  await a.call("flow.fail", {
+    flow_id: flow.flow_id,
+    helper_instance_id: flow.helper_instance_id,
+    reason: "credential_store_unavailable",
+  });
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  assert.equal(db.prepare("SELECT status FROM credential_metadata WHERE credential_ref=?")
+    .get(staged.credential_ref).status, "cleanup_pending");
+  assert.ok((await a.call("credential.cleanup.list")).credentials
+    .some(item => item.credential_ref === staged.credential_ref));
+});
+
+test("expired flow cleanup commits even when a late submission is rejected", async t => {
+  const { a, path } = await fixture(t);
+  const { flow } = await a.call("flow.create", { name: "p" });
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  const expiredAt = new Date(Date.now() - 25 * 3600000).toISOString();
+  db.prepare("UPDATE auth_flows SET expires_at=?,heartbeat_at=? WHERE flow_id=?")
+    .run(expiredAt, expiredAt, flow.flow_id);
+  await assert.rejects(a.call("flow.submit", { flow_id: flow.flow_id }), { subtype: "state_changed" });
+  assert.equal(db.prepare("SELECT count(*) AS n FROM auth_flows WHERE flow_id=?").get(flow.flow_id).n, 0);
+});
+
+test("staging rejects elapsed expiry or abandoned helper without a preceding status query", async t => {
+  const { a, path } = await fixture(t);
+  const db = new DatabaseSync(join(path, "state.db"));
+  t.after(() => db.close());
+  for (const scenario of ["expired", "abandoned"]) {
+    const { flow } = await a.call("flow.create", { name: "p" });
+    await a.call("flow.submit", { flow_id: flow.flow_id });
+    const past = new Date(Date.now() - 60000).toISOString();
+    if (scenario === "expired") db.prepare("UPDATE auth_flows SET expires_at=? WHERE flow_id=?").run(past, flow.flow_id);
+    else db.prepare("UPDATE auth_flows SET heartbeat_at=? WHERE flow_id=?").run(past, flow.flow_id);
+    await assert.rejects(a.call("flow.stage", { flow_id: flow.flow_id, provider: "protected_file" }), { subtype: "state_changed" });
+    assert.equal(db.prepare("SELECT count(*) AS n FROM credential_metadata WHERE flow_id=?").get(flow.flow_id).n, 0);
+    assert.equal((await a.call("flow.status", { name: "p", flow_id: flow.flow_id })).flow_state,
+      scenario === "expired" ? "expired" : "failed");
+  }
+});
 const claimArgs = (p) => ({
   client_request_id: randomUUID(),
   command: "transaction.retry.pause",
@@ -162,6 +305,20 @@ test("SEND_INTENT consumes plan atomically; restart cannot recreate send permiss
   const committed = await a.call("execution.sendIntent", send);
   assert.equal(committed.execution.state, "SEND_INTENT");
   assert.equal(committed.execution.outcome, "unknown");
+  const observed = await b.call("execution.observe", {
+    execution_id: e.execution_id,
+    expected_revision: committed.execution.record_version,
+    target_digest: claim.target_digest,
+    observation: { observation: "postcondition_observed", causality: "unproven", replay_allowed: false,
+      current_evidence: [{ source: "synthetic_read", status: "desired_condition_currently_observed" }] },
+  });
+  const afterObservation = await b.call("execution.get", { execution_id: e.execution_id });
+  assert.equal(afterObservation.execution.record_version, observed.record_version);
+  assert.equal(afterObservation.execution.state, "SEND_INTENT");
+  assert.equal(afterObservation.execution.outcome, "unknown");
+  assert.equal(afterObservation.execution.observation, committed.execution.observation);
+  assert.equal(afterObservation.events.at(-1).kind, "READ_ONLY_OBSERVATION");
+  assert.equal(afterObservation.events.at(-1).data.observation, "postcondition_observed");
   await assert.rejects(a.call("execution.sendIntent", send));
   await a.close();
   const recovered = await b.call("execution.recover", {
@@ -172,6 +329,71 @@ test("SEND_INTENT consumes plan atomically; restart cannot recreate send permiss
   const bytes = await readFile(join(path, "state.db"));
   assert.equal(bytes.includes(Buffer.from("Bearer ")), false);
 });
+test("read-only observations enforce revision and target binding without changing historical execution facts", async t => {
+  const { a, b, profile } = await fixture(t);
+  const claim = claimArgs(profile), e = (await a.call("execution.claim", claim)).execution;
+  const args = { execution_id: e.execution_id, expected_revision: e.record_version, target_digest: claim.target_digest,
+    observation: { observation: "unknown", causality: "unproven", replay_allowed: false, current_evidence: [] } };
+  await assert.rejects(a.call("execution.observe", { ...args, target_digest: "different" }), e => e.subtype === "execution_target_mismatch");
+  for (const change of [{ causality: "proven" }, { replay_allowed: true }, { observation: "applied" }, { payload: "x".repeat(8 * 1024 * 1024) }])
+    await assert.rejects(a.call("execution.observe", { ...args, observation: { ...args.observation, ...change } }));
+  const results = await Promise.allSettled([a.call("execution.observe", args), b.call("execution.observe", args)]);
+  assert.equal(results.filter(r => r.status === "fulfilled").length, 1);
+  const saved = await a.call("execution.get", { execution_id: e.execution_id });
+  assert.equal(saved.events.length, 2);
+  assert.equal(saved.execution.state, "CREATED");
+  assert.equal(saved.execution.outcome, "not_started");
+  assert.equal(saved.execution.request_phase, "not_started");
+  assert.equal(saved.execution.send_intent_at, null);
+  assert.equal(saved.recovery.replay_allowed, false);
+});
+
+test("read-only observation journal enforces an exact UTF-8 eight-MiB boundary", async t => {
+  const { a, profile } = await fixture(t);
+  const claim = claimArgs(profile), e = (await a.call("execution.claim", claim)).execution;
+  const observation = { observation: "unknown", causality: "unproven", replay_allowed: false,
+    current_evidence: [{ payload: "" }] };
+  const remaining = 8 * 1024 * 1024 - Buffer.byteLength(canonical(observation));
+  observation.current_evidence[0].payload = "é".repeat(Math.floor(remaining / 2)) + "x".repeat(remaining % 2);
+  assert.equal(Buffer.byteLength(canonical(observation)), 8 * 1024 * 1024);
+  const args = { execution_id: e.execution_id, expected_revision: e.record_version,
+    target_digest: claim.target_digest, observation };
+  await assert.rejects(a.call("execution.observe", { ...args,
+    observation: { ...observation, current_evidence: [{ payload: observation.current_evidence[0].payload + "x" }] } }),
+    { subtype: "invalid_observation" });
+  assert.equal((await a.call("execution.get", { execution_id: e.execution_id })).events.length, 1);
+  await a.call("execution.observe", args);
+  const saved = await a.call("execution.get", { execution_id: e.execution_id });
+  assert.equal(saved.events.length, 2);
+  assert.deepEqual(saved.events.at(-1).data, observation);
+  assert.equal(saved.execution.outcome, "not_started");
+  assert.equal(saved.recovery.replay_allowed, false);
+});
+
+test("Skills installation journal holds a process lock and preserves incomplete stage identity across reopen", async t => {
+  const { a, b } = await fixture(t);
+  const record = { operation_id: randomUUID(), version: "0.1.0-r11.0", phase: "preparing",
+    content_digest: digest({ bundle: "synthetic" }), installation_path: "/synthetic/user-skills", files: [] };
+  await assert.rejects(a.call("skills.install.record", { expected_revision: 0, record }), e => e.subtype === "skills_install_not_owned");
+  assert.equal((await a.call("skills.install.lock")).record, null);
+  await assert.rejects(b.call("skills.install.lock"));
+  let saved = (await a.call("skills.install.record", { expected_revision: 0, record })).record;
+  await assert.rejects(a.call("skills.install.record", { expected_revision: saved.revision, record: { ...record, phase: "complete" } }), e => e.subtype === "skills_install_phase");
+  await assert.rejects(a.call("skills.install.record", { expected_revision: saved.revision, record: { ...record, installation_path: "/other" } }), e => e.subtype === "skills_install_changed");
+  await assert.rejects(a.call("skills.install.record", { expected_revision: saved.revision, record: { ...record, previous_files: [{}] } }), e => e.subtype === "skills_install_changed");
+  await a.close();
+  assert.equal((await b.call("skills.install.lock")).record.phase, "preparing");
+  await assert.rejects(b.call("skills.install.record", { expected_revision: saved.revision, record: { ...record, operation_id: randomUUID() } }), e => e.subtype === "skills_install_unresolved");
+  for (const phase of ["writing", "verifying", "complete"])
+    saved = (await b.call("skills.install.record", { expected_revision: saved.revision, record: { ...record, phase } })).record;
+  const final = await b.call("skills.install.get");
+  assert.equal(final.record.phase, "complete"); assert.equal(final.record.operation_id, record.operation_id);
+  assert.equal(final.record.installation_path, "/synthetic/user-skills");
+  assert.equal(final.record.canonical_path, undefined); assert.equal(final.record.exposure_path, undefined);
+  await assert.rejects(b.call("skills.install.record", { expected_revision: 0, record }), e => e.subtype === "skills_install_changed");
+  await assert.rejects(b.call("skills.install.record", { expected_revision: saved.revision, record }), e => e.subtype === "skills_install_phase");
+});
+
 test("logout fences staged activation; auth flow remains queryable after cancel", async (t) => {
   const { a, b } = await fixture(t);
   const { flow } = await a.call("flow.create", { name: "p" });

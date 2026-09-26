@@ -22,6 +22,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { requestOnce, readRequest } from "../dist/adapter/transport/http.js";
+import { CliError } from "../dist/protocol/error.js";
 import { sendWithPermit } from "../dist/safety/send.js";
 import { StateStore } from "../dist/adapter/statestore/client.js";
 
@@ -88,6 +89,197 @@ test("read-only retries are bounded; large IDs decode without rounding", async (
     ),
   );
   assert.equal(count, 3);
+});
+test("read retries record bounded times and a redacted selector for every HTTP attempt", async t => {
+  let attempts = 0;
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    res.writeHead(attempts === 1 ? 503 : 200);
+    res.end("{}");
+  });
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test",
+    query: { resourceId: "jdbc:mysql://user:SELECTOR_SECRET@host/orders" },
+    headers: { authorization: "Bearer AUTH_SECRET" } }, AbortSignal.timeout(3000));
+  assert.equal(attempts, 2);
+  assert.deepEqual(result.readAttempts.map(({ attempt, path, outcome, http_status }) =>
+    ({ attempt, path, outcome, http_status })), [
+    { attempt: 1, path: "/api/v1/test", outcome: "http_response", http_status: 503 },
+    { attempt: 2, path: "/api/v1/test", outcome: "http_response", http_status: 200 },
+  ]);
+  assert.match(result.readAttempts[0].selector_digest, /^sha256:[a-f0-9]{64}$/);
+  assert.equal(result.readAttempts[0].selector_digest, result.readAttempts[1].selector_digest);
+  for (const item of result.readAttempts) {
+    assert.ok(Number.isFinite(Date.parse(item.started_at)));
+    assert.ok(Date.parse(item.observed_at) >= Date.parse(item.started_at));
+  }
+  assert.doesNotMatch(JSON.stringify(result.readAttempts), /SELECTOR_SECRET|AUTH_SECRET|jdbc:mysql/);
+});
+test("rejected HTTP responses retain status metadata without body leakage or extra retries", async t => {
+  for (const [kind, status, subtype] of [["json", 200, "protocol"], ["large", 200, "response_limit"],
+    ["redirect", 302, "redirect_denied"], ["encoding", 200, "protocol"], ["upgrade", 101, "protocol"]]) {
+    let requests = 0;
+    const endpoint = await server(t, (_req, res) => {
+      requests++;
+      res.writeHead(kind === "json" && requests === 1 ? 503 : status, kind === "redirect" ? { location: "http://127.0.0.1:9/SECRET" }
+        : kind === "encoding" ? { "content-encoding": "gzip" }
+          : kind === "upgrade" ? { connection: "Upgrade", upgrade: "test" } : {});
+      res.end(kind === "large" ? "x".repeat(4 * 1024 * 1024 + 1) : "SECRET invalid body");
+    });
+    const attempts = [];
+    await assert.rejects(readRequest({ endpoint, method: "GET", suffix: "/api/v1/test",
+      headers: { authorization: "Bearer SECRET" } }, AbortSignal.timeout(3000), undefined, entry => attempts.push(entry)),
+      { subtype });
+    assert.equal(requests, kind === "json" ? 2 : 1, kind);
+    assert.deepEqual(attempts.map(a => [a.attempt, a.outcome, a.http_status]), kind === "json"
+      ? [[1, "http_response", 503], [2, "http_response", 200]] : [[1, "http_response", status]], kind);
+    assert.doesNotMatch(JSON.stringify(attempts), /SECRET|invalid body|location|authorization/);
+  }
+});
+
+test("out-of-range HTTP status remains a failed status without invalid attempt metadata", async t => {
+  let requests = 0;
+  const endpoint = await server(t, (_req, res) => { requests++; res.writeHead(600); res.end("SECRET"); });
+  const observed = [];
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" },
+    AbortSignal.timeout(3000), undefined, item => observed.push(item));
+  assert.equal(result.status, 600);
+  assert.equal(requests, 1);
+  assert.equal(result.readAttempts[0].outcome, "http_response");
+  assert.equal(result.readAttempts[0].http_status, null);
+  assert.deepEqual(observed, result.readAttempts);
+  assert.doesNotMatch(JSON.stringify(observed), /SECRET/);
+});
+
+test("a transient connection reset is recorded before a successful read retry", async t => {
+  let attempts = 0;
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    if (attempts === 1) { res.destroy(); return; }
+    res.end("{}");
+  });
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, AbortSignal.timeout(3000));
+  assert.equal(result.status, 200);
+  assert.equal(attempts, 2);
+  assert.deepEqual(result.readAttempts.map(item => [item.outcome, item.http_status]),
+    [["connection_error", null], ["http_response", 200]]);
+});
+test("a read retries a reset after response headers without accepting the partial body", async t => {
+  let attempts = 0;
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    if (attempts === 1) {
+      res.writeHead(200, { "content-length": "20" });
+      res.write('{"incomplete":');
+      setImmediate(() => res.destroy());
+      return;
+    }
+    res.end('{"complete":true}');
+  });
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, AbortSignal.timeout(3000));
+  assert.equal(attempts, 2);
+  assert.equal(result.body.complete, true);
+  assert.deepEqual(result.readAttempts.map(item => [item.outcome, item.http_status]),
+    [["connection_error", null], ["http_response", 200]]);
+});
+test("a read retry sends the same pinned selector and headers it records", async t => {
+  const seen = [];
+  const endpoint = await server(t, (req, res) => {
+    seen.push({ query: new URL(req.url, endpoint).searchParams.get("q"), authorization: req.headers.authorization });
+    res.writeHead(seen.length === 1 ? 503 : 200);
+    res.end("{}");
+  });
+  const query = { q: "original" }, headers = { authorization: "Bearer ORIGINAL_TEST" };
+  let checked = 0;
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test", query, headers },
+    AbortSignal.timeout(3000), async () => {
+      if (++checked === 2) { query.q = "changed"; headers.authorization = "Bearer CHANGED_TEST"; }
+    });
+  assert.equal(result.status, 200);
+  assert.deepEqual(seen, [
+    { query: "original", authorization: "Bearer ORIGINAL_TEST" },
+    { query: "original", authorization: "Bearer ORIGINAL_TEST" },
+  ]);
+  assert.equal(result.readAttempts[0].selector_digest, result.readAttempts[1].selector_digest);
+  assert.doesNotMatch(JSON.stringify(result.readAttempts), /CHANGED_TEST|changed/);
+});
+test("retryable reads wait for a bounded numeric Retry-After before retrying", async (t) => {
+  let attempts = 0;
+  let firstAt = 0;
+  let secondAt = 0;
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    if (attempts === 1) {
+      firstAt = performance.now();
+      res.writeHead(503, { "retry-after": "3600" });
+      res.end();
+    } else {
+      secondAt = performance.now();
+      res.writeHead(200);
+      res.end("{}");
+    }
+  });
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, AbortSignal.timeout(4000));
+  assert.equal(result.status, 200);
+  assert.equal(attempts, 2);
+  assert.ok(secondAt - firstAt >= 850, `Retried too early: ${secondAt - firstAt} ms`);
+  assert.ok(secondAt - firstAt < 2500, `Retry-After was not capped: ${secondAt - firstAt} ms`);
+});
+test("retryable reads also honor a bounded HTTP-date Retry-After", async (t) => {
+  let attempts = 0;
+  let firstAt = 0;
+  let secondAt = 0;
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    if (attempts === 1) {
+      firstAt = performance.now();
+      res.writeHead(503, { "retry-after": new Date(Date.now() + 3600000).toUTCString() });
+      res.end();
+    } else {
+      secondAt = performance.now();
+      res.writeHead(200);
+      res.end("{}");
+    }
+  });
+  const result = await readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, AbortSignal.timeout(4000));
+  assert.equal(result.status, 200);
+  assert.equal(attempts, 2);
+  assert.ok(secondAt - firstAt >= 850, `Retried too early: ${secondAt - firstAt} ms`);
+  assert.ok(secondAt - firstAt < 2500, `Retry-After was not capped: ${secondAt - firstAt} ms`);
+});
+test("a read deadline preserves the invocation timeout instead of generic cancellation", async (t) => {
+  let attempts = 0;
+  let observedFirst;
+  const first = new Promise(resolve => observedFirst = resolve);
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    res.writeHead(503);
+    res.end();
+    observedFirst();
+  });
+  const abort = new AbortController();
+  const pending = readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, abort.signal);
+  await first;
+  abort.abort(new CliError("network", "timeout", "Invocation deadline exceeded."));
+  await assert.rejects(pending, error => error.type === "network" && error.subtype === "timeout");
+  assert.equal(attempts, 1);
+});
+test("a read deadline during retry backoff keeps the original timeout", { timeout: 5000 }, async (t) => {
+  let attempts = 0;
+  let firstClosed;
+  const closed = new Promise(resolve => firstClosed = resolve);
+  const endpoint = await server(t, (_req, res) => {
+    attempts++;
+    if (attempts === 1) res.socket.once("close", firstClosed);
+    res.writeHead(503);
+    res.end();
+  });
+  const abort = new AbortController();
+  const pending = readRequest({ endpoint, method: "GET", suffix: "/api/v1/test" }, abort.signal);
+  await closed;
+  await new Promise(resolve => setTimeout(resolve, 50));
+  abort.abort(new CliError("network", "timeout", "Invocation deadline exceeded."));
+  await assert.rejects(pending, error => error.type === "network" && error.subtype === "timeout");
+  assert.equal(attempts, 1);
 });
 test("aborts destroy request, malformed/oversized bodies reject, forged permits reject", async (t) => {
   let count = 0;
