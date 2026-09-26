@@ -15,6 +15,7 @@
 import { registry } from "../command/registry.js";
 import { object } from "../protocol/value.js";
 import { CliError } from "../protocol/error.js";
+import { deferredWrite } from "../command/scope.js";
 
 export function renderHelp(path: string[], field?: string): string {
   if (path.length === 0)
@@ -35,7 +36,7 @@ export function renderHelp(path: string[], field?: string): string {
         "Start with command --help; request exact fields with schema <command-id>.",
         "JSON invocation: seata-ai invoke < invocation.json",
         "Use an explicit --profile for management commands.",
-        "Runtime: Node.js >=24.19.0 <25. Production management writes are disabled.",
+        "Runtime: Node.js >=24.19.0 <25. Read-only release: all server mutations are deferred.",
         "Read availability from capabilities; catalog entries alone are not implemented capabilities.",
       ].join("\n") + "\n"
     );
@@ -55,7 +56,8 @@ export function renderHelp(path: string[], field?: string): string {
         "seata-ai " + path.join(" "),
         ...matches.map(
           (s) =>
-            "  " + s.path.slice(path.length).join(" ") + " [" + s.risk + "]",
+            "  " + s.path.slice(path.length).join(" ") + " [" + s.risk + "]" +
+            (deferredWrite(s.id) ? " (deferred; unavailable)" : ""),
         ),
       ].join("\n") + "\n"
     );
@@ -95,7 +97,7 @@ export function renderHelp(path: string[], field?: string): string {
         "  --" +
           (key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-")) +
           (def.type === "boolean"
-            ? ""
+            ? " / --no-" + (key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-"))
             : " <" + String(def.type ?? "JSON") + ">") +
           " (" +
           group +
@@ -107,10 +109,10 @@ export function renderHelp(path: string[], field?: string): string {
     "Objects and arrays are passed as a single JSON argument.",
     "Exact contract: seata-ai schema " + exact.id,
   );
-  if (exact.risk.endsWith("_write") && exact.risk !== "local_write")
+  if (deferredWrite(exact.id))
     lines.push(
-      "Persist a UUID v4 before a real write. --dry-run never sends.",
-      "An unknown result must be investigated with execution get/reconcile.",
+      "Unavailable: deferred_read_only_scope. This release does not execute server mutations.",
+      "--dry-run and confirmation flags do not enable this command.",
     );
   return lines.join("\n") + "\n";
 }

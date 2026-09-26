@@ -26,6 +26,21 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { StateStore, stateDirectory } from "../adapter/statestore/client.js";
 import { storageCapability } from "../capability/storage.js";
+import { deferredWrite, enforceReadOnly } from "../command/scope.js";
+import { readCommand, readImplemented } from "./read.js";
+import { authLogin, authStatus, localBrowser } from "./auth.js";
+import { connectivity, capabilityProbe } from "./connectivity.js";
+import { analysisCommand, analysisImplemented } from "./analysis.js";
+import { diagnoseCommand, diagnosticLocal, diagnosticRemote } from "./diagnose.js";
+import { configCommand, configImplemented } from "./config.js";
+import { inspectCommand, inspectImplemented } from "./inspect.js";
+import { snapshotCommand, snapshotImplemented } from "./snapshot.js";
+import { exportSnapshot } from "./export.js";
+import { skillCatalog, readSkill } from "../skillcontent/catalog.js";
+import { skillsStatus } from "../skillcontent/status.js";
+import { installSkills } from "../skillcontent/install.js";
+import { reconcileExecution } from "./reconcile.js";
+import { validateSkills, exportSkills, skillFilesystem } from "./skills.js";
 
 export const localImplemented = new Set([
   "profile.list",
@@ -38,7 +53,11 @@ export const localImplemented = new Set([
   "auth.status",
   "auth.logout",
   "auth.login.cancel",
+  "auth.login.status",
+  "auth.login",
   "execution.get",
+  "diagnose.snapshot.export",
+  "skills.install",
 ]);
 export const implemented = new Set([
   "system.version",
@@ -46,14 +65,46 @@ export const implemented = new Set([
   "system.schema",
   "system.capabilities",
   "system.invoke",
+  "skills.list",
+  "skills.read",
+  "skills.status",
+  "execution.reconcile",
+  ...skillFilesystem,
   ...localImplemented,
+  ...readImplemented,
+  ...analysisImplemented,
+  ...diagnosticLocal,
+  ...diagnosticRemote,
+  ...configImplemented,
+  ...inspectImplemented,
+  ...snapshotImplemented,
+  "connectivity.check",
 ]);
 export async function dispatch(
   inv: Invocation,
   signal: AbortSignal,
+  warn?: (warning: Obj) => void,
 ): Promise<Obj> {
   signal.throwIfAborted();
-  if (localImplemented.has(inv.command)) return localCommand(inv, signal);
+  enforceReadOnly(inv.command);
+  if (inv.command === "skills.install") return installSkills(inv, signal);
+  if (inv.command === "skills.status") return skillsStatus(inv.input, signal);
+  if (inv.command === "execution.reconcile") return reconcileExecution(inv, signal);
+  if (inv.command === "skills.validate") return validateSkills(inv.input, signal);
+  if (inv.command === "skills.export") return exportSkills(inv, signal);
+  if (inv.command === "skills.list") return { skills: skillCatalog() };
+  if (inv.command === "skills.read") return readSkill(inv.input);
+  if (inv.command === "diagnose.snapshot.export") return exportSnapshot(inv, signal);
+  if (snapshotImplemented.has(inv.command)) return snapshotCommand(inv, signal);
+  if (inspectImplemented.has(inv.command)) return inspectCommand(inv, signal);
+  if (configImplemented.has(inv.command)) return configCommand(inv, signal);
+  if (inv.command === "connectivity.check") return connectivity(inv, signal);
+  if (analysisImplemented.has(inv.command)) return analysisCommand(inv, signal);
+  if (diagnosticLocal.has(inv.command) || diagnosticRemote.has(inv.command)) return diagnoseCommand(inv, signal);
+  if (inv.command === "auth.login") return authLogin(inv, signal, warn);
+  if (inv.command === "auth.status") return authStatus(inv, signal, warn);
+  if (readImplemented.has(inv.command)) return readCommand(inv, signal);
+  if (localImplemented.has(inv.command)) return localCommand(inv, signal, warn);
   switch (inv.command) {
     case "system.version": {
       let id = null;
@@ -105,13 +156,17 @@ export async function dispatch(
         ? [specFor(str(inv.input.command_id))]
         : registry;
       const storage = await storageCapability(signal);
+      const report = inv.context.profile ? await connectivity(inv, signal) : undefined;
       return {
         commands: list.map((s) => {
-          const local = localImplemented.has(s.id),
+          const local = localImplemented.has(s.id), remote = s.id === "connectivity.check" || s.id === "execution.reconcile" || readImplemented.has(s.id) || analysisImplemented.has(s.id) || diagnosticRemote.has(s.id) || snapshotImplemented.has(s.id),
             exists = implemented.has(s.id);
-          const status = !exists
+          const filesystemUnavailable = (configImplemented.has(s.id) || inspectImplemented.has(s.id) || skillFilesystem.has(s.id)) && process.platform !== "linux";
+          const status = deferredWrite(s.id) || !exists || filesystemUnavailable || (s.id === "auth.login" && !localBrowser())
             ? "unavailable"
-            : !local
+            : remote
+              ? "not_evaluated"
+              : !local
               ? "available"
               : storage === "available" && s.id === "auth.status"
                 ? "degraded"
@@ -123,24 +178,36 @@ export async function dispatch(
             schema_version: s.schema_version,
             backends: s.backends,
             status,
-            reason_code: !exists
+            reason_code: deferredWrite(s.id)
+              ? "deferred_read_only_scope"
+              : filesystemUnavailable
+                ? "filesystem_adapter_unavailable"
+              : s.id === "auth.login" && !localBrowser()
+                ? "local_auth_unavailable"
+              : !exists
               ? "not_implemented"
-              : !local
+              : remote
+                ? "management_not_probed"
+                : !local
                 ? "local_implementation"
                 : status === "degraded"
                   ? "local_status_only"
                   : "storage_" + storage,
             observed_at: new Date().toISOString(),
-            scope: "local",
-            source: "handler_and_storage_check",
+            scope: report && remote ? "profile" : "local",
+            source: report && remote ? "bounded_read_probe" : "handler_and_storage_check",
+            ...(report && remote ? capabilityProbe(s.id, report) : {}),
           };
         }),
         runtime: {
-          authenticated: "not_evaluated",
-          management_reachable: "not_evaluated",
+          authenticated: report ? (report.assurance as Obj).authentication ?? "not_evaluated" : "not_evaluated",
+          management_reachable: report?.overall ?? "not_evaluated",
+          ...(report ? { checks: report.checks ?? [] } : {}),
           storage_safe: storage,
           compatibility_evidence: "source_inspected",
           production_writes: false,
+          server_mutations: "disabled",
+          release_scope: "read_only",
           optional_sources: {
             logs: "not_implemented",
             metrics: "not_implemented",

@@ -104,6 +104,10 @@ export function parseArgs(argv: string[]): Parsed {
       if (schema.type !== "boolean")
         option.argParser((v) => convert(v, schema));
       command.addOption(option);
+      if (schema.type === "boolean") {
+        fields.set("no-" + flag, { group, key, schema });
+        command.addOption(new Option("--no-" + flag));
+      }
     }
   }
   const positional = positionalFor(spec);
@@ -116,14 +120,15 @@ export function parseArgs(argv: string[]): Parsed {
     const arg = args[i];
     if (!arg?.startsWith("--") || arg === "--") continue;
     const flag = arg.slice(2).split("=")[0] ?? "";
-    if (seen.has(flag))
+    const field = fields.get(flag);
+    const binding = field ? `${field.group}.${field.key}` : flag;
+    if (seen.has(binding))
       throw new CliError(
         "validation",
         "duplicate_argument",
         "Repeated CLI flag.",
       );
-    seen.add(flag);
-    const field = fields.get(flag);
+    seen.add(binding);
     if (field && field.schema.type !== "boolean" && !arg.includes("=")) i++;
   }
   try {

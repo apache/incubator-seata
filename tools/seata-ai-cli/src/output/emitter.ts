@@ -32,6 +32,7 @@ export function envelope(
   data?: Obj,
   error?: unknown,
   invoked = false,
+  warnings: Obj[] = [],
 ): Result {
   const failure = error === undefined ? undefined : safeError(error);
   const state =
@@ -56,7 +57,7 @@ export function envelope(
       partial: state === "partial",
       ...(invoked ? { invoked_via: "system.invoke" } : {}),
     },
-    warnings: [],
+    warnings,
   };
   if (data) result.data = data;
   if (failure)
@@ -105,8 +106,17 @@ export function invocationEnvelope(
   data?: Obj,
   error?: unknown,
   via = false,
+  warnings: Obj[] = [],
 ): Result {
-  return envelope(inv.command, inv.context, start, data, error, via);
+  const result = envelope(inv.command, inv.context, start, data, error, via, warnings);
+  if (!error && data?.flow_state === "pending" && ["auth.login", "auth.login.status"].includes(inv.command)) {
+    result.envelope.state = "pending";
+    result.envelope.continuation = { reason: "authentication_pending", not_before_ms: 1000,
+      invocation: { protocol_version: "0.1", contract_revision: "R9", command: "auth.login.status",
+        context: inv.context, input: { flow_id: data.flow_id ?? null }, options: { timeout_ms: inv.options.timeout_ms ?? 30000 } } };
+    return wireResult(result.envelope);
+  }
+  return result;
 }
 export async function emit(
   result: Result,

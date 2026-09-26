@@ -8444,7 +8444,7 @@
     "path": "seata-ai transaction trace",
     "risk": "diagnostic_read",
     "confirmation": "none",
-    "backends": "naming_management / logs",
+    "backends": "naming_management",
     "skills": "seata-transaction-analysis, seata-incident-diagnosis, seata-recovery-plan"
   },
   {
@@ -8856,7 +8856,7 @@
     "path": "seata-ai diagnose run",
     "risk": "diagnostic_read",
     "confirmation": "none",
-    "backends": "rules / naming_management, logs, metrics, database",
+    "backends": "rules / naming_management",
     "skills": "seata-integration-check, seata-incident-diagnosis, seata-recovery-plan"
   },
   {
@@ -8883,7 +8883,7 @@
     "path": "seata-ai diagnose snapshot",
     "risk": "diagnostic_read",
     "confirmation": "none",
-    "backends": "naming_management / filesystem, logs, metrics",
+    "backends": "naming_management / filesystem",
     "skills": "seata-incident-diagnosis, seata-recovery-plan"
   },
   {
@@ -8938,7 +8938,7 @@
     "path": "seata-ai diagnose snapshot export",
     "risk": "local_write",
     "confirmation": "agent_judgment",
-    "backends": "filesystem / naming_management, logs, metrics",
+    "backends": "filesystem / naming_management",
     "skills": "seata-incident-diagnosis, seata-recovery-plan"
   },
   {

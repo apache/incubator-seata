@@ -17,6 +17,9 @@
 import { randomUUID } from "node:crypto";
 import { open } from "node:fs/promises";
 import { constants } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
+import type { ExportFile } from "./adapter/export/file.js";
+import type { Obj } from "./protocol/value.js";
 let outputStarted = false;
 
 async function main(): Promise<void> {
@@ -30,7 +33,7 @@ async function main(): Promise<void> {
     { parseJson, object },
     { dispatch },
     { envelope, invocationEnvelope, serialize, write },
-    { CliError },
+    { CliError, PartialResult },
   ] = await Promise.all([
     import("./cmdtree/parse.js"),
     import("./command/registry.js"),
@@ -50,6 +53,8 @@ async function main(): Promise<void> {
     context = {},
     invoked = false;
   let timer: NodeJS.Timeout | undefined;
+  let exportTarget: ExportFile | undefined;
+  const warnings: Obj[] = [];
   try {
     const args = process.argv.slice(2);
     const known = [...registry]
@@ -166,10 +171,25 @@ async function main(): Promise<void> {
         ),
       Number(inv.options.timeout_ms),
     );
-    const data = await dispatch(inv, abort.signal);
+    if (typeof inv.options.export === "string") {
+      const path = inv.options.export;
+      if (/[\\\x00-\x1f\x7f]/.test(path) || path.split("/").includes(".."))
+        throw new CliError("validation", "unsafe_export_path", "Export path must not contain traversal or ambiguous separators.");
+      const absolute = resolve(path);
+      const { ExportFile } = await import("./adapter/export/file.js");
+      exportTarget = new ExportFile(dirname(absolute), basename(absolute), false, undefined, Number(inv.options.timeout_ms));
+      await exportTarget.prepare(abort.signal);
+    }
+    let data: Obj, partial: unknown;
+    try { data = await dispatch(inv, abort.signal, warning => warnings.push(warning)); }
+    catch (error) {
+      if (!(error instanceof PartialResult)) throw error;
+      data = error.data; partial = error;
+    }
     validateOutput(inv.command, data);
-    const result = invocationEnvelope(inv, started, data, undefined, invoked);
+    const result = invocationEnvelope(inv, started, data, partial, invoked, warnings);
     const text = serialize(result);
+    if (exportTarget) await exportTarget.write(Buffer.from(text), abort.signal);
     outputStarted = true;
     await write(
       result.stream === "stdout" ? process.stdout : process.stderr,
@@ -178,13 +198,16 @@ async function main(): Promise<void> {
     process.exitCode = result.exit;
   } catch (error) {
     if (outputStarted) throw error;
+    const data = error instanceof PartialResult ? error.data : undefined;
+    if (data) validateOutput(command, data);
     const result = envelope(
       command,
       context,
       started,
-      undefined,
+      data,
       error,
       invoked,
+      warnings,
     );
     // Once output begins, EPIPE is handled by the outer boundary, never by a second envelope.
     const text = serialize(result);
@@ -196,6 +219,7 @@ async function main(): Promise<void> {
     process.exitCode = result.exit;
   } finally {
     clearTimeout(timer);
+    await exportTarget?.close();
     process.removeListener("SIGINT", cancel);
     process.removeListener("SIGTERM", cancel);
   }
