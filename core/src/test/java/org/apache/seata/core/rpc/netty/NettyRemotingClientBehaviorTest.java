@@ -18,7 +18,10 @@ package org.apache.seata.core.rpc.netty;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
@@ -35,10 +38,17 @@ import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -48,8 +58,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -606,27 +618,7 @@ public class NettyRemotingClientBehaviorTest {
 
     @Test
     public void testSendSyncRequestBatchModeSuccess() throws Exception {
-        TestNettyRemotingClientWithBatchAndMockManager batchClient =
-                new TestNettyRemotingClientWithBatchAndMockManager(clientConfig, messageExecutor);
-
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
-
-        try {
-            java.lang.reflect.Field basketMapField = AbstractNettyRemotingClient.class.getDeclaredField("basketMap");
-            basketMapField.setAccessible(true);
-            basketMapField.get(batchClient);
-
-            batchClient.sendSyncRequest(request);
-        } catch (Exception e) {
-            assertNotNull(e);
-        } finally {
-            try {
-                batchClient.destroy();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
+        assertMergedRequests(1, false);
     }
 
     @Test
@@ -916,13 +908,12 @@ public class NettyRemotingClientBehaviorTest {
         when(channel.isActive()).thenReturn(true);
         when(channel.isWritable()).thenReturn(true);
 
-        IdleStateEvent writerIdleEvent = IdleStateEvent.WRITER_IDLE_STATE_EVENT;
-
-        try {
-            handler.userEventTriggered(ctx, writerIdleEvent);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
+        when(channel.writeAndFlush(any())).thenReturn(mock(ChannelFuture.class));
+        handler.userEventTriggered(ctx, IdleStateEvent.WRITER_IDLE_STATE_EVENT);
+        ArgumentCaptor<RpcMessage> ping = ArgumentCaptor.forClass(RpcMessage.class);
+        verify(channel).writeAndFlush(ping.capture());
+        assertSame(HeartbeatMessage.PING, ping.getValue().getBody());
     }
 
     @Test
@@ -960,22 +951,11 @@ public class NettyRemotingClientBehaviorTest {
     public void testSendSyncRequestBatchModeOfferFailed() throws Exception {
         TestNettyRemotingClientWithFullBasket fullBasketClient =
                 new TestNettyRemotingClientWithFullBasket(clientConfig, messageExecutor);
-
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
-
         try {
-            fullBasketClient.init();
-            Object result = fullBasketClient.sendSyncRequest(request);
-            assertNull(result, "Should return null when basket offer fails");
-        } catch (Exception e) {
-            // Expected when offer fails
+            GlobalBeginRequest request = new GlobalBeginRequest();
+            assertNull(fullBasketClient.sendSyncRequest(request), "Should return null when basket offer fails");
         } finally {
-            try {
-                fullBasketClient.destroy();
-            } catch (Exception e) {
-                // Ignore
-            }
+            fullBasketClient.destroy();
         }
     }
 
@@ -1004,33 +984,7 @@ public class NettyRemotingClientBehaviorTest {
 
     @Test
     public void testMergedSendRunnableWithMessages() throws Exception {
-        TestNettyRemotingClientWithMergeRunnable mergeClient =
-                new TestNettyRemotingClientWithMergeRunnable(clientConfig, messageExecutor);
-
-        try {
-            mergeClient.init();
-
-            GlobalBeginRequest request = new GlobalBeginRequest();
-            request.setTransactionName("test-tx");
-
-            // Give some time for the thread to start
-            Thread.sleep(100);
-
-            // Submit a request to trigger merge sending
-            try {
-                mergeClient.sendSyncRequest(request);
-            } catch (Exception e) {
-                // Expected
-            }
-
-            Thread.sleep(100);
-        } finally {
-            try {
-                mergeClient.destroy();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
+        assertMergedRequests(1, false);
     }
 
     @Test
@@ -1321,7 +1275,7 @@ public class NettyRemotingClientBehaviorTest {
 
         @Override
         protected long getRpcRequestTimeout() {
-            return 100L;
+            return 5000L;
         }
 
         @Override
@@ -1338,113 +1292,85 @@ public class NettyRemotingClientBehaviorTest {
                 String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
     }
 
-    @Test
-    public void testPrintMergeMessageLogWithDebugEnabled() throws Exception {
-        // Enable DEBUG logging for AbstractNettyRemotingClient
+    private void assertMergedRequests(int count, boolean debug) throws Exception {
+        TestNettyRemotingClientWithMergeRunnable mergeClient =
+                new TestNettyRemotingClientWithMergeRunnable(clientConfig, messageExecutor);
         Logger logger = (Logger) LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
         Level originalLevel = logger.getLevel();
-        logger.setLevel(Level.DEBUG);
-
-        try {
-            TestNettyRemotingClientWithMergeRunnable mergeClient =
-                    new TestNettyRemotingClientWithMergeRunnable(clientConfig, messageExecutor);
-
-            mergeClient.init();
-
-            // Create multiple requests to trigger merge with msgIds.size() > 1
-            GlobalBeginRequest request1 = new GlobalBeginRequest();
-            request1.setTransactionName("test-tx-1");
-
-            GlobalBeginRequest request2 = new GlobalBeginRequest();
-            request2.setTransactionName("test-tx-2");
-
-            // Submit multiple requests to trigger merge sending
-            Thread submitter = new Thread(() -> {
-                try {
-                    mergeClient.sendSyncRequest(request1);
-                } catch (Exception e) {
-                    // Expected
+        ListAppender<ILoggingEvent> events = new ListAppender<>();
+        events.start();
+        logger.addAppender(events);
+        logger.setLevel(debug ? Level.DEBUG : Level.INFO);
+        ExecutorService callers = Executors.newFixedThreadPool(count);
+        CountDownLatch queued = new CountDownLatch(count);
+        BlockingQueue<RpcMessage> basket = new LinkedBlockingQueue<RpcMessage>() {
+            @Override
+            public boolean offer(RpcMessage message) {
+                boolean added = super.offer(message);
+                if (added) {
+                    queued.countDown();
                 }
-            });
-
-            Thread submitter2 = new Thread(() -> {
-                try {
-                    mergeClient.sendSyncRequest(request2);
-                } catch (Exception e) {
-                    // Expected
-                }
-            });
-
-            submitter.start();
-            submitter2.start();
-
-            // Wait for messages to be added to basket
-            Thread.sleep(50);
-
-            // Trigger merge condition
-            mergeClient.mergeLock.lock();
-            try {
-                mergeClient.mergeCondition.signalAll();
-            } finally {
-                mergeClient.mergeLock.unlock();
+                return added;
             }
-
-            // Wait for merge processing
-            Thread.sleep(150);
-
-            submitter.join(1000);
-            submitter2.join(1000);
-
-            mergeClient.destroy();
+        };
+        String address = "127.0.0.1:8080";
+        mergeClient.basketMap.put(address, basket);
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(true);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
+        mergeClient.getClientChannelManager().getChannels().put(address, channel);
+        Object response = new Object();
+        doAnswer(invocation -> {
+                    RpcMessage rpc = invocation.getArgument(0);
+                    MergedWarpMessage merged = (MergedWarpMessage) rpc.getBody();
+                    for (Integer id : merged.msgIds) {
+                        mergeClient.futures.remove(id).setResultMessage(response);
+                    }
+                    return mock(ChannelFuture.class);
+                })
+                .when(channel)
+                .writeAndFlush(any());
+        try {
+            List<GlobalBeginRequest> requests = new ArrayList<>();
+            List<Future<Object>> responses = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                GlobalBeginRequest request = new GlobalBeginRequest();
+                request.setTransactionName("test-tx-" + i);
+                requests.add(request);
+                responses.add(callers.submit(() -> mergeClient.sendSyncRequest(request)));
+            }
+            assertTrue(queued.await(5, TimeUnit.SECONDS), "All requests must be queued before merging");
+            mergeClient.init();
+            for (Future<Object> result : responses) {
+                assertSame(response, result.get(5, TimeUnit.SECONDS));
+            }
+            ArgumentCaptor<RpcMessage> sent = ArgumentCaptor.forClass(RpcMessage.class);
+            verify(channel).writeAndFlush(sent.capture());
+            MergedWarpMessage merged = (MergedWarpMessage) sent.getValue().getBody();
+            assertEquals(count, merged.msgIds.size());
+            assertEquals(count, merged.msgs.size());
+            assertTrue(merged.msgs.containsAll(requests));
+            assertTrue(mergeClient.futures.isEmpty());
+            assertEquals(debug && count > 1, events.list.stream().anyMatch(event -> event.getFormattedMessage()
+                    .equals("merge msg size:" + count)));
         } finally {
-            // Restore original log level
+            callers.shutdownNow();
+            mergeClient.destroy();
             logger.setLevel(originalLevel);
+            logger.detachAppender(events);
+            events.stop();
         }
     }
 
     @Test
+    public void testPrintMergeMessageLogWithDebugEnabled() throws Exception {
+        assertMergedRequests(2, true);
+    }
+
+    @Test
     public void testPrintMergeMessageLogWithSingleMessage() throws Exception {
-        // Enable DEBUG logging
-        Logger logger = (Logger) LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
-        Level originalLevel = logger.getLevel();
-        logger.setLevel(Level.DEBUG);
-
-        try {
-            TestNettyRemotingClientWithMergeRunnable mergeClient =
-                    new TestNettyRemotingClientWithMergeRunnable(clientConfig, messageExecutor);
-
-            mergeClient.init();
-
-            // Create a single request (msgIds.size() == 1, should not call printMergeMessageLog)
-            GlobalBeginRequest request = new GlobalBeginRequest();
-            request.setTransactionName("test-tx-single");
-
-            Thread submitter = new Thread(() -> {
-                try {
-                    mergeClient.sendSyncRequest(request);
-                } catch (Exception e) {
-                    // Expected
-                }
-            });
-
-            submitter.start();
-            Thread.sleep(50);
-
-            // Trigger merge condition
-            mergeClient.mergeLock.lock();
-            try {
-                mergeClient.mergeCondition.signalAll();
-            } finally {
-                mergeClient.mergeLock.unlock();
-            }
-
-            Thread.sleep(100);
-            submitter.join(1000);
-
-            mergeClient.destroy();
-        } finally {
-            logger.setLevel(originalLevel);
-        }
+        assertMergedRequests(1, true);
     }
 
     @Test
