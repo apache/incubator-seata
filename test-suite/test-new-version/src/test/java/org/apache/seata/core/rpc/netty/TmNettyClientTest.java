@@ -45,11 +45,17 @@ public class TmNettyClientTest extends BaseNettyClientTest {
 
             // then test client
             String applicationId = "app 1";
-            String transactionServiceGroup = "group A";
+            String transactionServiceGroup = "default_tx_group";
             TmNettyRemotingClient tmNettyRemotingClient =
                     TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
 
             tmNettyRemotingClient.init();
+            Assertions.assertFalse(
+                    tmNettyRemotingClient
+                            .getClientChannelManager()
+                            .getChannels()
+                            .isEmpty(),
+                    "Initialization must connect through the configured transaction group");
             Channel channel = TmNettyRemotingClient.getInstance()
                     .getClientChannelManager()
                     .acquireChannel(serverInstance.getAddress());
