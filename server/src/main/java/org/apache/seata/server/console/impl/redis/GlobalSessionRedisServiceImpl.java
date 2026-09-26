@@ -73,6 +73,7 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                     instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
+            boolean filterByStatus = param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null;
             if (isNotBlank(param.getXid())) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
@@ -81,7 +82,7 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                 total = (long) globalSessions.size();
             }
 
-            if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null) {
+            if (filterByStatus) {
                 if (CollectionUtils.isNotEmpty(globalSessions)) {
                     globalSessionsNew = globalSessions.stream()
                             .filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus()))
@@ -103,7 +104,9 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                     LOGGER.debug("not supported according to transactionName query");
                 }
             }
-            globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
+            if (filterByStatus) {
+                globalSessions = globalSessionsNew;
+            }
         }
 
         convertToGlobalSessionVo(result, globalSessions);
