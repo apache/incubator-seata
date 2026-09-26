@@ -26,7 +26,7 @@ const manifest = object(
 );
 for (const [path, expected] of Object.entries(manifest)) {
   if (
-    !/^(api|schemas|compatibility)\/[a-zA-Z0-9/_.-]+$/.test(path) ||
+    !/^(api|schemas|compatibility|skills)\/[a-zA-Z0-9/_.-]+$/.test(path) ||
     path.includes("..")
   )
     throw new CliError(

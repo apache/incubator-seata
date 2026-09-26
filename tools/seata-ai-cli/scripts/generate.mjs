@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { createHash } from "node:crypto";
 import { outputs } from "./output-schemas.mjs";
+import { parse as parseYaml } from "yaml";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const read = async (p) => JSON.parse(await readFile(resolve(root, p), "utf8"));
 const write = async (p, value) => {
@@ -59,6 +60,9 @@ for (const c of contracts) {
     },
     client_request_id: uuid,
   });
+  if (["read", "sensitive_read", "diagnostic_read"].includes(c.risk) && !c.id.startsWith("auth."))
+    options.properties.export = { type: "string", minLength: 1, maxLength: 4096,
+      description: "Explicitly export this result as private JSON; existing files are never overwritten." };
   if (remoteWrite)
     Object.assign(options.properties, {
       dry_run: { type: "boolean", default: false },
@@ -162,6 +166,10 @@ for (const c of contracts) {
   if (c.id !== "system.invoke")
     await write("schemas/invocations/" + c.id + ".schema.json", invocation);
 }
+// The delegated input describes the actual target schemas, including approved
+// optional extensions. Never retain a separate stale copy of their options.
+registry.find(spec => spec.id === "system.invoke").invocation.properties.input.properties.invocation.oneOf =
+  registry.filter(spec => spec.id !== "system.invoke").map(spec => spec.invocation);
 await write("api/protocol/registry.json", registry);
 await write(
   "api/protocol/outputs.json",
@@ -181,7 +189,30 @@ await copyFile(
   resolve(root, "src/adapter/statestore/schema.sql"),
   resolve(root, "api/store/schema.sql"),
 );
+const skillIds = ["seata-shared", "seata-onboarding", "seata-integration-check",
+  "seata-transaction-analysis", "seata-incident-diagnosis", "seata-recovery-plan",
+  "seata-controlled-recovery"];
+const skillPaths = ["SKILL.md", "references/evidence.md", "examples/scenario.md", "tests/acceptance.md"];
+const skills = [];
+for (const id of skillIds) {
+  const entries = [];
+  for (const path of skillPaths) {
+    const bytes = await readFile(resolve(root, "skills", id, path));
+    entries.push({ path, bytes: bytes.length, digest: createHash("sha256").update(bytes).digest("hex") });
+  }
+  const main = await readFile(resolve(root, "skills", id, "SKILL.md"), "utf8");
+  const front = main.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!front || main.split("\n").length > 180) throw new Error("Invalid Skill entrypoint: " + id);
+  const metadata = parseYaml(front[1]);
+  if (metadata.name !== id || typeof metadata.description !== "string" || !metadata.description.trim())
+    throw new Error("Invalid Skill metadata: " + id);
+  skills.push({ skill_id: id, version: "0.1.0-r11.0", description: metadata.description,
+    digest: createHash("sha256").update(JSON.stringify(entries)).digest("hex"), files: entries });
+}
+await write("api/skills.json", { version: "0.1.0-r11.0", skills });
 const files = [
+  "api/skills.json",
+  ...skillIds.flatMap(id => skillPaths.map(path => `skills/${id}/${path}`)),
   "api/protocol/registry.json",
   "api/protocol/outputs.json",
   "api/store/schema.sql",
