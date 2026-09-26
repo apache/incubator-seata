@@ -116,7 +116,8 @@ test("released Console business rejection does not activate a credential", { tim
   await cli(root, ["profile", "create", "--config", JSON.stringify({
     name, environment: "development",
     management: { console_endpoint: process.env.SEATA_TEST_ENDPOINT,
-      naming_endpoint: process.env.SEATA_TEST_ENDPOINT, compatibility_id: "seata-src-41694e14" },
+      naming_endpoint: process.env.SEATA_TEST_ENDPOINT, compatibility_id: "seata-src-41694e14",
+      ...(process.env.SEATA_TEST_CA_REF ? { ca_ref: process.env.SEATA_TEST_CA_REF } : {}) },
     target: { namespace: "public", cluster: "default" },
     policy: { storage_policy: process.env.SEATA_TEST_STORAGE_POLICY ?? "protected_file" },
   }), "--accept-target"]);
@@ -153,7 +154,8 @@ test("released Seata accepts browser login and serves real read commands", { tim
   const profile = {
     name, environment: "development",
     management: { console_endpoint: process.env.SEATA_TEST_ENDPOINT,
-      naming_endpoint: process.env.SEATA_TEST_ENDPOINT, compatibility_id: "seata-src-41694e14" },
+      naming_endpoint: process.env.SEATA_TEST_ENDPOINT, compatibility_id: "seata-src-41694e14",
+      ...(process.env.SEATA_TEST_CA_REF ? { ca_ref: process.env.SEATA_TEST_CA_REF } : {}) },
     target: process.env.SEATA_TEST_ROUTE === "vgroup"
       ? { namespace: "public", vgroup: "default_tx_group" }
       : { namespace: "public", cluster: process.env.SEATA_TEST_CLUSTER ?? "default" },
