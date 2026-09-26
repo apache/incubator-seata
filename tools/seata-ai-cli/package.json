@@ -27,6 +27,9 @@
     "test": "npm run build && node --test test/*.test.mjs",
     "test:contract:python": "python3 scripts/verify-contract.py",
     "test:install": "node test/install.mjs",
+    "test:keyring": "node test/keyring.mjs",
+    "test:browser": "npm run build && node --test test/browser-login.mjs",
+    "test:release": "npm run build && node --test test/release-integration.mjs",
     "check": "npm test && npm run test:contract:python && npm run test:install"
   },
   "dependencies": {
