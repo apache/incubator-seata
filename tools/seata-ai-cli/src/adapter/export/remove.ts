@@ -48,7 +48,8 @@ export class OwnedRemoval {
     catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined; throw failure(); }
     const stat = fstatSync(fd);
     if (stat.uid !== process.getuid?.() || (stat.mode & 0o777) !== 0o700) { closeSync(fd); throw failure(); }
-    const dir = opendirSync(`/proc/self/fd/${fd}`);
+    this.directory.assertCurrent();
+    const dir = opendirSync(process.platform === "darwin" ? this.directory.path + "/" + this.stagingName : `/proc/self/fd/${fd}`);
     try {
       const first = dir.readSync();
       if ((first && first.name !== "payload") || dir.readSync() !== null) throw failure();
@@ -74,9 +75,10 @@ export class OwnedRemoval {
   private inspect(): void {
     const fd = this.stage();
     try {
-      const staged = fd !== undefined && exists(`/proc/self/fd/${fd}/payload`), original = exists(this.source);
+      const captured = process.platform === "darwin" ? this.directory.path + "/" + this.stagingName + "/payload" : `/proc/self/fd/${fd}/payload`;
+      const staged = fd !== undefined && exists(captured), original = exists(this.source);
       if (this.record!.phase === "removed") { if (staged || original) throw failure(); return; }
-      if (staged) { if (original) throw failure(); this.verify(`/proc/self/fd/${fd}/payload`); }
+      if (staged) { if (original) throw failure(); this.verify(captured); }
       else if (original) this.verify(this.source);
       else if (this.record!.phase !== "removing") throw failure();
     } finally { if (fd !== undefined) closeSync(fd); }
@@ -104,7 +106,7 @@ export class OwnedRemoval {
     if (!exists(stagePath)) { mkdirSync(stagePath, { mode: 0o700 }); fsyncSync(this.directory.fd); }
     const fd = this.stage(); if (fd === undefined) throw failure();
     try {
-      const captured = `/proc/self/fd/${fd}/payload`;
+      const captured = process.platform === "darwin" ? stagePath + "/payload" : `/proc/self/fd/${fd}/payload`;
       if (!exists(captured) && exists(this.source)) {
         this.verify(this.source); signal.throwIfAborted();
         renameSync(this.source, captured); fsyncSync(fd); fsyncSync(this.directory.fd);

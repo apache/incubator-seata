@@ -57,6 +57,8 @@ for (const name of [
   "npm-shrinkwrap.json",
 ])
   assert.ok(packed.has(name), name);
+if (process.platform === "darwin")
+  assert.ok(packed.has("dist/native/seata-darwin-helper"), "Darwin Keychain and lock helper must be packaged");
 for (const file of packed)
   assert.equal(
     /(^|\/)(src|test|node_modules|\.git|state\.db)(\/|$)/.test(file),

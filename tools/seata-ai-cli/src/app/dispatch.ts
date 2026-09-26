@@ -161,7 +161,8 @@ export async function dispatch(
         commands: list.map((s) => {
           const local = localImplemented.has(s.id), remote = s.id === "connectivity.check" || s.id === "execution.reconcile" || readImplemented.has(s.id) || analysisImplemented.has(s.id) || diagnosticRemote.has(s.id) || snapshotImplemented.has(s.id),
             exists = implemented.has(s.id);
-          const filesystemUnavailable = (configImplemented.has(s.id) || inspectImplemented.has(s.id) || skillFilesystem.has(s.id)) && process.platform !== "linux";
+          const filesystemUnavailable = (configImplemented.has(s.id) || inspectImplemented.has(s.id) || skillFilesystem.has(s.id)) &&
+            !["linux", "darwin"].includes(process.platform);
           const status = deferredWrite(s.id) || !exists || filesystemUnavailable || (s.id === "auth.login" && !localBrowser())
             ? "unavailable"
             : remote

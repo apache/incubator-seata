@@ -21,7 +21,7 @@ export async function storageCapability(
   signal: AbortSignal,
 ): Promise<"available" | "unavailable" | "not_evaluated"> {
   const path = resolve(stateDirectory());
-  if (process.platform !== "linux" || path === "/") return "unavailable";
+  if (!["linux", "darwin"].includes(process.platform) || path === "/") return "unavailable";
   if (!existsSync(path)) return "not_evaluated";
   try {
     const directory = new PrivateDirectory(path, false);

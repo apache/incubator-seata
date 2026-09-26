@@ -13,6 +13,7 @@
 import { closeSync, constants, fstatSync, fsyncSync, openSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PrivateDirectory } from "../../platform/linux.js";
 import { CliError } from "../../protocol/error.js";
 
@@ -33,10 +34,11 @@ export class CredentialStore {
   constructor(private readonly root: string, readonly policy: string, private readonly storeId: string) {
     if (!["keyring_required", "protected_file"].includes(policy)) throw unavailable();
     reference(storeId);
-    if (process.platform !== "linux") throw unavailable();
+    if (!["linux", "darwin"].includes(process.platform)) throw unavailable();
   }
   get assurance(): string { return this.policy === "protected_file" ? "local_user_file" : "os_keyring"; }
   private async secretTool(action: "store" | "lookup" | "clear", ref: string, signal: AbortSignal, secret?: string): Promise<string> {
+    if (process.platform === "darwin") return this.darwinKeychain(action, ref, signal, secret);
     signal.throwIfAborted();
     const timeout = AbortSignal.timeout(5000), bounded = AbortSignal.any([signal, timeout]);
     const args = [action, ...(action === "store" ? ["--label=Seata AI CLI credential"] : []),
@@ -62,6 +64,29 @@ export class CredentialStore {
       child.stdin.end(secret === undefined ? undefined : secret + "\n");
     });
   }
+  private async darwinKeychain(action: "store" | "lookup" | "clear", ref: string, signal: AbortSignal, secret?: string): Promise<string> {
+    signal.throwIfAborted();
+    const helper = fileURLToPath(new URL("../../native/seata-darwin-helper", import.meta.url));
+    const bounded = AbortSignal.any([signal, AbortSignal.timeout(5000)]);
+    return await new Promise((resolve, reject) => {
+      const child = spawn(helper, [action === "store" ? "put" : action === "lookup" ? "get" : "delete",
+        this.storeId, reference(ref)], { stdio: ["pipe", "pipe", "pipe"], signal: bounded });
+      let output = "", bytes = 0, failed = false;
+      const fail = () => { failed = true; child.kill(); };
+      child.on("error", fail);
+      child.stdout.on("data", (chunk: Buffer) => {
+        bytes += chunk.length;
+        if (bytes > 16384) fail(); else output += chunk.toString("utf8");
+      });
+      child.stderr.on("data", (chunk: Buffer) => { bytes += chunk.length; if (bytes > 32768) fail(); });
+      child.stdin.on("error", fail);
+      child.on("close", code => {
+        if (failed || code !== 0) reject(unavailable());
+        else resolve(output);
+      });
+      child.stdin.end(secret);
+    });
+  }
   private directory(): PrivateDirectory {
     // Include StateStore identity so restoring a different store cannot select
     // another store's files merely by reusing its filesystem directory.
@@ -72,8 +97,10 @@ export class CredentialStore {
     if (this.policy === "keyring_required") { await this.secretTool("store", ref, signal, token); return; }
     const directory = this.directory(); let fd: number | undefined;
     try {
+      directory.assertCurrent();
       fd = openSync(directory.path + "/" + ref, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
       writeFileSync(fd, token, { encoding: "utf8" }); fsyncSync(fd); fsyncSync(directory.fd);
+      directory.assertCurrent();
     } catch { throw unavailable(); }
     finally { if (fd !== undefined) closeSync(fd); directory.close(); }
   }
@@ -84,7 +111,9 @@ export class CredentialStore {
     try {
       fd = directory.file(ref, false);
       if (fstatSync(fd).size > 16384) throw unavailable();
-      return bearer(readFileSync(fd, "utf8"));
+      const token = bearer(readFileSync(fd, "utf8"));
+      directory.assertCurrent();
+      return token;
     } catch { throw unavailable(); }
     finally { if (fd !== undefined) closeSync(fd); directory.close(); }
   }
@@ -93,11 +122,13 @@ export class CredentialStore {
     if (this.policy === "keyring_required") { await this.secretTool("clear", ref, signal); return; }
     const directory = this.directory(); let fd: number | undefined;
     try {
+      directory.assertCurrent();
       try { fd = openSync(directory.path + "/" + ref, constants.O_RDONLY | constants.O_NOFOLLOW); }
       catch (error) { if ((error as NodeJS.ErrnoException).code === "ENOENT") return; throw error; }
       const stat = fstatSync(fd);
       if (!stat.isFile() || stat.uid !== process.getuid?.() || stat.nlink !== 1 || (stat.mode & 0o077) !== 0) throw unavailable();
       unlinkSync(directory.path + "/" + ref); fsyncSync(directory.fd);
+      directory.assertCurrent();
     } catch { throw unavailable(); }
     finally { if (fd !== undefined) closeSync(fd); directory.close(); }
   }

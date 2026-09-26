@@ -125,12 +125,13 @@ test("scan file budget returns collected facts as truncated and directory handle
   const result = await f.run("environment.inspect", { root: f.root });
   assert.equal(result.code, 9); assert.equal(result.data.scan_scope.files, 200);
   assert.equal(result.data.completeness.status, "truncated"); assert.equal(result.data.completeness.limit_reason, "file_count_limit");
-  const count = readdirSync("/proc/self/fd").length;
+  const fdPath = process.platform === "darwin" ? "/dev/fd" : "/proc/self/fd";
+  const count = readdirSync(fdPath).length;
   for (let i = 0; i < 5; i++) {
     const directory = new ConfigDirectory(f.root, new AbortController().signal);
     assert.equal(directory.list(new AbortController().signal).names.length, 201); directory.close(); directory.close();
   }
-  assert.equal(readdirSync("/proc/self/fd").length, count);
+  assert.equal(readdirSync(fdPath).length, count);
 });
 
 test("directory entry budgets and invalid roots cannot be reported as complete empty scans", async () => {

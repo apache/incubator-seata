@@ -10,35 +10,59 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { closeSync, constants, fstatSync, openSync, readSync, statfsSync, opendirSync } from "node:fs";
-import { resolve } from "node:path";
+import { closeSync, constants, fstatSync, lstatSync, openSync, readSync, statfsSync, opendirSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 import { CliError } from "../../protocol/error.js";
+import { darwinPath } from "../../platform/linux.js";
 
 const FILE_BYTES = 1024 * 1024, TOTAL_BYTES = 10 * FILE_BYTES, FILE_COUNT = 200;
 function failure(subtype: string): CliError {
   return new CliError("config", subtype, "Configuration source could not be read safely within its inspection limits.");
 }
+function localFilesystem(path: string): boolean {
+  const type = statfsSync(path).type;
+  return process.platform === "darwin" ? type === 26 :
+    [0xef53, 0x01021994, 0x9123683e, 0x58465342, 0x794c7630].includes(type);
+}
+function checkedDarwinComponent(path: string, fd: number): void {
+  const named = lstatSync(path), opened = fstatSync(fd);
+  if (named.isSymbolicLink() || named.dev !== opened.dev || named.ino !== opened.ino)
+    throw failure("unsafe_config_path");
+}
+function checkedDarwinAncestors(path: string): void {
+  let current = "";
+  for (const part of path.split("/").filter(Boolean)) {
+    current += "/" + part;
+    if (lstatSync(current).isSymbolicLink()) throw failure("unsafe_config_path");
+  }
+}
 
-/** A retained directory descriptor anchors bounded discovery to the opened
- * directory. Only names are returned; every later file read revalidates its path.
+/** Bounded discovery. Linux anchors the directory by descriptor; Darwin checks
+ * each path component and verifies the open inode before and after listing.
  */
 export class ConfigDirectory {
   readonly path: string;
   private fd: number;
   constructor(input: string, signal: AbortSignal) {
     signal.throwIfAborted();
-    if (process.platform !== "linux") throw failure("filesystem_adapter_unavailable");
+    if (!["linux", "darwin"].includes(process.platform)) throw failure("filesystem_adapter_unavailable");
     if (!input || input.length > 4096 || /[\x00-\x1f\x7f]/.test(input)) throw failure("unsafe_config_path");
-    this.path = resolve(input);
+    this.path = process.platform === "darwin" ? darwinPath(input) : resolve(input);
     let fd: number | undefined;
     try {
       fd = openSync("/", constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+      let current = "";
       for (const part of this.path.split("/").filter(Boolean)) {
         signal.throwIfAborted();
-        const child = openSync(`/proc/self/fd/${fd}/${part}`, constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+        current += "/" + part;
+        if (process.platform === "darwin") checkedDarwinAncestors(current);
+        const child = openSync(process.platform === "darwin" ? current : `/proc/self/fd/${fd}/${part}`,
+          constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+        try { if (process.platform === "darwin") checkedDarwinComponent(current, child); }
+        catch (error) { closeSync(child); throw error; }
         closeSync(fd); fd = child;
       }
-      if (![0xef53, 0x01021994, 0x9123683e, 0x58465342, 0x794c7630].includes(statfsSync(`/proc/self/fd/${fd}`).type))
+      if (!localFilesystem(process.platform === "darwin" ? this.path : `/proc/self/fd/${fd}`))
         throw failure("filesystem_adapter_unavailable");
       this.fd = fd;
     } catch (error) {
@@ -50,7 +74,8 @@ export class ConfigDirectory {
   }
   list(signal: AbortSignal): { names: string[]; truncated: boolean } {
     signal.throwIfAborted();
-    const directory = opendirSync(`/proc/self/fd/${this.fd}`), names: string[] = [];
+    if (process.platform === "darwin") { checkedDarwinAncestors(this.path); checkedDarwinComponent(this.path, this.fd); }
+    const directory = opendirSync(process.platform === "darwin" ? this.path : `/proc/self/fd/${this.fd}`), names: string[] = [];
     try {
       for (let count = 0; count <= 2048; count++) {
         signal.throwIfAborted();
@@ -62,7 +87,10 @@ export class ConfigDirectory {
         names.push(entry.name);
       }
       return { names: names.sort(), truncated: true };
-    } finally { directory.closeSync(); }
+    } finally {
+      directory.closeSync();
+      if (process.platform === "darwin") { checkedDarwinAncestors(this.path); checkedDarwinComponent(this.path, this.fd); }
+    }
   }
   close(): void { if (this.fd >= 0) { closeSync(this.fd); this.fd = -1; } }
 }
@@ -73,29 +101,35 @@ export class ConfigFiles {
   private bytes = 0;
   get usage(): { files: number; bytes: number } { return { files: this.count, bytes: this.bytes }; }
 
-  /** Descriptor-relative traversal prevents both ancestor and leaf symlink races.
-   * No writes, subprocesses, network filesystems, or unbounded readFile calls.
+  /** Linux uses descriptor-relative traversal; Darwin verifies components and
+   * the final inode before returning bytes. No writes, subprocesses, network
+   * filesystems, or unbounded readFile calls.
    * Bytes remain private until parsed and converted to redacted ConfigFacts.
    */
   read(input: string, signal: AbortSignal): { path: string; bytes: Buffer } {
     signal.throwIfAborted();
-    if (process.platform !== "linux") throw failure("filesystem_adapter_unavailable");
+    if (!["linux", "darwin"].includes(process.platform)) throw failure("filesystem_adapter_unavailable");
     if (typeof input !== "string" || !input || input.length > 4096 || /[\x00-\x1f\x7f]/.test(input)) throw failure("unsafe_config_path");
     if (++this.count > FILE_COUNT) throw failure("config_limit_exceeded");
-    const path = resolve(input), parts = path.split("/").filter(Boolean);
+    const path = process.platform === "darwin" ? darwinPath(input) : resolve(input), parts = path.split("/").filter(Boolean);
     if (!parts.length) throw failure("unsafe_config_path");
     let fd: number | undefined;
     try {
       fd = openSync("/", constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW);
+      let current = "";
       for (let i = 0; i < parts.length; i++) {
         signal.throwIfAborted();
-        const child = openSync(`/proc/self/fd/${fd}/${parts[i]}`, constants.O_RDONLY | constants.O_NOFOLLOW |
+        current += "/" + parts[i];
+        if (process.platform === "darwin") checkedDarwinAncestors(i === parts.length - 1 ? dirname(current) : current);
+        const child = openSync(process.platform === "darwin" ? current : `/proc/self/fd/${fd}/${parts[i]}`, constants.O_RDONLY | constants.O_NOFOLLOW |
           (i === parts.length - 1 ? constants.O_NONBLOCK : constants.O_DIRECTORY));
+        try { if (process.platform === "darwin") checkedDarwinComponent(current, child); }
+        catch (error) { closeSync(child); throw error; }
         closeSync(fd); fd = child;
       }
       const before = fstatSync(fd, { bigint: true });
       if (!before.isFile() || before.nlink !== 1n) throw failure("unsafe_config_path");
-      if (![0xef53, 0x01021994, 0x9123683e, 0x58465342, 0x794c7630].includes(statfsSync(`/proc/self/fd/${fd}`).type))
+      if (!localFilesystem(process.platform === "darwin" ? path : `/proc/self/fd/${fd}`))
         throw failure("filesystem_adapter_unavailable");
       const remaining = Math.min(FILE_BYTES, TOTAL_BYTES - this.bytes);
       if (before.size > BigInt(remaining)) throw failure("config_limit_exceeded");
@@ -109,10 +143,11 @@ export class ConfigFiles {
         if (size > remaining) throw failure("config_limit_exceeded");
       }
       const after = fstatSync(fd, { bigint: true });
+      if (process.platform === "darwin") { checkedDarwinAncestors(path); checkedDarwinComponent(path, fd); }
       if (before.size !== BigInt(size) || before.size !== after.size || before.mtimeNs !== after.mtimeNs ||
           before.ctimeNs !== after.ctimeNs || before.nlink !== after.nlink)
         throw failure("config_source_changed");
-      return { path, bytes: buffer.subarray(0, size) };
+      return { path: resolve(input), bytes: buffer.subarray(0, size) };
     } catch (error) {
       if (signal.aborted) signal.throwIfAborted();
       if (error instanceof CliError) throw error;

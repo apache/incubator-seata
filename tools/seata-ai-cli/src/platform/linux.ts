@@ -18,25 +18,44 @@ import {
   closeSync,
   fstatSync,
   mkdirSync,
+  lstatSync,
   statfsSync,
   existsSync,
 } from "node:fs";
 import { resolve, parse, sep } from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { CliError } from "../protocol/error.js";
 
-/** Linux-only descriptor-relative traversal. Unsupported platforms fail closed. */
+export function darwinPath(input: string): string {
+  const path = resolve(input);
+  // macOS uses these fixed system links. Canonicalize only these roots; user
+  // supplied links anywhere else are rejected during component traversal.
+  for (const root of ["/var", "/tmp", "/etc"])
+    if (path === root || path.startsWith(root + "/")) return "/private" + path;
+  return path;
+}
+
+function localFilesystem(path: string): boolean {
+  const type = statfsSync(path).type;
+  return process.platform === "darwin" ? type === 26 :
+    [0xef53, 0x01021994, 0x9123683e, 0x58465342, 0x794c7630].includes(type);
+}
+
+/** Private state directory with Linux descriptor traversal and verified APFS traversal. */
 export class PrivateDirectory {
   readonly fd: number;
   readonly path: string;
   constructor(input: string, create = true) {
-    if (process.platform !== "linux" || !process.getuid)
+    if (!["linux", "darwin"].includes(process.platform) || !process.getuid)
       throw new CliError(
         "policy",
         "store_unsafe",
-        "Private storage is currently implemented only for Linux.",
+        "Private storage has no adapter for this platform.",
       );
-    const path = resolve(input);
+    if (!input || input.length > 4096 || /[\x00-\x1f\x7f]/.test(input))
+      throw new CliError("policy", "unsafe_path", "Invalid private directory path.");
+    const path = process.platform === "darwin" ? darwinPath(input) : resolve(input);
     const parts = path
       .slice(parse(path).root.length)
       .split(sep)
@@ -53,7 +72,9 @@ export class PrivateDirectory {
     );
     try {
       for (let i = 0; i < parts.length; i++) {
-        const next = "/proc/self/fd/" + fd + "/" + parts[i];
+        const next = process.platform === "darwin"
+          ? resolve(parse(path).root, ...parts.slice(0, i + 1))
+          : "/proc/self/fd/" + fd + "/" + parts[i];
         if (create) {
           try {
             mkdirSync(next, { mode: 0o700 });
@@ -69,6 +90,8 @@ export class PrivateDirectory {
               throw e;
           }
         }
+        if (process.platform === "darwin" && lstatSync(next).isSymbolicLink())
+          throw new CliError("policy", "unsafe_path", "Private directory contains a symbolic link.");
         const child = openSync(
           next,
           constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW,
@@ -76,6 +99,11 @@ export class PrivateDirectory {
         closeSync(fd);
         fd = child;
         const stat = fstatSync(fd);
+        if (process.platform === "darwin") {
+          const named = lstatSync(next);
+          if (named.dev !== stat.dev || named.ino !== stat.ino || !named.isDirectory())
+            throw new CliError("policy", "unsafe_path", "Private directory changed during traversal.");
+        }
         const final = i === parts.length - 1;
         if (
           final
@@ -90,18 +118,14 @@ export class PrivateDirectory {
           );
       }
       // ext, tmpfs, btrfs, xfs, overlay; no network or unrecognized filesystems.
-      if (
-        ![0xef53, 0x01021994, 0x9123683e, 0x58465342, 0x794c7630].includes(
-          statfsSync("/proc/self/fd/" + fd).type,
-        )
-      )
+      if (!localFilesystem(process.platform === "darwin" ? path : "/proc/self/fd/" + fd))
         throw new CliError(
           "policy",
           "store_unsafe",
           "Filesystem has no enabled private-storage adapter.",
         );
       this.fd = fd;
-      this.path = "/proc/self/fd/" + fd;
+      this.path = process.platform === "darwin" ? path : "/proc/self/fd/" + fd;
     } catch (error) {
       closeSync(fd);
       if (error instanceof CliError) throw error;
@@ -112,19 +136,42 @@ export class PrivateDirectory {
       );
     }
   }
+  assertCurrent(): void {
+    if (process.platform !== "darwin") return;
+    let prefix = "/";
+    const parts = this.path.split("/").filter(Boolean);
+    for (const [index, part] of parts.entries()) {
+      prefix = resolve(prefix, part);
+      const named = lstatSync(prefix);
+      const final = index === parts.length - 1;
+      const unsafeMode = final ? (named.mode & 0o077) !== 0 :
+        (named.mode & 0o022) !== 0 && (named.mode & 0o1000) === 0;
+      const unsafeOwner = final ? named.uid !== process.getuid!() :
+        named.uid !== 0 && named.uid !== process.getuid!();
+      if (named.isSymbolicLink() || !named.isDirectory() || unsafeMode || unsafeOwner)
+        throw new CliError("policy", "store_unsafe", "Private directory path changed.");
+    }
+    const named = lstatSync(this.path), opened = fstatSync(this.fd);
+    if (named.dev !== opened.dev || named.ino !== opened.ino || !localFilesystem(this.path))
+      throw new CliError("policy", "store_unsafe", "Private directory identity changed.");
+  }
   file(name: string, create = true): number {
     if (!/^[a-zA-Z0-9_.-]+$/.test(name) || name === "." || name === "..")
       throw new CliError("policy", "unsafe_path", "Invalid internal filename.");
-    let fd: number;
+    let fd: number | undefined;
     try {
+      this.assertCurrent();
       fd = openSync(
         this.path + "/" + name,
         constants.O_RDWR |
           constants.O_NOFOLLOW |
+          constants.O_NONBLOCK |
           (create ? constants.O_CREAT : 0),
         0o600,
       );
+      this.assertCurrent();
     } catch {
+      if (fd !== undefined) closeSync(fd);
       throw new CliError(
         "policy",
         "unsafe_path",
@@ -132,6 +179,18 @@ export class PrivateDirectory {
       );
     }
     const stat = fstatSync(fd);
+    if (process.platform === "darwin") {
+      let named: ReturnType<typeof lstatSync>;
+      try { named = lstatSync(this.path + "/" + name); }
+      catch {
+        closeSync(fd);
+        throw new CliError("policy", "store_unsafe", "State file path disappeared.");
+      }
+      if (named.isSymbolicLink() || named.dev !== stat.dev || named.ino !== stat.ino) {
+        closeSync(fd);
+        throw new CliError("policy", "store_unsafe", "State file identity changed.");
+      }
+    }
     if (
       !stat.isFile() ||
       stat.uid !== process.getuid?.() ||
@@ -148,13 +207,17 @@ export class PrivateDirectory {
     return fd;
   }
   checkAuxiliary(): void {
+    this.assertCurrent();
     for (const name of ["state.db-wal", "state.db-shm"])
       if (existsSync(this.path + "/" + name)) closeSync(this.file(name, false));
   }
   lock(name: string, shared = false): number {
     const fd = this.file(name);
     // flock(2) locks the inherited open file description; parent retains it until close.
-    const result = spawnSync("/usr/bin/flock", [shared ? "-sn" : "-xn", "3"], {
+    const darwin = process.platform === "darwin";
+    const helper = fileURLToPath(new URL("../native/seata-darwin-helper", import.meta.url));
+    const result = spawnSync(darwin ? helper : "/usr/bin/flock", darwin
+      ? ["lock", shared ? "shared" : "exclusive"] : [shared ? "-sn" : "-xn", "3"], {
       stdio: ["ignore", "ignore", "ignore", fd],
       timeout: 5000,
       env: { PATH: "/usr/bin:/bin", LANG: "C" },

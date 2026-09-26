@@ -39,7 +39,8 @@ test("config reads reject ancestor/leaf symlinks, hardlinks, directories and FIF
   const dir = mkdtempSync(join(tmpdir(), "seata-config-links-")), path = join(dir, "private.properties");
   writeFileSync(path, "password=SECRET");
   symlinkSync(path, join(dir, "leaf")); symlinkSync(dir, join(dir, "ancestor"));
-  const files = new ConfigFiles(), fds = readdirSync("/proc/self/fd").length;
+  const fdPath = process.platform === "darwin" ? "/dev/fd" : "/proc/self/fd";
+  const files = new ConfigFiles(), fds = readdirSync(fdPath).length;
   for (const unsafe of [join(dir, "leaf"), join(dir, "ancestor/private.properties"), dir]) {
     assert.throws(() => files.read(unsafe, signal), e => e.type === "config" && !e.message.includes("SECRET"));
   }
@@ -48,7 +49,7 @@ test("config reads reject ancestor/leaf symlinks, hardlinks, directories and FIF
   const fifo = join(dir, "fifo");
   assert.equal(spawnSync("mkfifo", [fifo]).status, 0);
   assert.throws(() => files.read(fifo, signal), e => e.subtype === "unsafe_config_path");
-  assert.equal(readdirSync("/proc/self/fd").length, fds);
+  assert.equal(readdirSync(fdPath).length, fds);
 });
 
 test("config read file-count and cancellation gates also apply to empty files", () => {

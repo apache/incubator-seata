@@ -22,10 +22,13 @@ import { readerFor } from "./read.js";
 import { cleanupCredentials, recoverCredentials } from "../adapter/auth/cleanup.js";
 
 export function localBrowser(): boolean {
-  if (process.platform !== "linux") return false;
+  if (!["linux", "darwin"].includes(process.platform)) return false;
   // Explicit host-runtime assertion, not a remote browser tunnel and not a
   // certification claim. Headless/SSH defaults never assume shared loopback.
   if (process.env.SEATA_AI_LOCAL_AUTH === "shared_loopback") return true;
+  if (process.platform === "darwin")
+    return !process.env.SSH_CONNECTION && !process.env.SSH_TTY && !process.env.CI &&
+      process.stdin.isTTY === true && process.stdout.isTTY === true;
   return !process.env.SSH_CONNECTION && !process.env.SSH_TTY && !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
 }
 

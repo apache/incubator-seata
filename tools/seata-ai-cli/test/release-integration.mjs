@@ -38,6 +38,9 @@ if (process.env.SEATA_TEST_ACTIVE_XID)
 const activeLockCount = Number(process.env.SEATA_TEST_ACTIVE_LOCK_COUNT ?? 1);
 assert.ok(Number.isSafeInteger(activeLockCount) && activeLockCount >= 1 && activeLockCount <= 120,
   "SEATA_TEST_ACTIVE_LOCK_COUNT must be 1..120");
+const seededStatus = Number(process.env.SEATA_TEST_SEEDED_STATUS ?? 1);
+assert.ok(Number.isSafeInteger(seededStatus) && seededStatus >= 0 && seededStatus <= 20,
+  "SEATA_TEST_SEEDED_STATUS must be a global transaction status code");
 const { chromium } = await import(pathToFileURL(process.env.SEATA_TEST_PLAYWRIGHT).href);
 const cliPath = process.env.SEATA_TEST_CLI_PATH ?? new URL("../dist/cli.js", import.meta.url).pathname;
 assert.ok(isAbsolute(cliPath), "SEATA_TEST_CLI_PATH must be an absolute installed CLI entrypoint");
@@ -227,7 +230,7 @@ test("released Seata accepts browser login and serves real read commands", { tim
     assert.ok(results.transactions.transactions.some(row => row.xid === xid));
     assert.ok(results.locks.locks.some(row => row.row_key === "seata-r11-e2e-order-42"));
     const selectedTransactions = await cli(root, ["transaction", "list", "--profile", name,
-      "--application-id", "seata-r11-e2e", "--transaction-name", "release-e2e", "--status", "1"]);
+      "--application-id", "seata-r11-e2e", "--transaction-name", "release-e2e", "--status", String(seededStatus)]);
     assert.deepEqual(selectedTransactions.transactions.map(row => row.xid), [xid]);
     assert.equal(selectedTransactions.pagination.total, 1);
     assert.equal(selectedTransactions.completeness.status, "complete");
@@ -252,7 +255,7 @@ test("released Seata accepts browser login and serves real read commands", { tim
       "--export", join(root, "transaction-evidence.json")]);
     assert.equal(exact.transaction.xid, xid);
     assert.equal(exact.transaction.transaction_id, "9007199254740993");
-    assert.equal(exact.transaction.status.code, 1);
+    assert.equal(exact.transaction.status.code, seededStatus);
     const branches = await cli(root, ["branch", "list", "--profile", name, "--xid", xid]);
     assert.equal(branches.branches.length, 1);
     const branch = await cli(root, ["branch", "get", "--profile", name, "--xid", xid, "--branch-id", branchId]);

@@ -23,17 +23,21 @@ execution/authentication model. It preserves Protocol `0.1`, contract revision
 `R9`, all 57 command IDs and their CLI paths.
 
 The package is a private development snapshot. `seata-ai-cli-development` is a
-local package identifier, not an approved Apache npm package name. Server read
-and write handlers, browser login, Keyring, diagnostic providers and the seven
-product Skills are not enabled. `capabilities` reports actual handler/storage
-availability. The command catalog alone does not imply implemented behavior.
+local package identifier, not an approved Apache npm package name. Read-only
+management handlers, browser login, diagnostics and the seven managed Skills
+are implemented; server writes remain disabled. `capabilities` reports actual
+handler/storage availability. The command catalog alone does not imply
+implemented behavior.
 
 ## Run from source
 
-Use Node.js `>=24.19.0 <25`; the checked environment uses Node 24.19.0,
-npm 11.17.0 and TypeScript 5.9.3. Linux StateStore operations additionally require
-`/usr/bin/flock` from util-linux and a private local directory. Other platforms
-can use discovery commands; private-state operations fail closed.
+Use Node.js `>=24.19.0 <25`. Linux StateStore operations require `/usr/bin/flock`
+from util-linux and a private local directory. On macOS, `npm run build` needs
+Apple Command Line Tools to compile the bundled universal Keychain/lock helper.
+The macOS adapter accepts local APFS volumes and checks directory ownership,
+permissions, symbolic links and inode identity. macOS 26.7 arm64 has been
+validated; macOS x86_64 has a universal helper build but has not been run on
+native hardware. Windows private-state operations still fail closed.
 
 ```sh
 cd tools/seata-ai-cli
@@ -66,31 +70,41 @@ python3 -m venv .venv
 npm run test:install
 ```
 
+Python contract validation requires Python 3.10 or newer. Browser and live
+release tests are separate opt-in commands; they require an external Playwright
+installation and an isolated test deployment. See `test/browser-login.mjs` and
+`test/release-integration.mjs` for their inputs. Keep test credentials out of
+Profiles and command arguments.
+
 Tests exercise the parser and actual CLI subprocess streams, compare generated
 schemas against independently supplied R11 fixtures, compete through real
 SQLite workers and OS lifetime locks, and count HTTP requests across redirects
 and SIGKILL recovery. The installer test packs the module, installs that exact
 tarball into a clean path containing spaces and non-ASCII characters, and
 verifies dependencies, resources, command shims and local Profile persistence.
-Temporary test directories contain only synthetic data.
+Local regression tests use synthetic data. Opt-in release tests use isolated
+test credentials supplied by the operator.
 
-Internal auth tests model staged credential references and epoch fencing;
-they do not establish real Keyring or browser integration. Internal write-model
-tests establish local invariants, not Seata compatibility or a public write
-executor. There are no certified server combinations and production writes
-remain unavailable. Windows ACLs, macOS storage/locks, browser Helper, actual
-power-loss/disk-full recovery and real Seata E2E remain unverified.
+Internal auth tests model staged credential references and epoch fencing.
+macOS arm64 has additionally passed isolated Keychain, real Chromium Helper and
+DB/File/Redis read-only integration against a Seata 2.6.0 test deployment.
+These results do not establish production compatibility, power-loss or disk-full
+recovery, or a public write executor. Windows ACLs and native macOS x86_64
+remain unverified.
 
 ## Packaging and next checkpoints
 
 `npm run build` generates protocol resources and their digests before compiling
-ESM JavaScript. Input contracts live in `src/command/contracts.json`; supplied
-fixtures under `test/contract/r11` remain independent. Generated files are not
+ESM JavaScript. On macOS it also compiles a universal native helper for
+BSD locks and Keychain access. A tarball built on Linux does not contain this
+helper; create the macOS development tarball on macOS. Input contracts live in
+`src/command/contracts.json`; supplied fixtures under `test/contract/r11`
+remain independent. Generated files are not
 edited. `package-lock.json` and `npm-shrinkwrap.json` pin identical dependency
 trees; update both when dependencies change. No install lifecycle hook deploys
 Skills, opens a browser or changes the user's StateStore.
 
-Continue with R11 M2's pinned real Seata read-only combination and captured
-fixtures, M3 browser/credential integration, M4 diagnostics/Skills, and M5/M6
-the command-specific write executor and certification gates. Publishing and
-official package ownership require the project's release process.
+Further gates include native macOS x86_64 and Windows validation, failure
+recovery under power loss or disk exhaustion, and certified server combinations.
+The command-specific write executor remains outside the read-only scope.
+Publishing and official package ownership require the project's release process.
