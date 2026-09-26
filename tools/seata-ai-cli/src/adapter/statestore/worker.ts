@@ -22,6 +22,7 @@ import {
   type Obj,
   type Json,
   object,
+  isObject,
   str,
   canonical,
   digest,
@@ -326,6 +327,25 @@ function fence(p: Obj): void {
     id,
   );
 }
+function expireFlows(): void {
+  const time = now();
+  run("UPDATE auth_flows SET state='expired',terminal_at=expires_at,reason_json=?,record_version=record_version+1 WHERE state IN ('pending','submitting') AND expires_at<=?",
+    canonical({ subtype: "auth_flow_expired" }), time);
+  run("UPDATE auth_flows SET state='failed',terminal_at=strftime('%Y-%m-%dT%H:%M:%fZ',heartbeat_at,'+10 seconds'),reason_json=?,record_version=record_version+1 WHERE state IN ('pending','submitting') AND heartbeat_at<?",
+    canonical({ subtype: "helper_unavailable" }), new Date(Date.now() - 10000).toISOString());
+  run("UPDATE credential_metadata SET status='cleanup_pending',updated_at=? WHERE status='staged' AND flow_id IN (SELECT flow_id FROM auth_flows WHERE state IN ('expired','failed','cancelled'))", time);
+  run("DELETE FROM auth_flows WHERE terminal_at<? AND terminal_at=strftime('%Y-%m-%dT%H:%M:%fZ',terminal_at) AND NOT EXISTS (SELECT 1 FROM credential_metadata WHERE flow_id=auth_flows.flow_id)",
+    new Date(Date.now() - 86400000).toISOString());
+}
+function publicFlow(args: Obj): Obj | null {
+  const flow = row("SELECT * FROM auth_flows WHERE flow_id=? AND (profile_label=? OR profile_id IN (SELECT profile_id FROM profiles WHERE name=? AND deleted_at IS NULL))",
+    str(args.flow_id), str(args.name), str(args.name));
+  if (!flow || (flow.terminal_at !== null && str(flow.terminal_at) < new Date(Date.now() - 86400000).toISOString()))
+    return null;
+  return { flow_id: flow.flow_id ?? null, flow_state: flow.state === "submitting" ? "pending" : flow.state ?? null,
+    phase: flow.state ?? null, reason: flow.reason_json === null ? null : decode(flow.reason_json),
+    expires_at: flow.expires_at ?? null, terminal_at: flow.terminal_at ?? null };
+}
 function op(name: string, args: Obj): Obj {
   if (name === "close") {
     for (const fd of locks.values()) closeSync(fd);
@@ -343,7 +363,100 @@ function op(name: string, args: Obj): Obj {
     startupFailure = safeError(error);
     throw startupFailure;
   }
+  // A later validation failure must not roll back expiry or safe retention GC.
+  // Each operation still rechecks the flow inside its own transaction.
+  if (["flow.create", "flow.submit", "flow.stage", "flow.activate", "flow.helper", "flow.heartbeat"].includes(name))
+    tx(() => expireFlows());
   switch (name) {
+    case "skills.install.lock": {
+      if (locks.has("skills-install")) throw new CliError("conflict", "skills_install_busy", "This worker already owns the installation lock.");
+      if (!directory) throw new CliError("internal", "journal_failure", "No storage directory.");
+      locks.set("skills-install", directory.lock("skills-install.lock"));
+      const stored = row("SELECT value FROM local_settings WHERE key='skills.install'");
+      return { record: stored ? parseJson(Buffer.from(str(stored.value))) : null };
+    }
+    case "skills.install.get": {
+      const stored = row("SELECT value FROM local_settings WHERE key='skills.install'");
+      return { record: stored ? parseJson(Buffer.from(str(stored.value))) : null };
+    }
+    case "skills.install.record":
+      return tx(() => {
+        if (!locks.has("skills-install")) throw new CliError("conflict", "skills_install_not_owned", "Installation lifetime lock is required.");
+        const stored = row("SELECT value FROM local_settings WHERE key='skills.install'");
+        const previous = stored ? object(parseJson(Buffer.from(str(stored.value)))) : undefined;
+        if ((previous?.revision ?? 0) !== args.expected_revision)
+          throw new CliError("conflict", "skills_install_changed", "Installation record changed.");
+        const record = object(args.record), phase = str(record.phase);
+        if (!["preparing", "writing", "verifying", "complete"].includes(phase) ||
+            !/^[a-f0-9-]{36}$/.test(str(record.operation_id)) ||
+            !/^sha256:[a-f0-9]{64}$/.test(str(record.content_digest)) ||
+            typeof record.version !== "string" || record.version.length > 128 ||
+            typeof record.installation_path !== "string" || !record.installation_path.startsWith("/") || record.installation_path.length > 4096 ||
+            !Array.isArray(record.files) || record.files.length > 200 ||
+            (record.previous_files !== undefined && (!Array.isArray(record.previous_files) || record.previous_files.length > 200)) ||
+            Buffer.byteLength(canonical(record)) > 65536)
+          throw new CliError("validation", "invalid_installation_record", "Installation metadata is invalid or exceeds limits.");
+        const stages: Record<string, number> = { preparing: 0, writing: 1, verifying: 2, complete: 3 };
+        if (!previous) {
+          if (phase !== "preparing") throw new CliError("conflict", "skills_install_phase", "An installation must begin with a durable preparing record.");
+        } else if (previous.operation_id === record.operation_id) {
+          for (const key of ["version", "content_digest", "installation_path"])
+            if (previous[key] !== record[key]) throw new CliError("conflict", "skills_install_changed", "Installation target is immutable within an operation.");
+          if (canonical(previous.previous_files ?? []) !== canonical(record.previous_files ?? []))
+            throw new CliError("conflict", "skills_install_changed", "Installation recovery baseline is immutable within an operation.");
+          const before = stages[str(previous.phase)]!, after = stages[phase]!;
+          if (before === undefined || after < before || after > before + 1 || previous.phase === "complete")
+            throw new CliError("conflict", "skills_install_phase", "Installation stages cannot reopen or skip verification.");
+        } else if (previous.phase !== "complete" || phase !== "preparing")
+          throw new CliError("conflict", "skills_install_unresolved", "An incomplete installation cannot be replaced by a new operation.");
+        const saved = { operation_id: record.operation_id!, version: record.version!, phase,
+          content_digest: record.content_digest!, installation_path: record.installation_path!,
+          files: record.files!, files_digest: digest(record.files!), previous_files: record.previous_files ?? [],
+          revision: Number(previous?.revision ?? 0) + 1, updated_at: now() };
+        run("INSERT INTO local_settings VALUES('skills.install',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", canonical(saved));
+        return { record: saved };
+      });
+    case "artifact.lock": {
+      const key = str(args.key);
+      if (!/^sha256:[a-f0-9]{64}$/.test(key)) throw new CliError("validation", "invalid_argument", "Invalid artifact key.");
+      const lockKey = "artifact-" + key.slice(7);
+      if (locks.has(lockKey)) throw new CliError("conflict", "artifact_busy", "Artifact is already owned by this worker.");
+      if (!directory) throw new CliError("internal", "journal_failure", "No storage directory.");
+      locks.set(lockKey, directory.lock(lockKey + ".lock"));
+      const stored = row("SELECT value FROM local_settings WHERE key=?", "artifact:" + key);
+      return { record: stored ? parseJson(Buffer.from(str(stored.value))) : null };
+    }
+    case "artifact.record":
+      return tx(() => {
+        const key = str(args.key), lockKey = "artifact-" + key.slice(7);
+        if (!/^sha256:[a-f0-9]{64}$/.test(key) || !locks.has(lockKey))
+          throw new CliError("conflict", "artifact_not_owned", "Artifact lifetime lock is required.");
+        const stored = row("SELECT value FROM local_settings WHERE key=?", "artifact:" + key);
+        const previous = stored ? object(parseJson(Buffer.from(str(stored.value)))) : undefined;
+        if ((previous?.revision ?? 0) !== args.expected_revision)
+          throw new CliError("conflict", "artifact_revision_conflict", "Artifact ownership metadata changed.");
+        const record = object(args.record);
+        if (!["writing", "complete", "removing", "removed"].includes(String(record.phase)) ||
+          !/^[a-f0-9-]{36}$/.test(str(record.operation_id)) || !/^sha256:[a-f0-9]{64}$/.test(str(record.digest)) ||
+          !Number.isSafeInteger(record.bytes) || Number(record.bytes) < 0 || Number(record.bytes) > 16 * 1024 * 1024 ||
+          !/^\d+$/.test(str(record.device)) || !/^\d+$/.test(str(record.inode)))
+          throw new CliError("validation", "invalid_argument", "Invalid artifact ownership metadata.");
+        if (record.phase === "complete" && (previous?.phase !== "writing" || previous.operation_id !== record.operation_id ||
+            previous.device !== record.device || previous.inode !== record.inode || previous.digest !== record.digest || previous.bytes !== record.bytes))
+          throw new CliError("conflict", "artifact_revision_conflict", "Artifact completion does not match its durable write record.");
+        if (["removing", "removed"].includes(String(record.phase))) {
+          const expectedPhase = record.phase === "removing" ? "complete" : "removing";
+          if (previous?.phase !== expectedPhase || !/^\.seata-remove-[a-f0-9-]{36}$/.test(str(record.staging_name)) ||
+              ["device", "inode", "digest", "bytes"].some(key => previous?.[key] !== record[key]) ||
+              (record.phase === "removed" && (previous.operation_id !== record.operation_id || previous.staging_name !== record.staging_name)))
+            throw new CliError("conflict", "artifact_revision_conflict", "Artifact removal does not match its owned durable record.");
+        }
+        const saved = { phase: str(record.phase), operation_id: str(record.operation_id), digest: str(record.digest), bytes: Number(record.bytes),
+          device: str(record.device), inode: str(record.inode), revision: Number(previous?.revision ?? 0) + 1, updated_at: now(),
+          ...(["removing", "removed"].includes(String(record.phase)) ? { staging_name: str(record.staging_name) } : {}) };
+        run("INSERT INTO local_settings VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value", "artifact:" + key, canonical(saved));
+        return { record: saved };
+      });
     case "info":
       return {
         ...row("SELECT * FROM store_meta"),
@@ -479,6 +592,35 @@ function op(name: string, args: Obj): Obj {
         expiry_hint: null,
       };
     }
+    case "auth.binding": {
+      const p = profile(str(args.name));
+      const credential = p.active_credential_ref === null ? null : row(
+        "SELECT credential_ref,provider,auth_generation FROM credential_metadata WHERE credential_ref=? AND profile_id=? AND status='active'",
+        str(p.active_credential_ref), str(p.profile_id));
+      if (p.active_credential_ref !== null && (!credential || credential.auth_generation !== p.auth_generation))
+        throw new CliError("policy", "store_unsafe", "Active credential binding is inconsistent.");
+      return { profile: publicProfile(p), credential: credential ?? null,
+        target_digest: p.target_digest ?? null, trust_digest: p.trust_digest ?? null,
+        state_store_id: row("SELECT state_store_id FROM store_meta")?.state_store_id ?? null };
+    }
+    case "credential.cleanup.list":
+      return tx(() => {
+        if (args.reap_flows === true) expireFlows();
+        return { credentials: database().prepare("SELECT credential_ref,provider,flow_id FROM credential_metadata c WHERE status IN ('retired','cleanup_pending') AND NOT EXISTS (SELECT 1 FROM profiles p WHERE p.active_credential_ref=c.credential_ref) LIMIT 128").all().map(r => object(r)),
+          state_store_id: row("SELECT state_store_id FROM store_meta")?.state_store_id ?? null };
+      });
+    case "credential.invalidate":
+      return tx(() => {
+        const p = profile(str(args.name));
+        if (p.active_credential_ref !== args.credential_ref) return { changed: false };
+        fence(p);
+        return { changed: true };
+      });
+    case "credential.cleanup.done":
+      return tx(() => {
+        run("DELETE FROM credential_metadata WHERE credential_ref=? AND status IN ('retired','cleanup_pending') AND NOT EXISTS (SELECT 1 FROM profiles WHERE active_credential_ref=credential_metadata.credential_ref)", str(args.credential_ref));
+        return {};
+      });
     case "execution.get": {
       const e = execution(args),
         id = str(e.execution_id);
@@ -547,6 +689,37 @@ function op(name: string, args: Obj): Obj {
         },
       };
     }
+    case "execution.readContext": {
+      const e = execution(args);
+      // Private IPC only: original selectors are not part of the public DTO.
+      const p = e.plan_id ? row("SELECT * FROM plans WHERE plan_id=?", str(e.plan_id)) : undefined;
+      const plan = p ? decode(p.plan_json) : null;
+      const bound = p && isObject(plan) && p.command === e.command && p.target_digest === e.target_digest &&
+        (p.consumed_by === null || p.consumed_by === e.execution_id) && plan.material_digest === p.material_digest;
+      return { intent: decode(e.intent_json), target_digest: e.target_digest ?? null,
+        plan, plan_binding_valid: Boolean(bound) };
+    }
+    case "execution.observe":
+      return tx(() => {
+        const e = execution(args), id = str(e.execution_id);
+        if (e.record_version !== args.expected_revision)
+          throw new CliError("conflict", "execution_changed", "Execution changed during read-only observation.");
+        if (e.target_digest !== args.target_digest)
+          throw new CliError("policy", "execution_target_mismatch", "Observation does not belong to the original execution target.");
+        const data = object(args.observation);
+        if (data.causality !== "unproven" || data.replay_allowed !== false ||
+            !["postcondition_observed", "precondition_still_observed", "partial_state_observed", "divergent_state_observed", "unknown"].includes(str(data.observation)) ||
+            // R11 permits up to 8 MiB of read evidence. A smaller journal
+            // ceiling must not reject an otherwise bounded reconciliation.
+            Buffer.byteLength(canonical(data)) > 8 * 1024 * 1024)
+          throw new CliError("validation", "invalid_observation", "Read-only observation must be bounded and cannot authorize replay or establish causality.");
+        // Observations are appended, not substituted for historical response
+        // facts. In particular, SEND_INTENT/unknown remains unknown even when
+        // a desired condition is now visible on the server.
+        event(id, "READ_ONLY_OBSERVATION", data);
+        run("UPDATE executions SET record_version=record_version+1,updated_at=? WHERE execution_id=?", now(), id);
+        return { execution_id: id, record_version: Number(e.record_version) + 1, appended: true };
+      });
     case "execution.claim":
       return tx(() => {
         const request = str(args.client_request_id).toLowerCase();
@@ -782,6 +955,7 @@ function op(name: string, args: Obj): Obj {
       });
     case "flow.create":
       return tx(() => {
+        expireFlows();
         const p = profile(str(args.name));
         const existing = row(
           "SELECT * FROM auth_flows WHERE profile_id=? AND state IN ('pending','submitting')",
@@ -810,6 +984,7 @@ function op(name: string, args: Obj): Obj {
       });
     case "flow.submit":
       return tx(() => {
+        expireFlows();
         const f = row(
           "SELECT * FROM auth_flows WHERE flow_id=?",
           str(args.flow_id),
@@ -828,6 +1003,7 @@ function op(name: string, args: Obj): Obj {
       });
     case "flow.stage":
       return tx(() => {
+        expireFlows();
         const f = row(
           "SELECT * FROM auth_flows WHERE flow_id=?",
           str(args.flow_id),
@@ -853,6 +1029,7 @@ function op(name: string, args: Obj): Obj {
       });
     case "flow.activate":
       return tx(() => {
+        expireFlows();
         const f = row(
           "SELECT * FROM auth_flows WHERE flow_id=?",
           str(args.flow_id),
@@ -907,19 +1084,54 @@ function op(name: string, args: Obj): Obj {
         );
         return { authenticated: true };
       });
-    case "flow.cancel":
+    case "flow.status": {
+      const result = tx(() => { expireFlows(); return publicFlow(args); });
+      if (result === null)
+        throw new CliError("not_found", "auth_flow_not_found", "Authentication flow does not exist or its retention period has ended.");
+      return result;
+    }
+    case "flow.helper":
       return tx(() => {
+        expireFlows();
+        const flow = row("SELECT * FROM auth_flows WHERE flow_id=? AND helper_instance_id=? AND state IN ('pending','submitting')",
+          str(args.flow_id), str(args.helper_instance_id));
+        const p = flow ? row("SELECT * FROM profiles WHERE profile_id=? AND deleted_at IS NULL", str(flow.profile_id)) : undefined;
+        if (!flow || !p || flow.auth_generation !== p.auth_generation || flow.target_digest !== p.target_digest || flow.trust_digest !== p.trust_digest)
+          throw new CliError("authentication", "auth_flow_unavailable", "Login flow is no longer active for this target.");
+        return { profile: publicProfile(p), flow, state_store_id: row("SELECT state_store_id FROM store_meta")?.state_store_id ?? null };
+      });
+    case "flow.heartbeat":
+      return tx(() => {
+        expireFlows();
+        const flow = row("SELECT * FROM auth_flows WHERE flow_id=? AND helper_instance_id=?",
+          str(args.flow_id), str(args.helper_instance_id));
+        if (!flow) throw new CliError("not_found", "auth_flow_not_found", "Authentication helper binding does not exist.");
+        const active = ["pending", "submitting"].includes(str(flow.state));
+        if (active) run("UPDATE auth_flows SET heartbeat_at=? WHERE flow_id=?", now(), str(flow.flow_id));
+        return { active, flow_state: flow.state ?? null };
+      });
+    case "flow.fail":
+      return tx(() => {
+        const reasons = ["helper_unavailable", "login_rejected", "login_transport_failed", "credential_store_unavailable", "invalid_credential", "ca_changed", "unsafe_ca_file"];
+        const reason = str(args.reason);
+        if (!reasons.includes(reason)) throw new CliError("internal", "contract_violation", "Invalid flow failure reason.");
+        expireFlows();
+        run("UPDATE auth_flows SET state='failed',terminal_at=?,reason_json=?,record_version=record_version+1 WHERE flow_id=? AND helper_instance_id=? AND state IN ('pending','submitting')",
+          now(), canonical({ subtype: reason }), str(args.flow_id), str(args.helper_instance_id));
+        run("UPDATE credential_metadata SET status='cleanup_pending',updated_at=? WHERE status='staged' AND flow_id IN (SELECT flow_id FROM auth_flows WHERE flow_id=? AND helper_instance_id=? AND state='failed')",
+          now(), str(args.flow_id), str(args.helper_instance_id));
+        return {};
+      });
+    case "flow.cancel": {
+      const result = tx(() => {
+        expireFlows();
         const f = row(
           "SELECT * FROM auth_flows WHERE flow_id=? AND profile_label=?",
           str(args.flow_id),
           str(args.name),
         );
-        if (!f)
-          throw new CliError(
-            "not_found",
-            "auth_flow_not_found",
-            "Authentication flow does not exist.",
-          );
+        if (!f || (f.terminal_at !== null && str(f.terminal_at) < new Date(Date.now() - 86400000).toISOString()))
+          return null;
         const changed = ["pending", "submitting"].includes(str(f.state));
         if (changed) {
           run(
@@ -939,6 +1151,10 @@ function op(name: string, args: Obj): Obj {
           changed,
         };
       });
+      if (result === null)
+        throw new CliError("not_found", "auth_flow_not_found", "Authentication flow does not exist or its retention period has ended.");
+      return result;
+    }
     default:
       throw new CliError(
         "internal",

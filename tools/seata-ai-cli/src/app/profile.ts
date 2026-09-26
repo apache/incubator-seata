@@ -16,6 +16,41 @@ import { type Obj, object, str, digest } from "../protocol/value.js";
 import { CliError } from "../protocol/error.js";
 import { StateStore } from "../adapter/statestore/client.js";
 import { type Invocation } from "../command/registry.js";
+import { cleanupCredentials, recoverCredentials } from "../adapter/auth/cleanup.js";
+import { adapterId, ManagementReader } from "../adapter/management/read.js";
+import { loadCa } from "../adapter/transport/ca.js";
+import { profileProxy, proxyUrl } from "../adapter/transport/proxy.js";
+
+export async function resolveSetupEndpoints(input: Obj, accepted: boolean, signal: AbortSignal): Promise<Obj> {
+  const validated = profileConfig(input, accepted), management = object(validated.config.management);
+  if (management.naming_endpoint !== undefined) return validated.config;
+  if (!accepted) throw new CliError("policy", "trust_required", "Accept the supplied endpoint before probing its read-only interfaces.");
+  if (management.compatibility_id !== adapterId)
+    throw new CliError("policy", "compatibility_unverified", "No pinned endpoint discovery adapter exists for this compatibility ID.");
+  if (management.deployment === "standalone_console")
+    throw new CliError("api", "management_endpoint_missing", "A standalone Console requires an explicit NamingServer endpoint.");
+  const proxy = profileProxy(management);
+  const ca = loadCa(str(management.ca_ref), signal);
+  const target = object(validated.config.target), base = str(management.console_endpoint);
+  const client = new ManagementReader({ endpoint: base, consoleEndpoint: base, namespace: str(target.namespace),
+    ...(target.vgroup !== undefined ? { vgroup: str(target.vgroup) } : { cluster: str(target.cluster) }) }, signal, undefined, async () => {
+      if (loadCa(str(management.ca_ref), signal) !== ca)
+        throw new CliError("policy", "ca_changed", "CA content changed during endpoint discovery.");
+    }, ca, proxy);
+  try {
+    // Probe only pinned GET interfaces below the exact accepted base path.
+    // No saved credential, discovered host, redirect or service-port guessing.
+    await client.consoleProbe();
+    await client.namespaces();
+  } catch (error) {
+    signal.throwIfAborted();
+    if (error instanceof CliError && error.type === "cancelled") throw error;
+    throw new CliError("api", "management_endpoint_missing", "The accepted endpoint did not provide both pinned anonymous read interfaces; specify the NamingServer endpoint explicitly.");
+  }
+  // This establishes available interfaces at one base URL, not physical
+  // co-location or a certified integrated server deployment.
+  return { ...validated.config, management: { ...management, naming_endpoint: base } };
+}
 
 export function endpoint(
   raw: string,
@@ -99,11 +134,10 @@ export function profileConfig(
       "proxy_endpoint requires explicit proxy mode.",
     );
   if (m.proxy_endpoint)
-    management.proxy_endpoint = endpoint(
-      str(m.proxy_endpoint),
-      environment,
-      accepted,
-    );
+    // A CONNECT proxy is a separately accepted hop, not the management origin.
+    // HTTPS remains mandatory for production Console/Naming endpoints above.
+    management.proxy_endpoint = proxyUrl(str(m.proxy_endpoint)).href.replace(/\/$/, "");
+  profileProxy(management);
   const policy: Obj = {
     require_https: true,
     allow_selector_only_high_risk: false,
@@ -137,25 +171,17 @@ export function profileConfig(
 export async function localCommand(
   inv: Invocation,
   signal: AbortSignal,
+  warn?: (warning: Obj) => void,
 ): Promise<Obj> {
   const store = new StateStore(undefined, Number(inv.options.timeout_ms));
   try {
     switch (inv.command) {
       case "setup.initialize":
       case "profile.create": {
-        const config = profileConfig(
-          object(inv.input.config),
-          inv.input.accept_target === true,
-        );
-        if (
-          inv.command === "setup.initialize" &&
-          !object(config.config.management).naming_endpoint
-        )
-          throw new CliError(
-            "api",
-            "management_endpoint_missing",
-            "Provide the explicit NamingServer endpoint; integrated discovery is not yet verified.",
-          );
+        const accepted = inv.input.accept_target === true;
+        const input = inv.command === "setup.initialize"
+          ? await resolveSetupEndpoints(object(inv.input.config), accepted, signal) : object(inv.input.config);
+        const config = profileConfig(input, accepted);
         const result = await store.call("profile.create", config, signal);
         return inv.command === "setup.initialize"
           ? {
@@ -186,7 +212,7 @@ export async function localCommand(
           object(merged),
           inv.input.accept_target === true,
         );
-        return await store.call(
+        const result = await store.call(
           "profile.update",
           {
             ...config,
@@ -195,6 +221,7 @@ export async function localCommand(
           },
           signal,
         );
+        return { ...result, credential_cleanup: await cleanupCredentials(store, signal) };
       }
       case "auth.status": {
         if (inv.input.verify === true)
@@ -209,21 +236,40 @@ export async function localCommand(
           signal,
         );
       }
-      case "auth.logout":
-        return await store.call(
+      case "auth.logout": {
+        const result = await store.call(
           "auth.logout",
           { name: inv.context.profile ?? null },
           signal,
         );
-      case "auth.login.cancel":
-        return await store.call(
-          "flow.cancel",
-          {
-            name: inv.context.profile ?? null,
-            flow_id: inv.input.flow_id ?? null,
-          },
-          signal,
-        );
+        return { ...result, credential_cleanup: await cleanupCredentials(store, signal) };
+      }
+      case "profile.delete": {
+        const result = await store.call("profile.delete", inv.input, signal);
+        return { ...result, credential_cleanup: await cleanupCredentials(store, signal) };
+      }
+      case "auth.login.cancel": {
+        try {
+          return await store.call(
+            "flow.cancel",
+            {
+              name: inv.context.profile ?? null,
+              flow_id: inv.input.flow_id ?? null,
+            },
+            signal,
+          );
+        } finally {
+          if (await cleanupCredentials(store, signal) === "pending")
+            warn?.({ code: "credential_cleanup_pending", message: "Local credential cleanup is still pending." });
+        }
+      }
+      case "auth.login.status": {
+        try {
+          return await store.call("flow.status", { name: inv.context.profile ?? null, flow_id: inv.input.flow_id ?? null }, signal);
+        } finally {
+          await recoverCredentials(store, signal, warn, Number(inv.options.timeout_ms));
+        }
+      }
       default:
         return await store.call(inv.command, inv.input, signal);
     }

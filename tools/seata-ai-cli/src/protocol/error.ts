@@ -29,6 +29,7 @@ export const exits = {
   indeterminate: 12,
 } as const;
 export type ErrorType = keyof typeof exits;
+import type { Obj } from "./value.js";
 export class CliError extends Error {
   constructor(
     public readonly type: ErrorType,
@@ -53,4 +54,9 @@ export function safeError(error: unknown): CliError {
         "unexpected",
         "The operation could not be completed.",
       );
+}
+export class PartialResult extends CliError {
+  constructor(readonly data: Obj, subtype: string, message: string) {
+    super("partial_failure", subtype, message, "read_only");
+  }
 }

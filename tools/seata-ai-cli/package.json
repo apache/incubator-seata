@@ -16,6 +16,7 @@
     "schemas/",
     "api/",
     "compatibility/",
+    "skills/",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -31,7 +32,9 @@
   "dependencies": {
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
-    "commander": "15.0.0"
+    "commander": "15.0.0",
+    "fflate": "0.8.3",
+    "yaml": "2.9.1"
   },
   "devDependencies": {
     "@types/node": "24.13.6",
