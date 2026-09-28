@@ -225,6 +225,12 @@ public final class ConfigurationFactory {
                             ConfigurationProvider.class, Objects.requireNonNull(configTypeName), false)
                     .provide();
             return configuration;
+        } catch (EnhancedServiceNotFoundException exx) {
+            if (FILE_TYPE.equalsIgnoreCase(configTypeName) && exx.getCause() == null) {
+                LOGGER.debug("No optional file configuration provider found; using FileConfiguration");
+            } else {
+                LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
+            }
         } catch (Exception exx) {
             LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }
