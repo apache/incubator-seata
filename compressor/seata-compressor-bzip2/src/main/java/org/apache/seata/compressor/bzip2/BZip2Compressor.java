@@ -35,4 +35,9 @@ public class BZip2Compressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return BZip2Util.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return BZip2Util.decompress(bytes, maxOutputSize);
+    }
 }
