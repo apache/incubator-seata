@@ -137,8 +137,18 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private ScheduledFuture<?> scheduledFuture;
 
+    private volatile boolean stopping;
+
+    /** Stop metadata submissions before JRaft tears down its apply queue. */
+    public synchronized void prepareShutdown() {
+        stopping = true;
+        if (scheduledFuture != null) {
+            scheduledFuture.cancel(false);
+        }
+    }
+
     public boolean isLeader() {
-        return this.leaderTerm.get() > 0;
+        return !stopping && this.leaderTerm.get() > 0;
     }
 
     public RaftStateMachine(String group) {
@@ -231,7 +241,10 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     @Override
-    public void onLeaderStart(final long term) {
+    public synchronized void onLeaderStart(final long term) {
+        if (stopping) {
+            return;
+        }
         boolean leader = isLeader();
         this.leaderTerm.set(term);
         LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
@@ -324,7 +337,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         return list.contains(nodePeer);
     }
 
-    public void syncMetadata() {
+    public synchronized void syncMetadata() {
         if (isLeader()) {
             SeataClusterContext.bindGroup(group);
             try {
