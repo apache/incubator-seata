@@ -128,4 +128,18 @@ public class ZipUtilTest {
 
         Assertions.assertEquals(text, new String(secondDecompressed, StandardCharsets.UTF_8));
     }
+
+    @Test
+    public void testLimitAcrossEntries() throws Exception {
+        java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zip = new java.util.zip.ZipOutputStream(bytes)) {
+            for (String name : new String[] {"first", "second"}) {
+                zip.putNextEntry(new java.util.zip.ZipEntry(name));
+                zip.write(new byte[1024]);
+                zip.closeEntry();
+            }
+        }
+        Assertions.assertArrayEquals(new byte[2048], ZipUtil.decompress(bytes.toByteArray(), 2048));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ZipUtil.decompress(bytes.toByteArray(), 2047));
+    }
 }
