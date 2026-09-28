@@ -35,6 +35,7 @@
         <spring-boot-for-server.version>4.0.6</spring-boot-for-server.version>
         <spring-framework-for-server.version>7.0.7</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
+        <sofa-common-tools-for-server.version>2.1.0</sofa-common-tools-for-server.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
@@ -290,6 +291,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa.common</groupId>
+            <artifactId>sofa-common-tools</artifactId>
+            <version>${sofa-common-tools-for-server.version}</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.janino</groupId>
