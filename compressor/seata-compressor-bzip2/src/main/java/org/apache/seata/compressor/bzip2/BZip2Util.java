@@ -16,6 +16,7 @@
  */
 package org.apache.seata.compressor.bzip2;
 
+import org.apache.seata.core.compressor.BoundedByteArrayOutputStream;
 import org.apache.tools.bzip2.CBZip2InputStream;
 import org.apache.tools.bzip2.CBZip2OutputStream;
 
@@ -46,10 +47,14 @@ public class BZip2Util {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        return decompress(bytes, Integer.MAX_VALUE);
+    }
+
+    public static byte[] decompress(byte[] bytes, int maxOutputSize) {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream out = new BoundedByteArrayOutputStream(maxOutputSize);
         ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
         try (CBZip2InputStream bzip2 = new CBZip2InputStream(bis)) {
             byte[] buffer = new byte[BUFFER_SIZE];
