@@ -73,7 +73,7 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                     instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
-            boolean filterByStatus = param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null;
+            boolean filterByStatus = isKnownStatus(param.getStatus());
             if (isNotBlank(param.getXid())) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
@@ -112,5 +112,17 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
         convertToGlobalSessionVo(result, globalSessions);
 
         return PageResult.success(result, total.intValue(), param.getPageNum(), param.getPageSize());
+    }
+
+    /**
+     * {@link GlobalStatus#get(int)} throws for a code outside the enum.
+     * An unrecognized status is not a filter.
+     */
+    private static boolean isKnownStatus(Integer status) {
+        if (status == null) {
+            return false;
+        }
+        int code = status;
+        return code >= 0 && code < GlobalStatus.values().length;
     }
 }

@@ -82,6 +82,15 @@ class GlobalSessionRedisServiceImplQueryTest {
         assertEquals(1, result.getData().size());
     }
 
+    @Test
+    void queryByXidAndUnrecognizedStatusKeepsTheSession() throws Exception {
+        PageResult<GlobalSessionVO> result = query(999);
+
+        assertTrue(result.isSuccess());
+        assertEquals(1, result.getTotal());
+        assertEquals(1, result.getData().size());
+    }
+
     private PageResult<GlobalSessionVO> query(Integer status) throws Exception {
         GlobalSession session = new GlobalSession();
         session.setXid("192.168.1.1:8091:1001");
