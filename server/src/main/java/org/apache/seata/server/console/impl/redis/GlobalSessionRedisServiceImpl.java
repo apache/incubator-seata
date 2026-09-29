@@ -74,7 +74,8 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
             boolean filterByStatus = isKnownStatus(param.getStatus());
-            if (isNotBlank(param.getXid())) {
+            boolean xidRequested = isNotBlank(param.getXid());
+            if (xidRequested) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
                 sessionCondition.setLazyLoadBranch(!param.isWithBranch());
@@ -83,10 +84,14 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
             }
 
             if (filterByStatus) {
-                if (CollectionUtils.isNotEmpty(globalSessions)) {
-                    globalSessionsNew = globalSessions.stream()
-                            .filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus()))
-                            .collect(Collectors.toList());
+                if (xidRequested) {
+                    // A missing xid must not fall through to a status-wide query.
+                    if (CollectionUtils.isNotEmpty(globalSessions)) {
+                        globalSessionsNew = globalSessions.stream()
+                                .filter(globalSession ->
+                                        globalSession.getStatus().getCode() == (param.getStatus()))
+                                .collect(Collectors.toList());
+                    }
                     total = (long) globalSessionsNew.size();
                 } else {
                     total = instance.countByGlobalSessions(new GlobalStatus[] {GlobalStatus.get(param.getStatus())});

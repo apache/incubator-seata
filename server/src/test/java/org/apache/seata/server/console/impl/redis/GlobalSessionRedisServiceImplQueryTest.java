@@ -41,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -89,6 +91,40 @@ class GlobalSessionRedisServiceImplQueryTest {
         assertTrue(result.isSuccess());
         assertEquals(1, result.getTotal());
         assertEquals(1, result.getData().size());
+    }
+
+    @Test
+    void queryByMissingXidAndStatusReturnsEmpty() throws Exception {
+        GlobalSession other = new GlobalSession();
+        other.setXid("192.168.1.1:8091:9999");
+        other.setStatus(GlobalStatus.Begin);
+        Field branchSessions = GlobalSession.class.getDeclaredField("branchSessions");
+        branchSessions.setAccessible(true);
+        branchSessions.set(other, new ArrayList<>());
+
+        RedisTransactionStoreManager store = mock(RedisTransactionStoreManager.class);
+        when(store.readSession(any(SessionCondition.class))).thenReturn(Collections.emptyList());
+        when(store.readSessionStatusByPage(any(GlobalSessionParam.class))).thenReturn(Collections.singletonList(other));
+        when(store.countByGlobalSessions(any(GlobalStatus[].class))).thenReturn(1L);
+
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageNum(1);
+        param.setPageSize(20);
+        param.setXid("192.168.1.1:8091:404");
+        param.setStatus(GlobalStatus.Begin.getCode());
+        param.setWithBranch(false);
+
+        try (MockedStatic<RedisTransactionStoreManagerFactory> factory =
+                mockStatic(RedisTransactionStoreManagerFactory.class)) {
+            factory.when(RedisTransactionStoreManagerFactory::getInstance).thenReturn(store);
+            PageResult<GlobalSessionVO> result = new GlobalSessionRedisServiceImpl().query(param);
+
+            assertTrue(result.isSuccess());
+            assertEquals(0, result.getTotal());
+            assertEquals(0, result.getData().size());
+            verify(store, never()).readSessionStatusByPage(any(GlobalSessionParam.class));
+            verify(store, never()).countByGlobalSessions(any(GlobalStatus[].class));
+        }
     }
 
     private PageResult<GlobalSessionVO> query(Integer status) throws Exception {
