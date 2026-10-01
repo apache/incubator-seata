@@ -70,6 +70,9 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
+      - name: "Test distribution server launcher"
+        if: matrix.java == '17'
+        run: bash distribution/src/test/bin/seata-server-test.sh
       # step 4
       - name: "Print maven version"
         run: ./mvnw -version
