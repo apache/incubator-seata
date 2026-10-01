@@ -123,6 +123,9 @@ public class DefaultTransactionManager implements TransactionManager {
         globalReport.setXid(xid);
         globalReport.setGlobalStatus(globalStatus);
         GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(response.getTransactionExceptionCode(), response.getMsg());
+        }
         return response.getGlobalStatus();
     }
 
