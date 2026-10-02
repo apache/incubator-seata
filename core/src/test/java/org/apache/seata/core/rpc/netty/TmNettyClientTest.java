@@ -35,6 +35,11 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
 /**
  * The type Tm rpc client test.
  */
@@ -75,39 +80,55 @@ public class TmNettyClientTest {
     public void testInit() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
+        TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmNettyRemotingClient =
                 TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
-        ConfigurationCache.clear();
-        tmNettyRemotingClient.init();
-        // check if attr of tmNettyClient object has been set success
-        Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
-        clientBootstrapField.setAccessible(true);
-        NettyClientBootstrap clientBootstrap = (NettyClientBootstrap) clientBootstrapField.get(tmNettyRemotingClient);
-        Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
-        bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
+        Field managerField = getDeclaredField(tmNettyRemotingClient, "clientChannelManager");
+        managerField.setAccessible(true);
+        NettyClientChannelManager originalManager = tmNettyRemotingClient.getClientChannelManager();
+        NettyClientChannelManager manager = mock(NettyClientChannelManager.class);
+        managerField.set(tmNettyRemotingClient, manager);
+        try {
+            tmNettyRemotingClient.init();
+            verify(manager).initReconnect(eq(transactionServiceGroup), anyBoolean());
+            // check if attr of tmNettyClient object has been set success
+            Field clientBootstrapField = getDeclaredField(tmNettyRemotingClient, "clientBootstrap");
+            clientBootstrapField.setAccessible(true);
+            NettyClientBootstrap clientBootstrap =
+                    (NettyClientBootstrap) clientBootstrapField.get(tmNettyRemotingClient);
+            Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
+            bootstrapField.setAccessible(true);
+            Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
 
-        Assertions.assertNotNull(bootstrap);
-        Field optionsField = getDeclaredField(bootstrap, "options");
-        optionsField.setAccessible(true);
-        Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>) optionsField.get(bootstrap);
-        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.TCP_NODELAY));
-        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
-        Assertions.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
-        Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
-        Assertions.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
+            Assertions.assertNotNull(bootstrap);
+            Field optionsField = getDeclaredField(bootstrap, "options");
+            optionsField.setAccessible(true);
+            Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>) optionsField.get(bootstrap);
+            Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.TCP_NODELAY));
+            Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
+            Assertions.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
+            Assertions.assertEquals(Boolean.TRUE, options.get(ChannelOption.SO_KEEPALIVE));
+            Assertions.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
 
-        Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
-        channelFactoryField.setAccessible(true);
-        ChannelFactory<? extends Channel> channelFactory =
-                (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
-        Assertions.assertNotNull(channelFactory);
+            Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
+            channelFactoryField.setAccessible(true);
+            ChannelFactory<? extends Channel> channelFactory =
+                    (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
+            Assertions.assertNotNull(channelFactory);
 
-        if (Epoll.isAvailable()) {
-            Assertions.assertTrue(channelFactory.newChannel() instanceof EpollSocketChannel);
-        } else {
-            Assertions.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
+            Channel channel = channelFactory.newChannel();
+            try {
+                if (Epoll.isAvailable()) {
+                    Assertions.assertTrue(channel instanceof EpollSocketChannel);
+                } else {
+                    Assertions.assertTrue(channel instanceof NioSocketChannel);
+                }
+            } finally {
+                channel.unsafe().closeForcibly();
+            }
+        } finally {
+            tmNettyRemotingClient.destroy();
+            managerField.set(tmNettyRemotingClient, originalManager);
         }
     }
 

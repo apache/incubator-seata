@@ -127,11 +127,19 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
                 ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
                 ResultSet onUpdateColumns = dbmd.getVersionColumns(catalogName, schemaName, tableName)) {
+            boolean mixedCaseIdentifiers = dbmd.supportsMixedCaseIdentifiers();
             while (rsColumns.next()) {
+                // getColumns accepts a table name pattern and may return columns from similar tables.
+                String columnTableName = rsColumns.getString("TABLE_NAME");
+                if (mixedCaseIdentifiers
+                        ? !tableName.equals(columnTableName)
+                        : !tableName.equalsIgnoreCase(columnTableName)) {
+                    continue;
+                }
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
                 col.setTableSchemaName(rsColumns.getString("TABLE_SCHEM"));
-                col.setTableName(rsColumns.getString("TABLE_NAME"));
+                col.setTableName(columnTableName);
                 col.setColumnName(rsColumns.getString("COLUMN_NAME"));
                 col.setDataType(rsColumns.getInt("DATA_TYPE"));
                 col.setDataTypeName(rsColumns.getString("TYPE_NAME"));
