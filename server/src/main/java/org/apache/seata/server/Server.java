@@ -68,8 +68,9 @@ public class Server {
         ParameterParser parameterParser = new ParameterParser(args);
 
         // initialize the metrics
-        MetricsManager.get().init();
-        ServerRunner.addDisposable(MetricsManager.get());
+        MetricsManager metricsManager = MetricsManager.get();
+        metricsManager.init();
+        ServerRunner.addDisposable(metricsManager);
 
         ThreadPoolExecutor workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
                 "ServerHandlerThread",

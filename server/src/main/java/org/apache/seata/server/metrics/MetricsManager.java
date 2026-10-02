@@ -64,15 +64,25 @@ public class MetricsManager implements Disposable {
                 .getBoolean(
                         ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, DEFAULT_METRICS_ENABLED);
         if (enabled) {
-            registry = RegistryFactory.getInstance();
-            if (registry != null) {
-                exporters.addAll(ExporterFactory.getInstanceList());
-                // only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
-                if (exporters.size() != 0) {
-                    exporters.forEach(exporter -> exporter.setRegistry(registry));
-                    subscriber = new MetricsSubscriber(registry);
-                    EventBusManager.get().register(subscriber);
+            try {
+                registry = RegistryFactory.getInstance();
+                if (registry != null) {
+                    exporters.addAll(ExporterFactory.getInstanceList());
+                    // only at least one metrics exporter implement had imported in pom then need register
+                    // MetricsSubscriber
+                    if (!exporters.isEmpty()) {
+                        exporters.forEach(exporter -> exporter.setRegistry(registry));
+                        subscriber = new MetricsSubscriber(registry);
+                        EventBusManager.get().register(subscriber);
+                    }
                 }
+            } catch (RuntimeException | Error failure) {
+                try {
+                    destroy();
+                } catch (RuntimeException | Error cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                }
+                throw failure;
             }
         }
     }

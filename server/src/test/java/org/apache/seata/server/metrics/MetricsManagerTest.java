@@ -82,7 +82,7 @@ class MetricsManagerTest {
             buses.when(EventBusManager::get).thenReturn(bus);
             manager.init();
             manager.init();
-            ArgumentCaptor<Object> subscriber = ArgumentCaptor.forClass(Object.class);
+            ArgumentCaptor<MetricsSubscriber> subscriber = ArgumentCaptor.forClass(MetricsSubscriber.class);
             verify(bus).register(subscriber.capture());
             verify(first).setRegistry(registry);
             verify(second).setRegistry(registry);
@@ -96,6 +96,38 @@ class MetricsManagerTest {
             factories.verify(ExporterFactory::getInstanceList);
         } finally {
             manager.destroy();
+        }
+    }
+
+    @Test
+    void failedInitializationClosesExportersAndCanRetry() throws Exception {
+        Configuration config = mock(Configuration.class);
+        when(config.getBoolean(anyString(), anyBoolean())).thenReturn(true);
+        Registry registry = mock(Registry.class);
+        EventBus bus = mock(EventBus.class);
+        Exporter exporter = mock(Exporter.class);
+        RuntimeException failure = new IllegalStateException("injected setup failure");
+        doThrow(failure).doNothing().when(exporter).setRegistry(registry);
+        MetricsManager manager = new MetricsManager();
+        try (MockedStatic<ConfigurationFactory> configs = mockStatic(ConfigurationFactory.class);
+                MockedStatic<RegistryFactory> registries = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> factories = mockStatic(ExporterFactory.class);
+                MockedStatic<EventBusManager> buses = mockStatic(EventBusManager.class)) {
+            configs.when(ConfigurationFactory::getInstance).thenReturn(config);
+            registries.when(RegistryFactory::getInstance).thenReturn(registry);
+            factories.when(ExporterFactory::getInstanceList).thenReturn(Arrays.asList(exporter));
+            buses.when(EventBusManager::get).thenReturn(bus);
+            try {
+                assertSame(failure, assertThrows(RuntimeException.class, manager::init));
+                assertNull(manager.getRegistry());
+                verify(exporter).close();
+                verify(registry).clearUp();
+                manager.init();
+                assertSame(registry, manager.getRegistry());
+                verify(bus).register(any(MetricsSubscriber.class));
+            } finally {
+                manager.destroy();
+            }
         }
     }
 
