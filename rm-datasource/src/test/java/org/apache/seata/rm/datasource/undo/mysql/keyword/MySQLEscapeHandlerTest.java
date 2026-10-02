@@ -28,11 +28,16 @@ import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.sql.Types;
+import java.util.stream.Stream;
 
 /**
  * The type My sql keyword checker test.
@@ -47,6 +52,85 @@ public class MySQLEscapeHandlerTest {
     public void testCheck() {
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.MYSQL);
         Assertions.assertTrue(escapeHandler.checkIfKeyWords("desc"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("columnNamesToEscape")
+    public void testColumnNameEscaping(String columnName, String expected) {
+        String escaped = ColumnUtils.addEscape(columnName, JdbcConstants.MYSQL);
+        Assertions.assertEquals(expected, escaped);
+        Assertions.assertEquals(expected, ColumnUtils.addEscape(escaped, JdbcConstants.MYSQL));
+    }
+
+    private static Stream<Arguments> columnNamesToEscape() {
+        return Stream.of(
+                Arguments.of("current_ quantity", "`current_ quantity`"),
+                Arguments.of("current_\tquantity", "`current_\tquantity`"),
+                Arguments.of("current_\nquantity", "`current_\nquantity`"),
+                Arguments.of(" quantity", "` quantity`"),
+                Arguments.of("\tquantity", "`\tquantity`"),
+                Arguments.of("`current_ quantity`", "`current_ quantity`"),
+                Arguments.of("`current_. quantity`", "`current_. quantity`"),
+                Arguments.of("sku.current_ quantity", "`sku`.`current_ quantity`"),
+                Arguments.of("`sku`.current_ quantity", "`sku`.`current_ quantity`"),
+                Arguments.of("sku.`current_ quantity`", "sku.`current_ quantity`"),
+                Arguments.of("`sku`.`current_ quantity`", "`sku`.`current_ quantity`"),
+                Arguments.of("quantity", "quantity"),
+                Arguments.of("desc", "`desc`"),
+                Arguments.of("`desc`", "`desc`"),
+                Arguments.of("", ""),
+                Arguments.of(" ", " "),
+                Arguments.of(null, null));
+    }
+
+    @Test
+    public void testUpdateWithWhitespaceColumnNames() {
+        SQLUndoLog sqlUndoLog = whitespaceColumnUndoLog(SQLType.UPDATE);
+        Assertions.assertEquals(
+                "UPDATE sku SET `current_ quantity` = ? WHERE `sku id` = ?",
+                new MySQLUndoUpdateExecutorExtension(sqlUndoLog).getSql().trim());
+    }
+
+    @Test
+    public void testInsertWithWhitespacePrimaryKey() {
+        SQLUndoLog sqlUndoLog = whitespaceColumnUndoLog(SQLType.INSERT);
+        Assertions.assertEquals(
+                "DELETE FROM sku WHERE `sku id` = ?",
+                new MySQLUndoInsertExecutorExtension(sqlUndoLog).getSql().trim());
+    }
+
+    @Test
+    public void testDeleteWithWhitespaceColumnNames() {
+        SQLUndoLog sqlUndoLog = whitespaceColumnUndoLog(SQLType.DELETE);
+        Assertions.assertEquals(
+                "INSERT INTO sku (`current_ quantity`, `sku id`) VALUES (?, ?)",
+                new MySQLUndoDeleteExecutorExtension(sqlUndoLog).getSql());
+    }
+
+    private static SQLUndoLog whitespaceColumnUndoLog(SQLType sqlType) {
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setTableName("sku");
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setBeforeImage(
+                sqlType == SQLType.INSERT
+                        ? TableRecords.empty(new UndoExecutorTest.MockTableMeta("sku", "sku id"))
+                        : whitespaceColumnImage(7240));
+        sqlUndoLog.setAfterImage(
+                sqlType == SQLType.DELETE
+                        ? TableRecords.empty(new UndoExecutorTest.MockTableMeta("sku", "sku id"))
+                        : whitespaceColumnImage(7241));
+        return sqlUndoLog;
+    }
+
+    private static TableRecords whitespaceColumnImage(int quantity) {
+        TableRecords image = new TableRecords(new UndoExecutorTest.MockTableMeta("sku", "sku id"));
+        Row row = new Row();
+        Field pkField = new Field("sku id", Types.INTEGER, 1068);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
+        row.add(pkField);
+        row.add(new Field("current_ quantity", Types.INTEGER, quantity));
+        image.add(row);
+        return image;
     }
 
     /**

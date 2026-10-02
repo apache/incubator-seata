@@ -1120,11 +1120,24 @@ public class MySQLEscapeHandler implements EscapeHandler {
         if (StringUtils.isBlank(columnName)) {
             return false;
         }
-        columnName = columnName.trim();
         if (containsEscape(columnName)) {
             return false;
         }
+        for (int i = 0; i < columnName.length(); i++) {
+            if (Character.isWhitespace(columnName.charAt(i))) {
+                return true;
+            }
+        }
         return checkIfKeyWords(columnName);
+    }
+
+    @Override
+    public String addColNameEscape(String colName, TableMeta tableMeta) {
+        // Preserve quoted identifiers containing dots before splitting qualified names.
+        if (StringUtils.isNotBlank(colName) && containsEscape(colName)) {
+            return colName;
+        }
+        return EscapeHandler.super.addColNameEscape(colName, tableMeta);
     }
 
     @Override
