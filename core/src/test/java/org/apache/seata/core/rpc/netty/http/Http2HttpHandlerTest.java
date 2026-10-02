@@ -307,54 +307,44 @@ class Http2HttpHandlerTest {
                 new DefaultHttp2DataFrame(Unpooled.copiedBuffer(json2, StandardCharsets.UTF_8), true);
         channel.writeInbound(dataFrame2);
 
-        Http2StreamFrame frame1 = null, frame2 = null;
-        long deadline = System.currentTimeMillis() + 5000;
-        while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-            if (frame1 == null) {
-                frame1 = channel.readOutbound();
-            }
-            if (frame2 == null) {
-                frame2 = channel.readOutbound();
-            }
-            if (frame1 == null || frame2 == null) {
-                Thread.sleep(500);
-            }
-        }
-        assertNotNull(frame1);
-        assertNotNull(frame2);
+        assertSuccessfulResponse("Processed: multiFrame");
     }
 
     @Test
-    void testHttp2PostRequestWithInvalidJson() throws Exception {
-        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
-            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
-            doNothing().when(mockChain).doFilter(any());
-            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+    void testHttp2InvalidJsonDoesNotDiscardQueryParameters() {
+        HttpRequestFilterManager.initializeFilters();
+        Http2Headers headers = new DefaultHttp2Headers();
+        headers.method("POST");
+        headers.path("/test?param=jsonValue");
+        headers.set("content-type", "application/json");
+        channel.writeInbound(new DefaultHttp2HeadersFrame(headers, false));
+        channel.writeInbound(
+                new DefaultHttp2DataFrame(Unpooled.copiedBuffer("{invalid json}", StandardCharsets.UTF_8), true));
 
-            String invalidJson = "{invalid json}";
-            Http2Headers headers = new DefaultHttp2Headers();
-            headers.method("POST");
-            headers.path("/test?param=jsonValue");
-            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
-            channel.writeInbound(headersFrame);
-            DefaultHttp2DataFrame dataFrame =
-                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(invalidJson, StandardCharsets.UTF_8), true);
-            channel.writeInbound(dataFrame);
+        // Body parsing is best-effort; this controller only requires a query parameter.
+        // A 500 response from an unrelated filter-chain failure must not pass this test.
+        assertSuccessfulResponse("Processed: jsonValue");
+    }
 
-            Http2StreamFrame frame1 = null, frame2 = null;
-            long deadline = System.currentTimeMillis() + 5000;
-            while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-                if (frame1 == null) {
-                    frame1 = channel.readOutbound();
-                }
-                if (frame2 == null) {
-                    frame2 = channel.readOutbound();
-                }
-                if (frame1 == null || frame2 == null) {
-                    Thread.sleep(500);
-                }
-            }
-            assertNotNull(frame1);
+    private void assertSuccessfulResponse(String expectedContent) {
+        Http2StreamFrame headers = waitForHttp2Response(5000);
+        assertTrue(headers instanceof DefaultHttp2HeadersFrame);
+        assertEquals(
+                "200", ((DefaultHttp2HeadersFrame) headers).headers().status().toString());
+        Http2StreamFrame data = waitForHttp2Response(5000);
+        assertTrue(data instanceof DefaultHttp2DataFrame);
+        DefaultHttp2DataFrame response = (DefaultHttp2DataFrame) data;
+        try {
+            assertEquals(
+                    expectedContent,
+                    OBJECT_MAPPER
+                            .readTree(response.content().toString(StandardCharsets.UTF_8))
+                            .asText());
+            assertTrue(response.isEndStream());
+        } catch (java.io.IOException e) {
+            throw new AssertionError("Response must contain valid JSON", e);
+        } finally {
+            response.release();
         }
     }
 
@@ -384,6 +374,7 @@ class Http2HttpHandlerTest {
 
     @org.junit.jupiter.api.AfterEach
     void tearDown() throws Exception {
+        channel.finishAndReleaseAll();
         // Clean up ControllerManager
         Field field = ControllerManager.class.getDeclaredField("HTTP_CONTROLLER_MAP");
         field.setAccessible(true);
