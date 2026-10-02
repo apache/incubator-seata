@@ -89,7 +89,12 @@ public class StateMachineDBTests extends AbstractServerTest {
         try {
             stopSeataServer();
             for (String name : new String[] {
-                "retryRollbacking", "retryCommitting", "asyncCommitting", "timeoutCheck", "undoLogDelete"
+                "syncProcessing",
+                "retryRollbacking",
+                "retryCommitting",
+                "asyncCommitting",
+                "timeoutCheck",
+                "undoLogDelete"
             }) {
                 ExecutorService executor = (ExecutorService) ReflectionTestUtils.getField(coordinator, name);
                 Assertions.assertTrue(executor.isShutdown(), name + " must stop before RM clients disconnect");
