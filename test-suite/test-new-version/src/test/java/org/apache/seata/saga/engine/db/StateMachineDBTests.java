@@ -38,6 +38,7 @@ import org.apache.seata.saga.rm.StateMachineEngineHolder;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
@@ -48,12 +49,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -82,9 +85,24 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @AfterAll
     public static void destroy() throws InterruptedException {
-        stopSeataServer();
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
+        DefaultCoordinator coordinator = DefaultCoordinator.getInstance();
+        try {
+            stopSeataServer();
+            for (String name : new String[] {
+                "syncProcessing",
+                "retryRollbacking",
+                "retryCommitting",
+                "asyncCommitting",
+                "timeoutCheck",
+                "undoLogDelete"
+            }) {
+                ExecutorService executor = (ExecutorService) ReflectionTestUtils.getField(coordinator, name);
+                Assertions.assertTrue(executor.isShutdown(), name + " must stop before RM clients disconnect");
+            }
+        } finally {
+            TmNettyRemotingClient.getInstance().destroy();
+            RmNettyRemotingClient.getInstance().destroy();
+        }
     }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance) {
