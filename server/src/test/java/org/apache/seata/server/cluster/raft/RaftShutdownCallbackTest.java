@@ -104,11 +104,13 @@ class RaftShutdownCallbackTest {
             metadataThread.start();
             assertTrue(metadataLocked.await(5, TimeUnit.SECONDS));
             leaderThread.start();
+            java.util.concurrent.locks.ReentrantLock lock =
+                    (java.util.concurrent.locks.ReentrantLock) ReflectionTestUtils.getField(stateMachine, "lock");
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-            while (leaderThread.getState() != Thread.State.WAITING && System.nanoTime() < deadline) {
+            while (!lock.hasQueuedThread(leaderThread) && System.nanoTime() < deadline) {
                 Thread.sleep(10);
             }
-            assertEquals(Thread.State.WAITING, leaderThread.getState());
+            assertTrue(lock.hasQueuedThread(leaderThread), "Leader callback must contend on the metadata lock");
             releaseMetadata.countDown();
             metadata.get(5, TimeUnit.SECONDS);
             leader.get(5, TimeUnit.SECONDS);
@@ -123,10 +125,6 @@ class RaftShutdownCallbackTest {
 
     @Test
     void stopsMetadataBeforeGroupShutdownAndIgnoresLateLeaderStart() throws Exception {
-        Object environment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        if (environment == null) {
-            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, new StandardEnvironment());
-        }
         try (MockedStatic<StoreConfig> store = mockStatic(StoreConfig.class);
                 MockedStatic<RaftServerManager> managers = mockStatic(RaftServerManager.class)) {
             store.when(StoreConfig::getSessionMode).thenReturn(SessionMode.FILE);
@@ -157,11 +155,6 @@ class RaftShutdownCallbackTest {
             verify(retry).cancel(false);
             verify(group).join();
             managers.verifyNoInteractions();
-        } finally {
-            if (environment == null) {
-                Map<?, ?> objects = (Map<?, ?>) ReflectionTestUtils.getField(ObjectHolder.class, "OBJECT_MAP");
-                objects.remove(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-            }
         }
     }
 }
