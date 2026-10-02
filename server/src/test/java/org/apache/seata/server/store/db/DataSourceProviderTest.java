@@ -52,11 +52,13 @@ import java.util.List;
 public class DataSourceProviderTest extends BaseSpringBootTest {
 
     private final List<AutoCloseable> dataSources = new ArrayList<>();
+    private List<Driver> registeredDrivers;
     private String originalDriver;
     private String originalMinConn;
 
     @BeforeEach
     void preserveConfiguration() {
+        registeredDrivers = Collections.list(DriverManager.getDrivers());
         originalDriver = System.getProperty("store.db.driverClassName");
         originalMinConn = System.getProperty("store.db.minConn");
         System.clearProperty("store.db.driverClassName");
@@ -103,6 +105,12 @@ public class DataSourceProviderTest extends BaseSpringBootTest {
                 dataSource.close();
             }
         } finally {
+            for (Driver driver : Collections.list(DriverManager.getDrivers())) {
+                if (!registeredDrivers.contains(driver)) {
+                    DriverManager.deregisterDriver(driver);
+                }
+            }
+            Assertions.assertEquals(registeredDrivers, Collections.list(DriverManager.getDrivers()));
             restoreProperty("store.db.driverClassName", originalDriver);
             restoreProperty("store.db.minConn", originalMinConn);
             EnhancedServiceLoader.unloadAll();
@@ -173,52 +181,58 @@ public class DataSourceProviderTest extends BaseSpringBootTest {
         URL driverJar =
                 org.h2.Driver.class.getProtectionDomain().getCodeSource().getLocation();
         try (URLClassLoader isolated = new URLClassLoader(new URL[] {driverJar}, Driver.class.getClassLoader())) {
-            Assertions.assertSame(
-                    isolated, Class.forName("org.h2.Driver", true, isolated).getClassLoader());
-            HikariDataSourceProvider provider = new HikariDataSourceProvider() {
-                @Override
-                protected ClassLoader getDriverClassLoader() {
-                    return isolated;
-                }
+            Class<?> isolatedDriver = Class.forName("org.h2.Driver", true, isolated);
+            try {
+                Assertions.assertSame(isolated, isolatedDriver.getClassLoader());
+                HikariDataSourceProvider provider = new HikariDataSourceProvider() {
+                    @Override
+                    protected ClassLoader getDriverClassLoader() {
+                        return isolated;
+                    }
 
-                @Override
-                protected String getDriverClassName() {
-                    return "org.h2.Driver";
-                }
+                    @Override
+                    protected String getDriverClassName() {
+                        return "org.h2.Driver";
+                    }
 
-                @Override
-                protected String getUrl() {
-                    return "jdbc:h2:mem:isolated_driver_test";
-                }
+                    @Override
+                    protected String getUrl() {
+                        return "jdbc:h2:mem:isolated_driver_test";
+                    }
 
-                @Override
-                protected String getUser() {
-                    return "sa";
-                }
+                    @Override
+                    protected String getUser() {
+                        return "sa";
+                    }
 
-                @Override
-                protected String getPassword() {
-                    return "";
-                }
+                    @Override
+                    protected String getPassword() {
+                        return "";
+                    }
 
-                @Override
-                protected DBType getDBType() {
-                    return DBType.H2;
-                }
+                    @Override
+                    protected DBType getDBType() {
+                        return DBType.H2;
+                    }
 
-                @Override
-                protected int getMinConn() {
-                    return 0;
+                    @Override
+                    protected int getMinConn() {
+                        return 0;
+                    }
+                };
+                try (HikariDataSource dataSource = (HikariDataSource) provider.generate();
+                        Connection connection = dataSource.getConnection();
+                        Statement statement = connection.createStatement();
+                        ResultSet result = statement.executeQuery("SELECT 1")) {
+                    Assertions.assertEquals("org.h2.Driver", dataSource.getDriverClassName());
+                    Assertions.assertTrue(result.next());
+                    Assertions.assertEquals(1, result.getInt(1));
+                    Assertions.assertSame(original, Thread.currentThread().getContextClassLoader());
                 }
-            };
-            try (HikariDataSource dataSource = (HikariDataSource) provider.generate();
-                    Connection connection = dataSource.getConnection();
-                    Statement statement = connection.createStatement();
-                    ResultSet result = statement.executeQuery("SELECT 1")) {
-                Assertions.assertEquals("org.h2.Driver", dataSource.getDriverClassName());
-                Assertions.assertTrue(result.next());
-                Assertions.assertEquals(1, result.getInt(1));
-                Assertions.assertSame(original, Thread.currentThread().getContextClassLoader());
+            } finally {
+                // DriverManager filters getDrivers() by the caller's loader. Let H2 deregister
+                // its own driver from inside the isolated loader before closing that loader.
+                isolatedDriver.getMethod("unload").invoke(null);
             }
         } finally {
             for (Driver driver : Collections.list(DriverManager.getDrivers())) {
