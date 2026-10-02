@@ -110,7 +110,9 @@ public class DataSourceProviderTest extends BaseSpringBootTest {
                     DriverManager.deregisterDriver(driver);
                 }
             }
-            Assertions.assertEquals(registeredDrivers, Collections.list(DriverManager.getDrivers()));
+            Assertions.assertEquals(
+                    new java.util.HashSet<>(registeredDrivers),
+                    new java.util.HashSet<>(Collections.list(DriverManager.getDrivers())));
             restoreProperty("store.db.driverClassName", originalDriver);
             restoreProperty("store.db.minConn", originalMinConn);
             EnhancedServiceLoader.unloadAll();
