@@ -16,10 +16,22 @@
  */
 package org.apache.seata.common.util;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class CycleDependencyHandlerTest {
+
+    @AfterEach
+    public void tearDown() {
+        CycleDependencyHandler.end();
+    }
 
     @Test
     public void testContainsObject() {
@@ -102,6 +114,167 @@ public class CycleDependencyHandlerTest {
             Assertions.assertTrue(result.contains("Object"));
         } finally {
             CycleDependencyHandler.end();
+        }
+    }
+
+    @Test
+    public void testWrapPropagatesFailureAndAllowsSameThreadReuse() {
+        Object obj = new Object();
+        IllegalStateException failure = new IllegalStateException("Conversion failed");
+
+        IllegalStateException thrown = Assertions.assertThrows(
+                IllegalStateException.class,
+                () -> CycleDependencyHandler.wrap(obj, ignored -> {
+                    throw failure;
+                }));
+
+        Assertions.assertSame(failure, thrown);
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
+        Assertions.assertFalse(CycleDependencyHandler.containsObject(obj));
+
+        AtomicInteger invocations = new AtomicInteger();
+        String result = CycleDependencyHandler.wrap(obj, current -> {
+            Assertions.assertSame(obj, current);
+            invocations.incrementAndGet();
+            return "converted";
+        });
+
+        Assertions.assertEquals("converted", result);
+        Assertions.assertEquals(1, invocations.get());
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
+    }
+
+    @Test
+    public void testNestedWrapSuccessPreservesOwnerState() {
+        Object owner = new Object();
+        Object nested = new Object();
+        CycleDependencyHandler.start();
+        CycleDependencyHandler.addObject(owner);
+
+        try {
+            String result = CycleDependencyHandler.wrap(nested, current -> {
+                Assertions.assertSame(nested, current);
+                Assertions.assertTrue(CycleDependencyHandler.containsObject(owner));
+                Assertions.assertTrue(CycleDependencyHandler.containsObject(nested));
+                return "nested";
+            });
+
+            Assertions.assertEquals("nested", result);
+            Assertions.assertTrue(CycleDependencyHandler.isStarting());
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(owner));
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(nested));
+        } finally {
+            CycleDependencyHandler.end();
+        }
+    }
+
+    @Test
+    public void testNestedWrapFailurePreservesOwnerState() {
+        Object owner = new Object();
+        Object nested = new Object();
+        IllegalStateException failure = new IllegalStateException("Nested conversion failed");
+        CycleDependencyHandler.start();
+        CycleDependencyHandler.addObject(owner);
+
+        try {
+            IllegalStateException thrown = Assertions.assertThrows(
+                    IllegalStateException.class,
+                    () -> CycleDependencyHandler.wrap(nested, ignored -> {
+                        throw failure;
+                    }));
+
+            Assertions.assertSame(failure, thrown);
+            Assertions.assertTrue(CycleDependencyHandler.isStarting());
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(owner));
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(nested));
+
+            Assertions.assertEquals("another", CycleDependencyHandler.wrap(new Object(), ignored -> "another"));
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(owner));
+        } finally {
+            CycleDependencyHandler.end();
+        }
+    }
+
+    @Test
+    public void testRecursiveWrapSkipsCallbackAndReturnsReference() {
+        Object obj = new Object();
+        AtomicInteger invocations = new AtomicInteger();
+
+        String result = CycleDependencyHandler.wrap(obj, current -> {
+            invocations.incrementAndGet();
+            return CycleDependencyHandler.wrap(current, ignored -> {
+                invocations.incrementAndGet();
+                return "unexpected";
+            });
+        });
+
+        Assertions.assertEquals("(ref Object)", result);
+        Assertions.assertEquals(1, invocations.get());
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
+        Assertions.assertFalse(CycleDependencyHandler.containsObject(obj));
+    }
+
+    @Test
+    public void testWrapStateIsIndependentBetweenThreads() throws Exception {
+        Object shared = new Object();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        CycleDependencyHandler.start();
+        CycleDependencyHandler.addObject(shared);
+
+        try {
+            Future<String> result = executor.submit(() -> {
+                try {
+                    Assertions.assertFalse(CycleDependencyHandler.isStarting());
+                    Assertions.assertFalse(CycleDependencyHandler.containsObject(shared));
+
+                    String converted = CycleDependencyHandler.wrap(shared, current -> {
+                        Assertions.assertSame(shared, current);
+                        Assertions.assertTrue(CycleDependencyHandler.isStarting());
+                        Assertions.assertTrue(CycleDependencyHandler.containsObject(shared));
+                        return "worker";
+                    });
+
+                    Assertions.assertFalse(CycleDependencyHandler.isStarting());
+                    Assertions.assertFalse(CycleDependencyHandler.containsObject(shared));
+                    return converted;
+                } finally {
+                    CycleDependencyHandler.end();
+                }
+            });
+
+            Assertions.assertEquals("worker", result.get(5, TimeUnit.SECONDS));
+            Assertions.assertTrue(CycleDependencyHandler.isStarting());
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(shared));
+        } finally {
+            CycleDependencyHandler.end();
+            executor.shutdownNow();
+            Assertions.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+    }
+
+    @Test
+    public void testIdentityTrackingDoesNotCallObjectHashCodeOrEquals() {
+        UnsafeHashObject obj = new UnsafeHashObject();
+
+        String result = CycleDependencyHandler.wrap(obj, current -> {
+            Assertions.assertTrue(CycleDependencyHandler.containsObject(current));
+            return CycleDependencyHandler.wrap(current, ignored -> "unexpected");
+        });
+
+        Assertions.assertEquals("(ref UnsafeHashObject)", result);
+        Assertions.assertFalse(CycleDependencyHandler.isStarting());
+    }
+
+    private static class UnsafeHashObject {
+
+        @Override
+        public int hashCode() {
+            throw new AssertionError("Object hashCode must not be called");
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            throw new AssertionError("Object equals must not be called");
         }
     }
 }
