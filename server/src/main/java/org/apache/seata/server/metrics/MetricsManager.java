@@ -98,6 +98,9 @@ public class MetricsManager implements Disposable {
             EnhancedServiceLoader.unload(Exporter.class);
             exporters.clear();
         }
-        registry = null;
+        if (registry != null) {
+            registry.clearUp();
+            registry = null;
+        }
     }
 }

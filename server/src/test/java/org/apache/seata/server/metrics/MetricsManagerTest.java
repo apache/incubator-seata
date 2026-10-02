@@ -91,6 +91,7 @@ class MetricsManagerTest {
             verify(bus).unregister(subscriber.getValue());
             verify(first).close();
             verify(second).close();
+            verify(registry).clearUp();
             assertNull(manager.getRegistry());
             factories.verify(ExporterFactory::getInstanceList);
         } finally {
