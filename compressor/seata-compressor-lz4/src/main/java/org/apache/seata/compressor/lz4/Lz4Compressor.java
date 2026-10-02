@@ -34,4 +34,9 @@ public class Lz4Compressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return Lz4Util.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return Lz4Util.decompress(bytes, maxOutputSize);
+    }
 }
