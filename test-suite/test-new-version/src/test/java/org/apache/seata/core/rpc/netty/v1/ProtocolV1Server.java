@@ -85,13 +85,22 @@ public class ProtocolV1Server {
 
         ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(host, port));
         try {
-            future.await(5000, TimeUnit.MILLISECONDS);
+            if (!future.await(5000, TimeUnit.MILLISECONDS)) {
+                future.cancel(false);
+                future.channel().close();
+                stop();
+                throw new IllegalStateException("Timed out waiting for protocol V1 server to bind");
+            }
             if (!future.isSuccess()) {
                 throw new RuntimeException("Server start fail!", future.cause());
             }
             this.port = ((InetSocketAddress) future.channel().localAddress()).getPort();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            future.cancel(false);
+            future.channel().close();
+            stop();
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for protocol V1 server to bind", e);
         }
     }
 

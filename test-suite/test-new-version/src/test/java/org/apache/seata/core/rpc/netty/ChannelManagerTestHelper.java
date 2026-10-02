@@ -30,7 +30,7 @@ public class ChannelManagerTestHelper {
     }
 
     public static Channel getChannel(TmNettyRemotingClient client) {
-        String serverAddress = System.getProperty("service.mock.grouplist", "0.0.0.0:10091");
+        String serverAddress = System.getProperty("service.mock.grouplist", "127.0.0.1:10091");
         return getChannelManager(client).acquireChannel(serverAddress);
     }
 

@@ -54,7 +54,7 @@ class HttpTest {
             socket.setReuseAddress(true);
             return socket.getLocalPort();
         } catch (IOException e) {
-            return 8081;
+            throw new IllegalStateException("Failed to allocate an HTTP test port", e);
         }
     }
 
