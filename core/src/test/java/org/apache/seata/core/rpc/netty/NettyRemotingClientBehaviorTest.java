@@ -28,13 +28,19 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
+import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.MergeResultMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.MessageFuture;
+import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1320,13 +1326,25 @@ public class NettyRemotingClientBehaviorTest {
         when(channel.isWritable()).thenReturn(true);
         when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
         mergeClient.getClientChannelManager().getChannels().put(address, channel);
-        Object response = new Object();
+        ClientOnResponseProcessor processor = new ClientOnResponseProcessor(
+                mergeClient.mergeMsgMap, mergeClient.futures, mergeClient.childToParentMap, null);
         doAnswer(invocation -> {
                     RpcMessage rpc = invocation.getArgument(0);
                     MergedWarpMessage merged = (MergedWarpMessage) rpc.getBody();
-                    for (Integer id : merged.msgIds) {
-                        mergeClient.futures.remove(id).setResultMessage(response);
+                    AbstractResultMessage[] results = new AbstractResultMessage[merged.msgs.size()];
+                    for (int i = 0; i < merged.msgs.size(); i++) {
+                        GlobalBeginResponse response = new GlobalBeginResponse();
+                        response.setResultCode(ResultCode.Success);
+                        response.setXid(((GlobalBeginRequest) merged.msgs.get(i)).getTransactionName());
+                        results[i] = response;
                     }
+                    MergeResultMessage result = new MergeResultMessage();
+                    result.setMsgs(results);
+                    RpcMessage reply = new RpcMessage();
+                    reply.setId(rpc.getId());
+                    reply.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+                    reply.setBody(result);
+                    processor.process(mock(ChannelHandlerContext.class), reply);
                     return mock(ChannelFuture.class);
                 })
                 .when(channel)
@@ -1342,8 +1360,11 @@ public class NettyRemotingClientBehaviorTest {
             }
             assertTrue(queued.await(5, TimeUnit.SECONDS), "All requests must be queued before merging");
             mergeClient.init();
-            for (Future<Object> result : responses) {
-                assertSame(response, result.get(5, TimeUnit.SECONDS));
+            for (int i = 0; i < responses.size(); i++) {
+                GlobalBeginResponse response =
+                        (GlobalBeginResponse) responses.get(i).get(5, TimeUnit.SECONDS);
+                assertEquals(ResultCode.Success, response.getResultCode());
+                assertEquals("test-tx-" + i, response.getXid());
             }
             ArgumentCaptor<RpcMessage> sent = ArgumentCaptor.forClass(RpcMessage.class);
             verify(channel).writeAndFlush(sent.capture());
@@ -1352,6 +1373,8 @@ public class NettyRemotingClientBehaviorTest {
             assertEquals(count, merged.msgs.size());
             assertTrue(merged.msgs.containsAll(requests));
             assertTrue(mergeClient.futures.isEmpty());
+            assertTrue(mergeClient.mergeMsgMap.isEmpty());
+            assertTrue(mergeClient.childToParentMap.isEmpty());
             assertEquals(debug && count > 1, events.list.stream().anyMatch(event -> event.getFormattedMessage()
                     .equals("merge msg size:" + count)));
         } finally {
