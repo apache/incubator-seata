@@ -66,6 +66,28 @@ class ConfigurationProviderFallbackTest {
         }
     }
 
+    @Test
+    void providerThrowingNotFoundWithoutCauseRemainsAnError() throws Exception {
+        ConfigurationFactory.getInstance();
+        Logger logger = (Logger) LoggerFactory.getLogger(ConfigurationFactory.class);
+        ListAppender<ILoggingEvent> events = new ListAppender<>();
+        events.start();
+        logger.addAppender(events);
+        ConfigurationProvider provider = mock(ConfigurationProvider.class);
+        when(provider.provide()).thenThrow(new EnhancedServiceNotFoundException("provider internal failure"));
+        try (MockedStatic<EnhancedServiceLoader> services = mockStatic(EnhancedServiceLoader.class)) {
+            services.when(() -> EnhancedServiceLoader.load(io.seata.config.ConfigurationProvider.class, "file"))
+                    .thenThrow(new EnhancedServiceNotFoundException("missing legacy provider"));
+            services.when(() -> EnhancedServiceLoader.load(ConfigurationProvider.class, "file", false))
+                    .thenReturn(provider);
+            assertNull(getNonSpringConfiguration("file"));
+            assertTrue(events.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR));
+        } finally {
+            logger.detachAppender(events);
+            events.stop();
+        }
+    }
+
     private void assertMissingProvider(String type, EnhancedServiceNotFoundException failure, boolean expectError)
             throws Exception {
         ConfigurationFactory.getInstance();
