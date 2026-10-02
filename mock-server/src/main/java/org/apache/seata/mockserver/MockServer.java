@@ -48,6 +48,9 @@ public class MockServer {
     public static final int MOCK_DEFAULT_PORT = 10091;
     public static final String MOCK_SEATA_PORT_KEY = "SEATA_MOCK_PORT";
 
+    private static final java.util.concurrent.atomic.AtomicReference<MockServer> ACTIVE_SERVER =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
     private ThreadPoolExecutor workingThreads;
     private MockNettyRemotingServer nettyRemotingServer;
     private MockCoordinator coordinator;
@@ -76,39 +79,57 @@ public class MockServer {
         if (started) {
             return;
         }
-        if (port == 0) {
-            port = findAvailablePort();
+        if (!ACTIVE_SERVER.compareAndSet(null, this)) {
+            throw new IllegalStateException(
+                    "Only one MockServer may run in a JVM because XID and UUID state is shared");
         }
+        try {
+            if (port == 0) {
+                port = findAvailablePort();
+            }
 
-        ConfigurationCache.clear();
-        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-        System.clearProperty("server.port");
+            ConfigurationCache.clear();
+            System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+            System.clearProperty("server.port");
 
-        workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                "mockServerWorker",
-                50,
-                50,
-                500,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(20000),
-                new ThreadPoolExecutor.CallerRunsPolicy());
-        NettyServerConfig config = new NettyServerConfig();
-        config.setServerListenPort(port);
-        nettyRemotingServer = new MockNettyRemotingServer(workingThreads, config);
+            workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                    "mockServerWorker",
+                    50,
+                    50,
+                    500,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(20000),
+                    new ThreadPoolExecutor.CallerRunsPolicy());
+            NettyServerConfig config = new NettyServerConfig();
+            config.setServerListenPort(port);
+            nettyRemotingServer = new MockNettyRemotingServer(workingThreads, config);
 
-        XID.setIpAddress(NetUtil.getLocalIp());
-        XID.setPort(port);
-        Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
-        UUIDGenerator.init(1L);
+            XID.setIpAddress(NetUtil.getLocalIp());
+            XID.setPort(port);
+            Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
+            UUIDGenerator.init(1L);
 
-        this.coordinator = coordinator;
-        coordinator.setRemotingServer(nettyRemotingServer);
-        nettyRemotingServer.setHandler(coordinator);
-        nettyRemotingServer.init();
+            this.coordinator = coordinator;
+            coordinator.setRemotingServer(nettyRemotingServer);
+            nettyRemotingServer.setHandler(coordinator);
+            nettyRemotingServer.init();
 
-        this.port = port;
-        this.started = true;
-        LOGGER.info("MockServer started on port: {}", port);
+            this.port = port;
+            this.started = true;
+            LOGGER.info("MockServer started on port: {}", port);
+        } catch (RuntimeException | Error failure) {
+            try {
+                if (nettyRemotingServer != null) {
+                    nettyRemotingServer.destroy();
+                }
+            } finally {
+                if (workingThreads != null) {
+                    workingThreads.shutdownNow();
+                }
+                ACTIVE_SERVER.compareAndSet(this, null);
+            }
+            throw failure;
+        }
     }
 
     /**
@@ -144,11 +165,15 @@ public class MockServer {
     public synchronized void close() {
         if (started) {
             started = false;
-            if (workingThreads != null) {
-                workingThreads.shutdown();
-            }
-            if (nettyRemotingServer != null) {
-                nettyRemotingServer.destroy();
+            try {
+                if (workingThreads != null) {
+                    workingThreads.shutdown();
+                }
+                if (nettyRemotingServer != null) {
+                    nettyRemotingServer.destroy();
+                }
+            } finally {
+                ACTIVE_SERVER.compareAndSet(this, null);
             }
         }
     }
@@ -168,8 +193,9 @@ public class MockServer {
         if (defaultInstance == null) {
             synchronized (MockServer.class) {
                 if (defaultInstance == null) {
-                    defaultInstance = new MockServer();
-                    defaultInstance.start(port, MockCoordinator.getInstance());
+                    MockServer server = new MockServer();
+                    server.start(port, MockCoordinator.getInstance());
+                    defaultInstance = server;
                 }
             }
         }
