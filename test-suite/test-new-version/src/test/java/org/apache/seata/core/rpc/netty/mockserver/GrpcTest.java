@@ -17,8 +17,10 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import com.google.protobuf.Any;
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationCache;
@@ -45,6 +47,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -164,6 +168,8 @@ public class GrpcTest {
 
     private void assertTransactionCompletes(boolean commit) throws Exception {
         BlockingQueue<Object> responses = new LinkedBlockingQueue<>();
+        CompletableFuture<Void> termination = new CompletableFuture<>();
+        Context.CancellableContext callContext = Context.current().withCancellation();
         GrpcSerializer serializer = new GrpcSerializer();
         StreamObserver<GrpcMessageProto> observer = new StreamObserver<GrpcMessageProto>() {
             @Override
@@ -179,12 +185,16 @@ public class GrpcTest {
             @Override
             public void onError(Throwable failure) {
                 responses.add(failure);
+                termination.completeExceptionally(failure);
             }
 
             @Override
-            public void onCompleted() {}
+            public void onCompleted() {
+                termination.complete(null);
+            }
         };
-        StreamObserver<GrpcMessageProto> requests = seataServiceStub.sendRequest(observer);
+        StreamObserver<GrpcMessageProto> requests = callContext.call(() -> seataServiceStub.sendRequest(observer));
+        boolean transactionVerified = false;
         try {
             RegisterTMResponse registration =
                     exchange(requests, responses, getRegisterTMRequest(), RegisterTMResponse.class);
@@ -210,8 +220,30 @@ public class GrpcTest {
                 assertEquals(1, Action1Impl.getRollbackTimes(xid));
                 assertEquals(0, Action1Impl.getCommitTimes(xid));
             }
+            transactionVerified = true;
         } finally {
             requests.onCompleted();
+            // Seata's transport keeps the bidirectional stream open after a half-close.
+            // Explicitly cancel this test-owned stream and observe its terminal callback.
+            boolean alreadyTerminated = termination.isDone();
+            callContext.cancel(null);
+            if (transactionVerified) {
+                try {
+                    termination.get(5, TimeUnit.SECONDS);
+                } catch (ExecutionException failure) {
+                    if (alreadyTerminated
+                            || Status.fromThrowable(failure.getCause()).getCode() != Status.Code.CANCELLED) {
+                        throw new AssertionError("gRPC stream failed", failure.getCause());
+                    }
+                }
+                Object remaining;
+                while ((remaining = responses.poll()) != null) {
+                    if (!(remaining instanceof Throwable)
+                            || Status.fromThrowable((Throwable) remaining).getCode() != Status.Code.CANCELLED) {
+                        fail("Unexpected response after the final transaction result: " + remaining);
+                    }
+                }
+            }
         }
     }
 
