@@ -252,13 +252,20 @@ class GlobalTransactionScannerBehaviorTest {
     @Test
     void initializesBothClientsBeforeRegisteringShutdownHook() {
         GlobalTransactionScanner real = spy(new GlobalTransactionScanner("app", "group"));
-        doNothing().when(real).registerSpringShutdownHook();
         try (MockedStatic<TMClient> tm = mockStatic(TMClient.class);
                 MockedStatic<RMClient> rm = mockStatic(RMClient.class)) {
+            doAnswer(invocation -> {
+                        tm.verify(() -> TMClient.init(
+                                "app",
+                                "group",
+                                GlobalTransactionScanner.getAccessKey(),
+                                GlobalTransactionScanner.getSecretKey()));
+                        rm.verify(() -> RMClient.init("app", "group"));
+                        return null;
+                    })
+                    .when(real)
+                    .registerSpringShutdownHook();
             real.initClient();
-            tm.verify(() -> TMClient.init(
-                    "app", "group", GlobalTransactionScanner.getAccessKey(), GlobalTransactionScanner.getSecretKey()));
-            rm.verify(() -> RMClient.init("app", "group"));
             verify(real).registerSpringShutdownHook();
         }
     }
