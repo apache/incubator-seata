@@ -726,7 +726,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── slf4j-api-1.7.36.jar
     │   ├── snakeyaml-2.0.jar
     │   ├── snappy-java-1.1.10.5.jar
-    │   ├── sofa-common-tools-1.0.12.jar
+    │   ├── sofa-common-tools-2.1.0.jar
     │   ├── spring-aop-5.3.39.jar
     │   ├── spring-beans-5.3.39.jar
     │   ├── spring-boot-2.7.18.jar
@@ -1883,7 +1883,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── slf4j-api-1.7.36.jar
     │   ├── snakeyaml-2.0.jar
     │   ├── snappy-java-1.1.10.5.jar
-    │   ├── sofa-common-tools-1.0.12.jar
+    │   ├── sofa-common-tools-2.1.0.jar
     │   ├── spring-aop-5.3.39.jar
     │   ├── spring-beans-5.3.39.jar
     │   ├── spring-boot-2.7.18.jar
