@@ -52,6 +52,15 @@ class Http2HttpHandlerTest {
     private EmbeddedChannel channel;
     private TestController testController = new TestController();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private java.util.List<?> originalFilters;
+    private Object originalChain;
+    private boolean originalInitialized;
+
+    private static Field filterField(String name) throws Exception {
+        Field field = HttpRequestFilterManager.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return field;
+    }
 
     static class TestController {
         public String handleRequest(String param) {
@@ -61,6 +70,11 @@ class Http2HttpHandlerTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        originalFilters = new java.util.ArrayList<>(
+                (java.util.List<?>) filterField("HTTP_REQUEST_FILTERS").get(null));
+        originalChain = filterField("HTTP_REQUEST_FILTER_CHAIN").get(null);
+        originalInitialized = filterField("initialized").getBoolean(null);
+
         handler = new Http2HttpHandler();
         channel = new EmbeddedChannel(handler);
         Method method = TestController.class.getMethod("handleRequest", String.class);
@@ -380,8 +394,11 @@ class Http2HttpHandlerTest {
         field.setAccessible(true);
         Map<String, HttpInvocation> map = (Map<String, HttpInvocation>) field.get(null);
         map.clear();
-        Field field2 = HttpRequestFilterManager.class.getDeclaredField("initialized");
-        field2.setAccessible(true);
-        field2.set(null, false);
+        java.util.List filters =
+                (java.util.List) filterField("HTTP_REQUEST_FILTERS").get(null);
+        filters.clear();
+        filters.addAll(originalFilters);
+        filterField("HTTP_REQUEST_FILTER_CHAIN").set(null, originalChain);
+        filterField("initialized").setBoolean(null, originalInitialized);
     }
 }
