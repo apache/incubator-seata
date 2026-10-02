@@ -19,6 +19,8 @@ package org.apache.seata.common.util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 public class IOUtilTest {
 
     @Test
@@ -54,6 +56,68 @@ public class IOUtilTest {
         IOUtil.close(resource);
 
         Assertions.assertTrue(resource.isClose());
+    }
+
+    @Test
+    public void testCloseContinuesAfterCheckedAndRuntimeExceptions() {
+        CountingResource checkedFailure = new CountingResource(new IOException("Checked close failure"));
+        CountingResource afterCheckedFailure = new CountingResource(null);
+        CountingResource runtimeFailure = new CountingResource(new IllegalStateException("Runtime close failure"));
+        CountingResource afterRuntimeFailure = new CountingResource(null);
+
+        Assertions.assertDoesNotThrow(
+                () -> IOUtil.close(checkedFailure, afterCheckedFailure, runtimeFailure, afterRuntimeFailure));
+
+        Assertions.assertEquals(1, checkedFailure.closeCount);
+        Assertions.assertEquals(1, afterCheckedFailure.closeCount);
+        Assertions.assertEquals(1, runtimeFailure.closeCount);
+        Assertions.assertEquals(1, afterRuntimeFailure.closeCount);
+    }
+
+    @Test
+    public void testCloseSkipsNullEntries() {
+        CountingResource first = new CountingResource(null);
+        CountingResource second = new CountingResource(null);
+
+        Assertions.assertDoesNotThrow(() -> IOUtil.close(null, first, null, second, null));
+
+        Assertions.assertEquals(1, first.closeCount);
+        Assertions.assertEquals(1, second.closeCount);
+    }
+
+    @Test
+    public void testCloseIgnoresNullAndEmptyInputs() {
+        Assertions.assertDoesNotThrow(() -> IOUtil.close((AutoCloseable) null));
+        Assertions.assertDoesNotThrow(() -> IOUtil.close((AutoCloseable[]) null));
+        Assertions.assertDoesNotThrow(() -> IOUtil.close(new AutoCloseable[0]));
+        Assertions.assertDoesNotThrow(() -> IOUtil.close());
+    }
+
+    @Test
+    public void testCloseSuppressesRuntimeExceptionAfterOneAttempt() {
+        CountingResource resource = new CountingResource(new IllegalStateException("Runtime close failure"));
+
+        Assertions.assertDoesNotThrow(() -> IOUtil.close(resource));
+
+        Assertions.assertEquals(1, resource.closeCount);
+    }
+
+    private static class CountingResource implements AutoCloseable {
+
+        private final Exception failure;
+        private int closeCount;
+
+        private CountingResource(Exception failure) {
+            this.failure = failure;
+        }
+
+        @Override
+        public void close() throws Exception {
+            closeCount++;
+            if (failure != null) {
+                throw failure;
+            }
+        }
     }
 
     private class FakeResource implements AutoCloseable {
