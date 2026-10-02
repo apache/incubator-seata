@@ -26,10 +26,12 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ClientHandlerShutdownTest {
@@ -57,6 +59,30 @@ class ClientHandlerShutdownTest {
     @AfterEach
     void tearDown() {
         client.destroy();
+    }
+
+    @Test
+    void runningTimerRejectionPropagatesWithoutInlineCleanup() throws Exception {
+        ScheduledExecutorService original = client.timerExecutor;
+        ScheduledExecutorService rejecting = mock(ScheduledExecutorService.class);
+        RejectedExecutionException rejection = new RejectedExecutionException("injected running timer rejection");
+        doThrow(rejection).when(rejecting).execute(any(Runnable.class));
+        when(rejecting.isShutdown()).thenReturn(false);
+        Field timer = AbstractNettyRemoting.class.getDeclaredField("timerExecutor");
+        timer.setAccessible(true);
+        timer.set(client, rejecting);
+        try {
+            assertFalse(client.timerExecutor.isShutdown());
+            assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> client.new ClientHandler()
+                    .channelInactive(context)));
+            assertSame(rejection, assertThrows(RejectedExecutionException.class, () -> client.new ClientHandler()
+                    .exceptionCaught(context, new IllegalStateException("closed"))));
+            verifyNoInteractions(manager);
+            verify(context, never()).fireChannelInactive();
+            verify(context, never()).fireExceptionCaught(any());
+        } finally {
+            timer.set(client, original);
+        }
     }
 
     @Test
