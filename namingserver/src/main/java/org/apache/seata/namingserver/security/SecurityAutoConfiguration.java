@@ -20,6 +20,7 @@ import jakarta.servlet.Filter;
 import org.apache.seata.common.security.HmacSigner;
 import org.apache.seata.common.security.NonceCache;
 import org.apache.seata.common.security.SignatureVerifier;
+import org.apache.seata.console.utils.JwtTokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -84,7 +85,7 @@ public class SecurityAutoConfiguration {
                             ? Collections.emptySet()
                             : new java.util.HashSet<>(cfg.getAllowedClusters()),
                     patterns,
-                    cfg.getPermissions() == null
+                    cfg.getPermissions() == null || cfg.getPermissions().isEmpty()
                             ? java.util.EnumSet.noneOf(Permission.class)
                             : java.util.EnumSet.copyOf(cfg.getPermissions())));
         }
@@ -118,8 +119,17 @@ public class SecurityAutoConfiguration {
             SecurityProperties props,
             ClusterIdentityRegistry registry,
             SignatureVerifier verifier,
-            PermissionChecker checker) {
-        SecurityFilter filter = new SecurityFilter(props, registry, verifier, checker);
+            PermissionChecker checker,
+            JwtTokenUtils tokenUtils) {
+        SecurityFilter filter = new SecurityFilter(props, registry, verifier, checker, request -> {
+            String token = request.getHeader("Authorization");
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            } else {
+                token = request.getParameter("access_token");
+            }
+            return token != null && !token.isEmpty() && tokenUtils.validateToken(token);
+        });
         FilterRegistrationBean<Filter> reg = new FilterRegistrationBean<>();
         reg.setFilter(filter);
         reg.addUrlPatterns("/*");

@@ -55,4 +55,51 @@ class SecurityAutoConfigurationTest {
         assertTrue(p.matcher("_prod").matches());
         assertFalse(p.matcher("prod").matches());
     }
+
+    @org.junit.jupiter.api.Test
+    void omittedPermissionsLoadAsDenyAll() {
+        SecurityProperties props = new SecurityProperties();
+        SecurityProperties.ClusterConfig cfg = new SecurityProperties.ClusterConfig();
+        cfg.setId("empty");
+        cfg.setSecretRef("test-secret");
+        props.setClusters(java.util.Collections.singletonList(cfg));
+        SecretResolver resolver = org.mockito.Mockito.mock(SecretResolver.class);
+        org.mockito.Mockito.when(resolver.resolve("test-secret")).thenReturn(new byte[32]);
+        org.junit.jupiter.api.Assertions.assertFalse(new SecurityAutoConfiguration()
+                .clusterIdentityRegistry(props, resolver)
+                .find("empty")
+                .get()
+                .hasPermission(Permission.REGISTER));
+    }
+
+    @org.junit.jupiter.api.Test
+    void legacyBypassValidatesJwtRatherThanTrustingAuthorizationHeader() throws Exception {
+        SecurityProperties props = new SecurityProperties();
+        props.setMode(SecurityProperties.Mode.ENFORCE);
+        org.apache.seata.console.utils.JwtTokenUtils tokens =
+                org.mockito.Mockito.mock(org.apache.seata.console.utils.JwtTokenUtils.class);
+        org.mockito.Mockito.when(tokens.validateToken("valid")).thenReturn(true);
+        jakarta.servlet.Filter filter = new SecurityAutoConfiguration()
+                .seataSecurityFilter(
+                        props,
+                        new ClusterIdentityRegistry(),
+                        new org.apache.seata.common.security.SignatureVerifier(
+                                new org.apache.seata.common.security.NonceCache.InMemory(60000, () -> 1000L),
+                                60000,
+                                () -> 1000L),
+                        new PermissionChecker(),
+                        tokens)
+                .getFilter();
+        for (String token : new String[] {"valid", "invalid"}) {
+            org.springframework.mock.web.MockHttpServletRequest request =
+                    new org.springframework.mock.web.MockHttpServletRequest("POST", "/naming/v1/register");
+            request.addHeader("Authorization", "Bearer " + token);
+            java.util.concurrent.atomic.AtomicBoolean called = new java.util.concurrent.atomic.AtomicBoolean();
+            filter.doFilter(
+                    request,
+                    new org.springframework.mock.web.MockHttpServletResponse(),
+                    (req, resp) -> called.set(true));
+            org.junit.jupiter.api.Assertions.assertEquals("valid".equals(token), called.get());
+        }
+    }
 }

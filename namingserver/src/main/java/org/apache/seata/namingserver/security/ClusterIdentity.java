@@ -59,7 +59,7 @@ public final class ClusterIdentity {
         this.allowedVgroupPatterns = allowedVgroupPatterns == null
                 ? Collections.emptyList()
                 : Collections.unmodifiableList(allowedVgroupPatterns);
-        this.permissions = permissions == null
+        this.permissions = permissions == null || permissions.isEmpty()
                 ? EnumSet.noneOf(Permission.class)
                 : Collections.unmodifiableSet(EnumSet.copyOf(permissions));
     }

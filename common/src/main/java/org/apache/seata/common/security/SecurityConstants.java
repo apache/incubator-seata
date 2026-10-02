@@ -16,6 +16,10 @@
  */
 package org.apache.seata.common.security;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 /**
  * Header names and error codes used by the HMAC-based authentication protocol
  * between Seata NamingServer and Seata Server (TC), and by Client (TM/RM) when
@@ -53,6 +57,17 @@ public final class SecurityConstants {
      * inside the window still finds its nonce in the cache.
      */
     public static final long DEFAULT_NONCE_CACHE_MINUTES = 10L;
+
+    public static Map<String, String> routingHeaders(Function<String, String> lookup) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (String name : new String[] {"x-seata-namespace", "x-seata-cluster"}) {
+            String value = lookup.apply(name);
+            if (value != null) {
+                headers.put(name, value);
+            }
+        }
+        return headers;
+    }
 
     private SecurityConstants() {
         // constants holder

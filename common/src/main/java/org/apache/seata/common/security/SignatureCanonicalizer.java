@@ -38,6 +38,7 @@ import java.util.Map;
  *            + TIMESTAMP       + "\n"
  *            + NONCE           + "\n"
  *            + SHA256_HEX(body)
+ *            + (signedHeaders.isEmpty() ? "" : "\n" + CANONICAL_HEADERS)
  * </pre>
  *
  * <p>Rationale for each field:
@@ -73,6 +74,9 @@ public final class SignatureCanonicalizer {
         sb.append(request.getTimestampMillis()).append('\n');
         sb.append(request.getNonce()).append('\n');
         sb.append(sha256Hex(request.getBody()));
+        if (!request.getSignedHeaders().isEmpty()) {
+            sb.append('\n').append(canonicalQuery(request.getSignedHeaders()));
+        }
         return sb.toString();
     }
 

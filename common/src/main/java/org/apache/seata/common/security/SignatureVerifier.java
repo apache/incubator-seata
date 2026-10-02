@@ -24,16 +24,16 @@ import java.util.Objects;
  * <ol>
  *   <li><b>Freshness</b> — timestamp must be within {@code now ± replayWindow}. Rejects
  *       captured-but-stale requests.</li>
+ *   <li><b>Signature validity</b> — the HMAC must match, computed in constant time.</li>
  *   <li><b>Nonce uniqueness</b> — the {@code (clusterId, nonce)} pair must not have been
  *       seen in the recent past. Rejects verbatim replays inside the freshness window.</li>
- *   <li><b>Signature validity</b> — the HMAC must match, computed in constant time.</li>
  *   <li>(Caller-supplied) <b>Authorization</b> — mapping cluster-id to allowed namespaces /
  *       clusters / vgroups happens outside this class in {@code PermissionChecker}, since it
  *       depends on receiver-specific data models.</li>
  * </ol>
  *
- * <p>The ordering matters: cheap checks first so that malformed traffic never reaches the
- * expensive HMAC computation. This also prevents CPU-exhaustion DoS via forged signatures.
+ * <p>Authenticate before storing the nonce so forged requests cannot fill the replay cache
+ * or consume a legitimate caller's nonce. Admission remains atomic for concurrent replays.
  */
 public final class SignatureVerifier {
 
@@ -87,9 +87,17 @@ public final class SignatureVerifier {
                     "timestamp skew of " + delta + "ms exceeds window " + replayWindowMillis + "ms");
         }
 
-        // 2) Nonce uniqueness — also cheap. Must precede signature check for two reasons:
-        //    (a) DoS resistance — a replay of a valid signature would otherwise pay full HMAC cost;
-        //    (b) it prevents attackers from probing (clusterId, nonce) admission timing.
+        // 2) Authenticate before retaining attacker-controlled nonces.
+        boolean valid;
+        try {
+            valid = HmacSigner.verify(request, secret, receivedSignature);
+        } catch (IllegalArgumentException bad) {
+            return VerificationResult.failure(SecurityConstants.ErrorCode.BAD_REQUEST, bad.getMessage());
+        }
+        if (!valid) {
+            return VerificationResult.failure(SecurityConstants.ErrorCode.BAD_SIGNATURE, "signature does not match");
+        }
+
         boolean fresh;
         try {
             fresh = nonceCache.putIfAbsent(request.getClusterId(), request.getNonce());
@@ -100,17 +108,6 @@ public final class SignatureVerifier {
             return VerificationResult.failure(
                     SecurityConstants.ErrorCode.REPLAY_DETECTED,
                     "nonce already used for cluster-id " + request.getClusterId());
-        }
-
-        // 3) Signature — the expensive check runs last.
-        boolean valid;
-        try {
-            valid = HmacSigner.verify(request, secret, receivedSignature);
-        } catch (IllegalArgumentException bad) {
-            return VerificationResult.failure(SecurityConstants.ErrorCode.BAD_REQUEST, bad.getMessage());
-        }
-        if (!valid) {
-            return VerificationResult.failure(SecurityConstants.ErrorCode.BAD_SIGNATURE, "signature does not match");
         }
 
         return VerificationResult.ok();

@@ -171,6 +171,7 @@ public class SeataServerAuthFilter implements Filter {
                 .method(method)
                 .path(path)
                 .queryParams(collectQuery(httpReq))
+                .signedHeaders(SecurityConstants.routingHeaders(httpReq::getHeader))
                 .clusterId(clusterId)
                 .timestampMillis(ts)
                 .nonce(nonce)

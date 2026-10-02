@@ -92,4 +92,37 @@ class OutboundSignerTest {
         m.put(k, v);
         return m;
     }
+
+    @org.junit.jupiter.api.Test
+    void interceptorSignsFinalUriBodyAndReplacesInboundIdentity() throws Exception {
+        byte[] secret = new byte[32];
+        byte[] body = "payload".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        OutboundSigner signer =
+                new OutboundSigner("naming", secret, SignatureAlgorithm.HMAC_SHA256, () -> 123L, () -> "nonce");
+        org.springframework.mock.http.client.MockClientHttpRequest request =
+                new org.springframework.mock.http.client.MockClientHttpRequest(
+                        org.springframework.http.HttpMethod.POST,
+                        java.net.URI.create("http://localhost/api/v1/console/session?vgroup=a%20b"));
+        request.getHeaders().set(SecurityConstants.HEADER_CLUSTER_ID, "incoming-identity");
+        request.getHeaders().set("x-seata-namespace", "tenant");
+        signer.intercept(request, body, (sent, bytes) -> {
+            org.junit.jupiter.api.Assertions.assertArrayEquals(body, bytes);
+            org.junit.jupiter.api.Assertions.assertEquals(
+                    "naming", sent.getHeaders().getFirst(SecurityConstants.HEADER_CLUSTER_ID));
+            CanonicalRequest canonical = CanonicalRequest.builder()
+                    .method("POST")
+                    .path("/api/v1/console/session")
+                    .queryParams(java.util.Collections.singletonMap("vgroup", "a b"))
+                    .signedHeaders(java.util.Collections.singletonMap("x-seata-namespace", "tenant"))
+                    .clusterId("naming")
+                    .timestampMillis(123L)
+                    .nonce("nonce")
+                    .body(bytes)
+                    .build();
+            org.junit.jupiter.api.Assertions.assertTrue(HmacSigner.verify(
+                    canonical, secret, sent.getHeaders().getFirst(SecurityConstants.HEADER_SIGNATURE)));
+            return new org.springframework.mock.http.client.MockClientHttpResponse(
+                    new byte[0], org.springframework.http.HttpStatus.OK);
+        });
+    }
 }

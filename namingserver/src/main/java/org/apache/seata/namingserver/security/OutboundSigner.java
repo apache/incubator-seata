@@ -20,7 +20,13 @@ import org.apache.seata.common.security.CanonicalRequest;
 import org.apache.seata.common.security.HmacSigner;
 import org.apache.seata.common.security.SecurityConstants;
 import org.apache.seata.common.security.SignatureAlgorithm;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpResponse;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -88,12 +94,22 @@ public final class OutboundSigner {
      * @return an ordered map ready to iterate onto the outbound request
      */
     public Map<String, String> signHeaders(String method, String path, Map<String, String> queryParams, byte[] body) {
+        return signHeaders(method, path, queryParams, body, Collections.emptyMap());
+    }
+
+    public Map<String, String> signHeaders(
+            String method,
+            String path,
+            Map<String, String> queryParams,
+            byte[] body,
+            Map<String, String> routingHeaders) {
         long ts = clock.get();
         String nonce = nonceSupplier.get();
         CanonicalRequest req = CanonicalRequest.builder()
                 .method(method)
                 .path(path)
                 .queryParams(queryParams)
+                .signedHeaders(routingHeaders)
                 .clusterId(selfClusterId)
                 .timestampMillis(ts)
                 .nonce(nonce)
@@ -109,6 +125,29 @@ public final class OutboundSigner {
         headers.put(SecurityConstants.HEADER_SIGN_ALG, algorithm.wireName());
         headers.put(SecurityConstants.HEADER_SIGNATURE, signature);
         return headers;
+    }
+
+    /** Sign the final request URI and serialized body, including proxy routing headers. */
+    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+            throws IOException {
+        Map<String, String> query = new LinkedHashMap<>();
+        String rawQuery = request.getURI().getRawQuery();
+        if (rawQuery != null && !rawQuery.isEmpty()) {
+            for (String pair : rawQuery.split("&")) {
+                String[] parts = pair.split("=", 2);
+                query.putIfAbsent(
+                        URLDecoder.decode(parts[0], "UTF-8"),
+                        parts.length == 1 ? "" : URLDecoder.decode(parts[1], "UTF-8"));
+            }
+        }
+        Map<String, String> headers = signHeaders(
+                request.getMethod().name(),
+                request.getURI().getRawPath(),
+                query,
+                body,
+                SecurityConstants.routingHeaders(request.getHeaders()::getFirst));
+        headers.forEach(request.getHeaders()::set);
+        return execution.execute(request, body);
     }
 
     public String getSelfClusterId() {

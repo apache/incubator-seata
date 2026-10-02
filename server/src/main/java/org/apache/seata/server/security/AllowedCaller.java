@@ -39,7 +39,7 @@ public final class AllowedCaller {
     public AllowedCaller(String id, byte[] secret, Set<CallerPermission> permissions) {
         this.id = Objects.requireNonNull(id, "id");
         this.secret = Objects.requireNonNull(secret, "secret").clone();
-        this.permissions = permissions == null
+        this.permissions = permissions == null || permissions.isEmpty()
                 ? EnumSet.noneOf(CallerPermission.class)
                 : Collections.unmodifiableSet(EnumSet.copyOf(permissions));
     }

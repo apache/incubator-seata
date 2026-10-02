@@ -26,8 +26,7 @@ import java.util.Objects;
  * Immutable value object representing everything the signer needs to know about a request.
  *
  * <p>The signature covers method + path + query + identity headers + body digest, so any
- * tampering with any of these fields invalidates the signature. Headers other than the
- * identity headers are intentionally excluded — proxies routinely add or rewrite them.
+ * tampering with any of these fields invalidates the signature. Explicitly selected routing headers are also covered; unrelated proxy headers are excluded.
  */
 public final class CanonicalRequest {
 
@@ -36,6 +35,8 @@ public final class CanonicalRequest {
     private final String path;
 
     private final Map<String, String> queryParams;
+
+    private final Map<String, String> signedHeaders;
 
     private final String clusterId;
 
@@ -53,6 +54,9 @@ public final class CanonicalRequest {
         this.queryParams = builder.queryParams == null
                 ? Collections.emptyMap()
                 : Collections.unmodifiableMap(new LinkedHashMap<>(builder.queryParams));
+        this.signedHeaders = builder.signedHeaders == null
+                ? Collections.emptyMap()
+                : Collections.unmodifiableMap(new LinkedHashMap<>(builder.signedHeaders));
         this.clusterId = Objects.requireNonNull(builder.clusterId, "clusterId");
         this.timestampMillis = builder.timestampMillis;
         this.nonce = Objects.requireNonNull(builder.nonce, "nonce");
@@ -70,6 +74,10 @@ public final class CanonicalRequest {
 
     public Map<String, String> getQueryParams() {
         return queryParams;
+    }
+
+    public Map<String, String> getSignedHeaders() {
+        return signedHeaders;
     }
 
     public String getClusterId() {
@@ -107,6 +115,7 @@ public final class CanonicalRequest {
         private String method;
         private String path;
         private Map<String, String> queryParams;
+        private Map<String, String> signedHeaders;
         private String clusterId;
         private long timestampMillis;
         private String nonce;
@@ -125,6 +134,11 @@ public final class CanonicalRequest {
 
         public Builder queryParams(Map<String, String> queryParams) {
             this.queryParams = queryParams;
+            return this;
+        }
+
+        public Builder signedHeaders(Map<String, String> headers) {
+            this.signedHeaders = headers;
             return this;
         }
 

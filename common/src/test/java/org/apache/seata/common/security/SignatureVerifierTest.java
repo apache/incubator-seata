@@ -113,6 +113,15 @@ class SignatureVerifierTest {
         assertTrue(verifier.verify(future, SECRET, sig).isSuccess());
     }
 
+    @Test
+    void invalidSignatureDoesNotConsumeNonce() {
+        SignatureVerifier verifier = newVerifier(NOW);
+        CanonicalRequest request = req(NOW).build();
+        assertFalse(verifier.verify(request, SECRET, "invalid").isSuccess());
+        assertTrue(verifier.verify(request, SECRET, HmacSigner.sign(request, SECRET))
+                .isSuccess());
+    }
+
     private SignatureVerifier newVerifier(long fixedNow) {
         AtomicLong clock = new AtomicLong(fixedNow);
         NonceCache cache = new NonceCache.InMemory(60_000L, clock::get);

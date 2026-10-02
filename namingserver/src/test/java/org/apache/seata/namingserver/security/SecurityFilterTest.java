@@ -88,6 +88,63 @@ class SecurityFilterTest {
         filter = new SecurityFilter(props, registry, verifier, permissionChecker);
     }
 
+    @Test
+    void legacyJwtFlowRequiresValidatedAuthentication() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/naming/v1/register");
+        request.addHeader("Authorization", "Bearer invalid");
+        RecordingChain denied = new RecordingChain();
+        filter.doFilter(request, new MockHttpServletResponse(), denied);
+        assertFalse(denied.called.get());
+        SecurityFilter compatible = new SecurityFilter(props, registry, verifier, permissionChecker, req -> true);
+        RecordingChain accepted = new RecordingChain();
+        compatible.doFilter(request, new MockHttpServletResponse(), accepted);
+        assertTrue(accepted.called.get());
+        request.addHeader(SecurityConstants.HEADER_CLUSTER_ID, CLUSTER_ID);
+        RecordingChain partialSignature = new RecordingChain();
+        compatible.doFilter(request, new MockHttpServletResponse(), partialSignature);
+        assertFalse(partialSignature.called.get());
+    }
+
+    @Test
+    void loginRemainsWithExistingAuthenticationChain() throws Exception {
+        RecordingChain chain = new RecordingChain();
+        filter.doFilter(new MockHttpServletRequest("POST", "/api/v1/auth/login"), new MockHttpServletResponse(), chain);
+        assertTrue(chain.called.get());
+    }
+
+    @Test
+    void consoleRoutingHeadersAreSignedAndScoped() throws Exception {
+        registry.register(new ClusterIdentity(
+                CLUSTER_ID,
+                SECRET,
+                Collections.singleton("tenant-a"),
+                Collections.singleton("cluster-a"),
+                Collections.singletonList(java.util.regex.Pattern.compile("group-a")),
+                EnumSet.allOf(Permission.class)));
+        for (boolean tamper : new boolean[] {false, true}) {
+            Map<String, String> query = Collections.singletonMap("vgroup", "group-a");
+            Map<String, String> routing = new HashMap<>();
+            routing.put("x-seata-namespace", tamper ? "tenant-a" : "tenant-b");
+            routing.put("x-seata-cluster", "cluster-a");
+            MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/v1/console/globalSession");
+            query.forEach(request::addParameter);
+            routing.forEach(request::addHeader);
+            OutboundSigner signer = new OutboundSigner(
+                    CLUSTER_ID, SECRET, SignatureAlgorithm.HMAC_SHA256, clock::get, () -> "console-" + tamper);
+            signer.signHeaders("GET", request.getRequestURI(), query, new byte[0], routing)
+                    .forEach(request::addHeader);
+            if (tamper) {
+                request.removeHeader("x-seata-namespace");
+                request.addHeader("x-seata-namespace", "tenant-b");
+            }
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            RecordingChain chain = new RecordingChain();
+            filter.doFilter(request, response, chain);
+            assertFalse(chain.called.get());
+            assertEquals(tamper ? 401 : 403, response.getStatus());
+        }
+    }
+
     // ------------------------------------------------------------------ excluded paths
 
     @Test

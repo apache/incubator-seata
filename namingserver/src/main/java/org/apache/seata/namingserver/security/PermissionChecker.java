@@ -53,13 +53,14 @@ public final class PermissionChecker {
         if (!identity.hasPermission(required)) {
             return false;
         }
-        if (namespace != null && !identity.isNamespaceAllowed(namespace)) {
+        boolean console = path.contains("/console/");
+        if ((namespace != null || console) && !identity.isNamespaceAllowed(namespace)) {
             return false;
         }
-        if (cluster != null && !identity.isClusterAllowed(cluster)) {
+        if ((cluster != null || console) && !identity.isClusterAllowed(cluster)) {
             return false;
         }
-        if (vGroup != null && !identity.isVgroupAllowed(vGroup)) {
+        if ((vGroup != null || console) && !identity.isVgroupAllowed(vGroup)) {
             return false;
         }
         return true;

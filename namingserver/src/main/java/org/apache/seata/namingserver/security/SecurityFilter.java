@@ -45,10 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
- * Servlet filter that authenticates every inbound HTTP request against a shared secret and
- * a per-caller permission set.
+ * Servlet filter that authenticates HMAC requests against a shared secret and per-caller permissions.
+ * Unsigned routes outside this protocol and validated legacy JWT requests retain their existing
+ * authentication chain; a supplied HMAC identity is always checked.
  *
  * <p>Life-cycle of a single request:
  * <ol>
@@ -87,11 +89,23 @@ public class SecurityFilter implements Filter {
 
     private final PermissionChecker permissionChecker;
 
+    private final Predicate<HttpServletRequest> legacyAuthentication;
+
     public SecurityFilter(
             SecurityProperties properties,
             ClusterIdentityRegistry registry,
             SignatureVerifier verifier,
             PermissionChecker permissionChecker) {
+        this(properties, registry, verifier, permissionChecker, request -> false);
+    }
+
+    public SecurityFilter(
+            SecurityProperties properties,
+            ClusterIdentityRegistry registry,
+            SignatureVerifier verifier,
+            PermissionChecker permissionChecker,
+            Predicate<HttpServletRequest> legacyAuthentication) {
+        this.legacyAuthentication = Objects.requireNonNull(legacyAuthentication, "legacyAuthentication");
         this.properties = Objects.requireNonNull(properties, "properties");
         this.registry = Objects.requireNonNull(registry, "registry");
         this.verifier = Objects.requireNonNull(verifier, "verifier");
@@ -119,6 +133,17 @@ public class SecurityFilter implements Filter {
         String nonce = httpReq.getHeader(SecurityConstants.HEADER_NONCE);
         String algName = httpReq.getHeader(SecurityConstants.HEADER_SIGN_ALG);
         String signature = httpReq.getHeader(SecurityConstants.HEADER_SIGNATURE);
+
+        // Legacy JWT flows keep their existing authentication/authorization chain. Never
+        // bypass a supplied (even incomplete) HMAC identity based on an unverified header.
+        boolean hasSignatureHeaders =
+                clusterId != null || timestamp != null || nonce != null || algName != null || signature != null;
+        if (!hasSignatureHeaders
+                && (permissionChecker.requiredPermission(httpReq.getMethod(), httpReq.getRequestURI()) == null
+                        || legacyAuthentication.test(httpReq))) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         // ---- Missing headers ----
         if (isBlank(clusterId) || isBlank(timestamp) || isBlank(nonce) || isBlank(signature)) {
@@ -177,6 +202,7 @@ public class SecurityFilter implements Filter {
                 .method(httpReq.getMethod())
                 .path(httpReq.getRequestURI())
                 .queryParams(parseQuery(httpReq))
+                .signedHeaders(SecurityConstants.routingHeaders(httpReq::getHeader))
                 .clusterId(clusterId)
                 .timestampMillis(ts)
                 .nonce(nonce)
@@ -191,9 +217,10 @@ public class SecurityFilter implements Filter {
         }
 
         // ---- Permission check ----
-        String namespace = httpReq.getParameter("namespace");
-        String cluster = httpReq.getParameter("clusterName");
-        String vgroup = httpReq.getParameter("vGroup");
+        boolean console = httpReq.getRequestURI().contains("/console/");
+        String namespace = console ? httpReq.getHeader("x-seata-namespace") : httpReq.getParameter("namespace");
+        String cluster = console ? httpReq.getHeader("x-seata-cluster") : httpReq.getParameter("clusterName");
+        String vgroup = httpReq.getParameter(console ? "vgroup" : "vGroup");
         boolean allowed = permissionChecker.check(
                 identity, httpReq.getMethod(), httpReq.getRequestURI(), namespace, cluster, vgroup);
         if (!allowed) {

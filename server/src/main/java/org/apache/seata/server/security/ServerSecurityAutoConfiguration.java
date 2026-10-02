@@ -67,7 +67,7 @@ public class ServerSecurityAutoConfiguration {
             loaded.add(new AllowedCaller(
                     cfg.getId(),
                     secret,
-                    cfg.getPermissions() == null
+                    cfg.getPermissions() == null || cfg.getPermissions().isEmpty()
                             ? EnumSet.noneOf(CallerPermission.class)
                             : EnumSet.copyOf(cfg.getPermissions())));
         }
