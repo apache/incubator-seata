@@ -131,10 +131,6 @@
             <artifactId>seata-spring-autoconfigure-server</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
         <!-- Jakarta Servlet API required by the security auth filter, aligned with Spring Boot 4.x. -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
