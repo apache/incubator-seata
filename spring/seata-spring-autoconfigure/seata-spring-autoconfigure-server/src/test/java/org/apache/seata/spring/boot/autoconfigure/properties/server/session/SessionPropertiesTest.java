@@ -24,10 +24,10 @@ public class SessionPropertiesTest {
     @Test
     public void testSessionProperties() {
         SessionProperties sessionProperties = new SessionProperties();
-        sessionProperties.setEnableBranchAsync(true);
+        sessionProperties.setEnableBranchAsyncRemove(true);
         sessionProperties.setBranchAsyncQueueSize(1);
 
-        Assertions.assertTrue(sessionProperties.getEnableBranchAsync());
+        Assertions.assertTrue(sessionProperties.getEnableBranchAsyncRemove());
         Assertions.assertEquals(1, sessionProperties.getBranchAsyncQueueSize());
     }
 }
