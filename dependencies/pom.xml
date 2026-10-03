@@ -140,6 +140,7 @@
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
+        <rocksdbjni.version>10.10.1.1</rocksdbjni.version>
 
         <!--  for fory  -->
         <fory.version>0.12.3</fory.version>
@@ -601,6 +602,11 @@
                 <groupId>org.scijava</groupId>
                 <artifactId>native-lib-loader</artifactId>
                 <version>${native-lib-loader.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.rocksdb</groupId>
+                <artifactId>rocksdbjni</artifactId>
+                <version>${rocksdbjni.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>

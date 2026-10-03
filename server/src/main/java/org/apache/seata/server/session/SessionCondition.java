@@ -18,17 +18,40 @@ package org.apache.seata.server.session;
 
 import org.apache.seata.core.model.GlobalStatus;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
 /**
  * The type Session condition.
  *
  */
 public class SessionCondition {
+    public enum ScanContinuation {
+        UNSET,
+        RESUMABLE,
+        EXHAUSTED
+    }
+
     private Long transactionId;
     private String xid;
     private GlobalStatus status;
     private GlobalStatus[] statuses;
     private Long overTimeAliveMills;
+    private Integer limit;
+    private Integer scanLimit;
     private boolean lazyLoadBranch;
+    private byte[] statusScanCursor;
+    private byte[] nextStatusScanCursor;
+    private ScanContinuation statusScanContinuation = ScanContinuation.UNSET;
+    private Map<GlobalStatus, byte[]> statusScanCursors = Collections.emptyMap();
+    private Map<GlobalStatus, byte[]> nextStatusScanCursors = Collections.emptyMap();
+    private Long maxTimeoutDeadlineMillis;
+    private byte[] timeoutScanCursor;
+    private byte[] nextTimeoutScanCursor;
+    private ScanContinuation timeoutScanContinuation = ScanContinuation.UNSET;
+    private SessionScanStats scanStats = SessionScanStats.empty();
 
     /**
      * Instantiates a new Session condition.
@@ -133,11 +156,152 @@ public class SessionCondition {
         this.statuses = statuses;
     }
 
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
+    public Integer getScanLimit() {
+        return scanLimit;
+    }
+
+    public void setScanLimit(Integer scanLimit) {
+        this.scanLimit = scanLimit;
+    }
+
     public boolean isLazyLoadBranch() {
         return lazyLoadBranch;
     }
 
     public void setLazyLoadBranch(boolean lazyLoadBranch) {
         this.lazyLoadBranch = lazyLoadBranch;
+    }
+
+    public byte[] getStatusScanCursor() {
+        return statusScanCursor == null ? null : Arrays.copyOf(statusScanCursor, statusScanCursor.length);
+    }
+
+    public void setStatusScanCursor(byte[] statusScanCursor) {
+        this.statusScanCursor =
+                statusScanCursor == null ? null : Arrays.copyOf(statusScanCursor, statusScanCursor.length);
+    }
+
+    public byte[] getNextStatusScanCursor() {
+        return nextStatusScanCursor == null ? null : Arrays.copyOf(nextStatusScanCursor, nextStatusScanCursor.length);
+    }
+
+    public void setNextStatusScanCursor(byte[] nextStatusScanCursor) {
+        this.nextStatusScanCursor =
+                nextStatusScanCursor == null ? null : Arrays.copyOf(nextStatusScanCursor, nextStatusScanCursor.length);
+        statusScanContinuation = nextStatusScanCursor == null ? ScanContinuation.EXHAUSTED : ScanContinuation.RESUMABLE;
+    }
+
+    public ScanContinuation getStatusScanContinuation() {
+        return statusScanContinuation;
+    }
+
+    public void clearNextStatusScanCursor() {
+        nextStatusScanCursor = null;
+        statusScanContinuation = ScanContinuation.UNSET;
+    }
+
+    public Map<GlobalStatus, byte[]> getStatusScanCursors() {
+        return copyStatusScanCursors(statusScanCursors);
+    }
+
+    public void setStatusScanCursors(Map<GlobalStatus, byte[]> statusScanCursors) {
+        this.statusScanCursors = copyStatusScanCursors(statusScanCursors);
+    }
+
+    public Map<GlobalStatus, byte[]> getNextStatusScanCursors() {
+        return copyStatusScanCursors(nextStatusScanCursors);
+    }
+
+    public void setNextStatusScanCursors(Map<GlobalStatus, byte[]> nextStatusScanCursors) {
+        setNextStatusScanCursors(
+                nextStatusScanCursors,
+                nextStatusScanCursors == null || nextStatusScanCursors.isEmpty()
+                        ? ScanContinuation.EXHAUSTED
+                        : ScanContinuation.RESUMABLE);
+    }
+
+    public void setNextStatusScanCursors(
+            Map<GlobalStatus, byte[]> nextStatusScanCursors, ScanContinuation statusScanContinuation) {
+        this.nextStatusScanCursors = copyStatusScanCursors(nextStatusScanCursors);
+        this.statusScanContinuation = statusScanContinuation;
+    }
+
+    public void clearNextStatusScanCursors() {
+        nextStatusScanCursors = Collections.emptyMap();
+        statusScanContinuation = ScanContinuation.UNSET;
+    }
+
+    public Long getMaxTimeoutDeadlineMillis() {
+        return maxTimeoutDeadlineMillis;
+    }
+
+    public void setMaxTimeoutDeadlineMillis(Long maxTimeoutDeadlineMillis) {
+        this.maxTimeoutDeadlineMillis = maxTimeoutDeadlineMillis;
+    }
+
+    public byte[] getTimeoutScanCursor() {
+        return timeoutScanCursor == null ? null : Arrays.copyOf(timeoutScanCursor, timeoutScanCursor.length);
+    }
+
+    public void setTimeoutScanCursor(byte[] timeoutScanCursor) {
+        this.timeoutScanCursor =
+                timeoutScanCursor == null ? null : Arrays.copyOf(timeoutScanCursor, timeoutScanCursor.length);
+    }
+
+    public byte[] getNextTimeoutScanCursor() {
+        return nextTimeoutScanCursor == null
+                ? null
+                : Arrays.copyOf(nextTimeoutScanCursor, nextTimeoutScanCursor.length);
+    }
+
+    public void setNextTimeoutScanCursor(byte[] nextTimeoutScanCursor) {
+        this.nextTimeoutScanCursor = nextTimeoutScanCursor == null
+                ? null
+                : Arrays.copyOf(nextTimeoutScanCursor, nextTimeoutScanCursor.length);
+        timeoutScanContinuation =
+                nextTimeoutScanCursor == null ? ScanContinuation.EXHAUSTED : ScanContinuation.RESUMABLE;
+    }
+
+    public ScanContinuation getTimeoutScanContinuation() {
+        return timeoutScanContinuation;
+    }
+
+    public void clearNextTimeoutScanCursor() {
+        nextTimeoutScanCursor = null;
+        timeoutScanContinuation = ScanContinuation.UNSET;
+    }
+
+    public SessionScanStats getScanStats() {
+        return scanStats;
+    }
+
+    public void setScanStats(SessionScanStats scanStats) {
+        this.scanStats = scanStats == null ? SessionScanStats.empty() : scanStats;
+    }
+
+    public void clearScanStats() {
+        this.scanStats = SessionScanStats.empty();
+    }
+
+    private static Map<GlobalStatus, byte[]> copyStatusScanCursors(Map<GlobalStatus, byte[]> cursors) {
+        if (cursors == null || cursors.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<GlobalStatus, byte[]> copies = new EnumMap<>(GlobalStatus.class);
+        for (Map.Entry<GlobalStatus, byte[]> entry : cursors.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                byte[] cursor = entry.getValue();
+                copies.put(entry.getKey(), Arrays.copyOf(cursor, cursor.length));
+            }
+        }
+        return copies.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(copies);
     }
 }

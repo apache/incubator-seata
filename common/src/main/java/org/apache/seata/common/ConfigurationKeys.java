@@ -139,6 +139,215 @@ public interface ConfigurationKeys {
     String STORE_FILE_DIR = STORE_FILE_PREFIX + "dir";
 
     /**
+     * The constant STORE_FILE_ENGINE
+     */
+    String STORE_FILE_ENGINE = STORE_FILE_PREFIX + "engine";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_PREFIX
+     */
+    String STORE_FILE_ROCKSDB_PREFIX = STORE_FILE_PREFIX + "rocksdb.";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_DIR
+     */
+    String STORE_FILE_ROCKSDB_DIR = STORE_FILE_ROCKSDB_PREFIX + "dir";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_BLOCK_CACHE_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_BLOCK_CACHE_SIZE = STORE_FILE_ROCKSDB_PREFIX + "blockCacheSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "writeBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_DB_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_DB_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "dbWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_TOTAL_WAL_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_MAX_TOTAL_WAL_SIZE = STORE_FILE_ROCKSDB_PREFIX + "maxTotalWalSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_GLOBAL_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_GLOBAL_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "globalWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_BRANCH_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_BRANCH_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "branchWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LOCK_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_LOCK_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "lockWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_INDEX_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_INDEX_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "indexWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_METADATA_WRITE_BUFFER_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_METADATA_WRITE_BUFFER_SIZE = STORE_FILE_ROCKSDB_PREFIX + "metadataWriteBufferSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_WRITE_BUFFER_NUMBER.
+     */
+    String STORE_FILE_ROCKSDB_MAX_WRITE_BUFFER_NUMBER = STORE_FILE_ROCKSDB_PREFIX + "maxWriteBufferNumber";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MIN_WRITE_BUFFER_NUMBER_TO_MERGE.
+     */
+    String STORE_FILE_ROCKSDB_MIN_WRITE_BUFFER_NUMBER_TO_MERGE =
+            STORE_FILE_ROCKSDB_PREFIX + "minWriteBufferNumberToMerge";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_BACKGROUND_JOBS.
+     */
+    String STORE_FILE_ROCKSDB_MAX_BACKGROUND_JOBS = STORE_FILE_ROCKSDB_PREFIX + "maxBackgroundJobs";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MAX_OPEN_FILES.
+     */
+    String STORE_FILE_ROCKSDB_MAX_OPEN_FILES = STORE_FILE_ROCKSDB_PREFIX + "maxOpenFiles";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_TARGET_FILE_SIZE_BASE.
+     */
+    String STORE_FILE_ROCKSDB_TARGET_FILE_SIZE_BASE = STORE_FILE_ROCKSDB_PREFIX + "targetFileSizeBase";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_FILE_NUM_COMPACTION_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_FILE_NUM_COMPACTION_TRIGGER =
+            STORE_FILE_ROCKSDB_PREFIX + "level0FileNumCompactionTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_SLOWDOWN_WRITES_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_SLOWDOWN_WRITES_TRIGGER =
+            STORE_FILE_ROCKSDB_PREFIX + "level0SlowdownWritesTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_LEVEL0_STOP_WRITES_TRIGGER.
+     */
+    String STORE_FILE_ROCKSDB_LEVEL0_STOP_WRITES_TRIGGER = STORE_FILE_ROCKSDB_PREFIX + "level0StopWritesTrigger";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ENABLE_STATISTICS.
+     */
+    String STORE_FILE_ROCKSDB_ENABLE_STATISTICS = STORE_FILE_ROCKSDB_PREFIX + "enableStatistics";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_OPTIMIZE_FILTERS_FOR_HITS.
+     */
+    String STORE_FILE_ROCKSDB_OPTIMIZE_FILTERS_FOR_HITS = STORE_FILE_ROCKSDB_PREFIX + "optimizeFiltersForHits";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_COMPRESSION_TYPE.
+     */
+    String STORE_FILE_ROCKSDB_COMPRESSION_TYPE = STORE_FILE_ROCKSDB_PREFIX + "compressionType";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ENABLE_RANGE_DELETE.
+     */
+    String STORE_FILE_ROCKSDB_ENABLE_RANGE_DELETE = STORE_FILE_ROCKSDB_PREFIX + "enableRangeDelete";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_RANGE_DELETE_COMPACT_AFTER_DELETE.
+     */
+    String STORE_FILE_ROCKSDB_RANGE_DELETE_COMPACT_AFTER_DELETE =
+            STORE_FILE_ROCKSDB_PREFIX + "rangeDeleteCompactAfterDelete";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_MODE.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_MODE = STORE_FILE_ROCKSDB_PREFIX + "walSyncMode";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_INTERVAL_MILLIS.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_INTERVAL_MILLIS = STORE_FILE_ROCKSDB_PREFIX + "walSyncIntervalMillis";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_WRITE_THRESHOLD.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_WRITE_THRESHOLD = STORE_FILE_ROCKSDB_PREFIX + "walSyncWriteThreshold";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_ON_SHUTDOWN.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_ON_SHUTDOWN = STORE_FILE_ROCKSDB_PREFIX + "walSyncOnShutdown";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_SHUTDOWN_TIMEOUT_MILLIS.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_SHUTDOWN_TIMEOUT_MILLIS =
+            STORE_FILE_ROCKSDB_PREFIX + "walSyncShutdownTimeoutMillis";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_WAL_SYNC_WARN_THRESHOLD_MILLIS.
+     */
+    String STORE_FILE_ROCKSDB_WAL_SYNC_WARN_THRESHOLD_MILLIS = STORE_FILE_ROCKSDB_PREFIX + "walSyncWarnThresholdMillis";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_FULL_SCAN_MAX_LIMIT.
+     * Safety limit for full table scans (scanGlobalSessions). 0 disables the limit.
+     */
+    String STORE_FILE_ROCKSDB_FULL_SCAN_MAX_LIMIT = STORE_FILE_ROCKSDB_PREFIX + "fullScanMaxLimit";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_FULL_SCAN_DEADLINE_MILLIS.
+     * Maximum wall-clock time (ms) a single full scan may run before being interrupted. 0 disables the deadline.
+     */
+    String STORE_FILE_ROCKSDB_FULL_SCAN_DEADLINE_MILLIS = STORE_FILE_ROCKSDB_PREFIX + "fullScanDeadlineMillis";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_MULTI_STATUS_SCAN_PAGE_SIZE.
+     */
+    String STORE_FILE_ROCKSDB_MULTI_STATUS_SCAN_PAGE_SIZE = STORE_FILE_ROCKSDB_PREFIX + "multiStatusScanPageSize";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_ENABLED.
+     * Whether the background orphan lock cleanup controller is enabled.
+     */
+    String STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_ENABLED = STORE_FILE_ROCKSDB_PREFIX + "orphanLockCleanEnabled";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_INTERVAL_MILLIS.
+     * Delay (ms) between the start of two background orphan lock cleanup cycles.
+     */
+    String STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_INTERVAL_MILLIS =
+            STORE_FILE_ROCKSDB_PREFIX + "orphanLockCleanIntervalMillis";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_BATCH_LIMIT.
+     * Max lock index entries scanned per batch inside one cleanup round.
+     */
+    String STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_BATCH_LIMIT = STORE_FILE_ROCKSDB_PREFIX + "orphanLockCleanBatchLimit";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_MAX_BATCHES.
+     * Max batches executed per cleanup round; round work is capped at batchLimit * maxBatches entries.
+     */
+    String STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_MAX_BATCHES = STORE_FILE_ROCKSDB_PREFIX + "orphanLockCleanMaxBatches";
+
+    /**
+     * The constant STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_ROUND_SLEEP_MILLIS.
+     * Sleep (ms) between cleanup rounds within one cycle to limit foreground I/O interference. 0 disables sleeping.
+     */
+    String STORE_FILE_ROCKSDB_ORPHAN_LOCK_CLEAN_ROUND_SLEEP_MILLIS =
+            STORE_FILE_ROCKSDB_PREFIX + "orphanLockCleanRoundSleepMillis";
+
+    /**
      * The constant SERVICE_GROUP_MAPPING_PREFIX.
      */
     String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroupMapping.";
@@ -1025,6 +1234,11 @@ public interface ConfigurationKeys {
      * The constant ENABLE_BRANCH_ASYNC_REMOVE
      */
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
+
+    /**
+     * The constant SESSION_BACKGROUND_TASK_QUERY_LIMIT
+     */
+    String SESSION_BACKGROUND_TASK_QUERY_LIMIT = SERVER_PREFIX + SESSION_PREFIX + "backgroundTaskQueryLimit";
 
     /**
      * The constant SERVER_RAFT.

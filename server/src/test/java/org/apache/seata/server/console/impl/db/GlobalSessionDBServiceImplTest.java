@@ -26,6 +26,7 @@ import org.apache.seata.server.console.service.BranchSessionService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -176,6 +177,7 @@ class GlobalSessionDBServiceImplTest extends BaseSpringBootTest {
         param.setPageNum(1);
         param.setPageSize(10);
         param.setXid("test-xid-001");
+        param.setTransactionId(1001L);
         param.setApplicationId("test-app");
         param.setStatus(1);
         param.setTransactionName("test-transaction");
@@ -202,6 +204,33 @@ class GlobalSessionDBServiceImplTest extends BaseSpringBootTest {
         Assertions.assertEquals(0, result.getTotal());
 
         verify(connection, times(1)).close();
+    }
+
+    @Test
+    void queryWithTransactionIdConditionTest() throws SQLException {
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageNum(1);
+        param.setPageSize(10);
+        param.setTransactionId(1001L);
+        param.setWithBranch(false);
+
+        when(dataSource.getConnection()).thenReturn(connection);
+        when(connection.prepareStatement(anyString()))
+                .thenReturn(preparedStatement)
+                .thenReturn(countPreparedStatement);
+        when(preparedStatement.executeQuery()).thenReturn(resultSet);
+        when(countPreparedStatement.executeQuery()).thenReturn(countResultSet);
+        when(resultSet.next()).thenReturn(false);
+        when(countResultSet.next()).thenReturn(true);
+        when(countResultSet.getInt(1)).thenReturn(0);
+
+        PageResult<GlobalSessionVO> result = globalSessionDBService.query(param);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isSuccess());
+        ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(connection, times(2)).prepareStatement(sqlCaptor.capture());
+        Assertions.assertTrue(sqlCaptor.getAllValues().stream().allMatch(sql -> sql.contains("transaction_id = ?")));
     }
 
     @Test

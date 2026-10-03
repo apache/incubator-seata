@@ -189,12 +189,46 @@ seata:
     lock:
       mode: file
     file:
+      # support: file, rocksdb
+      engine: file
       dir: sessionStore
       max-branch-session-size: 16384
       max-global-session-size: 512
       file-write-buffer-cache-size: 16384
       session-reload-read-size: 100
       flush-disk-mode: async
+      rocksdb:
+        dir: sessionStore/rocksdb
+        # Optional global memtable budget across all column families. 0 keeps the RocksDB default.
+        db-write-buffer-size: 0
+        # Optional total WAL size before RocksDB forces flushes. 0 keeps the RocksDB default.
+        max-total-wal-size: 0
+        # Optional per-profile memtable sizes. 0 falls back to write-buffer-size / RocksDB default.
+        global-write-buffer-size: 0
+        branch-write-buffer-size: 0
+        lock-write-buffer-size: 0
+        index-write-buffer-size: 0
+        metadata-write-buffer-size: 0
+        # Range deletion is the optimized default for xid-scoped branch and lock cleanup.
+        enable-range-delete: true
+        range-delete-compact-after-delete: false
+        # Bound maintenance scans by both result count and elapsed time.
+        full-scan-max-limit: 10000
+        full-scan-deadline-millis: 5000
+        multi-status-scan-page-size: 256
+        # periodic WAL sync is disabled by default; only works when flush-disk-mode is async.
+        wal-sync-mode: none
+        wal-sync-interval-millis: 2000
+        wal-sync-write-threshold: 10
+        wal-sync-on-shutdown: true
+        wal-sync-shutdown-timeout-millis: 30000
+        wal-sync-warn-threshold-millis: 1000
+        # background orphan lock cleanup: bounded rounds with persisted cursor instead of one full-pass stall.
+        orphan-lock-clean-enabled: true
+        orphan-lock-clean-interval-millis: 60000
+        orphan-lock-clean-batch-limit: 1000
+        orphan-lock-clean-max-batches: 2
+        orphan-lock-clean-round-sleep-millis: 100
     db:
       datasource: druid
       db-type: mysql

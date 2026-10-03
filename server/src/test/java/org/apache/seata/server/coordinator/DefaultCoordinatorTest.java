@@ -55,7 +55,12 @@ import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.rocksdb.RocksDBStoreConfig;
+import org.apache.seata.server.storage.rocksdb.RocksDBStoreEngine;
+import org.apache.seata.server.storage.rocksdb.session.RocksDBSessionManager;
 import org.apache.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -66,17 +71,29 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
@@ -102,6 +119,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     private static final int TIMEOUT = 3000;
 
     private static final String RESOURCE_ID = "tb_1";
+
+    @TempDir
+    Path tempDir;
 
     private static final String CLIENT_ID = "c_1";
 
@@ -337,8 +357,384 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }
 
     @Test
+    public void timeoutCheckUsesDeadlineBoundedScanForRocksDBSessionManager() {
+        RocksDBSessionManager sessionManager = mock(RocksDBSessionManager.class);
+        List<SessionCondition> conditions = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            conditions.add(invocation.getArgument(0));
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.timeoutCheck();
+        }
+
+        Assertions.assertEquals(1, conditions.size());
+        SessionCondition condition = conditions.get(0);
+        Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, condition.getLimit());
+        Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, condition.getScanLimit());
+        Assertions.assertEquals(GlobalStatus.Begin, condition.getStatus());
+        Assertions.assertTrue(condition.isLazyLoadBranch());
+        Assertions.assertNotNull(condition.getMaxTimeoutDeadlineMillis());
+        Assertions.assertTrue(condition.getMaxTimeoutDeadlineMillis() <= System.currentTimeMillis());
+    }
+
+    @Test
+    public void timeoutCheckUsesCoordinatorInstanceQueryLimitForRocksDBSessionManager() throws Exception {
+        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer, 7);
+        RocksDBSessionManager sessionManager = mock(RocksDBSessionManager.class);
+        List<SessionCondition> conditions = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            conditions.add(invocation.getArgument(0));
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            coordinator.timeoutCheck();
+        } finally {
+            shutdownCoordinatorExecutors(coordinator);
+        }
+
+        Assertions.assertEquals(1, conditions.size());
+        Assertions.assertEquals(7, conditions.get(0).getLimit());
+        Assertions.assertEquals(7, conditions.get(0).getScanLimit());
+    }
+
+    @Test
+    public void timeoutCheckKeepsFullScanForGenericSessionManager() {
+        SessionManager sessionManager = mock(SessionManager.class);
+        List<SessionCondition> conditions = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            conditions.add(invocation.getArgument(0));
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.timeoutCheck();
+        }
+
+        Assertions.assertEquals(1, conditions.size());
+        SessionCondition condition = conditions.get(0);
+        Assertions.assertNull(condition.getLimit());
+        Assertions.assertNull(condition.getMaxTimeoutDeadlineMillis());
+        Assertions.assertNull(condition.getTimeoutScanCursor());
+    }
+
+    @Test
+    public void timeoutCheckCarriesTimeoutScanCursorAcrossRounds() {
+        RocksDBSessionManager sessionManager = mock(RocksDBSessionManager.class);
+        byte[] nextCursor = new byte[] {4, 5, 6};
+        List<byte[]> cursors = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            cursors.add(condition.getTimeoutScanCursor());
+            if (cursors.size() == 1) {
+                condition.setNextTimeoutScanCursor(nextCursor);
+            } else if (cursors.size() == 2) {
+                condition.setNextTimeoutScanCursor(null);
+            }
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+        }
+
+        Assertions.assertEquals(3, cursors.size());
+        Assertions.assertNull(cursors.get(0));
+        Assertions.assertArrayEquals(nextCursor, cursors.get(1));
+        Assertions.assertNull(cursors.get(2));
+    }
+
+    @Test
     public void handleRetryCommittingNoSessionsTest() {
         defaultCoordinator.handleRetryCommitting();
+    }
+
+    @Test
+    public void retryBackgroundTasksSetSessionQueryLimit() {
+        List<SessionCondition> conditions = captureBackgroundSessionConditions(() -> {
+            defaultCoordinator.handleRetryRollbacking();
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleAsyncCommitting();
+        });
+
+        Assertions.assertEquals(5, conditions.size());
+        assertSharedBackgroundSessionQueryConditions(conditions.subList(0, 3));
+        assertBackgroundSessionQueryConditions(conditions.subList(3, 5));
+    }
+
+    @Test
+    public void retryBackgroundTasksCarryStatusScanCursorAcrossRounds() {
+        SessionManager sessionManager = mock(SessionManager.class);
+        byte[] nextCursor = new byte[] {1, 2, 3};
+        List<byte[]> cursors = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            cursors.add(condition.getStatusScanCursor());
+            if (cursors.size() == 1) {
+                condition.setNextStatusScanCursor(nextCursor);
+            } else if (cursors.size() == 2) {
+                condition.setNextStatusScanCursor(null);
+            }
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+        }
+
+        Assertions.assertEquals(3, cursors.size());
+        Assertions.assertNull(cursors.get(0));
+        Assertions.assertArrayEquals(nextCursor, cursors.get(1));
+        Assertions.assertNull(cursors.get(2));
+    }
+
+    @Test
+    public void retryBackgroundTasksPreserveRetainedCursorWhenContinuationIsUnset() {
+        SessionManager sessionManager = mock(SessionManager.class);
+        byte[] firstCursor = new byte[] {1, 2, 3};
+        byte[] replacementCursor = new byte[] {4, 5, 6};
+        List<byte[]> cursors = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            cursors.add(condition.getStatusScanCursor());
+            if (cursors.size() == 1) {
+                condition.setNextStatusScanCursor(firstCursor);
+            } else if (cursors.size() == 3) {
+                condition.setNextStatusScanCursor(replacementCursor);
+            } else if (cursors.size() == 4) {
+                condition.setNextStatusScanCursor(null);
+            }
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+            defaultCoordinator.handleRetryCommitting();
+        }
+
+        Assertions.assertEquals(5, cursors.size());
+        Assertions.assertNull(cursors.get(0));
+        Assertions.assertArrayEquals(firstCursor, cursors.get(1));
+        Assertions.assertArrayEquals(firstCursor, cursors.get(2));
+        Assertions.assertArrayEquals(replacementCursor, cursors.get(3));
+        Assertions.assertNull(cursors.get(4));
+    }
+
+    @Test
+    public void timeoutCheckPreservesRetainedCursorWhenContinuationIsUnset() {
+        RocksDBSessionManager sessionManager = mock(RocksDBSessionManager.class);
+        byte[] firstCursor = new byte[] {4, 5, 6};
+        byte[] replacementCursor = new byte[] {7, 8, 9};
+        List<byte[]> cursors = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            cursors.add(condition.getTimeoutScanCursor());
+            if (cursors.size() == 1) {
+                condition.setNextTimeoutScanCursor(firstCursor);
+            } else if (cursors.size() == 3) {
+                condition.setNextTimeoutScanCursor(replacementCursor);
+            } else if (cursors.size() == 4) {
+                condition.setNextTimeoutScanCursor(null);
+            }
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+            defaultCoordinator.timeoutCheck();
+        }
+
+        Assertions.assertEquals(5, cursors.size());
+        Assertions.assertNull(cursors.get(0));
+        Assertions.assertArrayEquals(firstCursor, cursors.get(1));
+        Assertions.assertArrayEquals(firstCursor, cursors.get(2));
+        Assertions.assertArrayEquals(replacementCursor, cursors.get(3));
+        Assertions.assertNull(cursors.get(4));
+    }
+
+    @Test
+    public void exhaustedMultiStatusScansRestartBeforeNewEarlierSessions() throws Exception {
+        GlobalStatus[] statuses = new GlobalStatus[] {
+            GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Committed, GlobalStatus.Finished
+        };
+        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer, statuses.length);
+        try (RocksDBStoreEngine engine = RocksDBStoreEngine.open(new RocksDBStoreConfig(
+                tempDir.resolve("multi-status-exhausted-cursors").toString(), true))) {
+            RocksDBSessionManager delegate = new RocksDBSessionManager("multi-status-exhausted-cursors", engine);
+            List<SessionCondition> conditions = new ArrayList<>();
+            SessionManager sessionManager = mock(SessionManager.class);
+            when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+                SessionCondition condition = invocation.getArgument(0);
+                List<GlobalSession> sessions = delegate.findGlobalSessions(condition);
+                conditions.add(condition);
+                return sessions;
+            });
+            for (int i = 0; i < statuses.length; i++) {
+                delegate.addGlobalSession(storedBackgroundSession("tx-exhausted-" + i, statuses[i], 100L + i));
+            }
+
+            try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+                sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+
+                List<GlobalSession> firstRound = invokeFindBackgroundSessions(coordinator, statuses, true);
+                Assertions.assertEquals(statuses.length, firstRound.size());
+                conditions.forEach(condition -> Assertions.assertEquals(
+                        SessionCondition.ScanContinuation.RESUMABLE, condition.getStatusScanContinuation()));
+
+                conditions.clear();
+                Assertions.assertTrue(invokeFindBackgroundSessions(coordinator, statuses, true)
+                        .isEmpty());
+                conditions.forEach(condition -> Assertions.assertEquals(
+                        SessionCondition.ScanContinuation.EXHAUSTED, condition.getStatusScanContinuation()));
+                assertBackgroundSessionCursors(coordinator, Collections.emptyMap());
+
+                GlobalSession earlier = storedBackgroundSession("tx-new-earlier", statuses[0], 50L);
+                delegate.addGlobalSession(earlier);
+                conditions.clear();
+                List<GlobalSession> nextRound = invokeFindBackgroundSessions(coordinator, statuses, true);
+
+                Assertions.assertTrue(
+                        nextRound.stream().anyMatch(session -> earlier.getXid().equals(session.getXid())));
+                SessionCondition restarted = conditions.stream()
+                        .filter(condition -> condition.getStatuses()[0] == statuses[0])
+                        .findFirst()
+                        .orElseThrow(AssertionError::new);
+                Assertions.assertNull(restarted.getStatusScanCursor());
+            }
+        } finally {
+            shutdownCoordinatorExecutors(coordinator);
+        }
+    }
+
+    @Test
+    public void retryBackgroundScanReachesSession1025AfterFullFailingPage() throws Exception {
+        int firstPageSize = 1024;
+        Assertions.assertEquals(firstPageSize, DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT);
+        List<GlobalSession> failingFirstPage = new ArrayList<>(firstPageSize);
+        for (int i = 0; i < firstPageSize; i++) {
+            failingFirstPage.add(mock(GlobalSession.class));
+        }
+        GlobalSession session1025 = mock(GlobalSession.class);
+        byte[] nextCursor = new byte[] {1, 2, 3};
+        List<byte[]> observedCursors = new ArrayList<>();
+        SessionManager sessionManager = mock(SessionManager.class);
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            observedCursors.add(condition.getStatusScanCursor());
+            Assertions.assertEquals(firstPageSize, condition.getScanLimit());
+            if (condition.getStatusScanCursor() == null) {
+                condition.setNextStatusScanCursor(nextCursor);
+                return failingFirstPage;
+            }
+            Assertions.assertArrayEquals(nextCursor, condition.getStatusScanCursor());
+            condition.setNextStatusScanCursor(null);
+            return Collections.singletonList(session1025);
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+
+            List<GlobalSession> firstRound =
+                    invokeFindBackgroundSessions(new GlobalStatus[] {GlobalStatus.CommitRetrying}, true);
+            List<GlobalSession> secondRound =
+                    invokeFindBackgroundSessions(new GlobalStatus[] {GlobalStatus.CommitRetrying}, true);
+
+            Assertions.assertEquals(firstPageSize, firstRound.size());
+            Assertions.assertSame(session1025, secondRound.get(0));
+        }
+
+        Assertions.assertEquals(2, observedCursors.size());
+        Assertions.assertNull(observedCursors.get(0));
+        Assertions.assertArrayEquals(nextCursor, observedCursors.get(1));
+    }
+
+    @Test
+    public void retryRollbackingStatusesShareRoundBudgetWithoutDroppingLaterSessions() throws Exception {
+        assertMultiStatusRoundsShareBudget(new GlobalStatus[] {
+            GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying
+        });
+    }
+
+    @Test
+    public void endStatusesShareRoundBudgetWithoutDroppingLaterSessions() throws Exception {
+        assertMultiStatusRoundsShareBudget(new GlobalStatus[] {
+            GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Committed, GlobalStatus.Finished
+        });
+    }
+
+    @Test
+    public void smallBackgroundQueryLimitRotatesAcrossRetryAndEndStatusGroups() throws Exception {
+        assertSmallBackgroundQueryLimitRotatesAcrossStatusGroup("retryRollbackingStatuses");
+        assertSmallBackgroundQueryLimitRotatesAcrossStatusGroup("endStatuses");
+    }
+
+    @Test
+    public void multiStatusRocksDBBackgroundScanCarriesCompositeCursorAcrossRounds() throws Exception {
+        clearBackgroundSessionStatusCursors();
+        RocksDBSessionManager sessionManager = mock(RocksDBSessionManager.class);
+        byte[] timeoutRollbackingCursor = new byte[] {1, 2, 3};
+        byte[] timeoutRollbackRetryingCursor = new byte[] {4, 5, 6};
+        List<SessionCondition> conditions = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            conditions.add(condition);
+            if (conditions.size() == 1) {
+                Map<GlobalStatus, byte[]> nextCursors = new EnumMap<>(GlobalStatus.class);
+                nextCursors.put(GlobalStatus.TimeoutRollbacking, timeoutRollbackingCursor);
+                nextCursors.put(GlobalStatus.TimeoutRollbackRetrying, timeoutRollbackRetryingCursor);
+                condition.setNextStatusScanCursors(nextCursors);
+            }
+            return Collections.emptyList();
+        });
+
+        GlobalStatus[] statuses = {GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying};
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            invokeFindBackgroundSessions(statuses, true);
+            invokeFindBackgroundSessions(statuses, true);
+        }
+
+        Assertions.assertEquals(2, conditions.size());
+        Assertions.assertArrayEquals(statuses, conditions.get(0).getStatuses());
+        Assertions.assertEquals(
+                DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT,
+                conditions.get(0).getLimit());
+        Map<GlobalStatus, byte[]> secondRoundCursors = conditions.get(1).getStatusScanCursors();
+        Assertions.assertArrayEquals(timeoutRollbackingCursor, secondRoundCursors.get(GlobalStatus.TimeoutRollbacking));
+        Assertions.assertArrayEquals(
+                timeoutRollbackRetryingCursor, secondRoundCursors.get(GlobalStatus.TimeoutRollbackRetrying));
+    }
+
+    @Test
+    public void scheduledBackgroundTasksSetSessionQueryLimit() {
+        List<SessionCondition> conditions = captureBackgroundSessionConditions(() -> {
+            defaultCoordinator.handleRollbackingByScheduled();
+            defaultCoordinator.handleCommittingByScheduled();
+            defaultCoordinator.handleEndStatesByScheduled();
+        });
+
+        Assertions.assertEquals(6, conditions.size());
+        assertBackgroundSessionQueryConditions(conditions.subList(0, 2));
+        assertSharedBackgroundSessionQueryConditions(conditions.subList(2, 6));
     }
 
     @Test
@@ -1334,6 +1730,234 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
             // Just verify the method exists by getting its reference
             defaultCoordinator.getClass().getMethod("destroy");
         });
+    }
+
+    private List<SessionCondition> captureBackgroundSessionConditions(Runnable action) {
+        SessionManager sessionManager = mock(SessionManager.class);
+        List<SessionCondition> conditions = new ArrayList<>();
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            conditions.add(invocation.getArgument(0));
+            return Collections.emptyList();
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+            try {
+                action.run();
+            } finally {
+                clearSyncProcessingQueue();
+            }
+        }
+        return conditions;
+    }
+
+    private void assertMultiStatusRoundsShareBudget(GlobalStatus[] statuses) throws Exception {
+        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer);
+        GlobalSession earlySession = new GlobalSession();
+        earlySession.setBeginTime(1L);
+        Map<GlobalStatus, List<GlobalSession>> laterSessions = new EnumMap<>(GlobalStatus.class);
+        for (int statusIndex = 1; statusIndex < statuses.length; statusIndex++) {
+            List<GlobalSession> sessions = new ArrayList<>();
+            for (int round = 0; round < 2; round++) {
+                GlobalSession session = new GlobalSession();
+                session.setBeginTime(100L + statusIndex * 10L + round);
+                sessions.add(session);
+            }
+            laterSessions.put(statuses[statusIndex], sessions);
+        }
+
+        List<SessionCondition> conditions = new ArrayList<>();
+        Map<GlobalStatus, Integer> statusRounds = new EnumMap<>(GlobalStatus.class);
+        Map<GlobalStatus, byte[]> expectedCursors = new EnumMap<>(GlobalStatus.class);
+        SessionManager sessionManager = mock(SessionManager.class);
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            conditions.add(condition);
+            GlobalStatus status = condition.getStatuses()[0];
+            Assertions.assertArrayEquals(expectedCursors.get(status), condition.getStatusScanCursor());
+            int round = statusRounds.getOrDefault(status, 0);
+            statusRounds.put(status, round + 1);
+            byte[] nextCursor = new byte[] {(byte) status.ordinal(), (byte) (round + 1)};
+            condition.setNextStatusScanCursor(nextCursor);
+            expectedCursors.put(status, nextCursor);
+            if (status == statuses[0]) {
+                return Collections.nCopies(condition.getLimit(), earlySession);
+            }
+            return Collections.singletonList(laterSessions.get(status).get(round));
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+
+            for (int round = 0; round < 2; round++) {
+                List<GlobalSession> result = invokeFindBackgroundSessions(coordinator, statuses, true);
+
+                Assertions.assertTrue(result.size() <= DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT);
+                for (int statusIndex = 1; statusIndex < statuses.length; statusIndex++) {
+                    Assertions.assertTrue(result.contains(
+                            laterSessions.get(statuses[statusIndex]).get(round)));
+                }
+            }
+        } finally {
+            shutdownCoordinatorExecutors(coordinator);
+        }
+
+        Assertions.assertEquals(statuses.length * 2, conditions.size());
+        assertSharedBackgroundSessionQueryConditions(conditions.subList(0, statuses.length));
+        assertSharedBackgroundSessionQueryConditions(conditions.subList(statuses.length, statuses.length * 2));
+    }
+
+    private void assertSmallBackgroundQueryLimitRotatesAcrossStatusGroup(String statusFieldName) throws Exception {
+        int queryLimit = 1;
+        DefaultCoordinator coordinator = new DefaultCoordinator(remotingServer, queryLimit);
+        GlobalStatus[] statuses = coordinatorStatusGroup(coordinator, statusFieldName);
+        Map<GlobalStatus, GlobalSession> sessions = new EnumMap<>(GlobalStatus.class);
+        for (GlobalStatus status : statuses) {
+            GlobalSession session = new GlobalSession();
+            session.setBeginTime(status.ordinal());
+            sessions.put(status, session);
+        }
+
+        List<GlobalStatus> queriedStatuses = new ArrayList<>();
+        List<SessionCondition> conditions = new ArrayList<>();
+        Map<GlobalStatus, byte[]> expectedCursors = new EnumMap<>(GlobalStatus.class);
+        SessionManager sessionManager = mock(SessionManager.class);
+        when(sessionManager.findGlobalSessions(any(SessionCondition.class))).thenAnswer(invocation -> {
+            SessionCondition condition = invocation.getArgument(0);
+            conditions.add(condition);
+            GlobalStatus status = condition.getStatuses()[0];
+            Assertions.assertArrayEquals(expectedCursors.get(status), condition.getStatusScanCursor());
+            queriedStatuses.add(status);
+            byte[] nextCursor = new byte[] {(byte) status.ordinal(), (byte) queriedStatuses.size()};
+            condition.setNextStatusScanCursor(nextCursor);
+            expectedCursors.put(status, nextCursor);
+            return Collections.singletonList(sessions.get(status));
+        });
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
+
+            for (int round = 0; round < statuses.length; round++) {
+                int firstCondition = conditions.size();
+                List<GlobalSession> result = invokeFindBackgroundSessions(coordinator, statuses, true);
+                List<SessionCondition> roundConditions = conditions.subList(firstCondition, conditions.size());
+
+                Assertions.assertEquals(1, roundConditions.size());
+                Assertions.assertTrue(roundConditions.stream()
+                                .mapToInt(SessionCondition::getLimit)
+                                .sum()
+                        <= queryLimit);
+                Assertions.assertTrue(roundConditions.stream()
+                                .mapToInt(SessionCondition::getScanLimit)
+                                .sum()
+                        <= queryLimit);
+                GlobalStatus queriedStatus = roundConditions.get(0).getStatuses()[0];
+                Assertions.assertEquals(Collections.singletonList(sessions.get(queriedStatus)), result);
+                assertBackgroundSessionCursors(coordinator, expectedCursors);
+            }
+        } finally {
+            shutdownCoordinatorExecutors(coordinator);
+        }
+
+        Assertions.assertArrayEquals(statuses, queriedStatuses.toArray(new GlobalStatus[0]));
+    }
+
+    private GlobalStatus[] coordinatorStatusGroup(DefaultCoordinator coordinator, String fieldName)
+            throws ReflectiveOperationException {
+        Field field = DefaultCoordinator.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        GlobalStatus[] statuses = (GlobalStatus[]) field.get(coordinator);
+        return Arrays.copyOf(statuses, statuses.length);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void assertBackgroundSessionCursors(
+            DefaultCoordinator coordinator, Map<GlobalStatus, byte[]> expectedCursors)
+            throws ReflectiveOperationException {
+        Field field = DefaultCoordinator.class.getDeclaredField("backgroundSessionStatusCursors");
+        field.setAccessible(true);
+        Map<GlobalStatus, byte[]> actualCursors = (Map<GlobalStatus, byte[]>) field.get(coordinator);
+        Assertions.assertEquals(expectedCursors.keySet(), actualCursors.keySet());
+        expectedCursors.forEach(
+                (status, expectedCursor) -> Assertions.assertArrayEquals(expectedCursor, actualCursors.get(status)));
+    }
+
+    private List<GlobalSession> invokeFindBackgroundSessions(GlobalStatus[] statuses, boolean lazyLoadBranch)
+            throws Exception {
+        return invokeFindBackgroundSessions(defaultCoordinator, statuses, lazyLoadBranch);
+    }
+
+    private GlobalSession storedBackgroundSession(String name, GlobalStatus status, long beginTime) {
+        GlobalSession session = new GlobalSession("app", "group", name, TIMEOUT);
+        session.setStatus(status);
+        session.setBeginTime(beginTime);
+        return session;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<GlobalSession> invokeFindBackgroundSessions(
+            DefaultCoordinator coordinator, GlobalStatus[] statuses, boolean lazyLoadBranch) throws Exception {
+        java.lang.reflect.Method method = DefaultCoordinator.class.getDeclaredMethod(
+                "findBackgroundSessions", GlobalStatus[].class, boolean.class);
+        method.setAccessible(true);
+        return (List<GlobalSession>) method.invoke(coordinator, statuses, lazyLoadBranch);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void clearBackgroundSessionStatusCursors() throws Exception {
+        Field cursorsField = DefaultCoordinator.class.getDeclaredField("backgroundSessionStatusCursors");
+        cursorsField.setAccessible(true);
+        ((Map<GlobalStatus, byte[]>) cursorsField.get(defaultCoordinator)).clear();
+    }
+
+    private void assertBackgroundSessionQueryConditions(List<SessionCondition> conditions) {
+        Assertions.assertFalse(conditions.isEmpty());
+        for (SessionCondition condition : conditions) {
+            Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, condition.getLimit());
+            Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, condition.getScanLimit());
+            Assertions.assertNotNull(condition.getStatuses());
+            Assertions.assertEquals(1, condition.getStatuses().length);
+        }
+    }
+
+    private void assertSharedBackgroundSessionQueryConditions(List<SessionCondition> conditions) {
+        Assertions.assertFalse(conditions.isEmpty());
+        int resultBudget = 0;
+        int scanBudget = 0;
+        for (SessionCondition condition : conditions) {
+            Assertions.assertTrue(condition.getLimit() > 0);
+            Assertions.assertEquals(condition.getLimit(), condition.getScanLimit());
+            Assertions.assertNotNull(condition.getStatuses());
+            Assertions.assertEquals(1, condition.getStatuses().length);
+            resultBudget += condition.getLimit();
+            scanBudget += condition.getScanLimit();
+        }
+        Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, resultBudget);
+        Assertions.assertEquals(DefaultCoordinator.SESSION_BACKGROUND_TASK_QUERY_LIMIT, scanBudget);
+    }
+
+    private void shutdownCoordinatorExecutors(DefaultCoordinator coordinator) throws IllegalAccessException {
+        for (Field field : DefaultCoordinator.class.getDeclaredFields()) {
+            if (!ExecutorService.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            field.setAccessible(true);
+            ExecutorService executor = (ExecutorService) field.get(coordinator);
+            if (executor != null) {
+                executor.shutdownNow();
+            }
+        }
+    }
+
+    private void clearSyncProcessingQueue() {
+        try {
+            Field field = DefaultCoordinator.class.getDeclaredField("syncProcessing");
+            field.setAccessible(true);
+            ScheduledThreadPoolExecutor executor = (ScheduledThreadPoolExecutor) field.get(defaultCoordinator);
+            executor.getQueue().clear();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static class MockServerMessageSender implements RemotingServer {
