@@ -19,7 +19,7 @@ package org.apache.seata.xa;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.druid.util.JdbcUtils;
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+import com.mysql.cj.jdbc.MysqlXADataSource;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
