@@ -73,7 +73,9 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                     instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
         } else {
             List<GlobalSession> globalSessionsNew = new ArrayList<>();
-            if (isNotBlank(param.getXid())) {
+            boolean filterByStatus = isKnownStatus(param.getStatus());
+            boolean xidRequested = isNotBlank(param.getXid());
+            if (xidRequested) {
                 SessionCondition sessionCondition = new SessionCondition();
                 sessionCondition.setXid(param.getXid());
                 sessionCondition.setLazyLoadBranch(!param.isWithBranch());
@@ -81,11 +83,15 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                 total = (long) globalSessions.size();
             }
 
-            if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null) {
-                if (CollectionUtils.isNotEmpty(globalSessions)) {
-                    globalSessionsNew = globalSessions.stream()
-                            .filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus()))
-                            .collect(Collectors.toList());
+            if (filterByStatus) {
+                if (xidRequested) {
+                    // A missing xid must not fall through to a status-wide query.
+                    if (CollectionUtils.isNotEmpty(globalSessions)) {
+                        globalSessionsNew = globalSessions.stream()
+                                .filter(globalSession ->
+                                        globalSession.getStatus().getCode() == (param.getStatus()))
+                                .collect(Collectors.toList());
+                    }
                     total = (long) globalSessionsNew.size();
                 } else {
                     total = instance.countByGlobalSessions(new GlobalStatus[] {GlobalStatus.get(param.getStatus())});
@@ -103,11 +109,25 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                     LOGGER.debug("not supported according to transactionName query");
                 }
             }
-            globalSessions = globalSessionsNew.size() > 0 ? globalSessionsNew : globalSessions;
+            if (filterByStatus) {
+                globalSessions = globalSessionsNew;
+            }
         }
 
         convertToGlobalSessionVo(result, globalSessions);
 
         return PageResult.success(result, total.intValue(), param.getPageNum(), param.getPageSize());
+    }
+
+    /**
+     * {@link GlobalStatus#get(int)} throws for a code outside the enum.
+     * An unrecognized status is not a filter.
+     */
+    private static boolean isKnownStatus(Integer status) {
+        if (status == null) {
+            return false;
+        }
+        int code = status;
+        return code >= 0 && code < GlobalStatus.values().length;
     }
 }
