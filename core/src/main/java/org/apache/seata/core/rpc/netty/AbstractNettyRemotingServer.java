@@ -26,6 +26,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
@@ -74,8 +75,18 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new IOException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+        return sendSyncRequest(channel, msg);
+    }
+
+    @Override
+    public Object sendSyncRequest(
+            String resourceId, String clientId, Object msg, boolean tryOtherApp, BranchType branchType)
+            throws TimeoutException, IOException {
+        Channel channel = ChannelManager.getChannel(resourceId, clientId, tryOtherApp, branchType);
+        if (channel == null) {
+            throw new IOException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+        }
+        return sendSyncRequest(channel, msg);
     }
 
     @Override
@@ -83,8 +94,20 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         if (channel == null) {
             throw new IOException("client is not connected");
         }
-        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+        // Count all synchronous calls on the connection, including legacy and direct-channel callers.
+        // One-way requests have no response lifecycle and are not part of this in-flight count.
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        if (rpcContext != null) {
+            rpcContext.incrementActiveCount();
+        }
+        try {
+            RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+            return sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+        } finally {
+            if (rpcContext != null) {
+                rpcContext.decrementActiveCount();
+            }
+        }
     }
 
     @Override
