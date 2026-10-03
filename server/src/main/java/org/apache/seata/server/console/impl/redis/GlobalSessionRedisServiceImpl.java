@@ -38,7 +38,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.seata.common.exception.FrameworkErrorCode.ParameterRequired;
-import static org.apache.seata.common.util.StringUtils.isBlank;
 import static org.apache.seata.common.util.StringUtils.isNotBlank;
 import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
 
@@ -67,7 +66,9 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
 
         RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
 
-        if (isBlank(param.getXid()) && param.getStatus() == null) {
+        boolean hasDirectGlobalQuery =
+                isNotBlank(param.getXid()) || (param.getTransactionId() != null && param.getTransactionId() > 0);
+        if (!hasDirectGlobalQuery && param.getStatus() == null) {
             total = instance.countByGlobalSessions(GlobalStatus.values());
             globalSessions =
                     instance.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
@@ -79,10 +80,16 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
                 sessionCondition.setLazyLoadBranch(!param.isWithBranch());
                 globalSessions = instance.readSession(sessionCondition);
                 total = (long) globalSessions.size();
+            } else if (param.getTransactionId() != null && param.getTransactionId() > 0) {
+                SessionCondition sessionCondition = new SessionCondition();
+                sessionCondition.setTransactionId(param.getTransactionId());
+                sessionCondition.setLazyLoadBranch(!param.isWithBranch());
+                globalSessions = instance.readSession(sessionCondition);
+                total = (long) globalSessions.size();
             }
 
             if (param.getStatus() != null && GlobalStatus.get(param.getStatus()) != null) {
-                if (CollectionUtils.isNotEmpty(globalSessions)) {
+                if (hasDirectGlobalQuery || CollectionUtils.isNotEmpty(globalSessions)) {
                     globalSessionsNew = globalSessions.stream()
                             .filter(globalSession -> globalSession.getStatus().getCode() == (param.getStatus()))
                             .collect(Collectors.toList());

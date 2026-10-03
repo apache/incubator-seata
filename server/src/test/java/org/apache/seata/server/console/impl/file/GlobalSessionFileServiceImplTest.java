@@ -22,11 +22,13 @@ import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -118,12 +120,43 @@ public class GlobalSessionFileServiceImplTest extends BaseSpringBootTest {
             sessions.add(mockGlobalSession);
 
             sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+            when(mockSessionManager.findGlobalSession(param.getXid(), false)).thenReturn(mockGlobalSession);
+
+            PageResult<GlobalSessionVO> result = service.query(param);
+
+            Assertions.assertNotNull(result);
+            Assertions.assertFalse(result.getData().isEmpty());
+            verify(mockSessionManager).findGlobalSession(param.getXid(), false);
+            verify(mockSessionManager, never()).allSessions();
+        }
+    }
+
+    @Test
+    public void testQuery_WithPartialXidFilterFallsBackToScan() {
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            GlobalSessionParam param = new GlobalSessionParam();
+            param.setPageSize(10);
+            param.setPageNum(1);
+            param.setXid("123456");
+
+            List<GlobalSession> sessions = new ArrayList<>();
+            when(mockGlobalSession.getXid()).thenReturn("192.168.1.1:8091:123456");
+            when(mockGlobalSession.getApplicationId()).thenReturn("test-app");
+            when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Begin);
+            when(mockGlobalSession.getTransactionName()).thenReturn("test-tx");
+            when(mockGlobalSession.getTransactionServiceGroup()).thenReturn("default");
+            when(mockGlobalSession.getBeginTime()).thenReturn(System.currentTimeMillis());
+            sessions.add(mockGlobalSession);
+
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
             when(mockSessionManager.allSessions()).thenReturn(sessions);
 
             PageResult<GlobalSessionVO> result = service.query(param);
 
             Assertions.assertNotNull(result);
             Assertions.assertFalse(result.getData().isEmpty());
+            verify(mockSessionManager, never()).findGlobalSession(anyString(), anyBoolean());
+            verify(mockSessionManager).allSessions();
         }
     }
 
@@ -145,12 +178,109 @@ public class GlobalSessionFileServiceImplTest extends BaseSpringBootTest {
             sessions.add(mockGlobalSession);
 
             sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+            when(mockSessionManager.findGlobalSessions(any(SessionCondition.class)))
+                    .thenReturn(sessions);
+
+            PageResult<GlobalSessionVO> result = service.query(param);
+
+            Assertions.assertNotNull(result);
+            Assertions.assertFalse(result.getData().isEmpty());
+            ArgumentCaptor<SessionCondition> captor = ArgumentCaptor.forClass(SessionCondition.class);
+            verify(mockSessionManager).findGlobalSessions(captor.capture());
+            Assertions.assertArrayEquals(
+                    new GlobalStatus[] {GlobalStatus.Begin}, captor.getValue().getStatuses());
+            Assertions.assertTrue(captor.getValue().isLazyLoadBranch());
+            verify(mockSessionManager, never()).allSessions();
+        }
+    }
+
+    @Test
+    public void testQuery_WithTransactionIdFilter() {
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            GlobalSessionParam param = new GlobalSessionParam();
+            param.setPageSize(10);
+            param.setPageNum(1);
+            param.setTransactionId(123456L);
+            param.setWithBranch(true);
+
+            List<GlobalSession> sessions = new ArrayList<>();
+            when(mockGlobalSession.getXid()).thenReturn("192.168.1.1:8091:123456");
+            when(mockGlobalSession.getTransactionId()).thenReturn(123456L);
+            when(mockGlobalSession.getApplicationId()).thenReturn("test-app");
+            when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Begin);
+            when(mockGlobalSession.getTransactionName()).thenReturn("test-tx");
+            when(mockGlobalSession.getTransactionServiceGroup()).thenReturn("default");
+            when(mockGlobalSession.getBeginTime()).thenReturn(System.currentTimeMillis());
+            sessions.add(mockGlobalSession);
+
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+            when(mockSessionManager.findGlobalSessions(any(SessionCondition.class)))
+                    .thenReturn(sessions);
+
+            PageResult<GlobalSessionVO> result = service.query(param);
+
+            Assertions.assertNotNull(result);
+            Assertions.assertFalse(result.getData().isEmpty());
+            ArgumentCaptor<SessionCondition> captor = ArgumentCaptor.forClass(SessionCondition.class);
+            verify(mockSessionManager).findGlobalSessions(captor.capture());
+            Assertions.assertEquals(123456L, captor.getValue().getTransactionId());
+            Assertions.assertFalse(captor.getValue().isLazyLoadBranch());
+            verify(mockSessionManager, never()).allSessions();
+        }
+    }
+
+    @Test
+    public void testQuery_WithNonPositiveTransactionIdDoesNotFilter() {
+        assertNonPositiveTransactionIdDoesNotFilter(0L);
+        assertNonPositiveTransactionIdDoesNotFilter(-1L);
+    }
+
+    private void assertNonPositiveTransactionIdDoesNotFilter(long transactionId) {
+        reset(mockSessionManager, mockGlobalSession);
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            GlobalSessionParam param = new GlobalSessionParam();
+            param.setPageSize(10);
+            param.setPageNum(1);
+            param.setTransactionId(transactionId);
+
+            List<GlobalSession> sessions = new ArrayList<>();
+            when(mockGlobalSession.getXid()).thenReturn("192.168.1.1:8091:123456");
+            when(mockGlobalSession.getTransactionId()).thenReturn(123456L);
+            when(mockGlobalSession.getApplicationId()).thenReturn("test-app");
+            when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Begin);
+            when(mockGlobalSession.getTransactionName()).thenReturn("test-tx");
+            when(mockGlobalSession.getTransactionServiceGroup()).thenReturn("default");
+            when(mockGlobalSession.getBeginTime()).thenReturn(System.currentTimeMillis());
+            sessions.add(mockGlobalSession);
+
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
             when(mockSessionManager.allSessions()).thenReturn(sessions);
 
             PageResult<GlobalSessionVO> result = service.query(param);
 
             Assertions.assertNotNull(result);
             Assertions.assertFalse(result.getData().isEmpty());
+            verify(mockSessionManager, never()).findGlobalSessions(any(SessionCondition.class));
+            verify(mockSessionManager).allSessions();
+        }
+    }
+
+    @Test
+    public void testQuery_WithInvalidStatusFilter() {
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            GlobalSessionParam param = new GlobalSessionParam();
+            param.setPageSize(10);
+            param.setPageNum(1);
+            param.setStatus(Integer.MAX_VALUE);
+
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+
+            PageResult<GlobalSessionVO> result = service.query(param);
+
+            Assertions.assertNotNull(result);
+            Assertions.assertTrue(result.getData().isEmpty());
+            verify(mockSessionManager, never()).allSessions();
+            verify(mockSessionManager, never()).findGlobalSessions(any(SessionCondition.class));
         }
     }
 

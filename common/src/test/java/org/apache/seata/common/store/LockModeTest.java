@@ -27,6 +27,7 @@ class LockModeTest {
         Assertions.assertEquals("db", LockMode.DB.getName());
         Assertions.assertEquals("redis", LockMode.REDIS.getName());
         Assertions.assertEquals("raft", LockMode.RAFT.getName());
+        Assertions.assertEquals("rocksdb", LockMode.ROCKSDB.getName());
     }
 
     @Test
@@ -40,6 +41,8 @@ class LockModeTest {
         Assertions.assertEquals(LockMode.REDIS, LockMode.get("REDIS"));
         Assertions.assertEquals(LockMode.RAFT, LockMode.get("raft"));
         Assertions.assertEquals(LockMode.RAFT, LockMode.get("Raft"));
+        Assertions.assertEquals(LockMode.ROCKSDB, LockMode.get("rocksdb"));
+        Assertions.assertEquals(LockMode.ROCKSDB, LockMode.get("RocksDB"));
     }
 
     @Test
@@ -57,6 +60,7 @@ class LockModeTest {
         Assertions.assertTrue(LockMode.contains("db"));
         Assertions.assertTrue(LockMode.contains("redis"));
         Assertions.assertTrue(LockMode.contains("raft"));
+        Assertions.assertTrue(LockMode.contains("rocksdb"));
     }
 
     @Test

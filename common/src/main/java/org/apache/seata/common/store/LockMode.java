@@ -32,7 +32,11 @@ public enum LockMode {
     /**
      * raft store
      */
-    RAFT("raft");
+    RAFT("raft"),
+    /**
+     * RocksDB lock mode for file store engine.
+     */
+    ROCKSDB("rocksdb");
 
     private String name;
 

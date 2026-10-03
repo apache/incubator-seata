@@ -29,6 +29,9 @@ public class McpGlobalSessionParamDto implements Serializable {
     @McpToolParam(description = "Global transaction ID", required = false)
     private String xid;
 
+    @McpToolParam(description = "Global transaction numeric ID", required = false)
+    private Long transactionId;
+
     @McpToolParam(description = "applicationId", required = false)
     private String applicationId;
 
@@ -93,6 +96,14 @@ public class McpGlobalSessionParamDto implements Serializable {
 
     public void setXid(String xid) {
         this.xid = xid;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
     }
 
     public String getTransactionName() {

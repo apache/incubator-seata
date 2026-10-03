@@ -34,6 +34,7 @@ public class McpGlobalSessionParam extends GlobalSessionParam {
         param.setPageNum(paramDto.getPageNum());
         param.setStatus(paramDto.getStatus());
         param.setXid(paramDto.getXid());
+        param.setTransactionId(paramDto.getTransactionId());
         param.setApplicationId(paramDto.getApplicationId());
         param.setTransactionName(paramDto.getTransactionName());
         param.setWithBranch(paramDto.isWithBranch());
