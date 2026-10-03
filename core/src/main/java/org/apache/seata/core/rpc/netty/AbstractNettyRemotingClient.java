@@ -82,7 +82,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
-    private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     private static final int MAX_MERGE_SEND_THREAD = 1;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
@@ -587,7 +586,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             while (true) {
                 mergeLock.lock();
                 try {
-                    mergeCondition.await(MAX_MERGE_SEND_MILLS, TimeUnit.MILLISECONDS);
+                    // Park until there are pending messages, so the merge thread no longer
+                    // burns CPU with a 1ms polling cycle when idle. The check-and-wait is
+                    // atomic under mergeLock and producers offer to the basket before
+                    // signalling (see sendSyncRequest), so no wake-up can be lost.
+                    while (isBasketEmpty()) {
+                        isSending = false;
+                        mergeCondition.await();
+                    }
+                    isSending = true;
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     LOGGER.warn("MergedSendRunnable wait interrupted", e);
@@ -637,6 +644,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 });
                 isSending = false;
             }
+        }
+
+        /**
+         * Checks whether all baskets are empty. The merge thread parks itself
+         * when this returns true, avoiding the idle 1ms polling busy loop.
+         *
+         * @return true if every basket in basketMap is empty
+         */
+        private boolean isBasketEmpty() {
+            for (BlockingQueue<RpcMessage> basket : basketMap.values()) {
+                if (!basket.isEmpty()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private void printMergeMessageLog(MergedWarpMessage mergeMessage) {
