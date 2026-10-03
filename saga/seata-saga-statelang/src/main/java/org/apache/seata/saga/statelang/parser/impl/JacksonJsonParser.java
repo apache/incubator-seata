@@ -23,7 +23,7 @@ import org.apache.seata.saga.statelang.parser.JsonParser;
 /**
  * JsonParser implement by Jackson
  *
- * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common-core module instead.
+ * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in seata-common module instead.
  */
 @Deprecated
 @LoadLevel(name = JacksonJsonParser.NAME)

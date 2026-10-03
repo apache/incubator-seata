@@ -110,7 +110,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                 THREAD_POOL_SIZE,
                 Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+                new LinkedBlockingQueue<>(),
+                true,
+                new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     }
 
     /**

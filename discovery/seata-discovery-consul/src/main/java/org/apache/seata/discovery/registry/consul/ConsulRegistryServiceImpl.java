@@ -102,7 +102,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
                 THREAD_POOL_NUM,
                 Integer.MAX_VALUE,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+                new LinkedBlockingQueue<>(),
+                true,
+                new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     }
 
     /**
