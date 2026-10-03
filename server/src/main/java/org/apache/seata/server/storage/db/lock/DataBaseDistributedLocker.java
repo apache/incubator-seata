@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
@@ -31,6 +32,7 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.core.store.db.DataSourceProvider;
+import org.apache.seata.core.store.db.sql.distributed.lock.DistributedLockSql;
 import org.apache.seata.core.store.db.sql.distributed.lock.DistributedLockSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED;
 import static org.apache.seata.core.constants.ConfigurationKeys.DISTRIBUTED_LOCK_DB_TABLE;
 
 /**
@@ -64,14 +67,50 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private static final int LOCK_WAIT_TIMEOUT_MYSQL_CODE = 1205;
 
+    /**
+     * MySQL 8.0+: ER_LOCK_NOWAIT.
+     * Statement aborted because lock(s) could not be acquired immediately and NOWAIT is set.
+     */
+    private static final int LOCK_NOWAIT_MYSQL_CODE = 3572;
+
+    /**
+     * Oracle: ORA-00054 - resource busy and acquire with NOWAIT specified or timeout expired.
+     * The driver maps the ORA-XXXXX number to the JDBC error code, so we match on 54.
+     */
+    private static final int LOCK_NOWAIT_ORACLE_CODE = 54;
+
+    /**
+     * PostgreSQL: 55P03 lock_not_available, raised when {@code FOR UPDATE NOWAIT} hits a held row.
+     */
+    private static final String LOCK_NOWAIT_POSTGRESQL_SQLSTATE = "55P03";
+
     private static final Set<Integer> IGNORE_MYSQL_CODE = new HashSet<>();
 
     private static final Set<String> IGNORE_MYSQL_MESSAGE = new HashSet<>();
 
+    /**
+     * Vendor error codes that signal a NOWAIT fast-fail rather than a real failure.
+     */
+    private static final Set<Integer> IGNORE_NOWAIT_CODE = new HashSet<>();
+
+    /**
+     * SQLState values that signal a NOWAIT fast-fail rather than a real failure.
+     */
+    private static final Set<String> IGNORE_NOWAIT_SQLSTATE = new HashSet<>();
+
     static {
         IGNORE_MYSQL_CODE.add(LOCK_WAIT_TIMEOUT_MYSQL_CODE);
         IGNORE_MYSQL_MESSAGE.add(LOCK_WAIT_TIMEOUT_MYSQL_MESSAGE);
+        IGNORE_NOWAIT_CODE.add(LOCK_NOWAIT_MYSQL_CODE);
+        IGNORE_NOWAIT_CODE.add(LOCK_NOWAIT_ORACLE_CODE);
+        IGNORE_NOWAIT_SQLSTATE.add(LOCK_NOWAIT_POSTGRESQL_SQLSTATE);
     }
+
+    /**
+     * whether NOWAIT acquisition is enabled. Resolved once in the constructor and
+     * propagated through configuration listener so toggling at runtime is supported.
+     */
+    private volatile boolean nowaitEnabled;
 
     /**
      * whether the distribute lock demotion
@@ -89,6 +128,17 @@ public class DataBaseDistributedLocker implements DistributedLocker {
         distributedLockTable = configuration.getConfig(DISTRIBUTED_LOCK_DB_TABLE);
         dbType = configuration.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         datasourceType = configuration.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        nowaitEnabled = configuration.getBoolean(
+                DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED, DefaultValues.DEFAULT_DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED);
+        configuration.addConfigListener(DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED, new CachedConfigurationChangeListener() {
+            @Override
+            public void onChangeEvent(ConfigurationChangeEvent event) {
+                String newValue = event.getNewValue();
+                if (StringUtils.isNotBlank(newValue)) {
+                    nowaitEnabled = Boolean.parseBoolean(newValue);
+                }
+            }
+        });
 
         if (StringUtils.isBlank(distributedLockTable)) {
             demotion = true;
@@ -146,10 +196,17 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
             return ret;
         } catch (SQLException ex) {
-            // ignore "Lock wait timeout exceeded; try restarting transaction"
-            // TODO: need nowait adaptation
+            // ignore "Lock wait timeout exceeded" (legacy blocking) and the
+            // NOWAIT fast-fail signals (MySQL 3572 / Oracle ORA-00054 /
+            // PostgreSQL 55P03). Other SQLExceptions are unexpected and logged.
             if (!ignoreSQLException(ex)) {
                 LOGGER.error("execute acquire lock failure, key is: {}", distributedLockDO.getLockKey(), ex);
+            } else if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                        "fast-fail acquiring distribute lock for key :{} due to contention (errorCode={}, sqlState={})",
+                        distributedLockDO.getLockKey(),
+                        ex.getErrorCode(),
+                        ex.getSQLState());
             }
             try {
                 if (connection != null) {
@@ -233,9 +290,11 @@ public class DataBaseDistributedLocker implements DistributedLocker {
     }
 
     protected DistributedLockDO getDistributedLockDO(Connection connection, String key) throws SQLException {
-        try (PreparedStatement pst =
-                connection.prepareStatement(DistributedLockSqlFactory.getDistributedLogStoreSql(dbType)
-                        .getSelectDistributeForUpdateSql(distributedLockTable))) {
+        DistributedLockSql lockSql = DistributedLockSqlFactory.getDistributedLogStoreSql(dbType);
+        String selectSql = nowaitEnabled
+                ? lockSql.getSelectDistributeForUpdateNoWaitSql(distributedLockTable)
+                : lockSql.getSelectDistributeForUpdateSql(distributedLockTable);
+        try (PreparedStatement pst = connection.prepareStatement(selectSql)) {
 
             pst.setString(1, key);
             ResultSet resultSet = pst.executeQuery();
@@ -285,6 +344,13 @@ public class DataBaseDistributedLocker implements DistributedLocker {
 
     private boolean ignoreSQLException(SQLException exception) {
         if (IGNORE_MYSQL_CODE.contains(exception.getErrorCode())) {
+            return true;
+        }
+        if (IGNORE_NOWAIT_CODE.contains(exception.getErrorCode())) {
+            return true;
+        }
+        if (StringUtils.isNotBlank(exception.getSQLState())
+                && IGNORE_NOWAIT_SQLSTATE.contains(exception.getSQLState())) {
             return true;
         }
         if (StringUtils.isNotBlank(exception.getMessage())) {
