@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.sql.Types;
 import java.util.stream.Stream;
@@ -60,6 +61,14 @@ public class MySQLEscapeHandlerTest {
         String escaped = ColumnUtils.addEscape(columnName, JdbcConstants.MYSQL);
         Assertions.assertEquals(expected, escaped);
         Assertions.assertEquals(expected, ColumnUtils.addEscape(escaped, JdbcConstants.MYSQL));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "\t", "\n"})
+    public void testBlankColumnNamesWithDirectEscapeHandler(String columnName) {
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.MYSQL);
+        Assertions.assertEquals(columnName, escapeHandler.addColNameEscape(columnName, null));
+        Assertions.assertFalse(escapeHandler.checkIfNeedEscape(columnName, null));
     }
 
     private static Stream<Arguments> columnNamesToEscape() {
