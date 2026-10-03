@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -27,17 +28,17 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollChannelOption;
-import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.epoll.EpollMode;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.Protocol;
@@ -123,14 +124,15 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
                 .option(ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize())
-                .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
+                .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize())
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
-        if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
-            LOGGER.info("client run on MacOS/Windows, fallback to NIO.");
-        } else if (Epoll.isAvailable()) {
+        if (Epoll.isAvailable()) {
             bootstrap
                     .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
                     .option(EpollChannelOption.TCP_QUICKACK, true);
+        } else if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Epoll is unavailable, fallback to NIO: {}", Epoll.unavailabilityCause());
         }
 
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
@@ -234,17 +236,19 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     private EventLoopGroup createEventLoopGroupWorker(int selectorThreadSizeThreadSize) {
         if (NettyServerConfig.enableEpoll()) {
-            return new EpollEventLoopGroup(
+            return new MultiThreadIoEventLoopGroup(
                     selectorThreadSizeThreadSize,
                     new NamedThreadFactory(
                             getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                            selectorThreadSizeThreadSize));
+                            selectorThreadSizeThreadSize),
+                    EpollIoHandler.newFactory());
         }
 
-        return new NioEventLoopGroup(
+        return new MultiThreadIoEventLoopGroup(
                 selectorThreadSizeThreadSize,
                 new NamedThreadFactory(
                         getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                        selectorThreadSizeThreadSize));
+                        selectorThreadSizeThreadSize),
+                NioIoHandler.newFactory());
     }
 }

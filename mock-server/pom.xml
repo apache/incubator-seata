@@ -62,6 +62,14 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <!-- Keep Netty aligned with seata-dependencies before the Spring Boot BOM import. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>

@@ -26,8 +26,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.WriteBufferWaterMark;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
@@ -100,12 +101,12 @@ public class ProtocolV1Server {
 
     private EventLoopGroup createBossGroup() {
         NamedThreadFactory threadName = new NamedThreadFactory("SEV-BOSS-" + port, false);
-        return new NioEventLoopGroup(2, threadName);
+        return new MultiThreadIoEventLoopGroup(2, threadName, NioIoHandler.newFactory());
     }
 
     private EventLoopGroup createWorkerGroup() {
         NamedThreadFactory threadName = new NamedThreadFactory("SEV-WORKER-" + port, false);
-        return new NioEventLoopGroup(10, threadName);
+        return new MultiThreadIoEventLoopGroup(10, threadName, NioIoHandler.newFactory());
     }
 
     public static void main(String[] args) {
