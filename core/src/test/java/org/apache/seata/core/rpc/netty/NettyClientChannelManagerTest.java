@@ -148,6 +148,7 @@ class NettyClientChannelManagerTest {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
         channelManager.releaseChannel(channel, "127.0.0.1:8091");
         assertTrue(channelManager.getChannels().isEmpty());
+        assertFalse(ChannelManager.isRegistered(channel));
         verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
     }
 

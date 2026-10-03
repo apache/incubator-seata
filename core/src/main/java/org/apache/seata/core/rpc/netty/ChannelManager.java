@@ -287,6 +287,7 @@ public class ChannelManager {
         RpcContext rpcContext = getContextFromIdentified(channel);
         if (rpcContext != null) {
             rpcContext.release();
+            IDENTIFIED_CHANNELS.remove(channel);
         }
     }
 
