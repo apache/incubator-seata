@@ -109,8 +109,15 @@ jobs:
                  -Dlicense.skip=false -DredisCaseEnabled=true -DnacosCaseEnabled=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
       # step 6.3
+      - name: "Test with Maven and Java17"
+        if: matrix.java == '17'
+        run: |
+          ./mvnw -T 4C clean test jacoco:report \
+                 -DredisCaseEnabled=true -DnacosCaseEnabled=true \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      # step 6.4
       - name: "Test with Maven and Java${{ matrix.java }}"
-        if: matrix.java != '8'
+        if: matrix.java != '8' && matrix.java != '17'
         run: |
           ./mvnw -T 4C clean test \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
@@ -123,7 +130,7 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ env.TODAY }}
       # step 8
       - name: "Codecov"
-        if: matrix.java == '8'
+        if: matrix.java == '17'
         uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
