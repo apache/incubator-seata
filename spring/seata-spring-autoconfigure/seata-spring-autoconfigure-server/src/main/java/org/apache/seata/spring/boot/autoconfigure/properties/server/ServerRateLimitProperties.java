@@ -42,6 +42,11 @@ public class ServerRateLimitProperties {
     /**
      * limit token initial number of bucket
      */
+    private Integer bucketTokenInitialNum;
+
+    /**
+     * Legacy property retained for compatibility.
+     */
     private Integer bucketTokenInitialTime;
 
     public boolean isEnable() {
@@ -74,5 +79,13 @@ public class ServerRateLimitProperties {
 
     public void setBucketTokenInitialTime(Integer bucketTokenInitialTime) {
         this.bucketTokenInitialTime = bucketTokenInitialTime;
+    }
+
+    public Integer getBucketTokenInitialNum() {
+        return bucketTokenInitialNum;
+    }
+
+    public void setBucketTokenInitialNum(Integer bucketTokenInitialNum) {
+        this.bucketTokenInitialNum = bucketTokenInitialNum;
     }
 }

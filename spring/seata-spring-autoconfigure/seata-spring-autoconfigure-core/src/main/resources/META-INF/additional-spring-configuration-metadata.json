@@ -2,6 +2,12 @@
   "groups": [],
   "properties": [
     {
+      "name": "seata.config.zk.session-timeout",
+      "type": "java.lang.Integer",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties",
+      "defaultValue": 6000
+    },
+    {
       "name": "seata.transport.threadpool",
       "type": "java.lang.String",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
@@ -38,10 +44,16 @@
       "defaultValue": false
     },
     {
+      "name": "seata.transport.enable-client-shared-event-loop-group",
+      "type": "java.lang.Boolean",
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": false
+    },
+    {
       "name": "seata.transport.shutdown.wait",
       "type": "java.lang.Integer",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties",
-      "defaultValue": 3
+      "defaultValue": 13
     },
     {
       "name": "seata.transport.thread-factory.boss-thread-prefix",
@@ -71,7 +83,7 @@
       "name": "seata.transport.thread-factory.client-selector-thread-size",
       "type": "java.lang.Integer",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties",
-      "defaultValue": 1
+      "defaultValue": -1
     },
     {
       "name": "seata.transport.thread-factory.client-worker-thread-prefix",
@@ -110,17 +122,20 @@
     {
       "name": "seata.transport.rpc-rm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": 15000
     },
     {
       "name": "seata.transport.rpc-tm-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": 30000
     },
     {
       "name": "seata.transport.rpc-tc-request-timeout",
       "type": "java.lang.Long",
-      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties"
+      "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties",
+      "defaultValue": 15000
     }
   ],
   "hints": [
@@ -173,46 +188,58 @@
       ]
     },
     {
-      "name": "seata.transport.type",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "org.apache.seata.core.rpc.TransportProtocolType"
-          }
-        }
-      ]
-    },
-    {
-      "name": "seata.transport.server",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "org.apache.seata.core.rpc.TransportServerType"
-          }
-        }
-      ]
-    },
-    {
       "name": "seata.transport.serialization",
-      "providers": [
+      "values": [
         {
-          "name": "handle-as",
-          "parameters": {
-            "target": "org.apache.seata.core.serializer.SerializerType"
-          }
+          "value": "seata"
+        },
+        {
+          "value": "protobuf"
+        },
+        {
+          "value": "kryo"
+        },
+        {
+          "value": "hessian"
+        },
+        {
+          "value": "fastjson2"
+        },
+        {
+          "value": "grpc"
+        },
+        {
+          "value": "fury",
+          "description": "Alias for the fory serializer."
+        },
+        {
+          "value": "fory"
         }
       ]
     },
     {
       "name": "seata.transport.compressor",
-      "providers": [
+      "values": [
         {
-          "name": "handle-as",
-          "parameters": {
-            "target": "org.apache.seata.core.compressor.CompressorType"
-          }
+          "value": "none"
+        },
+        {
+          "value": "gzip"
+        },
+        {
+          "value": "zip"
+        },
+        {
+          "value": "bzip2"
+        },
+        {
+          "value": "lz4"
+        },
+        {
+          "value": "deflater"
+        },
+        {
+          "value": "zstd"
         }
       ]
     },

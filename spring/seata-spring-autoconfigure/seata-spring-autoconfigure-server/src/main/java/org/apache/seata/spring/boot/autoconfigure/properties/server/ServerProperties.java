@@ -19,6 +19,9 @@ package org.apache.seata.spring.boot.autoconfigure.properties.server;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static org.apache.seata.common.DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
+import static org.apache.seata.common.DefaultValues.DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 
 @Component
@@ -28,10 +31,13 @@ public class ServerProperties {
     private long maxRollbackRetryTimeout = -1L;
     private long maxEndStatusRetryTimeout = -1L;
     private Boolean rollbackRetryTimeoutUnlockEnable = false;
+    private Boolean rollbackFailedUnlockEnable = DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE;
+    private long distributedLockExpireTime = DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME;
     private Boolean enableCheckAuth = true;
     private Boolean enableParallelRequestHandle = true;
     private Boolean enableParallelHandleBranch = false;
     private Integer retryDeadThreshold = 70000;
+    private Integer endStateRetryDeadThreshold = DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD;
     private Integer servicePort;
     private Integer xaerNotaRetryTimeout = 60000;
 
@@ -74,6 +80,24 @@ public class ServerProperties {
         return this;
     }
 
+    public Boolean getRollbackFailedUnlockEnable() {
+        return rollbackFailedUnlockEnable;
+    }
+
+    public ServerProperties setRollbackFailedUnlockEnable(Boolean rollbackFailedUnlockEnable) {
+        this.rollbackFailedUnlockEnable = rollbackFailedUnlockEnable;
+        return this;
+    }
+
+    public long getDistributedLockExpireTime() {
+        return distributedLockExpireTime;
+    }
+
+    public ServerProperties setDistributedLockExpireTime(long distributedLockExpireTime) {
+        this.distributedLockExpireTime = distributedLockExpireTime;
+        return this;
+    }
+
     public Boolean getEnableCheckAuth() {
         return enableCheckAuth;
     }
@@ -89,6 +113,15 @@ public class ServerProperties {
 
     public ServerProperties setRetryDeadThreshold(Integer retryDeadThreshold) {
         this.retryDeadThreshold = retryDeadThreshold;
+        return this;
+    }
+
+    public Integer getEndStateRetryDeadThreshold() {
+        return endStateRetryDeadThreshold;
+    }
+
+    public ServerProperties setEndStateRetryDeadThreshold(Integer endStateRetryDeadThreshold) {
+        this.endStateRetryDeadThreshold = endStateRetryDeadThreshold;
         return this;
     }
 

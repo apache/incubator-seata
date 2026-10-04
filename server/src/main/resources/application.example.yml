@@ -46,6 +46,8 @@ seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
     type: file
+    file:
+      name: file.conf
     nacos:
       server-addr: 127.0.0.1:8848
       namespace:
@@ -65,7 +67,7 @@ seata:
       acl-token:
       key: seata.properties
     apollo:
-      appId: seata-server
+      app-id: seata-server
       apollo-meta: http://192.168.1.204:8801
       apollo-config-service: http://192.168.1.204:8080
       namespace: application
@@ -98,7 +100,7 @@ seata:
       metadata-max-age-ms: 30000
       username: seata
       password: seata
-      tokenValidityInMilliseconds: 1740000
+      token-validity-in-milliseconds: 1740000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -151,20 +153,22 @@ seata:
     service-port: 8091 # If not configured, the default is '${server.port}'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
+    rollback-retry-timeout-unlock-enable: false
     rollback-failed-unlock-enable: false
     enable-check-auth: true
     enable-parallel-request-handle: true
     enable-parallel-handle-branch: false
+    distributed-lock-expire-time: 10000
     retry-dead-threshold: 70000
+    end-state-retry-dead-threshold: 10000
     xaer-nota-retry-timeout: 60000
-    enableParallelRequestHandle: true
-    applicationDataLimitCheck: true
-    applicationDataLimit: 64000
+    application-data-limit-check: true
+    application-data-limit: 64000
     recovery:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
-      end-status-retry-period: 1000
+      endstatus-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
@@ -174,16 +178,18 @@ seata:
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
     ratelimit:
       enable: false
-      bucketTokenNumPerSecond: 999999
-      bucketTokenMaxNum: 999999
-      bucketTokenInitialNum: 999999
+      bucket-token-num-per-second: 999999
+      bucket-token-max-num: 999999
+      bucket-token-initial-num: 999999
     http:
       filter:
         xss:
-          keywords: ["<script>", "</script>", "javascript:", "vbscript:"]
+          # Additional keywords are merged with the built-in XSS keywords. Use a JSON array string.
+          keywords: '["<script>", "</script>", "javascript:", "vbscript:"]'
   store:
-    # support: file 、 db 、 redis 、 raft
+    # support: file 、 db 、 redis; see application.raft.example.yml for raft
     mode: file
+    public-key:
     session:
       mode: file
     lock:
@@ -253,6 +259,18 @@ seata:
     rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false
     threadpool: auto
+    serialization: seata
+    compressor: none
+    server-socket-send-buf-size: 153600
+    server-socket-resv-buf-size: 153600
+    write-buffer-high-water-mark: 67108864
+    write-buffer-low-water-mark: 1048576
+    so-back-log-size: 1024
+    server-channel-max-idle-time-seconds: 30
+    min-server-pool-size: 50
+    max-server-pool-size: 500
+    max-task-queue-size: 20000
+    keep-alive-time: 500
     # HTTP thread pool
     min-http-pool-size: 10
     max-http-pool-size: 100
@@ -263,4 +281,7 @@ seata:
     thread-factory:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
+      server-executor-thread-prefix: NettyServerBizHandler
+      share-boss-worker: false
       boss-thread-size: 1
+      worker-thread-size: default

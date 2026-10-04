@@ -33,15 +33,19 @@ seata:
       async-commit-buffer-limit: 10000
       report-retry-count: 5
       table-meta-check-enable: false
+      table-meta-checker-interval: 60000
       report-success-enable: false
       saga-branch-register-enable: false
       saga-json-parser: fastjson
       saga-retry-persist-mode-update: false
       saga-compensate-persist-mode-update: false
+      saga-action-status-report-enable: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
       sql-parser-type: druid
-      applicationDataLimit: 64000
-      applicationDataLimitCheck: false
+      branch-execution-timeout-x-a: 60000
+      connection-two-phase-hold-timeout-x-a: 10000
+      application-data-limit: 64000
+      application-data-limit-check: false
       lock:
         retry-interval: 10
         retry-times: 30
@@ -87,8 +91,6 @@ seata:
       client-worker-thread-prefix: NettyClientWorkerThread
       worker-thread-size: default
       boss-thread-size: 1
-    type: TCP
-    server: NIO
     heartbeat: true
     serialization: seata
     compressor: none
@@ -99,13 +101,16 @@ seata:
     enable-client-shared-event-loop-group: false
   config:
     type: file
+    file:
+      name: file.conf
     consul:
       server-addr: 127.0.0.1:8500
+      acl-token:
     apollo:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
       namespace: application
-      apollo-accesskey-secret:
+      apollo-access-key-secret:
       cluster:
     etcd3:
       server-addr: http://localhost:2379
@@ -136,7 +141,7 @@ seata:
     type: file
     # Supports address translation parameters, currently only supported in raft mode，
     # if match the preferredNetworks rule return the first, eg: preferredNetworks = "192.168.*"
-    preferredNetworks: ""
+    preferred-networks: ""
     seata:
       server-addr: 127.0.0.1:8081
       namespace: public
@@ -144,15 +149,13 @@ seata:
       metadata-max-age-ms: 30000
       username: seata
       password: seata
-      tokenValidityInMilliseconds: 1740000
+      token-validity-in-milliseconds: 1740000
     raft:
       server-addr:
       metadata-max-age-ms: 30000
       username: seata
       password: seata
-      tokenValidityInMilliseconds: 1740000
-    file:
-      name: file.conf
+      token-validity-in-milliseconds: 1740000
     consul:
       server-addr: 127.0.0.1:8500
       acl-token:
@@ -223,5 +226,5 @@ seata:
       auto-register-resources: true
       resources:
         - classpath*:seata/saga/statelang/**/*.json
-      default-tenant-id: 000001
+      default-tenant-id: "000001"
       charset: UTF-8

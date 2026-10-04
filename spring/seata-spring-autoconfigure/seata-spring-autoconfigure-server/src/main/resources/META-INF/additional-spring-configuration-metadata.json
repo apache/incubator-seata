@@ -1,0 +1,174 @@
+{
+  "properties": [
+    {
+      "name": "seata.metrics.enabled",
+      "defaultValue": true
+    },
+    {
+      "name": "seata.metrics.exporter-list",
+      "defaultValue": "prometheus"
+    },
+    {
+      "name": "seata.metrics.exporter-prometheus-port",
+      "defaultValue": 9898
+    },
+    {
+      "name": "seata.metrics.registry-type",
+      "defaultValue": "compact"
+    },
+    {
+      "name": "seata.server.distributed-lock-expire-time",
+      "defaultValue": 10000
+    },
+    {
+      "name": "seata.server.end-state-retry-dead-threshold",
+      "defaultValue": 10000
+    },
+    {
+      "name": "seata.server.raft.max-append-buffer-size",
+      "defaultValue": 262144
+    },
+    {
+      "name": "seata.server.ratelimit.bucket-token-initial-num",
+      "defaultValue": 2147483647
+    },
+    {
+      "name": "seata.server.ratelimit.bucket-token-max-num",
+      "defaultValue": 2147483647
+    },
+    {
+      "name": "seata.server.ratelimit.bucket-token-num-per-second",
+      "defaultValue": 2147483647
+    },
+    {
+      "name": "seata.server.recovery.async-committing-retry-period",
+      "defaultValue": 1000
+    },
+    {
+      "name": "seata.server.recovery.committing-retry-period",
+      "defaultValue": 1000
+    },
+    {
+      "name": "seata.server.recovery.endstatus-retry-period",
+      "defaultValue": 30000
+    },
+    {
+      "name": "seata.server.recovery.rollbacking-retry-period",
+      "defaultValue": 1000
+    },
+    {
+      "name": "seata.server.recovery.timeout-retry-period",
+      "defaultValue": 1000
+    },
+    {
+      "name": "seata.server.rollback-failed-unlock-enable",
+      "defaultValue": false
+    },
+    {
+      "name": "seata.server.session.branch-async-queue-size",
+      "defaultValue": 5000
+    },
+    {
+      "name": "seata.server.undo.log-delete-period",
+      "defaultValue": 86400000
+    },
+    {
+      "name": "seata.server.undo.log-save-days",
+      "defaultValue": 7
+    },
+    {
+      "name": "seata.store.db.max-conn",
+      "defaultValue": 100
+    },
+    {
+      "name": "seata.store.db.min-conn",
+      "defaultValue": 10
+    },
+    {
+      "name": "seata.store.db.query-limit",
+      "defaultValue": 1000
+    },
+    {
+      "name": "seata.store.file.session-reload-read-size",
+      "defaultValue": 100
+    },
+    {
+      "name": "seata.store.redis.max-conn",
+      "defaultValue": 100
+    },
+    {
+      "name": "seata.store.redis.min-conn",
+      "defaultValue": 10
+    },
+    {
+      "name": "seata.store.redis.query-limit",
+      "defaultValue": 1000
+    }
+  ],
+  "hints": [
+    {
+      "name": "seata.store.mode",
+      "values": [
+        {
+          "value": "file"
+        },
+        {
+          "value": "db"
+        },
+        {
+          "value": "redis"
+        },
+        {
+          "value": "raft"
+        }
+      ]
+    },
+    {
+      "name": "seata.store.db.datasource",
+      "values": [
+        {
+          "value": "druid"
+        },
+        {
+          "value": "hikari"
+        },
+        {
+          "value": "dbcp"
+        }
+      ]
+    },
+    {
+      "name": "seata.store.redis.mode",
+      "values": [
+        {
+          "value": "single"
+        },
+        {
+          "value": "sentinel"
+        }
+      ]
+    },
+    {
+      "name": "seata.store.redis.type",
+      "values": [
+        {
+          "value": "pipeline"
+        },
+        {
+          "value": "lua"
+        }
+      ]
+    },
+    {
+      "name": "seata.store.file.flush-disk-mode",
+      "values": [
+        {
+          "value": "async"
+        },
+        {
+          "value": "sync"
+        }
+      ]
+    }
+  ]
+}

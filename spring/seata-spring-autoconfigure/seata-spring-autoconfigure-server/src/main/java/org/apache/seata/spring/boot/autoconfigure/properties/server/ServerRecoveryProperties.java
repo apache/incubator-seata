@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
 import static org.apache.seata.common.DefaultValues.DEFAULT_COMMITING_RETRY_PERIOD;
+import static org.apache.seata.common.DefaultValues.DEFAULT_END_STATUS_RETRY_PERIOD;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
@@ -32,6 +33,7 @@ public class ServerRecoveryProperties {
     private long committingRetryPeriod = DEFAULT_COMMITING_RETRY_PERIOD;
     private long asyncCommittingRetryPeriod = DEFAULT_ASYNC_COMMITTING_RETRY_PERIOD;
     private long rollbackingRetryPeriod = DEFAULT_ROLLBACKING_RETRY_PERIOD;
+    private long endstatusRetryPeriod = DEFAULT_END_STATUS_RETRY_PERIOD;
     private long timeoutRetryPeriod = DEFAULT_TIMEOUT_RETRY_PERIOD;
 
     public long getCommittingRetryPeriod() {
@@ -63,6 +65,15 @@ public class ServerRecoveryProperties {
 
     public long getTimeoutRetryPeriod() {
         return timeoutRetryPeriod;
+    }
+
+    public long getEndstatusRetryPeriod() {
+        return endstatusRetryPeriod;
+    }
+
+    public ServerRecoveryProperties setEndstatusRetryPeriod(long endstatusRetryPeriod) {
+        this.endstatusRetryPeriod = endstatusRetryPeriod;
+        return this;
     }
 
     public ServerRecoveryProperties setTimeoutRetryPeriod(long timeoutRetryPeriod) {

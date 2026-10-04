@@ -57,4 +57,13 @@ public class SessionProperties {
         this.enableBranchAsyncRemove = enableBranchAsyncRemove;
         return this;
     }
+
+    public Boolean getEnableBranchAsyncRemove() {
+        return enableBranchAsyncRemove;
+    }
+
+    public SessionProperties setEnableBranchAsyncRemove(Boolean enableBranchAsyncRemove) {
+        this.enableBranchAsyncRemove = enableBranchAsyncRemove;
+        return this;
+    }
 }
