@@ -127,10 +127,11 @@ jobs:
       # step 8
       - name: "Codecov"
         if: matrix.java == '8'
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          version: v0.6.0
+          use_pypi: true
+          version: v11.3.1
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
