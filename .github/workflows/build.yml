@@ -124,14 +124,18 @@ jobs:
       # step 8
       - name: "Codecov"
         if: matrix.java == '8'
-        uses: codecov/codecov-action@v7.1.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          use_pypi: true
-          use_legacy_upload_endpoint: true
-          version: v11.3.1
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CODECOV_BRANCH: ${{ github.event.pull_request.head.label || github.ref_name }}
+          CODECOV_PR: ${{ github.event.pull_request.number }}
+        run: |
+          python -m pip install codecov-cli==11.3.1
+          codecov_args=(--legacy --fail-on-error --sha "$CODECOV_SHA" --branch "$CODECOV_BRANCH" --slug "$GITHUB_REPOSITORY")
+          if [ -n "$CODECOV_PR" ]; then
+            codecov_args+=(--pr "$CODECOV_PR")
+          fi
+          codecovcli do-upload "${codecov_args[@]}"
 
   # job 2: Build and Release on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
