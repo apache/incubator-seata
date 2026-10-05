@@ -60,8 +60,9 @@ jobs:
             license_check: true
           - java: 17
             service_tests: true
-            coverage: true
           - java: 25
+            service_tests: true
+            coverage: true
             checkstyle: true
     steps:
       # step 1
