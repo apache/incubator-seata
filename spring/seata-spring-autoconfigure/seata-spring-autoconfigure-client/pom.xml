@@ -31,6 +31,21 @@
     <name>seata-spring-autoconfigure-client ${project.version}</name>
     <description>spring-autoconfigure-client for Seata built with Maven</description>
 
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>${project.basedir}/../../../script/client/spring</directory>
+                <includes>
+                    <include>application.yml</include>
+                </includes>
+                <targetPath>client-example</targetPath>
+            </testResource>
+        </testResources>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.seata</groupId>
