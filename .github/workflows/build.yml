@@ -136,10 +136,10 @@ jobs:
       # step 8
       - name: "Codecov"
         if: matrix.coverage == true
-        uses: codecov/codecov-action@v4.0.1
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          version: v0.6.0
+          fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
