@@ -23,9 +23,11 @@ import com.alipay.sofa.jraft.rpc.RpcServer;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.*;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -34,6 +36,7 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_ENABLED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@MockitoBean(types = ServerRunner.class)
 class RaftServerLifecycleUnitTest extends BaseSpringBootTest {
     @TempDir
     Path directory;
