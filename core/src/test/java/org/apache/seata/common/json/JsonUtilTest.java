@@ -21,7 +21,6 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.Configuration;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
@@ -31,9 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class JsonUtilTest {
-
-    @BeforeEach
-    void setUp() {}
 
     @Test
     public void testToJSONStringBasicObject() {

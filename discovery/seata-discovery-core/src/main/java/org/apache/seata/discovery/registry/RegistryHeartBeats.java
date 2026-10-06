@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -43,7 +44,8 @@ public class RegistryHeartBeats {
     private static final boolean DEFAULT_HEARTBEAT_ENABLED = Boolean.TRUE;
 
     private static final ScheduledExecutorService HEARTBEAT_SCHEDULED =
-            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("seata-discovery-heartbeat", 1, true);
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(
+                    "seata-discovery-heartbeat", 1, true, new ThreadPoolExecutor.AbortPolicy());
 
     public static void addHeartBeat(String registryType, InetSocketAddress serverAddress, ReRegister reRegister) {
         addHeartBeat(registryType, serverAddress, getHeartbeatPeriod(registryType), reRegister);

@@ -16,23 +16,21 @@
  */
 package org.apache.seata.common.json;
 
-import org.junit.jupiter.api.Test;
+import org.apache.seata.common.loader.LoadLevel;
 
-import java.util.Arrays;
+/**
+ * JsonCodec implementation backed by the central JsonUtil facade.
+ */
+@LoadLevel(name = "jsonUtil")
+public class JsonUtilCodec implements JsonCodec {
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-
-public class Fastjson2ObjectReaderWarmupTest {
-
-    @Test
-    public void warmupAcceptsIterableTypes() {
-        assertThatCode(() -> Fastjson2ObjectReaderWarmup.warmup(Arrays.<Class<?>>asList(String.class, Integer.class)))
-                .doesNotThrowAnyException();
+    @Override
+    public String toJSONString(Object object) {
+        return JsonUtil.toJSONString(object);
     }
 
-    @Test
-    public void warmupAcceptsVarargsTypes() {
-        assertThatCode(() -> Fastjson2ObjectReaderWarmup.warmup(String.class, Integer.class))
-                .doesNotThrowAnyException();
+    @Override
+    public <T> T parseObject(String text, Class<T> clazz) {
+        return JsonUtil.parseObject(text, clazz);
     }
 }

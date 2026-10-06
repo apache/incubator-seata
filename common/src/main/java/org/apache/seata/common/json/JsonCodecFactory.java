@@ -45,8 +45,7 @@ public final class JsonCodecFactory {
                         codec = result;
                     } catch (EnhancedServiceNotFoundException e) {
                         throw new JsonParseException(
-                                "No JsonCodec provider found. Please add json-common-core to the runtime classpath.",
-                                e);
+                                "No JsonCodec provider found. Please add seata-core to the runtime classpath.", e);
                     }
                 }
             }

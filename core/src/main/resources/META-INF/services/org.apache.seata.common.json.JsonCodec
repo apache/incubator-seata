@@ -14,12 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-service {
-  #transaction service group mapping
-  vgroupMapping.default_tx_group = "default"
-  #only support when registry.type=file, please don't set multiple addresses
-  default.grouplist = "127.0.0.1:8091"
-  #disable seata
-  disableGlobalTransaction = false
-}
+# Provider is hosted in seata-core because it delegates to the configured JsonUtil facade.
+org.apache.seata.common.json.JsonUtilCodec
