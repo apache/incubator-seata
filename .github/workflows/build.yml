@@ -139,6 +139,8 @@ jobs:
         uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          # Avoid TLS handshake failures at the CLI binary download endpoint.
+          use_pypi: true
           fail_ci_if_error: true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
