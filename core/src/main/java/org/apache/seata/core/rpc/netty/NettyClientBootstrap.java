@@ -29,10 +29,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
-import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.epoll.EpollMode;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
@@ -117,9 +117,10 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
+        Class<? extends Channel> channelClass = nettyClientConfig.getClientChannelClazz();
         this.bootstrap
                 .group(eventLoopGroupWorker)
-                .channel(nettyClientConfig.getClientChannelClazz())
+                .channel(channelClass)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
@@ -127,12 +128,10 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize())
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
 
-        if (Epoll.isAvailable()) {
+        if (EpollSocketChannel.class.isAssignableFrom(channelClass)) {
             bootstrap
                     .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
                     .option(EpollChannelOption.TCP_QUICKACK, true);
-        } else if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Epoll is unavailable, fallback to NIO: {}", Epoll.unavailabilityCause());
         }
 
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {

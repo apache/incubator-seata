@@ -51,7 +51,7 @@ class NettyServerBootstrapTest {
             field.setAccessible(true);
             return (EventLoopGroup) field.get(bootstrap);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to access Netty server event loop group: " + fieldName, e);
         }
     }
 }

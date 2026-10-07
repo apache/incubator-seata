@@ -60,10 +60,16 @@ public class GrpcTest {
         RootContext.unbind();
         RootContext.unbindBranchType();
         if (channel != null) {
-            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            channel.shutdown();
+            if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
+                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            }
         }
         if (server != null) {
-            server.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            server.shutdown();
+            if (!server.awaitTermination(5, TimeUnit.SECONDS)) {
+                server.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            }
         }
     }
 

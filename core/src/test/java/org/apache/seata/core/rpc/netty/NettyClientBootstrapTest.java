@@ -22,6 +22,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.jupiter.api.Assertions;
@@ -88,6 +89,24 @@ class NettyClientBootstrapTest {
     }
 
     @Test
+    void testStartWithNioChannelDoesNotApplyEpollOptions() {
+        when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(false);
+        when(nettyClientConfig.getClientChannelClazz()).thenAnswer(invocation -> NioSocketChannel.class);
+
+        NettyClientBootstrap bootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+        try {
+            bootstrap.start();
+            Assertions.assertFalse(
+                    getBootstrap(bootstrap).config().options().containsKey(EpollChannelOption.EPOLL_MODE));
+            Assertions.assertFalse(
+                    getBootstrap(bootstrap).config().options().containsKey(EpollChannelOption.TCP_QUICKACK));
+        } finally {
+            getEventLoopGroupWorker(bootstrap).shutdownGracefully().syncUninterruptibly();
+        }
+    }
+
+    @Test
     void testNioEventLoopGroup() {
         when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(false);
 
@@ -109,7 +128,7 @@ class NettyClientBootstrapTest {
             field.setAccessible(true);
             return (EventLoopGroup) field.get(bootstrap);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to access Netty client event loop group", e);
         }
     }
 
@@ -119,7 +138,7 @@ class NettyClientBootstrapTest {
             field.setAccessible(true);
             return (Bootstrap) field.get(bootstrap);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to access Netty client bootstrap", e);
         }
     }
 }
