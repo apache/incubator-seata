@@ -205,6 +205,11 @@ public interface ConfigurationKeys {
     String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "sessionReloadReadSize";
 
     /**
+     * The constant STORE_FILE_ENGINE.
+     */
+    String STORE_FILE_ENGINE = STORE_FILE_PREFIX + "engine";
+
+    /**
      * The constant CLIENT_REPORT_SUCCESS_ENABLE.
      */
     String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "reportSuccessEnable";
