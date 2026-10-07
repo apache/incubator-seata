@@ -18,6 +18,7 @@ package org.apache.seata.compressor.zstd;
 
 import com.github.luben.zstd.Zstd;
 import com.github.luben.zstd.ZstdInputStream;
+import org.apache.seata.core.compressor.BoundedByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,12 +39,16 @@ public class ZstdUtil {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        return decompress(bytes, Integer.MAX_VALUE);
+    }
+
+    public static byte[] decompress(byte[] bytes, int maxOutputSize) {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
                 ZstdInputStream zis = new ZstdInputStream(bais);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                ByteArrayOutputStream baos = new BoundedByteArrayOutputStream(maxOutputSize)) {
             byte[] buffer = new byte[8192];
             int len;
             while ((len = zis.read(buffer)) > 0) {

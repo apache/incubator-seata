@@ -20,6 +20,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -137,5 +143,40 @@ class ServerVersionHolderTest {
 
         assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
         assertNull(ServerVersionHolder.getServerVersion("127.0.0.1:8092"));
+    }
+
+    @Test
+    void concurrentAttachAndLastDetachKeepsNewClientVersionTest() throws Exception {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try {
+            for (int round = 0; round < 10000; round++) {
+                ServerVersionHolder.detach("RMROLE");
+                ServerVersionHolder.attach("TMROLE");
+                ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.5.0");
+                CountDownLatch start = new CountDownLatch(1);
+                Future<?> detach = executor.submit(() -> {
+                    start.await();
+                    ServerVersionHolder.detach("TMROLE");
+                    return null;
+                });
+                Future<?> attach = executor.submit(() -> {
+                    start.await();
+                    ServerVersionHolder.attach("RMROLE");
+                    ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
+                    return null;
+                });
+                start.countDown();
+                detach.get(5, TimeUnit.SECONDS);
+                attach.get(5, TimeUnit.SECONDS);
+                assertTrue(
+                        ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, Version.VERSION_2_6_0),
+                        "The active RM client lost its version in round " + round);
+            }
+        } finally {
+            executor.shutdownNow();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+        }
+        ServerVersionHolder.detach("RMROLE");
+        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
     }
 }

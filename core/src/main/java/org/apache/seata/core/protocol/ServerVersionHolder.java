@@ -64,7 +64,7 @@ public class ServerVersionHolder {
      * @param clientRole the role of the client, that is the name of a
      *                   {@code NettyPoolKey.TransactionRole}
      */
-    public static void attach(String clientRole) {
+    public static synchronized void attach(String clientRole) {
         if (StringUtils.isBlank(clientRole)) {
             return;
         }
@@ -79,10 +79,11 @@ public class ServerVersionHolder {
      * @param clientRole the role of the client, that is the name of a
      *                   {@code NettyPoolKey.TransactionRole}
      */
-    public static void detach(String clientRole) {
+    public static synchronized void detach(String clientRole) {
         if (StringUtils.isBlank(clientRole)) {
             return;
         }
+        // Serialize last-client cleanup with attach so a new client's registration cannot be erased.
         if (ACTIVE_CLIENTS.remove(clientRole) && ACTIVE_CLIENTS.isEmpty()) {
             clear();
         }

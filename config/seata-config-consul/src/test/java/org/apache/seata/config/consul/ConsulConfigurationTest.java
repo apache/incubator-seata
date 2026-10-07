@@ -21,65 +21,78 @@ import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
-import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
+import org.mockito.MockedConstruction;
 
-import java.net.InetSocketAddress;
+import java.lang.reflect.Field;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class ConsulConfigurationTest {
 
+    private static final String ACL_TOKEN = "test-token";
     private ConsulConfiguration consulConfig;
     private ConsulClient mockConsulClient;
-    private Configuration mockFileConfig;
-    private MockedStatic<NetUtil> mockedNetUtil;
+    private String previousSeataEnv;
+    private String previousAclToken;
+    private String previousConsulKey;
 
     @BeforeEach
     void setUp() {
-        System.setProperty("seataEnv", "test");
-        // Mock dependencies
-        mockFileConfig = mock(Configuration.class);
+        previousSeataEnv = System.setProperty("seataEnv", "test");
+        previousAclToken = System.setProperty("aclToken", ACL_TOKEN);
+        previousConsulKey = System.setProperty("config.consul.key", "seata.properties");
         mockConsulClient = mock(ConsulClient.class);
-        mockedNetUtil = mockStatic(NetUtil.class);
-
-        // Setup static mocks
-        when(mockFileConfig.getConfig(anyString(), anyString())).thenReturn("seata.properties");
-        when(mockFileConfig.getConfig(anyString())).thenReturn("localhost:8500");
-        mockedNetUtil
-                .when(() -> NetUtil.toInetSocketAddress("127.0.0.1:8500"))
-                .thenReturn(new InetSocketAddress("localhost", 8500));
 
         GetValue mockValue = mock(GetValue.class);
-        when(mockValue.getDecodedValue()).thenReturn("testValue");
+        when(mockValue.getDecodedValue()).thenReturn("key1=val1");
         Response<GetValue> mockResponse = new Response<>(mockValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue("seata.properties", (String) null)).thenReturn(mockResponse);
+        when(mockConsulClient.getKVValue("seata.properties", ACL_TOKEN)).thenReturn(mockResponse);
 
+        setField(null, "instance", null);
         setField(null, "client", mockConsulClient);
 
-        // Initialize singleton
-        consulConfig = ConsulConfiguration.getInstance();
+        // Keep the initialization watch from starting an unbounded background task.
+        try (MockedConstruction<ConsulConfiguration.ConsulListener> ignored =
+                mockConstruction(ConsulConfiguration.ConsulListener.class)) {
+            consulConfig = ConsulConfiguration.getInstance();
+        }
     }
 
     @AfterEach
-    void tearDown() {
-        mockedNetUtil.close();
-        reset(mockConsulClient);
+    void tearDown() throws InterruptedException {
+        try {
+            if (consulConfig != null) {
+                ExecutorService executor = (ExecutorService) getField(consulConfig, "consulNotifierExecutor");
+                executor.shutdownNow();
+                assertTrue(executor.awaitTermination(1, TimeUnit.SECONDS));
+            }
+        } finally {
+            setField(null, "instance", null);
+            setField(null, "client", null);
+            setField(null, "seataConfig", new Properties());
+            restoreProperty("seataEnv", previousSeataEnv);
+            restoreProperty("aclToken", previousAclToken);
+            restoreProperty("config.consul.key", previousConsulKey);
+        }
     }
 
     @Test
@@ -89,12 +102,12 @@ class ConsulConfigurationTest {
     }
 
     @Test
-    void testGetLatestConfig() throws InterruptedException {
+    void testGetLatestConfig() {
         // Mock Consul response
         GetValue mockValue = mock(GetValue.class);
         when(mockValue.getDecodedValue()).thenReturn("testValue");
         Response<GetValue> mockResponse = new Response<>(mockValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue("testKey", (String) null)).thenReturn(mockResponse);
+        when(mockConsulClient.getKVValue("testKey", ACL_TOKEN)).thenReturn(mockResponse);
 
         String result = consulConfig.getLatestConfig("testKey", "default", 3000);
         assertEquals("testValue", result);
@@ -111,73 +124,70 @@ class ConsulConfigurationTest {
     }
 
     @Test
-    void testInitSeataConfig() throws Exception {
-        // Mock initial config load
-        GetValue initValue = mock(GetValue.class);
-        when(initValue.getDecodedValue()).thenReturn("val1");
-        Response<GetValue> initResponse = new Response<>(initValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue(eq("key1"), (String) isNull())).thenReturn(initResponse);
-
-        ConsulConfiguration newInstance = ConsulConfiguration.getInstance();
-
-        // Short retry loop to absorb potential propagation delay in CI environments
-        String value = null;
-        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(3); // Max ~3 seconds
-        do {
-            value = newInstance.getLatestConfig("key1", null, 1000);
-            if ("val1".equals(value)) {
-                break;
-            }
-            Thread.sleep(100);
-        } while (System.nanoTime() < deadline);
-
-        // Verify that the value retrieved matches the expected one
-        assertEquals("val1", value, "KV should be visible after a short await");
+    void testInitSeataConfig() {
+        assertEquals("val1", consulConfig.getLatestConfig("key1", null, 0));
+        verify(mockConsulClient).getKVValue("seata.properties", ACL_TOKEN);
+        verify(mockConsulClient, never()).getKVValue("key1", ACL_TOKEN);
     }
 
     @Test
-    void testOnChangeEvent_skipWhenValueIsBlank() throws InterruptedException {
+    void testOnChangeEvent_skipWhenValueIsBlank() {
         String dataId = "seata.properties";
 
         // Mock the initial call in ConsulListener constructor (2-arg version)
         GetValue initValue = mock(GetValue.class);
         when(initValue.getDecodedValue()).thenReturn("dummy");
         Response<GetValue> initResponse = new Response<>(initValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue(eq(dataId), (String) isNull())).thenReturn(initResponse);
+        when(mockConsulClient.getKVValue(dataId, ACL_TOKEN)).thenReturn(initResponse);
 
         // Mock the watch call in onChangeEvent loop (3-arg version)
         GetValue blankValue = mock(GetValue.class);
         when(blankValue.getDecodedValue()).thenReturn("");
         Response<GetValue> blankResponse = new Response<>(blankValue, 2L, false, 2L);
-        when(mockConsulClient.getKVValue(eq(dataId), (String) isNull(), any(QueryParams.class)))
-                .thenReturn(blankResponse);
+        RuntimeException stopWatching = new RuntimeException("stop watching after the blank response");
+        when(mockConsulClient.getKVValue(eq(dataId), eq(ACL_TOKEN), any(QueryParams.class)))
+                .thenReturn(blankResponse)
+                .thenThrow(stopWatching);
 
         ConsulConfiguration.ConsulListener listener = new ConsulConfiguration.ConsulListener(dataId, null);
 
-        // Run onChangeEvent in a separate thread since it loops indefinitely
-        Thread thread = new Thread(() -> {
-            try {
-                listener.onChangeEvent(new ConfigurationChangeEvent());
-            } catch (Exception e) {
-                // ignore
-            }
-        });
-        thread.start();
-        Thread.sleep(100);
-        thread.interrupt();
-        thread.join(500);
-
-        assertTrue(true);
+        try {
+            assertSame(
+                    stopWatching,
+                    assertThrows(RuntimeException.class, () -> listener.onChangeEvent(new ConfigurationChangeEvent())));
+            assertEquals("val1", consulConfig.getLatestConfig("key1", null, 0));
+            verify(mockConsulClient, times(2)).getKVValue(eq(dataId), eq(ACL_TOKEN), any(QueryParams.class));
+        } finally {
+            listener.onShutDown();
+        }
     }
 
     // Utility method to set private fields via reflection
     private void setField(Object target, String fieldName, Object value) {
         try {
-            java.lang.reflect.Field field = ConsulConfiguration.class.getDeclaredField(fieldName);
+            Field field = ConsulConfiguration.class.getDeclaredField(fieldName);
             field.setAccessible(true);
             field.set(target, value);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private Object getField(Object target, String fieldName) {
+        try {
+            Field field = ConsulConfiguration.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            return field.get(target);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void restoreProperty(String key, String value) {
+        if (value == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, value);
         }
     }
 }

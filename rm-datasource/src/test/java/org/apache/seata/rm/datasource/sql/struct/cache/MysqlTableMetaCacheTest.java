@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
@@ -31,9 +32,19 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
+import java.util.Properties;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * The table meta fetch test.
@@ -151,6 +162,88 @@ public class MysqlTableMetaCacheTest {
         };
         mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         getTableMetaCache().refresh(dataSourceProxy.getPlainConnection(), dataSourceProxy.getResourceId());
+    }
+
+    @Test
+    public void testSimilarTableNamesDoNotMixColumnMetadata() throws SQLException {
+        Object[][] columns = new Object[][] {
+            columnMeta("bill_storage_data_0", "id", 1),
+            columnMeta("bill_storage", "id", 1),
+            columnMeta("bill_storage", "amount", 2),
+            columnMeta("bill_storage_data_0", "description", 99)
+        };
+
+        TableMeta tableMeta = resultSetMetaToSchema("bill_storage", true, columns);
+
+        Assertions.assertEquals("bill_storage", tableMeta.getTableName());
+        Assertions.assertEquals("seata.`bill_storage`", tableMeta.getOriginalTableName());
+        Assertions.assertEquals(2, tableMeta.getAllColumns().size());
+        Assertions.assertTrue(tableMeta.getAllColumns().containsKey("id"));
+        Assertions.assertTrue(tableMeta.getAllColumns().containsKey("amount"));
+        Assertions.assertFalse(tableMeta.getAllColumns().containsKey("description"));
+        Assertions.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertTrue(tableMeta.getColumnMeta("amount").isCaseSensitive());
+    }
+
+    @Test
+    public void testTableNamesAreCaseInsensitiveWhenIdentifiersAreNotMixedCase() throws SQLException {
+        Object[][] columns =
+                new Object[][] {columnMeta("bill_storage_data_0", "id", 1), columnMeta("bill_storage", "id", 1)};
+
+        TableMeta tableMeta = resultSetMetaToSchema("BILL_STORAGE", false, columns);
+
+        Assertions.assertEquals(1, tableMeta.getAllColumns().size());
+        Assertions.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
+    }
+
+    @Test
+    public void testCaseSensitiveTableNamesAreNotCombined() throws SQLException {
+        Object[][] columns = new Object[][] {columnMeta("BILL_STORAGE", "id", 1), columnMeta("bill_storage", "id", 1)};
+
+        TableMeta tableMeta = resultSetMetaToSchema("bill_storage", true, columns);
+
+        Assertions.assertEquals(1, tableMeta.getAllColumns().size());
+        Assertions.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
+    }
+
+    @Test
+    public void testCaseInsensitiveDuplicateColumnsRemainUnsupported() {
+        Object[][] columns = new Object[][] {columnMeta("bill_storage", "id", 1), columnMeta("bill_storage", "ID", 2)};
+
+        Assertions.assertThrows(
+                NotSupportYetException.class, () -> resultSetMetaToSchema("bill_storage", true, columns));
+    }
+
+    private Object[] columnMeta(String tableName, String columnName, int ordinalPosition) {
+        Object[] column = columnMetas[0].clone();
+        column[2] = tableName;
+        column[3] = columnName;
+        column[15] = ordinalPosition;
+        return column;
+    }
+
+    private TableMeta resultSetMetaToSchema(String tableName, boolean mixedCaseIdentifiers, Object[][] columns)
+            throws SQLException {
+        Object[][] indexes = new Object[][] {new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34L}};
+        MockDriver mockDriver = new MockDriver(columns, indexes);
+        try (Connection connection = mockDriver.connect("jdbc:mock:xxx", new Properties())) {
+            DatabaseMetaData databaseMetaData = spy(connection.getMetaData());
+            // The mock driver returns every column when no table matches, reproducing broad metadata results.
+            ResultSet allColumns = databaseMetaData.getColumns("", "", "", "%");
+            doReturn(allColumns).when(databaseMetaData).getColumns("", "", tableName, "%");
+            doReturn(mixedCaseIdentifiers).when(databaseMetaData).supportsMixedCaseIdentifiers();
+
+            ResultSetMetaData resultSetMetaData = mock(ResultSetMetaData.class);
+            when(resultSetMetaData.getCatalogName(1)).thenReturn("");
+            when(resultSetMetaData.getSchemaName(1)).thenReturn("");
+            when(resultSetMetaData.getTableName(1)).thenReturn(tableName);
+            when(resultSetMetaData.isCaseSensitive(2)).thenReturn(true);
+            when(resultSetMetaData.isCaseSensitive(99))
+                    .thenThrow(new SQLException("Column ordinal belongs to another table"));
+
+            return new MysqlTableMetaCache()
+                    .resultSetMetaToSchema(resultSetMetaData, databaseMetaData, "seata.`" + tableName + "`");
+        }
     }
 
     private void assertColumnMetaEquals(Object[] expected, ColumnMeta actual) {
