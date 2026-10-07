@@ -178,6 +178,25 @@ class GlobalSessionRedisServiceImplTest extends BaseSpringBootTest {
     }
 
     @Test
+    void queryByXidAndNonMatchingStatusTest() throws Exception {
+        createTestGlobalTransaction("127.0.0.1:8091:1001", 1001L, GlobalStatus.Begin);
+
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageNum(1);
+        param.setPageSize(10);
+        param.setXid("127.0.0.1:8091:1001");
+        param.setStatus(GlobalStatus.RollbackRetrying.getCode());
+        param.setWithBranch(false);
+
+        PageResult<GlobalSessionVO> result = globalSessionRedisService.query(param);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.isSuccess());
+        Assertions.assertEquals(0, result.getData().size());
+        Assertions.assertEquals(0, result.getTotal());
+    }
+
+    @Test
     void queryEmptyResultTest() {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageNum(1);
