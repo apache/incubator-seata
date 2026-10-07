@@ -88,9 +88,9 @@ class ExecuteTemplateBehaviorTest {
                             }
                         })) {
             context.when(RootContext::getBranchType).thenReturn(BranchType.AT);
-            assertEquals(
-                    42,
-                    ExecuteTemplate.execute(Collections.singletonList(recognizer), statement, callback, "parameter"));
+            Object result =
+                    ExecuteTemplate.execute(Collections.singletonList(recognizer), statement, callback, "parameter");
+            assertEquals(Integer.valueOf(42), result);
             assertEquals(1, executors.constructed().size());
             verify(executors.constructed().get(0)).execute("parameter");
             verifyNoInteractions(callback);
@@ -156,12 +156,11 @@ class ExecuteTemplateBehaviorTest {
                             }
                         })) {
             context.when(RootContext::getBranchType).thenReturn(BranchType.AT);
-            assertEquals(
-                    2,
-                    ExecuteTemplate.execute(
-                            Arrays.asList(mock(SQLRecognizer.class), mock(SQLRecognizer.class)),
-                            statement,
-                            mock(StatementCallback.class)));
+            Object result = ExecuteTemplate.execute(
+                    Arrays.asList(mock(SQLRecognizer.class), mock(SQLRecognizer.class)),
+                    statement,
+                    mock(StatementCallback.class));
+            assertEquals(Integer.valueOf(2), result);
             assertEquals(1, executors.constructed().size());
         }
     }
