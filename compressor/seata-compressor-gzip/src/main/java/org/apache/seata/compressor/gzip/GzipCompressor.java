@@ -31,4 +31,9 @@ public class GzipCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return GzipUtil.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return GzipUtil.decompress(bytes, maxOutputSize);
+    }
 }
