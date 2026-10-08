@@ -340,4 +340,98 @@ class MergeNativeImageMetadataTests {
 
         assertEquals(sourceNode, targetNode);
     }
+
+    /**
+     * When source contains a {@code FastClassByGuice} entry with a
+     * different numeric suffix than the target, the entries should be
+     * recognized as the same logical element (no duplicate created)
+     * and the target's original {@code type} value should be preserved
+     * to avoid meaningless metadata churn.
+     */
+    @Test
+    void deduplicateFastClassByGuiceDifferentSuffixes() {
+
+        String source =
+                """
+                {
+                  "reflection" : [ {
+                    "type" : "com.ctrip.framework.apollo.spring.config.ConfigPropertySourceFactory$$FastClassByGuice$$9999999",
+                    "fields" : [ {
+                      "name" : "GUICE$INVOKERS"
+                    } ]
+                  } ]
+                }
+                """;
+        String target =
+                """
+                {
+                  "reflection" : [ {
+                    "type" : "com.ctrip.framework.apollo.spring.config.ConfigPropertySourceFactory$$FastClassByGuice$$1111111",
+                    "fields" : [ {
+                      "name" : "GUICE$INVOKERS"
+                    } ]
+                  } ]
+                }
+                """;
+
+        JsonNode sourceNode = objectMapper.readTree(source);
+        JsonNode targetNode = objectMapper.readTree(target);
+
+        MergeNativeImageMetadata.mergeObjectNodes(sourceNode, targetNode);
+
+        // Target should still have exactly one reflection entry — no duplicate.
+        assertEquals(1, targetNode.get("reflection").size(), "Should have exactly one entry after merge");
+        // The type field should keep the target's original value — the numeric
+        // suffix is a transient hash that doesn't meaningfully change behavior.
+        assertEquals(
+                "com.ctrip.framework.apollo.spring.config.ConfigPropertySourceFactory$$FastClassByGuice$$1111111",
+                targetNode.get("reflection").get(0).get("type").asString(),
+                "Type should preserve target's original value");
+    }
+
+    /**
+     * Verifies that Spring CGLIB entries with fixed numeric suffixes
+     * ({@code $$0}, {@code $$1}) are NOT affected by the FastClassByGuice
+     * normalization — they are distinct CGLIB proxies.
+     */
+    @Test
+    void doesNotAffectSpringCglibEntries() {
+
+        String source =
+                """
+                {
+                  "reflection" : [ {
+                    "type" : "org.apache.seata.server.config.ServerConfig$$SpringCGLIB$$FastClass$$0",
+                    "methods" : [ {
+                      "name" : "<init>",
+                      "parameterTypes" : [ "java.lang.Class" ]
+                    } ]
+                  } ]
+                }
+                """;
+        String target =
+                """
+                {
+                  "reflection" : [ {
+                    "type" : "org.apache.seata.server.config.ServerConfig$$SpringCGLIB$$FastClass$$1",
+                    "methods" : [ {
+                      "name" : "<init>",
+                      "parameterTypes" : [ "java.lang.Class" ]
+                    } ]
+                  } ]
+                }
+                """;
+
+        JsonNode sourceNode = objectMapper.readTree(source);
+        JsonNode targetNode = objectMapper.readTree(target);
+
+        MergeNativeImageMetadata.mergeObjectNodes(sourceNode, targetNode);
+
+        // Both entries should remain — $$FastClass$$0 and $$FastClass$$1 are
+        // distinct CGLIB proxy classes, not transient duplicates.
+        assertEquals(
+                2,
+                targetNode.get("reflection").size(),
+                "SpringCGLIB entries with different fixed suffixes should remain distinct");
+    }
 }
