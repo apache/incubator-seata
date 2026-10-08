@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.boot.web.server.autoconfigure.ServerProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.*;
 
 import java.util.*;
@@ -69,9 +68,7 @@ class GeneralInstanceStrategyUnitTest extends BaseSpringBootTest {
             strategy.registryNamingServerProperties.setHeartbeatPeriod(1000);
             ServerProperties properties = new ServerProperties();
             properties.setPort(8080);
-            strategy.applicationContext = mock(ApplicationContext.class);
-            when(strategy.applicationContext.getBean(ServerProperties.class)).thenReturn(properties);
-            strategy.postConstruct();
+            strategy.serverProperties = properties;
             assertSame(instance, strategy.serverInstanceInit());
             verify(instance).setNamespace("tenant");
             verify(instance).setClusterName("east");
