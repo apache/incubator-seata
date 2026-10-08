@@ -53,6 +53,17 @@ jobs:
       fail-fast: false
       matrix:
         java: [ 8, 17, 21, 25 ]
+        # Optional capabilities default to false; service_tests enables Redis and Nacos.
+        include:
+          - java: 8
+            service_tests: true
+            license_check: true
+          - java: 17
+            service_tests: true
+          - java: 25
+            service_tests: true
+            coverage: true
+            checkstyle: true
     steps:
       # step 1
       - name: "Checkout"
@@ -85,7 +96,7 @@ jobs:
            ${{ runner.os }}-maven-
       # step 6.1：Support GitHub Actions, local shell
       - name: Checkstyle
-        if: matrix.java == '25'
+        if: matrix.checkstyle == true
         run: |
           GITHUB_BASE_REF=${GITHUB_BASE_REF:-2.x}
           echo "GITHUB_BASE_REF: $GITHUB_BASE_REF"
@@ -102,18 +113,19 @@ jobs:
           echo "CHECKSTYLE_INCLUDES: $CHECKSTYLE_INCLUDES"
           mvn -T 4C -e -B clean checkstyle:check -Dcheckstyle.skip=false -Dcheckstyle.includes=$CHECKSTYLE_INCLUDES
       # step 6.2
-      - name: "Test, Check license with Maven and Java8"
-        if: matrix.java == '8'
-        run: |
-          ./mvnw -T 4C clean test \
-                 -Dlicense.skip=false -DredisCaseEnabled=true -DnacosCaseEnabled=true \
-                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-      # step 6.3
       - name: "Test with Maven and Java${{ matrix.java }}"
-        if: matrix.java != '8'
+        env:
+          SERVICE_TESTS: ${{ matrix.service_tests == true }}
+          LICENSE_SKIP: ${{ matrix.license_check != true }}
         run: |
           ./mvnw -T 4C clean test \
-                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+                 -Dlicense.skip="$LICENSE_SKIP" \
+                 -DredisCaseEnabled="$SERVICE_TESTS" -DnacosCaseEnabled="$SERVICE_TESTS" \
+                 -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      # step 6.3: Include all test executions, including the separate Server Raft execution.
+      - name: "Generate final coverage reports"
+        if: matrix.coverage == true
+        run: ./mvnw -T 4C -B org.jacoco:jacoco-maven-plugin:0.8.14:report
       # step 7
       - name: "Save local maven repository cache"
         uses: actions/cache/save@v4
@@ -123,13 +135,19 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ env.TODAY }}
       # step 8
       - name: "Codecov"
-        if: matrix.java == '8'
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          version: v0.6.0
+        if: matrix.coverage == true
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CODECOV_BRANCH: ${{ github.event.pull_request.head.label || github.ref_name }}
+          CODECOV_PR: ${{ github.event.pull_request.number }}
+        run: |
+          python -m pip install codecov-cli==11.3.1
+          codecov_args=(--fail-on-error --sha "$CODECOV_SHA" --branch "$CODECOV_BRANCH" --slug "$GITHUB_REPOSITORY")
+          if [ -n "$CODECOV_PR" ]; then
+            codecov_args+=(--pr "$CODECOV_PR")
+          fi
+          codecovcli --url https://codecov.io upload-coverage "${codecov_args[@]}"
 
   # job 2: Build and Release on 'arm64v8/ubuntu' OS (Skip tests).
   build_arm64-binary:
