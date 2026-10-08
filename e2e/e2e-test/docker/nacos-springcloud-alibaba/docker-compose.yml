@@ -1,0 +1,94 @@
+version: "3.9"
+services:
+  seata-server:
+    image: seataio/seata-server:1.4.2
+    hostname: seata-server
+    volumes:
+      - ./volume/seata/resources:/seata-server/resources
+    networks:
+      - host
+#    ports:
+#      - "8091:8091"
+    depends_on:
+      - nacos
+    environment:
+      - SEATA_PORT=8091
+#      - STORE_MODE=db
+    restart: on-failure
+  mysql:
+    hostname: mysql
+    image: nacos/nacos-mysql:5.7
+    env_file:
+      - ./mysql.env
+    networks:
+      - host
+#    ports:
+#      - "3306:3306"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+#    volumes:
+#      - ./mysql:/var/lib/mysql
+  db-mysql:
+    hostname: businessmysql
+    image: mysql:5.7
+    volumes:
+      - ./sqlsh:/docker-entrypoint-initdb.d
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: storage
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+#    ports:
+#      - "3307:3306"
+    networks:
+      - host
+  consumer:
+#    container_name: consumer
+    image: consumer:0.0.1
+    hostname: consumer
+    networks:
+      - host
+#    ports:
+#      - "8081:8081"
+    depends_on:
+      - nacos
+      - seata-server
+      - provider
+    restart: on-failure
+  provider:
+    image: provider:0.0.1
+    hostname: provider
+    networks:
+      - host
+#    ports:
+#      - "8080:8080"
+    depends_on:
+      - nacos
+      - db-mysql
+      - seata-server
+    restart: on-failure
+  nacos:
+    hostname: nacos-server
+    networks:
+      - host
+    image: nacos/nacos-server:2.0.2
+    env_file:
+      - ./nacos-standlone-mysql.env
+#    ports:
+#      - "8848:8848"
+#      - "9848:9848"
+#      - "9555:9555"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+
+
+
+networks:
+  host:
