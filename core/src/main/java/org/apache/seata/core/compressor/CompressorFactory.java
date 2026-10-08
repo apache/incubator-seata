@@ -63,5 +63,13 @@ public class CompressorFactory {
         public byte[] decompress(byte[] bytes) {
             return bytes;
         }
+
+        @Override
+        public byte[] decompress(byte[] bytes, int maxOutputSize) {
+            if (maxOutputSize < 0 || bytes.length > maxOutputSize) {
+                throw new IllegalArgumentException("Decompressed data exceeds maximum size: " + maxOutputSize);
+            }
+            return bytes;
+        }
     }
 }
