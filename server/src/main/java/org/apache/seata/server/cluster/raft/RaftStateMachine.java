@@ -68,7 +68,6 @@ import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.core.env.Environment;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -89,7 +88,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_VGROUP_MAPPING;
@@ -387,9 +385,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                     cureentPeerId.getIp(),
                     XID.getPort(),
                     raftServer.getServerId().getPort(),
-                    Integer.parseInt(
-                            ((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                                    .getProperty("server.port", String.valueOf(7091))),
+                    XID.getPort(),
                     group,
                     Collections.emptyMap());
             leader.setRole(ClusterRole.LEADER);
@@ -434,9 +430,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                         cureentPeerId.getIp(),
                         XID.getPort(),
                         cureentPeerId.getPort(),
-                        Integer.parseInt(((Environment)
-                                        ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                                .getProperty("server.port", String.valueOf(7091))),
+                        XID.getPort(),
                         group,
                         Collections.emptyMap());
                 InvokeContext invokeContext = new InvokeContext();
