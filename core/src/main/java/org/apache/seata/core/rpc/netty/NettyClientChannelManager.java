@@ -162,7 +162,6 @@ class NettyClientChannelManager {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
                 serverVersionMap.remove(serverAddress);
-                ChannelManager.releaseRpcContext(channel);
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {

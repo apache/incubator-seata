@@ -93,7 +93,15 @@ public class RegRmProcessor implements RemotingProcessor {
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
         }
-        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
+        try {
+            remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
+        } finally {
+            // the channel may have closed while this request waited in the executor, and then the disconnect
+            // handling had nothing to clean up yet
+            if (!ctx.channel().isActive()) {
+                ChannelManager.removeClosedChannel(ctx.channel());
+            }
+        }
         if (isSuccess && LOGGER.isInfoEnabled()) {
             LOGGER.info(
                     "RM register success,message:{},channel:{},client version:{}",

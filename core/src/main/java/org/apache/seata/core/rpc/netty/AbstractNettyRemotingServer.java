@@ -24,6 +24,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
@@ -41,7 +42,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -52,6 +55,13 @@ import java.util.concurrent.TimeoutException;
 public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting implements RemotingServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingServer.class);
+
+    /**
+     * How long a closed channel stays identified, so requests and responses still in flight for it keep working;
+     * a TM response, for one, can fall back to another channel of the same client. Matches the default TM request
+     * timeout, after which the client no longer waits.
+     */
+    private static final long CLOSED_CHANNEL_RETENTION_MILLS = DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 
     private final NettyServerBootstrap serverBootstrap;
 
@@ -137,6 +147,26 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
     }
 
     /**
+     * Remove a closed channel from the identified channels once the retention time has passed.
+     * Until then, requests already received from it are still handled and a TM response can fall back to another
+     * channel of the same client.
+     *
+     * @param channel    the closed channel
+     * @param rpcContext the context the channel was bound to
+     */
+    protected void removeIdentifiedChannelLater(Channel channel, RpcContext rpcContext) {
+        try {
+            timerExecutor.schedule(
+                    () -> ChannelManager.removeIdentifiedChannel(channel, rpcContext),
+                    CLOSED_CHANNEL_RETENTION_MILLS,
+                    TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            // the server is shutting down, nothing routes to this channel anymore
+            ChannelManager.removeIdentifiedChannel(channel, rpcContext);
+        }
+    }
+
+    /**
      * Debug log.
      *
      * @param format the info
@@ -203,7 +233,14 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             if (messageExecutor.isShutdown()) {
                 return;
             }
-            handleDisconnect(ctx);
+            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+            try {
+                handleDisconnect(ctx);
+            } finally {
+                if (rpcContext != null) {
+                    removeIdentifiedChannelLater(ctx.channel(), rpcContext);
+                }
+            }
             super.channelInactive(ctx);
         }
 
@@ -215,7 +252,6 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             }
             if (rpcContext != null && rpcContext.getClientRole() != null) {
                 rpcContext.release();
-                ChannelManager.releaseRpcContext(ctx.channel());
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);
                 }
@@ -289,6 +325,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         // If the client is not version 2.3.0 or higher, splitting MergedWarpMessage will result in the client’s
         // mergeMsgMap not being cleared
         if (body instanceof MergedWarpMessage
+                && rpcContext != null
                 && (StringUtils.isNotBlank(rpcContext.getVersion())
                         && Version.isAboveOrEqualVersion230(rpcContext.getVersion()))) {
             MergedWarpMessage mergedWarpMessage = (MergedWarpMessage) body;
