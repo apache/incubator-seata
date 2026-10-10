@@ -82,7 +82,7 @@ class HttpDetectorTest {
 
     @Test
     void testStartsWithNegativeBranch() {
-        ByteBuf buf = Unpooled.copiedBuffer("GE", StandardCharsets.UTF_8);
+        ByteBuf buf = Unpooled.copiedBuffer("GEX /path", StandardCharsets.UTF_8);
         try {
             java.lang.reflect.Method m =
                     HttpDetector.class.getDeclaredMethod("startsWith", ByteBuf.class, String.class);

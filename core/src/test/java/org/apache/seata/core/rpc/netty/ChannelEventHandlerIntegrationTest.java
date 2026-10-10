@@ -23,7 +23,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -73,8 +74,8 @@ class ChannelEventHandlerIntegrationTest {
 
     @BeforeAll
     static void setupClass() throws InterruptedException {
-        bossGroup = new NioEventLoopGroup(1);
-        workerGroup = new NioEventLoopGroup();
+        bossGroup = new MultiThreadIoEventLoopGroup(1, NioIoHandler.newFactory());
+        workerGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap
@@ -107,7 +108,7 @@ class ChannelEventHandlerIntegrationTest {
     void setUp() {
         channelEventHandler = new ChannelEventHandler(mockRemotingClient);
 
-        clientGroup = new NioEventLoopGroup();
+        clientGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         channelActiveLatch = new CountDownLatch(1);
         channelInactiveLatch = new CountDownLatch(1);
         exceptionCaughtLatch = new CountDownLatch(1);

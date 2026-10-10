@@ -29,7 +29,6 @@ import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.watch.WatchResponse;
-import io.netty.util.internal.ConcurrentSet;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
@@ -314,7 +313,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
                 EtcdListener etcdListener = new EtcdListener(etcdConfigKey, null);
                 CONFIG_LISTENERS_MAP
-                        .computeIfAbsent(etcdConfigKey, key -> new ConcurrentSet<>())
+                        .computeIfAbsent(etcdConfigKey, key -> ConcurrentHashMap.newKeySet())
                         .add(etcdListener);
                 etcdListener.onProcessEvent(new ConfigurationChangeEvent());
             }
