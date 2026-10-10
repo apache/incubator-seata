@@ -21,6 +21,16 @@ server:
 spring:
   application:
     name: seata-namingserver
+  ai:
+    mcp:
+      server:
+        # This property must be set explicitly. Since spring-ai 2.0.1 the streamable
+        # HTTP transport is auto-configured only when the property is present
+        # (matchIfMissing = false), while McpServerProperties defaults its protocol
+        # field to STREAMABLE. Without it MCPProperties#init fails to load the context.
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
 logging:
   config: classpath:logback-spring.xml
   file:
