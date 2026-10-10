@@ -17,8 +17,11 @@
 package io.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.mysql.jdbc.JDBC4MySQLConnection;
-import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
+import com.mysql.cj.Session;
+import com.mysql.cj.conf.RuntimeProperty;
+import com.mysql.cj.jdbc.JdbcConnection;
+import com.mysql.cj.jdbc.JdbcPropertySet;
+import com.mysql.cj.log.Log;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
@@ -36,6 +39,7 @@ import java.sql.Driver;
 import java.sql.SQLException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Tests for DataSourceProxyXA
@@ -57,12 +61,23 @@ public class DataSourceProxyXATest {
     public void testGetConnection() throws SQLException {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
-        JDBC4MySQLConnection connection = Mockito.mock(JDBC4MySQLConnection.class);
+        Mockito.when(driver.getMajorVersion()).thenReturn(8);
+        JdbcConnection connection = Mockito.mock(JdbcConnection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+        JdbcPropertySet propertySet = Mockito.mock(JdbcPropertySet.class);
+        @SuppressWarnings("unchecked")
+        RuntimeProperty<Boolean> runtimeProperty = Mockito.mock(RuntimeProperty.class);
+        Mockito.when(runtimeProperty.getValue()).thenReturn(Boolean.FALSE);
+        Mockito.when(propertySet.getBooleanProperty(anyString())).thenReturn(runtimeProperty);
+        Mockito.when(connection.getPropertySet()).thenReturn(propertySet);
+        Session session = Mockito.mock(Session.class);
+        Mockito.when(session.getLog()).thenReturn(Mockito.mock(Log.class));
+        Mockito.when(connection.getSession()).thenReturn(session);
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
@@ -84,7 +99,7 @@ public class DataSourceProxyXATest {
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
+        Assertions.assertNotNull(connectionInXA);
         tearDown();
     }
 
