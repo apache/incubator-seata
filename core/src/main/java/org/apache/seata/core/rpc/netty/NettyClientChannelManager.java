@@ -251,17 +251,21 @@ class NettyClientChannelManager {
                 }
             }
             if (failedMap.size() > 0) {
+                // Merge all failed addresses into a single log entry to avoid flooding logs.
+                // info level: output summary without stack traces
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error(
+                    LOGGER.info(
                             "{} can not connect to {} cause:{}",
                             FrameworkErrorCode.NetConnect.getErrCode(),
                             failedMap.keySet(),
                             failedMap.values().stream()
                                     .map(Throwable::getMessage)
                                     .collect(Collectors.toSet()));
-                } else if (LOGGER.isDebugEnabled()) {
+                }
+                // debug level: output detailed stack traces for each failed address
+                if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error(
+                        LOGGER.debug(
                                 "{} can not connect to {} cause:{} trace information:",
                                 FrameworkErrorCode.NetConnect.getErrCode(),
                                 key,
