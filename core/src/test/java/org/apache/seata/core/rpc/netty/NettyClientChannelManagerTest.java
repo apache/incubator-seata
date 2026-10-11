@@ -420,33 +420,8 @@ class NettyClientChannelManagerTest {
     }
 
     @Test
-    void putAndGetServerVersionTest() {
-        channelManager.putServerVersion("127.0.0.1:8091", "2.1.0");
-        assertEquals("2.1.0", channelManager.getServerVersion("127.0.0.1:8091"));
-
-        channelManager.putServerVersion("127.0.0.1:8091", "2.2.0");
-        assertEquals("2.2.0", channelManager.getServerVersion("127.0.0.1:8091"));
-    }
-
-    @Test
-    void getServerVersionReturnNullWhenNotExistTest() {
-        Assertions.assertNull(channelManager.getServerVersion("127.0.0.1:9999"));
-    }
-
-    @Test
-    void clearServerVersionsTest() {
-        channelManager.putServerVersion("127.0.0.1:8091", "2.1.0");
-        channelManager.putServerVersion("127.0.0.1:8092", "2.2.0");
-
-        channelManager.clearServerVersions();
-
-        Assertions.assertNull(channelManager.getServerVersion("127.0.0.1:8091"));
-        Assertions.assertNull(channelManager.getServerVersion("127.0.0.1:8092"));
-    }
-
-    @Test
     @SuppressWarnings("unchecked")
-    void testDestroyChannelCleansUpServerVersionMap() throws Exception {
+    void destroyChannelRemovesChannelTest() throws Exception {
         String serverAddress = "127.0.0.1:8091";
         setNettyClientKeyPool();
         ConcurrentMap<String, NettyPoolKey> poolKeyMap =
@@ -454,17 +429,15 @@ class NettyClientChannelManagerTest {
         poolKeyMap.put(serverAddress, nettyPoolKey);
 
         channelManager.getChannels().put(serverAddress, channel);
-        channelManager.putServerVersion(serverAddress, "2.1.0");
 
         channelManager.destroyChannel(serverAddress, channel);
 
         assertFalse(channelManager.getChannels().containsKey(serverAddress));
-        Assertions.assertNull(channelManager.getServerVersion(serverAddress));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void testDestroyChannelKeepsServerVersionWhenChannelMismatch() throws Exception {
+    void destroyChannelKeepsChannelWhenChannelMismatchTest() throws Exception {
         String serverAddress = "127.0.0.1:8091";
         setNettyClientKeyPool();
         ConcurrentMap<String, NettyPoolKey> poolKeyMap =
@@ -473,23 +446,20 @@ class NettyClientChannelManagerTest {
 
         // Put a different channel in the map
         channelManager.getChannels().put(serverAddress, newChannel);
-        channelManager.putServerVersion(serverAddress, "2.1.0");
 
         // Destroy with a channel that doesn't match the cached one
         channelManager.destroyChannel(serverAddress, channel);
 
-        // channels and serverVersionMap should remain since the channel didn't match
+        // channels should remain since the channel didn't match
         assertTrue(channelManager.getChannels().containsKey(serverAddress));
-        assertEquals("2.1.0", channelManager.getServerVersion(serverAddress));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void testCleanupDisconnectedChannelMetadata() {
+    void cleanupDisconnectedChannelMetadataTest() {
         String serverAddress = "10.0.0.1:8091";
 
         // Pre-populate maps with metadata for the address
-        channelManager.putServerVersion(serverAddress, "2.1.0");
         ConcurrentMap<String, Object> channelLocks =
                 (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
         channelLocks.put(serverAddress, new Object());
@@ -500,19 +470,17 @@ class NettyClientChannelManagerTest {
         // No active channel for this address — cleanup should proceed
         channelManager.cleanupDisconnectedChannelMetadata(serverAddress);
 
-        Assertions.assertNull(channelManager.getServerVersion(serverAddress));
         assertFalse(channelLocks.containsKey(serverAddress));
         assertFalse(poolKeyMap.containsKey(serverAddress));
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    void testCleanupSkippedWhenActiveChannelExists() {
+    void cleanupSkippedWhenActiveChannelExistsTest() {
         String serverAddress = "10.0.0.1:8091";
 
         // Pre-populate maps and an active channel
         channelManager.getChannels().put(serverAddress, channel);
-        channelManager.putServerVersion(serverAddress, "2.1.0");
         ConcurrentMap<String, Object> channelLocks =
                 (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
         channelLocks.put(serverAddress, new Object());
@@ -523,18 +491,21 @@ class NettyClientChannelManagerTest {
         // Active channel exists — cleanup should be skipped
         channelManager.cleanupDisconnectedChannelMetadata(serverAddress);
 
-        assertEquals("2.1.0", channelManager.getServerVersion(serverAddress));
         assertTrue(channelLocks.containsKey(serverAddress));
         assertTrue(poolKeyMap.containsKey(serverAddress));
     }
 
     @Test
-    void testCleanupDisconnectedChannelMetadataWithNullAddressTest() {
-        channelManager.putServerVersion("10.0.0.1:8091", "2.1.0");
+    @SuppressWarnings("unchecked")
+    void cleanupDisconnectedChannelMetadataWithNullAddressTest() {
+        String serverAddress = "10.0.0.1:8091";
+        ConcurrentMap<String, NettyPoolKey> poolKeyMap =
+                (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
+        poolKeyMap.put(serverAddress, nettyPoolKey);
 
         channelManager.cleanupDisconnectedChannelMetadata(null);
 
         // Should not throw and metadata should remain unchanged
-        assertEquals("2.1.0", channelManager.getServerVersion("10.0.0.1:8091"));
+        assertTrue(poolKeyMap.containsKey(serverAddress));
     }
 }
