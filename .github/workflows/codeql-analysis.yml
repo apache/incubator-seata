@@ -57,7 +57,7 @@ jobs:
           distribution: 'zulu'
           java-version: 25
 
-      - run: ./mvnw -T 4C clean install -DskipTests
+      - run: ./mvnw clean install -DskipTests
 
       # step 3
       - name: "Perform CodeQL Analysis"
