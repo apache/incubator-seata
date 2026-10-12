@@ -1773,6 +1773,7 @@ class RaftRegistryServiceImplTest {
      */
     @Test
     public void startQueryMetadataTest() throws Exception {
+        setClosed(true);
         Field executorField = RaftRegistryServiceImpl.class.getDeclaredField("REFRESH_METADATA_EXECUTOR");
         executorField.setAccessible(true);
 
@@ -1790,6 +1791,7 @@ class RaftRegistryServiceImplTest {
      */
     @Test
     public void startQueryMetadataMultipleCallsTest() throws Exception {
+        setClosed(true);
         Field executorField = RaftRegistryServiceImpl.class.getDeclaredField("REFRESH_METADATA_EXECUTOR");
         executorField.setAccessible(true);
 
