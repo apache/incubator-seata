@@ -19,23 +19,26 @@ package org.apache.seata.server.cluster.manager;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.RaftStateMachine;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
+import org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -61,7 +65,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ClusterWatcherManagerTest extends BaseSpringBootTest {
+class ClusterWatcherManagerTest {
 
     private ClusterWatcherManager clusterWatcherManager;
     private ChannelHandlerContext mockChannelHandlerContext;
@@ -71,6 +75,13 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     private static final String TEST_GROUP = "test-group";
     private static final int TEST_TIMEOUT = 5000;
     private static final long TEST_TERM = 1000L;
+
+    @BeforeAll
+    static void initConfiguration() {
+        // This isolated test fork needs configuration, without starting Spring's watcher poller.
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, new MockEnvironment());
+        SeataCoreEnvironmentPostProcessor.init();
+    }
 
     @BeforeEach
     void setUp() {
