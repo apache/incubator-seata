@@ -193,6 +193,11 @@ while [[ $# -gt 0 ]]; do
 done
 
 function start_server() {
+  # Set SEATA_FOREGROUND=true to keep the JVM in the foreground for containers.
+  if [ "${SEATA_FOREGROUND}" = "true" ]; then
+    echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS}"
+    exec "$JAVACMD" ${JAVA_OPT} ${NEW_ARGS}
+  fi
   echo "$JAVACMD ${JAVA_OPT} ${NEW_ARGS} &"
   nohup $JAVACMD ${JAVA_OPT} ${NEW_ARGS} &
   echo "seata-server is starting, you can check the ${LOG_HOME}/ *.log"
