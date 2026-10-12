@@ -16,7 +16,7 @@
  */
 package org.apache.seata.mcp.entity.param;
 
-import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 
