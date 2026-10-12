@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
-    "node": ">=24.19.0 <25"
+    "node": ">=22.13.0 <23 || >=24.19.0 <25"
   },
   "bin": {
     "seata-ai": "dist/cli.js"

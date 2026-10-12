@@ -36,7 +36,7 @@ export function renderHelp(path: string[], field?: string): string {
         "Start with command --help; request exact fields with schema <command-id>.",
         "JSON invocation: seata-ai invoke < invocation.json",
         "Use an explicit --profile for management commands.",
-        "Runtime: Node.js >=24.19.0 <25. Read-only release: all server mutations are deferred.",
+        "Runtime: Node.js >=22.13.0 <23 or >=24.19.0 <25. Server mutations are deferred.",
         "Read availability from capabilities; catalog entries alone are not implemented capabilities.",
       ].join("\n") + "\n"
     );

@@ -25,7 +25,8 @@ let outputStarted = false;
 async function main(): Promise<void> {
   const started = performance.now();
   const [major, minor] = process.versions.node.split(".").map(Number);
-  if (major !== 24 || minor === undefined || minor < 19)
+  if (!((major === 22 && minor !== undefined && minor >= 13) ||
+        (major === 24 && minor !== undefined && minor >= 19)))
     throw new Error("unsupported_runtime");
   const [
     { parseArgs },
@@ -255,7 +256,7 @@ main().catch((error) => {
       type: unsupported ? "policy" : "internal",
       subtype: unsupported ? "unsupported_runtime" : "startup_failure",
       message: unsupported
-        ? "Node.js >=24.19.0 <25 is required."
+        ? "Node.js >=22.13.0 <23 or >=24.19.0 <25 is required."
         : "CLI startup or output failed.",
       retry: "never",
       details: {},

@@ -31,9 +31,11 @@ implemented behavior.
 
 ## Run from source
 
-Use Node.js `>=24.19.0 <25`. Linux StateStore operations require `/usr/bin/flock`
-from util-linux and a private local directory. On macOS, `npm run build` needs
-Apple Command Line Tools to compile the bundled universal Keychain/lock helper.
+Use Node.js `>=22.13.0 <23` or `>=24.19.0 <25`. Node 22 uses its built-in
+SQLite API, which Node marks experimental. Linux StateStore operations require
+`/usr/bin/flock` from util-linux and a private local directory. On macOS,
+`npm run build` needs Apple Command Line Tools to compile the bundled universal
+Keychain/lock helper.
 The macOS adapter accepts local APFS volumes and checks directory ownership,
 permissions, symbolic links and inode identity. macOS 26.7 arm64 has been
 validated; macOS x86_64 has a universal helper build but has not been run on
@@ -86,8 +88,12 @@ Local regression tests use synthetic data. Opt-in release tests use isolated
 test credentials supplied by the operator.
 
 Internal auth tests model staged credential references and epoch fencing.
-macOS arm64 has additionally passed isolated Keychain, real Chromium Helper and
+macOS arm64 has additionally passed isolated Keychain, headless Chromium Helper and
 DB/File/Redis read-only integration against a Seata 2.6.0 test deployment.
+The regression suite passes on Node 22.13.0, 22.13.1, 22.22.0 and 24.19.0.
+Visible Safari login against the same deployment has passed on Node 22.13.0,
+followed by installed-package reads of transactions, branches and locks. The
+same private state has also passed those reads on Node 22.22.0 and 24.19.0.
 These results do not establish production compatibility, power-loss or disk-full
 recovery, or a public write executor. Windows ACLs and native macOS x86_64
 remain unverified.

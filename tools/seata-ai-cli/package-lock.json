@@ -23,7 +23,7 @@
         "typescript": "5.9.3"
       },
       "engines": {
-        "node": ">=24.19.0 <25"
+        "node": ">=22.13.0 <23 || >=24.19.0 <25"
       }
     },
     "node_modules/@types/node": {
