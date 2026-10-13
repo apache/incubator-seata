@@ -75,7 +75,7 @@ class VGroupMappingControllerTest extends BaseSpringBootTest {
             verify(vGroupMappingStoreManager).addVGroup(mappingCaptor.capture());
             MappingDO mappingDO = mappingCaptor.getValue();
             assertEquals("default", mappingDO.getNamespace());
-            assertEquals("default", mappingDO.getCluster());
+            assertEquals("default", mappingDO.getClusterName());
             assertEquals("unit-a", mappingDO.getUnit());
             assertEquals("vgroup", mappingDO.getVGroup());
         }
