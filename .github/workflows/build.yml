@@ -118,6 +118,7 @@ jobs:
           SERVICE_TESTS: ${{ matrix.service_tests == true }}
           LICENSE_SKIP: ${{ matrix.license_check != true }}
         run: |
+          export SEATA_SECRET_KEY="$(openssl rand -base64 32)"
           ./mvnw -T 4C clean test \
                  -Dlicense.skip="$LICENSE_SKIP" \
                  -DredisCaseEnabled="$SERVICE_TESTS" -DnacosCaseEnabled="$SERVICE_TESTS" \

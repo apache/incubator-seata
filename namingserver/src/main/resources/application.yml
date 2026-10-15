@@ -55,7 +55,9 @@ seata:
     metrics:
       enabled: true
   security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    # Generate once with openssl rand -base64 32; keep private and reuse across restarts and instances.
+    # Startup rejects missing, invalid, short, or previously published default keys.
+    secretKey: ${SEATA_SECRET_KEY:}
     tokenValidityInMilliseconds: 14400000
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:

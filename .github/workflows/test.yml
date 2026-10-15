@@ -63,6 +63,7 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
+          export SEATA_SECRET_KEY="$(openssl rand -base64 32)"
           if [[ "${{ matrix.os }}" =~ "macos" ]]; then
              python3 -m ensurepip --upgrade;
              python3 -m pip install --upgrade pip setuptools;
@@ -119,6 +120,7 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
+          export SEATA_SECRET_KEY="$(openssl rand -base64 32)"
           if [[ "${{ matrix.os }}" =~ "macos" ]]; then
              python3 -m ensurepip --upgrade;
              python3 -m pip install --upgrade pip setuptools;
