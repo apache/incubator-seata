@@ -816,6 +816,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     public void destroy() {
         // 1. first shutdown timed task
+        syncProcessing.shutdown();
         retryRollbacking.shutdown();
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
@@ -825,6 +826,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             branchRemoveExecutor.shutdown();
         }
         try {
+            syncProcessing.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);

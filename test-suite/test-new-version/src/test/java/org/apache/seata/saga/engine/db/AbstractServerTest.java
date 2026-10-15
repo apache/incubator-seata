@@ -21,7 +21,6 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.ParameterParser;
@@ -60,6 +59,7 @@ public abstract class AbstractServerTest {
     }
 
     private static NettyRemotingServer nettyServer;
+    private static DefaultCoordinator coordinator;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(
             100, 500, 500, TimeUnit.SECONDS, new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -92,12 +92,9 @@ public abstract class AbstractServerTest {
                         // log store mode : file、db
                         SessionHolder.init();
 
-                        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
+                        coordinator = DefaultCoordinator.getInstance(nettyServer);
                         coordinator.init();
                         nettyServer.setHandler(coordinator);
-
-                        // register ShutdownHook
-                        ShutdownHook.getInstance().addDisposable(coordinator);
 
                         // 127.0.0.1 and 0.0.0.0 are not valid here.
                         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
@@ -115,9 +112,14 @@ public abstract class AbstractServerTest {
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if (nettyServer != null) {
+        if (coordinator != null) {
+            // Stop retries before closing RM channels and release the session stores.
+            coordinator.destroy();
+            coordinator = null;
+            nettyServer = null;
+        } else if (nettyServer != null) {
             nettyServer.destroy();
-            Thread.sleep(5000);
+            nettyServer = null;
         }
         restoreProperty("config.type", originalConfigType);
         restoreProperty("config.file.name", originalConfigFileName);
