@@ -22,6 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -125,6 +127,14 @@ public class LowerCaseLinkHashMapTest {
     @CsvSource(value = {"Value, Key, abc", "Value, key, abc", "abc, default, abc"})
     void getOrDefault1(String expected, String key, String defaultValue) {
         Assertions.assertEquals(expected, lowerCaseLinkHashMap.getOrDefault(key, defaultValue));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(ints = {123})
+    void getOrDefaultWithNonStringKey(Integer key) {
+        Object defaultValue = new Object();
+        Assertions.assertSame(defaultValue, lowerCaseLinkHashMap.getOrDefault(key, defaultValue));
     }
 
     @Test
@@ -238,9 +248,36 @@ public class LowerCaseLinkHashMapTest {
     @Test
     void testEquals() {
         Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
+        Assertions.assertTrue(map.equals(map));
+        Assertions.assertFalse(map.equals(null));
+        Assertions.assertFalse(map.equals(new Object()));
         Assertions.assertTrue(map.equals(lowerCaseLinkHashMap));
         map.put("equals", "equals");
         Assertions.assertFalse(map.equals(lowerCaseLinkHashMap));
+    }
+
+    @Test
+    void testCloneIsIndependent() throws CloneNotSupportedException {
+        LowerCaseLinkHashMap<String> map = new LowerCaseLinkHashMap<>(4, 0.75f);
+        map.put("Key", "Value");
+        map.put("Key2", "Value2");
+
+        LowerCaseLinkHashMap<String> copy = map.clone();
+        Assertions.assertNotSame(map, copy);
+        Assertions.assertEquals(map, copy);
+        Assertions.assertEquals("Value", copy.get("KEY"));
+
+        Assertions.assertEquals("Value", copy.remove("KEY"));
+        Assertions.assertEquals("Value", map.get("key"));
+        Assertions.assertTrue(map.keySet().contains("Key"));
+
+        copy.put("KEY2", "CopyValue");
+        Assertions.assertEquals("Value2", map.get("key2"));
+        Assertions.assertEquals("CopyValue", copy.get("key2"));
+
+        map.put("Key3", "Value3");
+        Assertions.assertNull(copy.get("key3"));
+        Assertions.assertFalse(copy.keySet().contains("Key3"));
     }
 
     @Test

@@ -21,9 +21,11 @@ import org.junit.jupiter.api.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -221,6 +223,14 @@ public class CollectionUtilsTest {
     }
 
     @Test
+    public void testMapToStringWithSelfKey() {
+        Map<Object, Object> map = new IdentityHashMap<>();
+        map.put(map, "value");
+
+        Assertions.assertEquals("{(this IdentityHashMap)->\"value\"}", CollectionUtils.toString(map));
+    }
+
+    @Test
     public void testIsEmpty() {
         Map<String, Object> map = new HashMap<>();
         Assertions.assertTrue(CollectionUtils.isEmpty(map));
@@ -370,7 +380,7 @@ public class CollectionUtilsTest {
     }
 
     @Test
-    public void testGetLastWithConcurrentModification() {
+    public void testGetLastWithStandardLists() {
         // Test with normal list
         List<String> list = new ArrayList<>();
         list.add("first");
@@ -384,6 +394,38 @@ public class CollectionUtilsTest {
 
         // Test with null list
         assertThat(CollectionUtils.<String>getLast(null)).isNull();
+    }
+
+    @Test
+    public void testGetLastRetriesAfterListShrinks() {
+        List<String> list = removingLastElementOnFirstRead("first", "last");
+
+        Assertions.assertEquals("first", CollectionUtils.getLast(list));
+        Assertions.assertEquals(Collections.singletonList("first"), list);
+    }
+
+    @Test
+    public void testGetLastReturnsNullAfterListBecomesEmpty() {
+        List<String> list = removingLastElementOnFirstRead("last");
+
+        Assertions.assertNull(CollectionUtils.getLast(list));
+        Assertions.assertTrue(list.isEmpty());
+    }
+
+    private static List<String> removingLastElementOnFirstRead(String... values) {
+        return new ArrayList<String>(Arrays.asList(values)) {
+            private boolean firstRead = true;
+
+            @Override
+            public String get(int index) {
+                if (firstRead) {
+                    firstRead = false;
+                    // Model removal between size() and get() without relying on thread timing.
+                    remove(size() - 1);
+                }
+                return super.get(index);
+            }
+        };
     }
 
     @Test
