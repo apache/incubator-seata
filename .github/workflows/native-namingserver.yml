@@ -115,6 +115,12 @@ jobs:
             namingserver/target/seata-*-*
             namingserver/target/git-sha.txt
           if-no-files-found: error
+      - name: "Generate ephemeral JWT key for verification"
+        shell: bash
+        run: |
+          key="$(openssl rand -base64 32)"
+          echo "::add-mask::$key"
+          echo "SEATA_SECRET_KEY=$key" >> "$GITHUB_ENV"
       - name: "Verify native binary"
         shell: sh
         env:
