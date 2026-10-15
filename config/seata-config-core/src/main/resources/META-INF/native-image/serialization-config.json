@@ -1,0 +1,23 @@
+{
+  "types":[
+    {
+      "name":"java.lang.InterruptedException",
+      "customTargetConstructorClass":"java.lang.Object"
+    },
+    {
+      "name":"java.util.concurrent.ExecutionException",
+      "customTargetConstructorClass":"java.lang.Object"
+    },
+    {
+      "name":"java.util.concurrent.TimeoutException",
+      "customTargetConstructorClass":"java.lang.Object"
+    },
+    {
+      "name":"org.junit.platform.launcher.TestIdentifier$SerializedForm"
+    }
+  ],
+  "lambdaCapturingTypes":[
+  ],
+  "proxies":[
+  ]
+}

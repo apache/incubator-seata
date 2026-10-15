@@ -1,0 +1,435 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QClass.class\\E"
+  }, {
+    "pattern":"\\QMETA-INF/hessian/deserializers\\E"
+  }, {
+    "pattern":"\\QMETA-INF/hessian/serializers\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.auth.AuthSigner\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.context.ContextCore\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.rpc.hook.RpcHook\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.serializer.Serializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.store.db.sql.distributed.lock.DistributedLockSql\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.store.db.sql.lock.LockStoreSql\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.core.store.db.sql.log.LogStoreSqls\\E"
+  }, {
+    "pattern":"\\QMETA-INF/seata/org.apache.seata.discovery.registry.RegistryProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/ch.qos.logback.classic.spi.Configurator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alibaba.fastjson.parser.deserializer.AutowiredObjectDeserializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alibaba.fastjson.serializer.AutowiredObjectSerializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.common.tracer.core.extensions.SpanExtension\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.bootstrap.ProviderBootstrap\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.AddressHolder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.Cluster\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.ConnectionHolder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.LoadBalancer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.Router\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.aft.DegradeStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.aft.MeasureStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.aft.RecoverStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.aft.RegulationStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.client.aft.Regulator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.codec.Serializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.filter.Filter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.module.Module\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.proxy.Proxy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.server.Server\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.tracer.Tracer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.alipay.sofa.rpc.transport.ClientTransport\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.baidu.brpc.client.loadbalance.LoadBalanceFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.baidu.brpc.naming.NamingServiceFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.baidu.brpc.protocol.ProtocolFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.cluster.Cluster\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.cluster.HaStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.cluster.LoadBalance\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.codec.Codec\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.codec.Serialization\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.config.handler.ConfigHandler\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.filter.Filter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.proxy.ProxyFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.registry.RegistryFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.registry.Registry\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.rpc.Protocol\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.switcher.SwitcherService\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.transport.EndpointFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/com.weibo.api.motan.transport.HeartbeatFactory\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.grpc.LoadBalancerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.grpc.NameResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/io.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.InetAddressResolverProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.net.spi.URLStreamHandlerProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.nio.channels.spi.SelectorProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/java.time.zone.ZoneRulesProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.ExtConfigurationProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.config.file.FileConfig\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.auth.AuthSigner\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.context.ContextCore\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.rpc.hook.RpcHook\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.serializer.Serializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.store.db.sql.distributed.lock.DistributedLockSql\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.store.db.sql.lock.LockStoreSql\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.core.store.db.sql.log.LogStoreSqls\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.apache.seata.discovery.registry.RegistryProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.assertj.core.presentation.Representation\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.engine.TestEngine\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherDiscoveryListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.LauncherSessionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.PostDiscoveryFilter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.junit.platform.launcher.TestExecutionListener\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/org.slf4j.spi.SLF4JServiceProvider\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.bootstrap.ProviderBootstrap\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.AddressHolder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.Cluster\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.ConnectionHolder\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.LoadBalancer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.Router\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.aft.DegradeStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.aft.MeasureStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.aft.RecoverStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.aft.RegulationStrategy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.client.aft.Regulator\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.codec.Serializer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.filter.Filter\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.module.Module\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.proxy.Proxy\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.server.Server\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.tracer.Tracer\\E"
+  }, {
+    "pattern":"\\QMETA-INF/services/sofa-rpc/com.alipay.sofa.rpc.transport.ClientTransport\\E"
+  }, {
+    "pattern":"\\QMETA-INF/sofa-rpc/rpc-config.json\\E"
+  }, {
+    "pattern":"\\QObject.class\\E"
+  }, {
+    "pattern":"\\QString.class\\E"
+  }, {
+    "pattern":"\\QThrowable.class\\E"
+  }, {
+    "pattern":"\\Q\\E"
+  }, {
+    "pattern":"\\Qcom.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/common.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/common/rpc-config-default.json\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/common/utils.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/common/utils/ReflectUtils.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core/exception.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core/exception/RpcErrorType.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core/exception/SofaRpcException.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core/request/SofaRequest.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/core/response/SofaResponse.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/invoke/Invoker.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/message.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/message/MessageBuilder.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/proxy.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/proxy/javassist.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/proxy/javassist/JavassistProxy.class\\E"
+  }, {
+    "pattern":"\\Qcom/alipay/sofa/rpc/proxy/javassist/UselessInvocationHandler.class\\E"
+  }, {
+    "pattern":"\\Qconfig/rpc-config.properties\\E"
+  }, {
+    "pattern":"\\Qdarwin/aarch64/libzstd-jni-1.5.0-4.dylib\\E"
+  }, {
+    "pattern":"\\Qfastjson.properties\\E"
+  }, {
+    "pattern":"\\Qfile.conf\\E"
+  }, {
+    "pattern":"\\Qjava/lang/com.class\\E"
+  }, {
+    "pattern":"\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }, {
+    "pattern":"\\Qjunit-platform.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j.properties\\E"
+  }, {
+    "pattern":"\\Qlog4j.xml\\E"
+  }, {
+    "pattern":"\\Qlogback-test.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback-test.xml\\E"
+  }, {
+    "pattern":"\\Qlogback.scmo\\E"
+  }, {
+    "pattern":"\\Qlogback.xml\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.AnnotationEngine\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.DoNotMockEnforcer\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.InstantiatorProvider2\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MemberAccessor\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockMaker\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockResolver\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.MockitoLogger\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.PluginSwitch\\E"
+  }, {
+    "pattern":"\\Qmockito-extensions/org.mockito.plugins.StackTraceCleanerProvider\\E"
+  }, {
+    "pattern":"\\Qmozilla/public-suffix-list.txt\\E"
+  }, {
+    "pattern":"\\Qnet/jpountz/util/darwin/aarch64/liblz4-java.dylib\\E"
+  }, {
+    "pattern":"\\Qorg/apache/http/client/version.properties\\E"
+  }, {
+    "pattern":"\\Qorg/apache/seata/core/protocol\\E"
+  }, {
+    "pattern":"\\Qorg/apache/seata/integration/sofa/rpc/HelloService.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForEquals.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForHashCode.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice$ForStatic.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/MockMethodAdvice.class\\E"
+  }, {
+    "pattern":"\\Qorg/mockito/internal/creation/bytebuddy/inject/MockMethodDispatcher.raw\\E"
+  }, {
+    "pattern":"\\Qorg/slf4j/impl/StaticLoggerBinder.class\\E"
+  }, {
+    "pattern":"\\Qreference.conf\\E"
+  }, {
+    "pattern":"\\Qregistry.conf\\E"
+  }, {
+    "pattern":"\\Qsecurity/serialize.blacklist\\E"
+  }, {
+    "pattern":"\\Qsofa-rpc/logcodes-common_en.properties\\E"
+  }, {
+    "pattern":"\\Qsofa-rpc/logcodes-common_zh_CN_#Hans.properties\\E"
+  }, {
+    "pattern":"\\Qsofa-rpc/rpc-config.json\\E"
+  }, {
+    "pattern":"\\Qsofa-rpc/serialize_blacklist.txt\\E"
+  }, {
+    "pattern":"\\Qsofa.tracer.properties\\E"
+  }, {
+    "pattern":"java.base:\\QClass.class\\E"
+  }, {
+    "pattern":"java.base:\\QObject.class\\E"
+  }, {
+    "pattern":"java.base:\\QString.class\\E"
+  }, {
+    "pattern":"java.base:\\QThrowable.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/common.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/common/utils.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/common/utils/ReflectUtils.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core/exception.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core/exception/RpcErrorType.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core/exception/SofaRpcException.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core/request/SofaRequest.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/core/response/SofaResponse.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/invoke/Invoker.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/message.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/message/MessageBuilder.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/proxy.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/proxy/javassist.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/proxy/javassist/JavassistProxy.class\\E"
+  }, {
+    "pattern":"java.base:\\Qcom/alipay/sofa/rpc/proxy/javassist/UselessInvocationHandler.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/io/Serializable.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/Class.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/Integer.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/Object.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/String.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/Throwable.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/com.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/constant/Constable.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/invoke/TypeDescriptor$OfField.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/invoke/TypeDescriptor.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/AccessibleObject.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/AnnotatedElement.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/Executable.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/GenericDeclaration.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/InvocationHandler.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/Member.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/Method.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/Proxy.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjava/lang/reflect/Type.class\\E"
+  }, {
+    "pattern":"java.base:\\Qjdk/internal/icu/impl/data/icudt72b/nfc.nrm\\E"
+  }, {
+    "pattern":"java.base:\\Qorg/apache/seata/integration/sofa/rpc/HelloService.class\\E"
+  }, {
+    "pattern":"jdk.jfr:\\Qjdk/jfr/internal/query/view.ini\\E"
+  }]},
+  "bundles":[]
+}
