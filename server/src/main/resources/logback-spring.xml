@@ -74,21 +74,21 @@
             <!-- logstash-appender: off by default -->
             <if condition='property("LOGSTASH_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include resource="logback/logstash-appender.xml"/>
+                    <include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>
                 </then>
             </if>
 
             <!-- metric-appender: off by default -->
             <if condition='property("METRIC_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include resource="logback/metric-appender.xml"/>
+                    <include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>
                 </then>
             </if>
 
             <!-- kafka-appender: off by default -->
             <if condition='property("KAFKA_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include resource="logback/kafka-appender.xml"/>
+                    <include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>
                 </then>
             </if>
         </else>
