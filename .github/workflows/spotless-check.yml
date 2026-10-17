@@ -18,9 +18,9 @@ name: Spotless Check
 
 on:
   push:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, "*.*.*" ]
   pull_request:
-    branches: [ 2.x, develop, master ]
+    branches: [ 2.x, develop, master, "*.*.*" ]
     types: [opened, reopened, synchronize]
     paths-ignore:
       - '**.md'

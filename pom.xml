@@ -335,6 +335,9 @@
                 <module>server</module>
                 <module>integration-tx-api</module>
                 <module>namingserver</module>
+                <!-- Needed so a source-release consumer can resolve distribution/
+                     without relying on include-test-modules (tests may be absent). -->
+                <module>distribution</module>
             </modules>
             <build>
                 <plugins>

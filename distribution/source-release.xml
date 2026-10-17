@@ -39,7 +39,10 @@
         <exclude>**/*.log</exclude>
         <exclude>**/.DS_Store</exclude>
         <exclude>**/.flattened-pom.xml</exclude>
-        <exclude>distribution/**</exclude>
+        <!-- Keep distribution/ (pom, LICENSE*, NOTICE*, licenses/) — required for a
+             buildable source release and for LICENSE "see:licenses/..." pointers.
+             Do not exclude the whole tree; only skip packaging outputs if present. -->
+        <exclude>distribution/target/**</exclude>
         <exclude>test-old-version/**</exclude>
         <exclude>test/**</exclude>
         <exclude>**/node_modules/**</exclude>

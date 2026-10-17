@@ -147,28 +147,21 @@ Component: seata-namingserver
                                             </filterchain>
                                         </concat>
 
+                                        <!-- Shared ASF product header only (first 5 lines).
+                                             Component-specific attributions (e.g. Snap.svg on
+                                             namingserver/console) may differ after that. -->
                                         <concat destfile="${project.build.directory}/NOTICE-server-common.tmp"
                                                 encoding="UTF-8" fixlastline="true">
                                             <file file="${project.basedir}/NOTICE-server"/>
                                             <filterchain>
-                                                <tokenfilter>
-                                                    <filetokenizer/>
-                                                    <replaceregex flags="s"
-                                                                  pattern="(?:\r?\n)+=+.*\z"
-                                                                  replace=""/>
-                                                </tokenfilter>
+                                                <headfilter lines="5"/>
                                             </filterchain>
                                         </concat>
                                         <concat destfile="${project.build.directory}/NOTICE-namingserver-common.tmp"
                                                 encoding="UTF-8" fixlastline="true">
                                             <file file="${project.basedir}/NOTICE-namingserver"/>
                                             <filterchain>
-                                                <tokenfilter>
-                                                    <filetokenizer/>
-                                                    <replaceregex flags="s"
-                                                                  pattern="(?:\r?\n)+=+.*\z"
-                                                                  replace=""/>
-                                                </tokenfilter>
+                                                <headfilter lines="5"/>
                                             </filterchain>
                                         </concat>
                                         <condition property="notice.common.headers.match">
@@ -176,14 +169,25 @@ Component: seata-namingserver
                                                         file2="${project.build.directory}/NOTICE-namingserver-common.tmp"/>
                                         </condition>
                                         <fail unless="notice.common.headers.match"
-                                              message="NOTICE-server and NOTICE-namingserver must have identical project notice header"/>
+                                              message="NOTICE-server and NOTICE-namingserver must share the same ASF product header (first 5 lines)"/>
 
-                                        <!-- The project NOTICE header is common. Dependency
-                                             notices remain grouped by the component shipping them. -->
+                                        <!-- Root NOTICE: ASF header + Snap (console ships with
+                                             namingserver) + per-component dependency notices. -->
                                         <copy file="${project.build.directory}/NOTICE-server-common.tmp"
                                               tofile="${project.build.directory}/NOTICE" overwrite="true"/>
-                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
-                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+
+Snap.svg
+Snap.svg is licensed under the Apache license version 2.0, January 2004 (see LICENSE file).
+Copyright (c) 2013 - 2017 Adobe Systems Incorporated. All rights reserved.
+
+This product contains a modified portion of Snap.svg
+(https://github.com/adobe-webplatform/Snap.svg/blob/master/src/svg.js)
+in saga/seata-saga-statemachine-designer/src/render/PathMap.js,
+bundled into the console saga designer.
+
+]]></echo>
                                         <echo file="${project.build.directory}/NOTICE" append="true"
                                               encoding="UTF-8"><![CDATA[
 Component: seata-server
@@ -235,8 +239,12 @@ Component: seata-namingserver
                         <version>${maven-assembly-plugin.version}</version>
                         <configuration>
                             <descriptors>
+                                <!-- Binary convenience package only.
+                                     Source release must be built from the repository root
+                                     (profile source-release / git archive), not from this
+                                     module — ${basedir} here is distribution/ and cannot
+                                     assemble the full multi-module tree. -->
                                 <descriptor>release-seata.xml</descriptor>
-                                <descriptor>source-release.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
