@@ -212,7 +212,8 @@
         <profile>
             <id>release-image-based-on-java8</id>
             <properties>
-                <image.tags>${project.version},latest</image.tags>
+                <!-- Temporarily omit the latest tag. -->
+                <image.tags>${project.version}</image.tags>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
