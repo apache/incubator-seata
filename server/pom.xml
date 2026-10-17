@@ -386,8 +386,7 @@
                         </platforms>
                     </from>
                     <to>
-                        <!-- Specify the primary tag to avoid Jib defaulting to latest. -->
-                        <image>docker.io/apache/seata-server:${image.tags}</image>
+                        <image>docker.io/apache/seata-server</image>
                         <tags>${image.tags}</tags>
                         <auth>
                             <username>${REGISTRY_USERNAME}</username>
