@@ -44,6 +44,7 @@ header:
     - 'console/src/main/resources/static/console-fe/public/css/font-awesome.css'
     - 'saga/seata-saga-statemachine-designer/src/render/PathMap.js'
     - 'distribution/licenses/**'
+    - 'sqlparser/seata-sqlparser-antlr/src/main/appended-resources/META-INF/LICENSE'
     - 'distribution/LICENSE'
     - 'distribution/LICENSE-*'
     - 'distribution/NOTICE'

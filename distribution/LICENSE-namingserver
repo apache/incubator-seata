@@ -429,7 +429,7 @@ EPL-2.0 licenses
 MIT licenses
 ========================================================================
 
-    normalize.css 2.1.3 MIT (bundled in Bootstrap v3.0.3)
+    normalize.css 2.1.3 MIT (bundled in Bootstrap v3.0.3) see:licenses/normalize.css-MIT
     Font Awesome 4.5.0 CSS MIT
     org.checkerframework:checker-qual 3.37.0 MIT see:licenses/checker-qual-MIT
     org.slf4j:jul-to-slf4j 2.0.17  MIT see:licenses/jul-to-slf4j-MIT
