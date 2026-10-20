@@ -28,9 +28,11 @@ import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -70,6 +72,12 @@ class RmNettyClientTest {
     @AfterAll
     public static void afterAll() {
         RmNettyRemotingClient.getInstance().destroy();
+        ServerVersionHolder.clear();
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        ServerVersionHolder.clear();
     }
 
     @Test
@@ -188,7 +196,9 @@ class RmNettyClientTest {
 
         client.onRegisterMsgSuccess(serverAddress, channel, response, request);
 
-        verify(channelManager).registerChannel(eq(serverAddress), eq(channel), anyString());
+        // the version carried by the register channel is the peer(server) version
+        verify(channelManager).registerChannel(eq(serverAddress), eq(channel), eq("1.5.0"));
+        Assertions.assertEquals("1.5.0", ServerVersionHolder.getServerVersion(serverAddress));
     }
 
     @Test
@@ -400,7 +410,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.6.0");
+        ServerVersionHolder.putServerVersion(serverAddress, "2.6.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
@@ -422,7 +432,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.5.0");
+        ServerVersionHolder.putServerVersion(serverAddress, "2.5.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
@@ -465,7 +475,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        when(channelManager.getServerVersion(serverAddress)).thenReturn("2.6.0");
+        ServerVersionHolder.putServerVersion(serverAddress, "2.6.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
