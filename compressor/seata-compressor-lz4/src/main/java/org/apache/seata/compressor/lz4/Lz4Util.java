@@ -18,6 +18,7 @@ package org.apache.seata.compressor.lz4;
 
 import net.jpountz.lz4.LZ4FrameInputStream;
 import net.jpountz.lz4.LZ4FrameOutputStream;
+import org.apache.seata.core.compressor.BoundedByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,11 +48,15 @@ public class Lz4Util {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        return decompress(bytes, Integer.MAX_VALUE);
+    }
+
+    public static byte[] decompress(byte[] bytes, int maxOutputSize) {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(ARRAY_SIZE);
+        ByteArrayOutputStream outputStream = new BoundedByteArrayOutputStream(maxOutputSize);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
         try (LZ4FrameInputStream decompressedInputStream = new LZ4FrameInputStream(inputStream)) {
             int count;

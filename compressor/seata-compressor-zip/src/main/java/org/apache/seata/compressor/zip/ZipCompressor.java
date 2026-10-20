@@ -35,4 +35,9 @@ public class ZipCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return ZipUtil.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return ZipUtil.decompress(bytes, maxOutputSize);
+    }
 }

@@ -120,8 +120,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
-        if (ChannelManager.isRegistered(ctx.channel())) {
-            onRequestMessage(ctx, rpcMessage);
+        // look the context up only once, the IO thread may release the channel at any time
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+        if (rpcContext != null) {
+            onRequestMessage(ctx, rpcMessage, rpcContext);
         } else {
             try {
                 if (LOGGER.isInfoEnabled()) {
@@ -146,9 +148,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         }
     }
 
-    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+    private void onRequestMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage, RpcContext rpcContext) {
         Object message = rpcMessage.getBody();
-        RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (!(message instanceof AbstractMessage)) {
             LOGGER.error("unrecognized message:{}", message);
             return;

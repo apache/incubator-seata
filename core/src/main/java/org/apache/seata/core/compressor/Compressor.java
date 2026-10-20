@@ -31,4 +31,17 @@ public interface Compressor {
      * @return the byte[]
      */
     byte[] decompress(byte[] bytes);
+
+    /**
+     * Decompress while limiting the number of output bytes.
+     * Implementations must enforce the limit before growing the output buffer.
+     *
+     * @param bytes the compressed bytes
+     * @param maxOutputSize the maximum output size, in bytes
+     * @return the decompressed bytes
+     * @throws UnsupportedOperationException if bounded decompression is not implemented
+     */
+    default byte[] decompress(byte[] bytes, int maxOutputSize) {
+        throw new UnsupportedOperationException("Bounded decompression is not supported");
+    }
 }
