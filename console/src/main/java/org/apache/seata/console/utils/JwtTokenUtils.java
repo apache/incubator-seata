@@ -36,6 +36,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
@@ -66,11 +67,16 @@ public class JwtTokenUtils {
 
     @PostConstruct
     public void validateSecretKey() {
+        if (secretKey == null || secretKey.isBlank()) {
+            byte[] generatedKey = new byte[32];
+            new SecureRandom().nextBytes(generatedKey);
+            secretKey = Base64.getEncoder().encodeToString(generatedKey);
+            LOGGER.warn("No JWT secret was configured. A temporary random key has been generated. "
+                    + "Tokens will become invalid after a restart. Configure SEATA_SECRET_KEY to retain "
+                    + "sessions across restarts and share the signing key across instances.");
+        }
         String errorMessage = "seata.security.secretKey must be a unique Base64-encoded random key of at least "
                 + "32 decoded bytes, not the published default; set SEATA_SECRET_KEY (openssl rand -base64 32)";
-        if (secretKey == null || secretKey.isBlank()) {
-            throw new IllegalArgumentException(errorMessage);
-        }
         byte[] decodedKey;
         try {
             decodedKey = Base64.getDecoder().decode(secretKey);

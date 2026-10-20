@@ -43,7 +43,7 @@ seata:
     metrics:
       enabled: true
   security:
-    # Generate once before running tests: export SEATA_SECRET_KEY="$(openssl rand -base64 32)"
+    # Empty: generate a temporary random key during Java initialization.
     secretKey: ${SEATA_SECRET_KEY:}
     tokenValidityInMilliseconds: 1800000
     ignore:

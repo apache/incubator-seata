@@ -17,21 +17,47 @@
 package org.apache.seata.console.utils;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class JwtTokenUtilsTest {
 
     @Test
-    void rejectsMissingOrBlankSecret() {
+    void generatesUsableStableSecretWhenMissingOrBlank() {
         for (String secret : new String[] {null, "", " \t\n"}) {
-            assertThrows(IllegalArgumentException.class, () -> tokens(secret).validateSecretKey());
+            JwtTokenUtils tokens = tokens(secret);
+            tokens.validateSecretKey();
+            String generated = (String) ReflectionTestUtils.getField(tokens, "secretKey");
+            assertEquals(32, Base64.getDecoder().decode(generated).length);
+            String token = tokens.createToken(new UsernamePasswordAuthenticationToken("seata", "", List.of()));
+            assertTrue(tokens.validateToken(token));
+            assertEquals("seata", tokens.getAuthentication(token).getName());
+            tokens.validateSecretKey();
+            assertEquals(generated, ReflectionTestUtils.getField(tokens, "secretKey"));
         }
+    }
+
+    @Test
+    void generatesDifferentSecretsForIndependentInstances() {
+        JwtTokenUtils first = tokens(null);
+        JwtTokenUtils second = tokens(null);
+        first.validateSecretKey();
+        second.validateSecretKey();
+        assertNotEquals(
+                ReflectionTestUtils.getField(first, "secretKey"), ReflectionTestUtils.getField(second, "secretKey"));
+        String token = first.createToken(new UsernamePasswordAuthenticationToken("seata", "", List.of()));
+        assertFalse(second.validateToken(token));
     }
 
     @Test
@@ -60,13 +86,16 @@ class JwtTokenUtilsTest {
     void acceptsRandomSecretsAtAndAboveDecodedLengthBoundary() {
         for (int length : new int[] {32, 64}) {
             String secret = randomSecret(length);
-            assertDoesNotThrow(() -> tokens(secret).validateSecretKey());
+            JwtTokenUtils tokens = tokens(secret);
+            assertDoesNotThrow(tokens::validateSecretKey);
+            assertEquals(secret, ReflectionTestUtils.getField(tokens, "secretKey"));
         }
     }
 
     private JwtTokenUtils tokens(String secret) {
         JwtTokenUtils tokens = new JwtTokenUtils();
         ReflectionTestUtils.setField(tokens, "secretKey", secret);
+        ReflectionTestUtils.setField(tokens, "tokenValidityInMilliseconds", 60000L);
         return tokens;
     }
 

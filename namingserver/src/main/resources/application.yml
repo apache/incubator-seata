@@ -55,8 +55,8 @@ seata:
     metrics:
       enabled: true
   security:
-    # Generate once with openssl rand -base64 32; keep private and reuse across restarts and instances.
-    # Startup rejects missing, invalid, short, or previously published default keys.
+    # Empty: generate a temporary random key in Java; existing tokens become invalid after a restart.
+    # Set a shared Base64 key (at least 32 decoded bytes) for restarts and multiple instances.
     secretKey: ${SEATA_SECRET_KEY:}
     tokenValidityInMilliseconds: 14400000
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
