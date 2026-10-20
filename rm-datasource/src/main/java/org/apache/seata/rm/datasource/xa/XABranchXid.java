@@ -30,6 +30,21 @@ public class XABranchXid implements XAXid {
 
     private static final int SEATA_XA_XID_FORMAT_ID = 9752;
 
+    /**
+     * Format id for XA Xids whose gtrid is qualified with the branch id
+     * (gtrid = xid + "-" + branchId), so that every branch of one Seata global transaction
+     * owns a distinct gtrid. This is required by databases (e.g. DM) that reject a new
+     * xa start with XAER_RMERR while an in-doubt branch of the same gtrid exists.
+     */
+    public static final int SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID = 9753;
+
+    /**
+     * The maximum length of the global transaction id defined by the X/Open CAE Specification.
+     */
+    private static final int MAX_GTRID_LENGTH = 64;
+
+    private final int formatId;
+
     private String xid;
 
     private long branchId;
@@ -39,14 +54,29 @@ public class XABranchXid implements XAXid {
     private byte[] branchQualifier;
 
     XABranchXid(String xid, long branchId) {
+        this(xid, branchId, SEATA_XA_XID_FORMAT_ID);
+    }
+
+    /**
+     * Build a XAXid with an explicit format id, which selects the gtrid encoding:
+     * {@link #SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID} qualifies the gtrid with the branch id,
+     * {@link #SEATA_XA_XID_FORMAT_ID} keeps the legacy gtrid (= xid).
+     */
+    XABranchXid(String xid, long branchId, int formatId) {
         this.xid = xid;
         this.branchId = branchId;
+        this.formatId = formatId;
         encode();
     }
 
+    /**
+     * Rebuild a XAXid from raw XA bytes. Only the legacy encoding can be reconstructed this way;
+     * per-branch-qualified gtrids must be rebuilt via {@link XAXidBuilder#build(String, long, String)}.
+     */
     XABranchXid(byte[] globalTransactionId, byte[] branchQualifier) {
         this.globalTransactionId = globalTransactionId;
         this.branchQualifier = branchQualifier;
+        this.formatId = SEATA_XA_XID_FORMAT_ID;
         decode();
     }
 
@@ -62,7 +92,7 @@ public class XABranchXid implements XAXid {
 
     @Override
     public int getFormatId() {
-        return SEATA_XA_XID_FORMAT_ID;
+        return formatId;
     }
 
     @Override
@@ -94,6 +124,16 @@ public class XABranchXid implements XAXid {
     private void encode() {
         if (xid == null) {
             globalTransactionId = new byte[0];
+        } else if (formatId == SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID) {
+            String gtrid = xid + BRANCH_ID_PREFIX + branchId;
+            byte[] encodedGtrid = string2byteArray(gtrid);
+            if (encodedGtrid.length > MAX_GTRID_LENGTH) {
+                throw new IllegalArgumentException(
+                        "the encoded gtrid [" + gtrid + "] exceeds the X/Open maximum gtrid length "
+                                + MAX_GTRID_LENGTH + " bytes, the per-branch-gtrid XA Xid format is "
+                                + "not applicable to this xid");
+            }
+            globalTransactionId = encodedGtrid;
         } else {
             globalTransactionId = string2byteArray(xid);
         }
