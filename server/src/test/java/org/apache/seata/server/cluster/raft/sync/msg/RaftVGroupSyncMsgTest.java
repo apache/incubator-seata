@@ -35,7 +35,7 @@ public class RaftVGroupSyncMsgTest {
     public void testConstructorWithParameters() {
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("vgroup");
-        mappingDO.setCluster("cluster");
+        mappingDO.setClusterName("cluster");
         RaftVGroupSyncMsg msg = new RaftVGroupSyncMsg(mappingDO, RaftSyncMsgType.ADD_VGROUP_MAPPING);
 
         assertEquals(RaftSyncMsgType.ADD_VGROUP_MAPPING, msg.getMsgType());
@@ -47,7 +47,7 @@ public class RaftVGroupSyncMsgTest {
         RaftVGroupSyncMsg msg = new RaftVGroupSyncMsg();
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("vgroup2");
-        mappingDO.setCluster("cluster2");
+        mappingDO.setClusterName("cluster2");
         msg.setMappingDO(mappingDO);
 
         assertEquals(mappingDO, msg.getMappingDO());
@@ -58,12 +58,12 @@ public class RaftVGroupSyncMsgTest {
         RaftVGroupSyncMsg msg = new RaftVGroupSyncMsg();
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("test-vgroup");
-        mappingDO.setCluster("test-cluster");
+        mappingDO.setClusterName("test-cluster");
         msg.setMappingDO(mappingDO);
         msg.setMsgType(RaftSyncMsgType.UPDATE_VGROUP_MAPPING);
 
         assertEquals(RaftSyncMsgType.UPDATE_VGROUP_MAPPING, msg.getMsgType());
         assertEquals("test-vgroup", msg.getMappingDO().getVGroup());
-        assertEquals("test-cluster", msg.getMappingDO().getCluster());
+        assertEquals("test-cluster", msg.getMappingDO().getClusterName());
     }
 }

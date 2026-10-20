@@ -37,7 +37,8 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     public boolean addVGroup(MappingDO mappingDO) {
         String vGroup = mappingDO.getVGroup();
         String namespace = REDIS_PREFIX + mappingDO.getNamespace();
-        String clusterName = mappingDO.getCluster();
+        String clusterName = mappingDO.getClusterName();
+
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.hset(namespace, vGroup, clusterName);
             return true;
