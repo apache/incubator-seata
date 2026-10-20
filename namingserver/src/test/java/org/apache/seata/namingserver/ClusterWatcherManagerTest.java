@@ -23,9 +23,11 @@ import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.metrics.NoOpNamingMetricsManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,7 +46,9 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +56,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class ClusterWatcherManagerTest {
 
     private ClusterWatcherManager clusterWatcherManager;
+
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     @Mock
     private AsyncContext asyncContext;
@@ -75,6 +81,8 @@ public class ClusterWatcherManagerTest {
     @BeforeEach
     void setUp() {
         clusterWatcherManager = new ClusterWatcherManager();
+        scheduledThreadPoolExecutor = (ScheduledThreadPoolExecutor)
+                ReflectionTestUtils.getField(clusterWatcherManager, "scheduledThreadPoolExecutor");
         // Inject dependencies to avoid null pointer
         ReflectionTestUtils.setField(clusterWatcherManager, "metricsManager", new NoOpNamingMetricsManager());
         ReflectionTestUtils.setField(clusterWatcherManager, "eventPublisher", eventPublisher);
@@ -90,6 +98,12 @@ public class ClusterWatcherManagerTest {
 
         watchers.clear();
         groupUpdateTime.clear();
+    }
+
+    @AfterEach
+    void tearDown() throws InterruptedException {
+        scheduledThreadPoolExecutor.shutdownNow();
+        assertTrue(scheduledThreadPoolExecutor.awaitTermination(5, TimeUnit.SECONDS));
     }
 
     @Test
@@ -236,22 +250,31 @@ public class ClusterWatcherManagerTest {
     }
 
     @Test
-    void testScheduledTaskReRegisterNonTimeoutWatcher() throws InterruptedException {
-        int timeoutDuration = 3000;
+    void testScheduledTaskReRegisterNonTimeoutWatcher() {
         Watcher<AsyncContext> watcher =
-                new Watcher<>(testGroup, asyncContext, timeoutDuration, testTerm, testClientEndpoint);
+                new Watcher<>(testGroup, asyncContext, testTimeout, testTerm, testClientEndpoint);
+        watcher.setTimeout(Long.MAX_VALUE);
         clusterWatcherManager.registryWatcher(watcher);
+        Map<String, Queue<Watcher<?>>> watchers =
+                (Map<String, Queue<Watcher<?>>>) ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
+        Queue<Watcher<?>> originalWatchers = watchers.get(testGroup);
+
+        ScheduledThreadPoolExecutor executor = Mockito.mock(ScheduledThreadPoolExecutor.class);
+        ReflectionTestUtils.setField(clusterWatcherManager, "scheduledThreadPoolExecutor", executor);
 
         clusterWatcherManager.init();
-        TimeUnit.SECONDS.sleep(2);
+        ArgumentCaptor<Runnable> task = ArgumentCaptor.forClass(Runnable.class);
+        Mockito.verify(executor)
+                .scheduleAtFixedRate(task.capture(), Mockito.eq(1L), Mockito.eq(1L), Mockito.eq(TimeUnit.SECONDS));
+        task.getValue().run();
 
         Mockito.verify(response, Mockito.never()).setStatus(Mockito.anyInt());
         Mockito.verify(asyncContext, Mockito.never()).complete();
         assertFalse(watcher.isDone());
-        Map<String, Queue<Watcher<?>>> watchers =
-                (Map<String, Queue<Watcher<?>>>) ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
         assertTrue(watchers.containsKey(testGroup));
         assertEquals(1, watchers.get(testGroup).size());
+        assertNotSame(originalWatchers, watchers.get(testGroup));
+        assertSame(watcher, watchers.get(testGroup).peek());
     }
 
     @Test

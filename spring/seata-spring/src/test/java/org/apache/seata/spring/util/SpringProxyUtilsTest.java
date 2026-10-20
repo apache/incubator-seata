@@ -22,6 +22,7 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.SingletonTargetSource;
 
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
@@ -78,6 +79,97 @@ public class SpringProxyUtilsTest {
 
         Class<?> result = SpringProxyUtils.findTargetClass(springJdkProxy);
         assertEquals(TestServiceImpl.class, result);
+    }
+
+    @Test
+    public void testFindTargetClass_WithNonStaticJdkTargetSource() throws Exception {
+        UnavailableScopedTargetSource targetSource = new UnavailableScopedTargetSource();
+        Object proxy = createScopedProxy(targetSource, false);
+
+        assertTrue(AopUtils.isJdkDynamicProxy(proxy));
+        assertSame(targetSource, ((Advised) proxy).getTargetSource());
+        assertSame(TestServiceImpl.class, SpringProxyUtils.findTargetClass(proxy));
+        assertEquals(0, targetSource.targetAccessCount);
+    }
+
+    @Test
+    public void testFindTargetClass_WithNonStaticCglibTargetSource() throws Exception {
+        UnavailableScopedTargetSource targetSource = new UnavailableScopedTargetSource();
+        Object proxy = createScopedProxy(targetSource, true);
+
+        assertTrue(AopUtils.isCglibProxy(proxy));
+        assertSame(targetSource, ((Advised) proxy).getTargetSource());
+        assertSame(TestServiceImpl.class, SpringProxyUtils.findTargetClass(proxy));
+        assertEquals(0, targetSource.targetAccessCount);
+    }
+
+    @Test
+    public void testFindTargetClass_WithNestedStaticAndNonStaticTargetSources() throws Exception {
+        UnavailableScopedTargetSource targetSource = new UnavailableScopedTargetSource();
+        Object scopedProxy = createScopedProxy(targetSource, false);
+        SingletonTargetSource outerTargetSource = new SingletonTargetSource(scopedProxy);
+        ProxyFactory factory = new ProxyFactory();
+        factory.addInterface(TestService.class);
+        factory.setTargetSource(outerTargetSource);
+        Object outerProxy = factory.getProxy();
+
+        assertTrue(AopUtils.isJdkDynamicProxy(scopedProxy));
+        assertTrue(AopUtils.isJdkDynamicProxy(outerProxy));
+        assertSame(targetSource, ((Advised) scopedProxy).getTargetSource());
+        assertSame(outerTargetSource, ((Advised) outerProxy).getTargetSource());
+        assertTrue(outerTargetSource.isStatic());
+        assertSame(scopedProxy, outerTargetSource.getTarget());
+        assertSame(TestServiceImpl.class, SpringProxyUtils.findTargetClass(outerProxy));
+        assertEquals(0, targetSource.targetAccessCount);
+    }
+
+    @Test
+    public void testFindTargetClass_WithOpaqueScopedProxy() throws Exception {
+        UnavailableScopedTargetSource targetSource = new UnavailableScopedTargetSource();
+        ProxyFactory factory = new ProxyFactory();
+        factory.addInterface(TestService.class);
+        factory.setTargetSource(targetSource);
+        factory.setOpaque(true);
+        Object proxy = factory.getProxy();
+
+        assertTrue(AopUtils.isJdkDynamicProxy(proxy));
+        assertFalse(proxy instanceof Advised);
+        assertSame(proxy.getClass(), SpringProxyUtils.findTargetClass(proxy));
+        assertEquals(0, targetSource.targetAccessCount);
+    }
+
+    private Object createScopedProxy(TargetSource targetSource, boolean useClassProxy) {
+        ProxyFactory factory = new ProxyFactory();
+        factory.addInterface(TestService.class);
+        factory.setTargetSource(targetSource);
+        factory.setProxyTargetClass(useClassProxy);
+        return factory.getProxy();
+    }
+
+    private static class UnavailableScopedTargetSource implements TargetSource {
+
+        private int targetAccessCount;
+
+        @Override
+        public Class<?> getTargetClass() {
+            return TestServiceImpl.class;
+        }
+
+        @Override
+        public boolean isStatic() {
+            return false;
+        }
+
+        @Override
+        public Object getTarget() {
+            targetAccessCount++;
+            throw new IllegalStateException("Request scope is not active");
+        }
+
+        @Override
+        public void releaseTarget(Object target) {
+            // No target is available outside the request scope.
+        }
     }
 
     // Tests for findInterfaces

@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,5 +70,43 @@ public class BlobUtilsTest {
         assertNull(BlobUtils.blob2Bytes(null));
         byte[] bs = "xxaaadd".getBytes(Constants.DEFAULT_CHARSET_NAME);
         assertThat(BlobUtils.blob2Bytes(new SerialBlob(bs))).isEqualTo(bs);
+    }
+
+    @Test
+    public void testEmptyStringRoundTrip() throws SQLException {
+        Blob blob = BlobUtils.string2blob("");
+
+        assertThat(blob).isNotNull();
+        assertThat(blob.length()).isZero();
+        assertThat(BlobUtils.blob2string(blob)).isEmpty();
+    }
+
+    @Test
+    public void testEmptyByteArrayRoundTrip() throws SQLException {
+        Blob blob = BlobUtils.bytes2Blob(new byte[0]);
+
+        assertThat(blob).isNotNull();
+        assertThat(blob.length()).isZero();
+        assertThat(BlobUtils.blob2Bytes(blob)).isEmpty();
+    }
+
+    @Test
+    public void testUtf8StringRoundTrip() throws SQLException {
+        String value = "Seata-事务-€-🙂";
+        byte[] expectedBytes = value.getBytes(StandardCharsets.UTF_8);
+        Blob blob = BlobUtils.string2blob(value);
+
+        assertThat(blob.length()).isEqualTo(expectedBytes.length);
+        assertThat(BlobUtils.blob2Bytes(blob)).containsExactly(expectedBytes);
+        assertThat(BlobUtils.blob2string(blob)).isEqualTo(value);
+    }
+
+    @Test
+    public void testBinaryByteArrayRoundTrip() throws SQLException {
+        byte[] value = {0, 1, 0x7f, (byte) 0x80, (byte) 0xff};
+        Blob blob = BlobUtils.bytes2Blob(value);
+
+        assertThat(blob.length()).isEqualTo(value.length);
+        assertThat(BlobUtils.blob2Bytes(blob)).containsExactly(value);
     }
 }

@@ -16,6 +16,8 @@
  */
 package org.apache.seata.compressor.deflater;
 
+import org.apache.seata.core.compressor.BoundedByteArrayOutputStream;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.Deflater;
@@ -49,6 +51,10 @@ public class DeflaterUtil {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        return decompress(bytes, Integer.MAX_VALUE);
+    }
+
+    public static byte[] decompress(byte[] bytes, int maxOutputSize) {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
@@ -56,7 +62,7 @@ public class DeflaterUtil {
         Inflater inflater = new Inflater();
         inflater.setInput(bytes);
         byte[] outputBytes = new byte[BUFFER_SIZE];
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+        try (ByteArrayOutputStream bos = new BoundedByteArrayOutputStream(maxOutputSize)) {
             while (!inflater.finished()) {
                 length = inflater.inflate(outputBytes);
                 if (length == 0) {
@@ -64,10 +70,13 @@ public class DeflaterUtil {
                 }
                 bos.write(outputBytes, 0, length);
             }
-            inflater.end();
             return bos.toByteArray();
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Deflater decompress error", e);
+        } finally {
+            inflater.end();
         }
     }
 }

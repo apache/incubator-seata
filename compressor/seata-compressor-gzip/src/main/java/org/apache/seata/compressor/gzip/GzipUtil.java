@@ -16,6 +16,8 @@
  */
 package org.apache.seata.compressor.gzip;
 
+import org.apache.seata.core.compressor.BoundedByteArrayOutputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -44,11 +46,15 @@ public class GzipUtil {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        return decompress(bytes, Integer.MAX_VALUE);
+    }
+
+    public static byte[] decompress(byte[] bytes, int maxOutputSize) {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream out = new BoundedByteArrayOutputStream(maxOutputSize);
         try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int n;
