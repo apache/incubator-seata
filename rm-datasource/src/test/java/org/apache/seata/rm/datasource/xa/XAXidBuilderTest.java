@@ -100,17 +100,38 @@ public class XAXidBuilderTest {
     }
 
     @Test
-    public void testPerBranchGtridExceedingXOpenLimitIsRejected() {
-        // the X/Open specification limits the gtrid to 64 bytes: build an xid long enough that
-        // xid + "-" + branchId exceeds the limit (the legacy encoding of the same xid stays valid)
-        StringBuilder longXidBuilder = new StringBuilder("127.0.0.1:8091:");
-        while (longXidBuilder.length() < 64) {
-            longXidBuilder.append('8');
-        }
-        String longXid = longXidBuilder.toString();
+    public void testPerBranchGtridIsBoundedForLongXids() {
+        // a valid long xid (e.g. ipv6 based): the readable per-branch form would exceed the X/Open
+        // gtrid limit, so the bounded (hashed) form is used - the build must never fail, otherwise
+        // the branch would remain registered on the TC without any physical XA branch
+        String longXid = "2001:db8:1234:5678:90ab:cdef:1234:5678:8091:812345678901234567";
+        long longBranchId = 812345678901234567L;
+        Assertions.assertTrue(
+                (longXid + "-" + longBranchId).getBytes(StandardCharsets.UTF_8).length > XABranchXid.MAX_GTRID_LENGTH);
 
-        Assertions.assertDoesNotThrow(() -> XAXidBuilder.build(longXid, MOCK_BRANCH_ID));
-        Assertions.assertThrows(
-                IllegalArgumentException.class, () -> XAXidBuilder.build(longXid, MOCK_BRANCH_ID, JdbcConstants.DM));
+        XAXid xaXid = XAXidBuilder.build(longXid, longBranchId, JdbcConstants.DM);
+        Assertions.assertTrue(xaXid.getGlobalTransactionId().length <= XABranchXid.MAX_GTRID_LENGTH);
+        // the logical identity is not affected by the bounded encoding
+        Assertions.assertEquals(longXid, xaXid.getGlobalXid());
+        Assertions.assertEquals(longBranchId, xaXid.getBranchId());
+        Assertions.assertEquals(XABranchXid.SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID, xaXid.getFormatId());
+    }
+
+    @Test
+    public void testBoundedGtridIsDeterministicAndDistinctPerBranch() {
+        String longXid = "2001:db8:1234:5678:90ab:cdef:1234:5678:8091:812345678901234567";
+        long longBranchId = 812345678901234567L;
+
+        // phase-2 rebuild produces exactly the same bytes as phase-1
+        XAXid phaseOne = XAXidBuilder.build(longXid, longBranchId, JdbcConstants.DM);
+        XAXid phaseTwo = XAXidBuilder.build(longXid, longBranchId, JdbcConstants.DM);
+        Assertions.assertArrayEquals(phaseOne.getGlobalTransactionId(), phaseTwo.getGlobalTransactionId());
+        Assertions.assertEquals(phaseOne, phaseTwo);
+
+        // distinct branches of the same global transaction still own distinct gtrids
+        XAXid otherBranch = XAXidBuilder.build(longXid, longBranchId + 1, JdbcConstants.DM);
+        Assertions.assertFalse(
+                java.util.Arrays.equals(phaseOne.getGlobalTransactionId(), otherBranch.getGlobalTransactionId()));
+        Assertions.assertNotEquals(phaseOne, otherBranch);
     }
 }

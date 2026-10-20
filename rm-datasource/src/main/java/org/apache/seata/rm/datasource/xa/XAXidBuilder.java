@@ -37,7 +37,9 @@ public class XAXidBuilder {
      * same gtrid exists (e.g. DM), the returned XAXid uses a per-branch-qualified gtrid
      * ({@code xid + "-" + branchId}) with a dedicated format id, so that every branch of one
      * Seata global transaction owns a distinct gtrid and can be started, prepared and decided
-     * independently by the database. The rebuild on the phase-2 path is deterministic, since the
+     * independently by the database. If the readable form would exceed the X/Open maximum gtrid
+     * length, a bounded (md5-hex based) encoding of the xid is used instead, so the build never
+     * fails for a valid Seata xid. The rebuild on the phase-2 path is deterministic, since the
      * gtrid is derived from the xid and the branch id only, both of which are carried by the
      * branch commit/rollback requests of the TC.
      * <p>
