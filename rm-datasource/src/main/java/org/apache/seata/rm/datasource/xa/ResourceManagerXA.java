@@ -144,8 +144,10 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             String resourceId,
             String applicationData)
             throws TransactionException {
-        XAXid xaBranchXid = XAXidBuilder.build(xid, branchId);
         Resource resource = dataSourceCache.get(resourceId);
+        String dbType =
+                resource instanceof BaseDataSourceResource ? ((BaseDataSourceResource) resource).getDbType() : null;
+        XAXid xaBranchXid = XAXidBuilder.build(xid, branchId, dbType);
         if (resource instanceof AbstractDataSourceProxyXA) {
             try (ConnectionProxyXA connectionProxyXA =
                     ((AbstractDataSourceProxyXA) resource).getConnectionForXAFinish(xaBranchXid)) {

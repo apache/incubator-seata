@@ -132,7 +132,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public void xaCommit(String xid, long branchId, String applicationData) throws XAException {
         try (ResourceLock ignored = resourceLock.obtain()) {
-            XAXid xaXid = XAXidBuilder.build(xid, branchId);
+            XAXid xaXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
             xaResource.commit(xaXid, false);
             releaseIfNecessary();
         }
@@ -149,7 +149,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (this.xaBranchXid != null) {
                 xaRollback(xaBranchXid);
             } else {
-                XAXid xaXid = XAXidBuilder.build(xid, branchId);
+                XAXid xaXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
                 xaRollback(xaXid);
             }
         }
@@ -204,7 +204,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                         "failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
             }
             // 2. build XA-Xid with xid and branchId
-            this.xaBranchXid = XAXidBuilder.build(xid, branchId);
+            this.xaBranchXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
             // Keep the Connection if necessary
             keepIfNecessary();
             try {
