@@ -24,7 +24,6 @@ import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
-import io.netty.util.internal.PlatformDependent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -100,7 +99,7 @@ public class NettyBaseConfig {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
 
-        boolean useEpoll = !PlatformDependent.isWindows() && !PlatformDependent.isOsx() && Epoll.isAvailable();
+        boolean useEpoll = Epoll.isAvailable();
         SERVER_CHANNEL_CLAZZ = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
         CLIENT_CHANNEL_CLAZZ = useEpoll ? EpollSocketChannel.class : NioSocketChannel.class;
 

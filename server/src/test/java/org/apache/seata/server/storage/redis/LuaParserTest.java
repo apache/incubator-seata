@@ -17,13 +17,12 @@
 package org.apache.seata.server.storage.redis;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class LuaParserTest extends BaseSpringBootTest {
+public class LuaParserTest {
 
     @Test
     public void testLuaResultGettersAndSetters() {
