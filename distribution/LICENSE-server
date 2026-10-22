@@ -250,7 +250,7 @@ Apache-2.0 licenses
     net.logstash.logback:logstash-logback-encoder 6.5 Apache-2.0
     com.google.guava:failureaccess 1.0.1 Apache-2.0
     com.alibaba:fastjson 1.2.83 Apache-2.0
-    com.alibaba.fastjson2:fastjson2 2.0.52 Apache-2.0
+    com.alibaba.fastjson2:fastjson2 2.0.63 Apache-2.0
     io.dropwizard.metrics:metrics-core 4.2.22 Apache-2.0
     io.grpc:grpc-api 1.55.1 Apache-2.0
     io.grpc:grpc-context 1.55.1 Apache-2.0
