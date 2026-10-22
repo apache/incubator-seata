@@ -284,6 +284,16 @@ public interface DefaultValues {
     String DEFAULT_DISTRIBUTED_LOCK_DB_TABLE = "distributed_lock";
 
     /**
+     * The default value of {@link ConfigurationKeys#DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED}.
+     *
+     * <p>Disabled by default to preserve the legacy blocking behaviour for
+     * deployments running on databases without NOWAIT support (MySQL 5.x,
+     * MariaDB, etc.). Operators on MySQL 8.0+, PostgreSQL or Oracle can opt
+     * in to fast-fail acquisition.
+     */
+    boolean DEFAULT_DISTRIBUTED_LOCK_DB_NOWAIT_ENABLED = false;
+
+    /**
      * The constant DEFAULT_TM_COMMIT_RETRY_COUNT.
      */
     int DEFAULT_TM_COMMIT_RETRY_COUNT = 5;
