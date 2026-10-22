@@ -161,6 +161,8 @@ seata:
     # support: file
     mode: raft
     file:
+      # support: file, rocksdb
+      engine: file
       dir: sessionStore
       max-branch-session-size: 16384
       max-global-session-size: 512
