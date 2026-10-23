@@ -18,9 +18,6 @@
 
 -->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
-    <!-- Context listeners -->
-    <contextListener class="org.apache.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
-
     <!-- The conversion rules are copied from `defaults.xml` in the `spring-boot-xxx.jar` -->
     <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
@@ -37,6 +34,12 @@
     <springProperty name="LOGSTASH_APPENDER_ENABLED" source="logging.extend.logstash-appender.enabled" defaultValue="false"/>
     <springProperty name="KAFKA_APPENDER_ENABLED" source="logging.extend.kafka-appender.enabled" defaultValue="false"/>
     <springProperty name="METRIC_APPENDER_ENABLED" source="logging.extend.metric-appender.enabled" defaultValue="false"/>
+
+    <!-- Expose the external conf directory to the listener, which detects the appender files it contains,
+         so that the includes below can prefer the external definition and fall back to the classpath copy. -->
+    <property name="EXTERNAL_CONF_DIR" value="${LOG_BASH_DIR}" scope="context"/>
+    <!-- Context listeners -->
+    <contextListener class="org.apache.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
 
     <if condition='property("LOG_BASH_DIR").equals("")' >
         <then>
@@ -74,21 +77,45 @@
             <!-- logstash-appender: off by default -->
             <if condition='property("LOGSTASH_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>
+                    <!-- prefer the external file, fall back to the classpath copy when it is absent -->
+                    <if condition='property("LOGSTASH_APPENDER_EXTERNAL").equals("true")'>
+                        <then>
+                            <include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>
+                        </then>
+                        <else>
+                            <include resource="logback/logstash-appender.xml"/>
+                        </else>
+                    </if>
                 </then>
             </if>
 
             <!-- metric-appender: off by default -->
             <if condition='property("METRIC_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>
+                    <!-- prefer the external file, fall back to the classpath copy when it is absent -->
+                    <if condition='property("METRIC_APPENDER_EXTERNAL").equals("true")'>
+                        <then>
+                            <include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>
+                        </then>
+                        <else>
+                            <include resource="logback/metric-appender.xml"/>
+                        </else>
+                    </if>
                 </then>
             </if>
 
             <!-- kafka-appender: off by default -->
             <if condition='property("KAFKA_APPENDER_ENABLED").equals("true")'>
                 <then>
-                    <include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>
+                    <!-- prefer the external file, fall back to the classpath copy when it is absent -->
+                    <if condition='property("KAFKA_APPENDER_EXTERNAL").equals("true")'>
+                        <then>
+                            <include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>
+                        </then>
+                        <else>
+                            <include resource="logback/kafka-appender.xml"/>
+                        </else>
+                    </if>
                 </then>
             </if>
         </else>
