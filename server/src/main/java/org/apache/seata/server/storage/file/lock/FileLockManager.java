@@ -29,12 +29,13 @@ import org.apache.seata.server.storage.file.spi.FileLockStore;
  * The type file lock manager.
  *
  */
+// Each runtime needs a fresh facade; a cached instance would retain the previous lock store.
 @LoadLevel(name = "file", scope = Scope.PROTOTYPE)
 public class FileLockManager extends AbstractLockManager {
 
     private final FileLockStore lockStore;
 
-    protected FileLockManager() {
+    public FileLockManager() {
         this(new DefaultFileLockStore());
     }
 

@@ -21,6 +21,7 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.lock.DelegatingLockManager;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
@@ -71,6 +72,9 @@ public abstract class AbstractService {
 
     protected static final List<GlobalStatus> FINISH_STATUS =
             Arrays.asList(GlobalStatus.Committed, GlobalStatus.Finished, GlobalStatus.Rollbacked);
+
+    /** Retained for existing subclasses; resolves the current manager lazily. */
+    protected final LockManager lockManager = new DelegatingLockManager();
 
     protected LockManager getLockManager() {
         return LockerManagerFactory.getLockManager();

@@ -74,7 +74,12 @@ public class AbstractServiceTest extends BaseSpringBootTest {
 
         LockManager current = mock(LockManager.class);
         field.set(null, current);
-        Assertions.assertSame(current, uninitializedService.currentLockManager());
+        uninitializedService.currentLockManager().cleanAllLocks();
+        Mockito.verify(current).cleanAllLocks();
+        LockManager replacement = mock(LockManager.class);
+        field.set(null, replacement);
+        uninitializedService.currentLockManager().cleanAllLocks();
+        Mockito.verify(replacement).cleanAllLocks();
     }
 
     @Test

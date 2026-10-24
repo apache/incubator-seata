@@ -46,15 +46,20 @@ public class LockerManagerFactory {
         return LOCK_MANAGER;
     }
 
-    public static boolean init() {
-        return init(null);
+    public static void init() {
+        init(null);
     }
 
     public static void destroy() {
         LOCK_MANAGER = null;
     }
 
-    public static boolean init(LockMode lockMode) {
+    public static void init(LockMode lockMode) {
+        install(lockMode);
+    }
+
+    /** Installs a legacy manager and reports whether this call owns the installation. */
+    public static boolean install(LockMode lockMode) {
         if (LOCK_MANAGER != null) {
             return false;
         }
@@ -64,9 +69,6 @@ public class LockerManagerFactory {
             }
             if (null == lockMode) {
                 lockMode = StoreConfig.getLockMode();
-            }
-            if (LockMode.FILE == lockMode) {
-                throw new StoreException("FileMode lock manager must be installed by FileStoreRuntime before use");
             }
             LOGGER.info("use lock store mode: {}", lockMode.getName());
             LOCK_MANAGER = EnhancedServiceLoader.load(LockManager.class, lockMode.getName());

@@ -61,10 +61,14 @@ class LockerManagerFactoryTest {
     }
 
     @Test
-    void testUntypedFileModeAccessFailsBeforeRuntimeInstallation() {
-        StoreException exception = Assertions.assertThrows(StoreException.class, LockerManagerFactory::getLockManager);
-
-        Assertions.assertTrue(exception.getMessage().contains("FileStoreRuntime"));
+    void testUntypedFileModeAccessPreservesLegacyConstructor() throws Exception {
+        Assertions.assertInstanceOf(FileLockManager.class, LockerManagerFactory.getLockManager());
+        Assertions.assertNotNull(new FileLockManager());
+        Assertions.assertEquals(
+                void.class, LockerManagerFactory.class.getMethod("init").getReturnType());
+        Assertions.assertEquals(
+                void.class,
+                LockerManagerFactory.class.getMethod("init", LockMode.class).getReturnType());
     }
 
     @Test
@@ -122,6 +126,22 @@ class LockerManagerFactoryTest {
     }
 
     @Test
+    void testTypedReinstallUsesNewStoreRatherThanCachedFacade() throws Exception {
+        FileLockStore first = mock(FileLockStore.class);
+        FileLockStore second = mock(FileLockStore.class);
+        Locker expected = mock(Locker.class);
+        Mockito.when(second.getLocker(null)).thenReturn(expected);
+        LockerManagerFactory.init(LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {first});
+        LockManager previous = LockerManagerFactory.getLockManager();
+        LockerManagerFactory.destroy();
+        LockerManagerFactory.init(LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {second});
+        FileLockManager current = (FileLockManager) LockerManagerFactory.getLockManager();
+        Assertions.assertNotSame(previous, current);
+        Assertions.assertSame(expected, current.getLocker(null));
+        Mockito.verifyNoInteractions(first);
+    }
+
+    @Test
     void testTypedFileModeInitRejectsExistingManager() throws Exception {
         FileLockStore originalStore = mock(FileLockStore.class);
         FileLockStore replacementStore = mock(FileLockStore.class);
@@ -139,8 +159,8 @@ class LockerManagerFactoryTest {
 
     @Test
     void testExplicitDbRedisAndRaftModesRemainLoaderBacked() {
-        Assertions.assertTrue(LockerManagerFactory.init(LockMode.DB));
-        Assertions.assertFalse(LockerManagerFactory.init(LockMode.DB));
+        Assertions.assertTrue(LockerManagerFactory.install(LockMode.DB));
+        Assertions.assertFalse(LockerManagerFactory.install(LockMode.DB));
         Assertions.assertInstanceOf(DataBaseLockManager.class, LockerManagerFactory.getLockManager());
         LockerManagerFactory.destroy();
         LockerManagerFactory.init(LockMode.REDIS);
