@@ -18,6 +18,16 @@ package org.apache.seata.server.storage.file.spi;
 
 /**
  * Provider for a file-mode storage runtime.
+ *
+ * <p>The default engine preserves the legacy {@code SessionManager} provider named {@code file}
+ * (with {@code String, String} constructor arguments) and the no-argument {@code LockManager} SPI.
+ * Session and lock modes remain independently selectable.
+ *
+ * <p>Opting into a non-default engine with FILE locks requires the selected file lock manager to
+ * accept a {@link FileLockStore} constructor argument. The built-in file lock manager supports both
+ * constructors. Existing custom lock managers can stay on the default engine unchanged, or add the
+ * typed constructor and delegate operations to the supplied store when adopting a new engine.
+ * The typed manager must not be initialized before its runtime is opened.
  */
 public interface FileStoreProvider {
 

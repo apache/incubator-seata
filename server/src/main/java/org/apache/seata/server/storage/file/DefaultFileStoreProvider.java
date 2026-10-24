@@ -17,9 +17,10 @@
 package org.apache.seata.server.storage.file;
 
 import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.storage.file.lock.DefaultFileLockStore;
-import org.apache.seata.server.storage.file.session.FileSessionManager;
 import org.apache.seata.server.storage.file.spi.FileLockStore;
 import org.apache.seata.server.storage.file.spi.FileStoreContext;
 import org.apache.seata.server.storage.file.spi.FileStoreProvider;
@@ -32,7 +33,7 @@ public class DefaultFileStoreProvider implements FileStoreProvider {
 
     @Override
     public FileStoreRuntime open(FileStoreContext context) {
-        FileSessionManager sessionManager = null;
+        SessionManager sessionManager = null;
         try {
             sessionManager = createSessionManager(context);
             FileLockStore lockStore = createLockStore();
@@ -47,17 +48,17 @@ public class DefaultFileStoreProvider implements FileStoreProvider {
         }
     }
 
-    protected FileSessionManager createSessionManager(FileStoreContext context) throws IOException {
-        return new FileSessionManager(
-                context.getRootSessionManagerName(),
-                context.getSessionStorePath().toString());
+    protected SessionManager createSessionManager(FileStoreContext context) throws IOException {
+        return EnhancedServiceLoader.load(SessionManager.class, "file", new Object[] {
+            context.getRootSessionManagerName(), context.getSessionStorePath().toString()
+        });
     }
 
     protected FileLockStore createLockStore() {
         return new DefaultFileLockStore();
     }
 
-    private static void closeSessionManager(FileSessionManager sessionManager, Throwable failure) {
+    private static void closeSessionManager(SessionManager sessionManager, Throwable failure) {
         if (sessionManager == null) {
             return;
         }

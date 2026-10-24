@@ -98,6 +98,8 @@ public class SessionHolder {
 
     private static volatile FileStoreRuntime FILE_STORE_RUNTIME;
 
+    private static boolean LOCK_MANAGER_INSTALLED;
+
     public static void init() {
         init(null);
     }
@@ -119,14 +121,16 @@ public class SessionHolder {
         LockMode lockMode = StoreConfig.getLockMode();
         boolean fileSessionMode = SessionMode.FILE.equals(sessionMode);
         boolean fileLockMode = LockMode.FILE.equals(lockMode);
-        if (fileSessionMode != fileLockMode) {
-            String message = fileSessionMode
-                    ? "file session mode must use file lock mode"
-                    : "file lock mode must use file session mode";
-            throw new StoreException(message);
-        }
         if (!fileSessionMode) {
-            initLegacyMode(sessionMode);
+            boolean installed = LockerManagerFactory.install(lockMode);
+            try {
+                initLegacyMode(sessionMode);
+                LOCK_MANAGER_INSTALLED = installed;
+            } catch (RuntimeException | Error failure) {
+                cleanup(failure, ROOT_SESSION_MANAGER == null ? null : ROOT_SESSION_MANAGER::destroy);
+                rollbackFailedFileInitialization(failure, null, installed);
+                throw failure;
+            }
             return;
         }
 
@@ -135,8 +139,14 @@ public class SessionHolder {
         try {
             runtime = openFileStoreRuntime();
             FILE_STORE_RUNTIME = runtime;
-            lockManagerInstalled = LockerManagerFactory.init(
-                    LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {runtime.lockStore()});
+            if (fileLockMode && !"default".equals(StoreConfig.getFileEngineName())) {
+                lockManagerInstalled = LockerManagerFactory.init(
+                        LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {runtime.lockStore()});
+            } else {
+                // Preserve the no-argument LockManager SPI for the default engine and mixed modes.
+                lockManagerInstalled = LockerManagerFactory.install(lockMode);
+            }
+            LOCK_MANAGER_INSTALLED = lockManagerInstalled;
             initFileMode(runtime);
         } catch (RuntimeException | Error startupFailure) {
             rollbackFailedFileInitialization(startupFailure, runtime, lockManagerInstalled);
@@ -230,6 +240,7 @@ public class SessionHolder {
 
     private static void clearFileModeReferences() {
         FILE_STORE_RUNTIME = null;
+        LOCK_MANAGER_INSTALLED = false;
         ROOT_SESSION_MANAGER = null;
         ROOT_VGROUP_MAPPING_MANAGER = null;
         DISTRIBUTED_LOCKER = null;
@@ -262,8 +273,10 @@ public class SessionHolder {
 
     private static void reload(
             Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock, boolean failFast) {
-        if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
-                && CollectionUtils.isNotEmpty(allSessions)) {
+        if (SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode) {
+            if (CollectionUtils.isEmpty(allSessions)) {
+                return;
+            }
             long currentTimeMillis = System.currentTimeMillis();
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
@@ -361,6 +374,7 @@ public class SessionHolder {
             }
         } else {
             // Redis, db and so on
+            SessionManager recoverySessionManager = ROOT_SESSION_MANAGER;
             CompletableFuture.runAsync(() -> {
                 SessionCondition searchCondition = new SessionCondition(
                         GlobalStatus.UnKnown,
@@ -372,7 +386,7 @@ public class SessionHolder {
 
                 long now = System.currentTimeMillis();
                 List<GlobalSession> errorStatusGlobalSessions =
-                        ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                        recoverySessionManager.findGlobalSessions(searchCondition);
                 while (!CollectionUtils.isEmpty(errorStatusGlobalSessions)) {
                     for (GlobalSession errorStatusGlobalSession : errorStatusGlobalSessions) {
                         if (errorStatusGlobalSession.getBeginTime() >= now) {
@@ -380,11 +394,11 @@ public class SessionHolder {
                             return;
                         }
 
-                        removeInErrorState(errorStatusGlobalSession);
+                        removeInErrorState(errorStatusGlobalSession, false, recoverySessionManager);
                     }
 
                     // Load the next part
-                    errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                    errorStatusGlobalSessions = recoverySessionManager.findGlobalSessions(searchCondition);
                 }
             });
         }
@@ -402,12 +416,17 @@ public class SessionHolder {
     }
 
     private static void removeInErrorState(GlobalSession globalSession, boolean failFast) {
+        removeInErrorState(globalSession, failFast, getRootSessionManager());
+    }
+
+    private static void removeInErrorState(
+            GlobalSession globalSession, boolean failFast, SessionManager sessionManager) {
         try {
             LOGGER.warn(
                     "The global session should NOT be {}, remove it. xid = {}",
                     globalSession.getStatus(),
                     globalSession.getXid());
-            getRootSessionManager().removeGlobalSession(globalSession);
+            sessionManager.removeGlobalSession(globalSession);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(
                         "Remove global session succeed, xid = {}, status = {}",
@@ -429,7 +448,10 @@ public class SessionHolder {
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         branchSessions.forEach(branchSession -> {
             try {
-                branchSession.lock();
+                if (!branchSession.lock()) {
+                    throw new StoreException("Could not recover branch lock, xid: " + branchSession.getXid()
+                            + ", branchId: " + branchSession.getBranchId());
+                }
             } catch (TransactionException e) {
                 throw new ShouldNeverHappenException(e);
             }
@@ -562,6 +584,16 @@ public class SessionHolder {
             } catch (RuntimeException | Error runtimeFailure) {
                 failure = appendFailure(failure, runtimeFailure);
             }
+        } else {
+            try {
+                if (ROOT_SESSION_MANAGER != null) {
+                    ROOT_SESSION_MANAGER.destroy();
+                }
+            } catch (RuntimeException | Error sessionFailure) {
+                failure = appendFailure(failure, sessionFailure);
+            }
+        }
+        if (LOCK_MANAGER_INSTALLED) {
             try {
                 LockerManagerFactory.destroy();
             } catch (RuntimeException | Error facadeFailure) {
@@ -571,20 +603,9 @@ public class SessionHolder {
                 EnhancedServiceLoader.unload(LockManager.class);
             } catch (RuntimeException | Error unloadFailure) {
                 failure = appendFailure(failure, unloadFailure);
-            } finally {
-                clearFileModeReferences();
-            }
-        } else {
-            try {
-                if (ROOT_SESSION_MANAGER != null) {
-                    ROOT_SESSION_MANAGER.destroy();
-                }
-            } catch (RuntimeException | Error sessionFailure) {
-                failure = appendFailure(failure, sessionFailure);
-            } finally {
-                SESSION_MANAGER_MAP = null;
             }
         }
+        clearFileModeReferences();
         rethrow(failure);
     }
 

@@ -17,11 +17,16 @@
 package org.apache.seata.server.storage.file;
 
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.storage.file.lock.FileLockManager;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
 import org.apache.seata.server.storage.file.spi.FileLockStore;
 import org.apache.seata.server.storage.file.spi.FileStoreContext;
+import org.apache.seata.server.storage.file.spi.FileStoreRuntime;
 import org.apache.seata.server.storage.file.spi.SessionRecoveryConsumer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -34,6 +39,7 @@ import org.springframework.mock.env.MockEnvironment;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -111,6 +117,67 @@ class DefaultFileStoreRuntimeTest {
         Assertions.assertSame(openFailure, thrown);
         Assertions.assertArrayEquals(new Throwable[] {cleanupFailure}, thrown.getSuppressed());
         Mockito.verify(sessionManager).destroy();
+    }
+
+    @Test
+    void testCloseReopenReleasesOnlyOwnedLocks() throws Exception {
+        FileLockManager manager = new FileLockManager();
+        BranchSession unrelated = branch(8002, "t:2");
+        Assertions.assertTrue(manager.acquireLock(unrelated));
+        DefaultFileStoreProvider provider = new DefaultFileStoreProvider();
+        FileStoreContext context = new FileStoreContext("root.data", tempDir);
+        FileStoreRuntime first = provider.open(context);
+        FileStoreRuntime second = null;
+        try {
+            GlobalSession global = new GlobalSession("app", "group", "tx", 60000);
+            BranchSession oldBranch = branch(8001, "t:1");
+            global.add(oldBranch);
+            first.sessionManager().addGlobalSession(global);
+            Assertions.assertTrue(manager.acquireLock(oldBranch));
+            first.close();
+            Assertions.assertTrue(oldBranch.getLockHolder().isEmpty());
+            Assertions.assertFalse(manager.isLockable("127.0.0.1:8091:9000", "runtime-close", "t:2"));
+
+            second = provider.open(context);
+            BranchSession restored = branch(8001, "t:1");
+            Assertions.assertTrue(manager.acquireLock(restored));
+            Assertions.assertFalse(restored.getLockHolder().isEmpty());
+            Assertions.assertTrue(manager.releaseLock(restored));
+            Assertions.assertTrue(manager.isLockable("127.0.0.1:8091:9000", "runtime-close", "t:1"));
+        } finally {
+            first.close();
+            if (second != null) {
+                second.close();
+            }
+            manager.releaseLock(unrelated);
+        }
+    }
+
+    @Test
+    void testCloseAttemptsRemainingLocksAndSessionCleanupAfterReleaseFailure() throws Exception {
+        FileSessionManager sessions = Mockito.mock(FileSessionManager.class);
+        FileLockStore locks = Mockito.mock(FileLockStore.class);
+        GlobalSession first = Mockito.mock(GlobalSession.class);
+        GlobalSession second = Mockito.mock(GlobalSession.class);
+        Mockito.when(sessions.allSessions()).thenReturn(Arrays.asList(first, second));
+        Mockito.when(locks.releaseGlobalLock(first)).thenReturn(false);
+        Mockito.when(locks.releaseGlobalLock(second)).thenReturn(true);
+        DefaultFileStoreRuntime runtime = new DefaultFileStoreRuntime(sessions, locks);
+        Assertions.assertThrows(StoreException.class, runtime::close);
+        Mockito.verify(locks).releaseGlobalLock(second);
+        Mockito.verify(sessions).destroy();
+        Assertions.assertDoesNotThrow(runtime::close);
+        Mockito.verify(sessions, Mockito.times(1)).destroy();
+    }
+
+    private static BranchSession branch(long transaction, String key) {
+        BranchSession branch = new BranchSession(BranchType.AT);
+        branch.setTransactionId(transaction);
+        branch.setXid("127.0.0.1:8091:" + transaction);
+        branch.setBranchId(transaction);
+        branch.setResourceId("runtime-close");
+        branch.setLockKey(key);
+        return branch;
     }
 
     @SuppressWarnings("unchecked")

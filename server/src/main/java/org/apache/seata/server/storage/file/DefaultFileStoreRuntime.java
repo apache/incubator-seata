@@ -18,20 +18,21 @@ package org.apache.seata.server.storage.file;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.Reloadable;
 import org.apache.seata.server.session.SessionManager;
-import org.apache.seata.server.storage.file.session.FileSessionManager;
 import org.apache.seata.server.storage.file.spi.FileLockStore;
 import org.apache.seata.server.storage.file.spi.FileStoreRuntime;
 import org.apache.seata.server.storage.file.spi.SessionRecoveryConsumer;
 
 public class DefaultFileStoreRuntime implements FileStoreRuntime {
 
-    private final FileSessionManager sessionManager;
+    private final SessionManager sessionManager;
     private final FileLockStore lockStore;
     private State state = State.OPEN;
     private boolean recoveryComplete;
 
-    DefaultFileStoreRuntime(FileSessionManager sessionManager, FileLockStore lockStore) {
+    DefaultFileStoreRuntime(SessionManager sessionManager, FileLockStore lockStore) {
         this.sessionManager = sessionManager;
         this.lockStore = lockStore;
     }
@@ -52,7 +53,9 @@ public class DefaultFileStoreRuntime implements FileStoreRuntime {
         if (recoveryComplete) {
             throw new IllegalStateException("file store recovery already completed");
         }
-        sessionManager.reload();
+        if (sessionManager instanceof Reloadable) {
+            ((Reloadable) sessionManager).reload();
+        }
         try {
             recoveryConsumer.accept(sessionManager.allSessions());
             recoveryComplete = true;
@@ -77,10 +80,49 @@ public class DefaultFileStoreRuntime implements FileStoreRuntime {
             return;
         }
         state = State.CLOSING;
+        Throwable failure = null;
         try {
-            sessionManager.destroy();
+            // Release only sessions owned by this runtime, never the shared process-wide lock map.
+            for (GlobalSession session : sessionManager.allSessions()) {
+                try {
+                    if (!lockStore.releaseGlobalLock(session)) {
+                        throw new StoreException("Could not release file locks for " + session.getXid());
+                    }
+                } catch (TransactionException | RuntimeException | Error e) {
+                    if (failure == null) {
+                        failure = e;
+                    } else if (failure != e) {
+                        failure.addSuppressed(e);
+                    }
+                }
+            }
+        } catch (RuntimeException | Error e) {
+            if (failure == null) {
+                failure = e;
+            } else if (failure != e) {
+                failure.addSuppressed(e);
+            }
         } finally {
-            state = State.CLOSED;
+            try {
+                sessionManager.destroy();
+            } catch (RuntimeException | Error e) {
+                if (failure == null) {
+                    failure = e;
+                } else if (failure != e) {
+                    failure.addSuppressed(e);
+                }
+            } finally {
+                state = State.CLOSED;
+            }
+        }
+        if (failure instanceof Error) {
+            throw (Error) failure;
+        }
+        if (failure instanceof RuntimeException) {
+            throw (RuntimeException) failure;
+        }
+        if (failure != null) {
+            throw new StoreException(failure, "close default file store failed");
         }
     }
 
