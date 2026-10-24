@@ -95,7 +95,7 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
                                 "delete global lock," + "xid:%s ,branchId:%s", param.getXid(), param.getBranchId()));
             }
             try {
-                lockManager.releaseLock(branchSessions.get(0));
+                getLockManager().releaseLock(branchSessions.get(0));
             } catch (TransactionException e) {
                 throw new ConsoleException(
                         e,

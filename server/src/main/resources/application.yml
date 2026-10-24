@@ -53,5 +53,8 @@ seata:
   store:
     # support: file 、 db 、 redis 、 raft
     mode: file
+    file:
+      # support: default and other FileStoreProvider implementations
+      engine: default
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'

@@ -19,9 +19,7 @@ package org.apache.seata.server.session;
 import jakarta.annotation.Resource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.seata.common.XID;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.model.BranchStatus;
@@ -34,17 +32,17 @@ import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
-import org.apache.seata.server.util.StoreUtil;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -71,25 +69,16 @@ public class FileSessionManagerTest extends BaseSpringBootTest {
     private BranchSessionService branchSessionService;
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {
-        StoreUtil.deleteDataFile();
-        try {
-            EnhancedServiceLoader.unloadAll();
-            sessionManagerList =
-                    Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
-        } catch (IOException e) {
-            e.printStackTrace();
+    public static void setUp(ApplicationContext context, @TempDir Path sessionStorePath) throws IOException {
+        sessionManagerList = Arrays.asList(
+                new FileSessionManager("root.data", sessionStorePath.toString()), new FileSessionManager("test", null));
+    }
+
+    @AfterAll
+    public static void tearDown() {
+        for (SessionManager sessionManager : sessionManagerList) {
+            sessionManager.destroy();
         }
-    }
-
-    @BeforeEach
-    public void setUp() {
-        SessionHolder.init(SessionMode.FILE);
-    }
-
-    @AfterEach
-    public void tearDown() {
-        SessionHolder.destroy();
     }
 
     /**
@@ -396,7 +385,6 @@ public class FileSessionManagerTest extends BaseSpringBootTest {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.end();
             }
-            SessionHolder.destroy();
         }
     }
 

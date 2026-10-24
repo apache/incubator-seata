@@ -23,9 +23,9 @@ import org.apache.seata.core.lock.Locker;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.storage.db.lock.DataBaseLockManager;
 import org.apache.seata.server.storage.db.lock.DataBaseLocker;
 import org.apache.seata.server.storage.db.lock.LockStoreDataBaseDAO;
-import org.apache.seata.server.storage.file.lock.FileLockManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -263,7 +263,7 @@ public class DataBaseLockManagerImplTest extends BaseSpringBootTest {
         }
     }
 
-    public static class DBLockManagerForTest extends FileLockManager {
+    public static class DBLockManagerForTest extends DataBaseLockManager {
 
         protected LockStoreDataBaseDAO lockStore;
 

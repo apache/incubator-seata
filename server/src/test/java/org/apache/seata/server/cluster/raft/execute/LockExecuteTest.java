@@ -31,12 +31,14 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.SessionConverter;
+import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -44,6 +46,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,24 +61,42 @@ class LockExecuteTest extends BaseSpringBootTest {
 
     private static final long BRANCH_ID = 0L;
 
+    private static SessionMode originalSessionMode;
+    private static LockMode originalLockMode;
+    private static String originalRaftServerAddr;
+
     @BeforeAll
     public static void setUp(ApplicationContext context) throws TransactionException {
-        System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9091");
-        SessionHolder.init(SessionMode.RAFT);
+        originalSessionMode = (SessionMode) ReflectionTestUtils.getField(StoreConfig.class, "sessionMode");
+        originalLockMode = (LockMode) ReflectionTestUtils.getField(StoreConfig.class, "lockMode");
+        originalRaftServerAddr = System.getProperty("server.raft.serverAddr");
+        // Executor tests own session transitions without coordinator retry tasks.
+        DefaultCoordinator.getInstance().destroy();
         LockerManagerFactory.destroy();
+        StoreConfig.setStartupParameter(null, SessionMode.RAFT.getName(), LockMode.RAFT.getName());
+        System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9091");
+        ConfigurationCache.clear();
+        SessionHolder.init(SessionMode.RAFT);
         LockerManagerFactory.init(LockMode.RAFT);
     }
 
     @AfterAll
     public static void destroy() throws TransactionException {
-        // Clear configuration
-        ConfigurationCache.clear();
-        System.clearProperty("server.raft.serverAddr");
-
-        // Destroy SessionHolder and LockerManagerFactory
-        SessionHolder.destroy();
-        SessionHolder.init(null);
-        LockerManagerFactory.destroy();
+        try {
+            SessionHolder.destroy();
+        } finally {
+            LockerManagerFactory.destroy();
+            ReflectionTestUtils.setField(StoreConfig.class, "sessionMode", originalSessionMode);
+            ReflectionTestUtils.setField(StoreConfig.class, "lockMode", originalLockMode);
+            if (originalRaftServerAddr == null) {
+                System.clearProperty("server.raft.serverAddr");
+            } else {
+                System.setProperty("server.raft.serverAddr", originalRaftServerAddr);
+            }
+            ConfigurationCache.clear();
+            SessionHolder.init();
+            LockerManagerFactory.init();
+        }
     }
 
     @BeforeEach

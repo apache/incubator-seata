@@ -21,6 +21,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -33,13 +34,21 @@ import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.lock.LockManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
+import org.apache.seata.server.storage.file.FileStoreProviderFactory;
+import org.apache.seata.server.storage.file.spi.FileLockStore;
+import org.apache.seata.server.storage.file.spi.FileStoreContext;
+import org.apache.seata.server.storage.file.spi.FileStoreProvider;
+import org.apache.seata.server.storage.file.spi.FileStoreRuntime;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -87,6 +96,10 @@ public class SessionHolder {
 
     private static DistributedLocker DISTRIBUTED_LOCKER;
 
+    private static volatile FileStoreRuntime FILE_STORE_RUNTIME;
+
+    private static boolean LOCK_MANAGER_INSTALLED;
+
     public static void init() {
         init(null);
     }
@@ -97,11 +110,51 @@ public class SessionHolder {
      * @param sessionMode the store mode: file, db, redis
      * @throws IOException the io exception
      */
-    public static void init(SessionMode sessionMode) {
+    public static synchronized void init(SessionMode sessionMode) {
+        if (FILE_STORE_RUNTIME != null) {
+            throw new StoreException("FileStoreRuntime is already initialized; destroy it before reinitializing");
+        }
         if (null == sessionMode) {
             sessionMode = StoreConfig.getSessionMode();
         }
         LOGGER.info("use session store mode: {}", sessionMode.getName());
+        LockMode lockMode = StoreConfig.getLockMode();
+        boolean fileSessionMode = SessionMode.FILE.equals(sessionMode);
+        boolean fileLockMode = LockMode.FILE.equals(lockMode);
+        if (!fileSessionMode) {
+            boolean installed = LockerManagerFactory.install(lockMode);
+            try {
+                initLegacyMode(sessionMode);
+                LOCK_MANAGER_INSTALLED = installed;
+            } catch (RuntimeException | Error failure) {
+                cleanup(failure, ROOT_SESSION_MANAGER == null ? null : ROOT_SESSION_MANAGER::destroy);
+                rollbackFailedFileInitialization(failure, null, installed);
+                throw failure;
+            }
+            return;
+        }
+
+        FileStoreRuntime runtime = null;
+        boolean lockManagerInstalled = false;
+        try {
+            runtime = openFileStoreRuntime();
+            FILE_STORE_RUNTIME = runtime;
+            if (fileLockMode && !"default".equals(StoreConfig.getFileEngineName())) {
+                lockManagerInstalled = LockerManagerFactory.init(
+                        LockMode.FILE, new Class<?>[] {FileLockStore.class}, new Object[] {runtime.lockStore()});
+            } else {
+                // Preserve the no-argument LockManager SPI for the default engine and mixed modes.
+                lockManagerInstalled = LockerManagerFactory.install(lockMode);
+            }
+            LOCK_MANAGER_INSTALLED = lockManagerInstalled;
+            initFileMode(runtime);
+        } catch (RuntimeException | Error startupFailure) {
+            rollbackFailedFileInitialization(startupFailure, runtime, lockManagerInstalled);
+            throw startupFailure;
+        }
+    }
+
+    private static void initLegacyMode(SessionMode sessionMode) {
         DISTRIBUTED_LOCKER = DistributedLockerFactory.getDistributedLocker(sessionMode.getName());
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
@@ -109,44 +162,16 @@ public class SessionHolder {
 
             ROOT_VGROUP_MAPPING_MANAGER =
                     EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.DB.getName());
-        } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
-            if (SessionMode.RAFT.equals(sessionMode)) {
-                String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
-                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(
-                        SessionManager.class, SessionMode.RAFT.getName(), new Object[] {ROOT_SESSION_MANAGER_NAME});
-                SESSION_MANAGER_MAP = new HashMap<>();
-                SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
-                ROOT_VGROUP_MAPPING_MANAGER =
-                        EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.RAFT.getName());
-                RaftServerManager.init();
-                RaftServerManager.start();
-            } else {
-                String vGroupMappingStorePath =
-                        CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)
-                                + separator
-                                + XID.getPort();
-                String sessionStorePath =
-                        CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                                + separator
-                                + XID.getPort();
-                if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
-                    throw new StoreException("the {store.file.dir} is empty.");
-                }
-                ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(
-                        VGroupMappingStoreManager.class,
-                        SessionMode.FILE.getName(),
-                        new Object[] {vGroupMappingStorePath});
-
-                ROOT_SESSION_MANAGER =
-                        EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(), new Object[] {
-                            ROOT_SESSION_MANAGER_NAME, sessionStorePath
-                        });
-                ROOT_SESSION_MANAGER =
-                        EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(), new Object[] {
-                            ROOT_SESSION_MANAGER_NAME, sessionStorePath
-                        });
-                reload(sessionMode);
-            }
+        } else if (SessionMode.RAFT.equals(sessionMode)) {
+            String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(
+                    SessionManager.class, SessionMode.RAFT.getName(), new Object[] {ROOT_SESSION_MANAGER_NAME});
+            SESSION_MANAGER_MAP = new HashMap<>();
+            SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
+            ROOT_VGROUP_MAPPING_MANAGER =
+                    EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.RAFT.getName());
+            RaftServerManager.init();
+            RaftServerManager.start();
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
             ROOT_VGROUP_MAPPING_MANAGER =
@@ -158,14 +183,80 @@ public class SessionHolder {
         }
     }
 
+    private static FileStoreRuntime openFileStoreRuntime() {
+        String engineName = StoreConfig.getFileEngineName();
+        FileStoreProvider provider = FileStoreProviderFactory.getProvider(engineName);
+        String sessionStoreDir = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
+        if (StringUtils.isBlank(sessionStoreDir)) {
+            throw new StoreException("the {store.file.dir} is empty.");
+        }
+        String sessionStorePath = sessionStoreDir + separator + XID.getPort();
+        return provider.open(new FileStoreContext(ROOT_SESSION_MANAGER_NAME, Paths.get(sessionStorePath)));
+    }
+
+    private static void initFileMode(FileStoreRuntime runtime) {
+        String vGroupMappingStoreDir =
+                CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR);
+        if (StringUtils.isBlank(vGroupMappingStoreDir)) {
+            throw new StoreException("the {store.file.dir} is empty.");
+        }
+        String vGroupMappingStorePath = vGroupMappingStoreDir + separator + XID.getPort();
+        VGroupMappingStoreManager vGroupMappingManager = EnhancedServiceLoader.load(
+                VGroupMappingStoreManager.class, SessionMode.FILE.getName(), new Object[] {vGroupMappingStorePath});
+        DistributedLocker distributedLocker = DistributedLockerFactory.getDistributedLocker(SessionMode.FILE.getName());
+        ROOT_VGROUP_MAPPING_MANAGER = vGroupMappingManager;
+        DISTRIBUTED_LOCKER = distributedLocker;
+        ROOT_SESSION_MANAGER = runtime.sessionManager();
+        runtime.recover(sessions -> reload(sessions, SessionMode.FILE, true, true));
+        runtime.startBackgroundServices();
+    }
+
+    private static void rollbackFailedFileInitialization(
+            Throwable startupFailure, FileStoreRuntime runtime, boolean lockManagerInstalled) {
+        try {
+            // Runtime-owned services may still need the installed lock manager while stopping.
+            cleanup(startupFailure, runtime == null ? null : runtime::close);
+            if (lockManagerInstalled) {
+                cleanup(startupFailure, LockerManagerFactory::destroy);
+                cleanup(startupFailure, () -> EnhancedServiceLoader.unload(LockManager.class));
+            }
+        } finally {
+            clearFileModeReferences();
+        }
+    }
+
+    private static void cleanup(Throwable failure, Runnable action) {
+        if (action == null) {
+            return;
+        }
+        try {
+            action.run();
+        } catch (RuntimeException | Error cleanupFailure) {
+            if (failure != cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+        }
+    }
+
+    private static void clearFileModeReferences() {
+        FILE_STORE_RUNTIME = null;
+        LOCK_MANAGER_INSTALLED = false;
+        ROOT_SESSION_MANAGER = null;
+        ROOT_VGROUP_MAPPING_MANAGER = null;
+        DISTRIBUTED_LOCKER = null;
+        SESSION_MANAGER_MAP = null;
+    }
+
     /**
      * Reload.
      *
      * @param sessionMode the mode of store
      */
     protected static void reload(SessionMode sessionMode) {
-        if (sessionMode == SessionMode.FILE) {
+        if (sessionMode == SessionMode.FILE && ROOT_SESSION_MANAGER instanceof Reloadable) {
             ((Reloadable) ROOT_SESSION_MANAGER).reload();
+            reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
+        } else if (sessionMode == SessionMode.FILE) {
             reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
         } else {
             reload(null, sessionMode);
@@ -177,8 +268,15 @@ public class SessionHolder {
     }
 
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
-        if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
-                && CollectionUtils.isNotEmpty(allSessions)) {
+        reload(allSessions, storeMode, acquireLock, false);
+    }
+
+    private static void reload(
+            Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock, boolean failFast) {
+        if (SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode) {
+            if (CollectionUtils.isEmpty(allSessions)) {
+                return;
+            }
             long currentTimeMillis = System.currentTimeMillis();
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
@@ -192,6 +290,7 @@ public class SessionHolder {
                                     "Could not handle the global session, xid: {},error: {}",
                                     globalSession.getXid(),
                                     e.getMessage());
+                            throwIfFileModeStartupReloadFailed(globalSession, e, failFast);
                         }
                         break;
                     case Committed:
@@ -202,6 +301,7 @@ public class SessionHolder {
                                     "Could not handle the global session, xid: {},error: {}",
                                     globalSession.getXid(),
                                     e.getMessage());
+                            throwIfFileModeStartupReloadFailed(globalSession, e, failFast);
                         }
                         break;
                     case Finished:
@@ -209,7 +309,7 @@ public class SessionHolder {
                     case CommitFailed:
                     case RollbackFailed:
                     case TimeoutRollbackFailed:
-                        removeInErrorState(globalSession);
+                        removeInErrorState(globalSession, failFast);
                         break;
                     case AsyncCommitting:
                     case Committing:
@@ -224,6 +324,7 @@ public class SessionHolder {
                                 throw new RuntimeException(e);
                             }
                         }
+                        break;
                     case StopCommitOrCommitRetry:
                     case StopRollbackOrRollbackRetry:
                     case Deleting:
@@ -273,6 +374,7 @@ public class SessionHolder {
             }
         } else {
             // Redis, db and so on
+            SessionManager recoverySessionManager = ROOT_SESSION_MANAGER;
             CompletableFuture.runAsync(() -> {
                 SessionCondition searchCondition = new SessionCondition(
                         GlobalStatus.UnKnown,
@@ -284,7 +386,7 @@ public class SessionHolder {
 
                 long now = System.currentTimeMillis();
                 List<GlobalSession> errorStatusGlobalSessions =
-                        ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                        recoverySessionManager.findGlobalSessions(searchCondition);
                 while (!CollectionUtils.isEmpty(errorStatusGlobalSessions)) {
                     for (GlobalSession errorStatusGlobalSession : errorStatusGlobalSessions) {
                         if (errorStatusGlobalSession.getBeginTime() >= now) {
@@ -292,23 +394,39 @@ public class SessionHolder {
                             return;
                         }
 
-                        removeInErrorState(errorStatusGlobalSession);
+                        removeInErrorState(errorStatusGlobalSession, false, recoverySessionManager);
                     }
 
                     // Load the next part
-                    errorStatusGlobalSessions = ROOT_SESSION_MANAGER.findGlobalSessions(searchCondition);
+                    errorStatusGlobalSessions = recoverySessionManager.findGlobalSessions(searchCondition);
                 }
             });
         }
     }
 
+    private static void throwIfFileModeStartupReloadFailed(
+            GlobalSession globalSession, TransactionException cause, boolean failFast) {
+        if (failFast) {
+            throw new StoreException(cause, "FileMode startup reload failed, xid: " + globalSession.getXid());
+        }
+    }
+
     private static void removeInErrorState(GlobalSession globalSession) {
+        removeInErrorState(globalSession, false);
+    }
+
+    private static void removeInErrorState(GlobalSession globalSession, boolean failFast) {
+        removeInErrorState(globalSession, failFast, getRootSessionManager());
+    }
+
+    private static void removeInErrorState(
+            GlobalSession globalSession, boolean failFast, SessionManager sessionManager) {
         try {
             LOGGER.warn(
                     "The global session should NOT be {}, remove it. xid = {}",
                     globalSession.getStatus(),
                     globalSession.getXid());
-            getRootSessionManager().removeGlobalSession(globalSession);
+            sessionManager.removeGlobalSession(globalSession);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(
                         "Remove global session succeed, xid = {}, status = {}",
@@ -321,13 +439,19 @@ public class SessionHolder {
                     globalSession.getXid(),
                     globalSession.getStatus(),
                     e);
+            if (failFast) {
+                throw new StoreException(e, "FileMode startup reload failed, xid: " + globalSession.getXid());
+            }
         }
     }
 
     private static void lockBranchSessions(List<BranchSession> branchSessions) {
         branchSessions.forEach(branchSession -> {
             try {
-                branchSession.lock();
+                if (!branchSession.lock()) {
+                    throw new StoreException("Could not recover branch lock, xid: " + branchSession.getXid()
+                            + ", branchId: " + branchSession.getBranchId());
+                }
             } catch (TransactionException e) {
                 throw new ShouldNeverHappenException(e);
             }
@@ -446,12 +570,62 @@ public class SessionHolder {
         return lock;
     }
 
-    public static void destroy() {
-        RaftServerManager.destroy();
-        if (ROOT_SESSION_MANAGER != null) {
-            ROOT_SESSION_MANAGER.destroy();
+    public static synchronized void destroy() {
+        Throwable failure = null;
+        try {
+            RaftServerManager.destroy();
+        } catch (RuntimeException | Error raftFailure) {
+            failure = raftFailure;
         }
-        SESSION_MANAGER_MAP = null;
+        FileStoreRuntime runtime = FILE_STORE_RUNTIME;
+        if (runtime != null) {
+            try {
+                runtime.close();
+            } catch (RuntimeException | Error runtimeFailure) {
+                failure = appendFailure(failure, runtimeFailure);
+            }
+        } else {
+            try {
+                if (ROOT_SESSION_MANAGER != null) {
+                    ROOT_SESSION_MANAGER.destroy();
+                }
+            } catch (RuntimeException | Error sessionFailure) {
+                failure = appendFailure(failure, sessionFailure);
+            }
+        }
+        if (LOCK_MANAGER_INSTALLED) {
+            try {
+                LockerManagerFactory.destroy();
+            } catch (RuntimeException | Error facadeFailure) {
+                failure = appendFailure(failure, facadeFailure);
+            }
+            try {
+                EnhancedServiceLoader.unload(LockManager.class);
+            } catch (RuntimeException | Error unloadFailure) {
+                failure = appendFailure(failure, unloadFailure);
+            }
+        }
+        clearFileModeReferences();
+        rethrow(failure);
+    }
+
+    private static Throwable appendFailure(Throwable failure, Throwable next) {
+        if (failure == null) {
+            return next;
+        }
+        if (failure != next) {
+            failure.addSuppressed(next);
+        }
+        return failure;
+    }
+
+    private static void rethrow(Throwable failure) {
+        if (failure instanceof RuntimeException) {
+            throw (RuntimeException) failure;
+        }
+        if (failure instanceof Error) {
+            throw (Error) failure;
+        }
     }
 
     @FunctionalInterface
