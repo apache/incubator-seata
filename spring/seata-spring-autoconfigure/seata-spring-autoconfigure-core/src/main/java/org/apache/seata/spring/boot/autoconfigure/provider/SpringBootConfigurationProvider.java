@@ -120,8 +120,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         // Get the property class
         final Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         if (propertyClass == null) {
-            throw new ShouldNeverHappenException(
-                    "PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
+            return null;
         }
 
         // Instantiate the property object
