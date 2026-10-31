@@ -830,6 +830,125 @@ public class DataBaseDistributedLockerTest extends BaseSpringBootTest {
             verify(mockConnection, never()).close();
         }
 
+        @Test
+        void testIgnoreSQLException_WithMySqlNoWaitErrorCode_ReturnsTrue() throws Exception {
+            // MySQL 8.0+ ER_LOCK_NOWAIT
+            SQLException exception = new SQLException(
+                    "Statement aborted because lock(s) could not be acquired " + "immediately and NOWAIT is set",
+                    "HY000",
+                    3572);
+
+            Method method = DataBaseDistributedLocker.class.getDeclaredMethod("ignoreSQLException", SQLException.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(locker, exception);
+
+            assertTrue(result, "ignoreSQLException should treat MySQL error code 3572 as fast-fail");
+        }
+
+        @Test
+        void testIgnoreSQLException_WithOracleNoWaitErrorCode_ReturnsTrue() throws Exception {
+            // ORA-00054 resource busy
+            SQLException exception = new SQLException(
+                    "ORA-00054: resource busy and acquire with NOWAIT specified or timeout expired", "61000", 54);
+
+            Method method = DataBaseDistributedLocker.class.getDeclaredMethod("ignoreSQLException", SQLException.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(locker, exception);
+
+            assertTrue(result, "ignoreSQLException should treat Oracle error code 54 as fast-fail");
+        }
+
+        @Test
+        void testIgnoreSQLException_WithPostgresqlNoWaitSqlState_ReturnsTrue() throws Exception {
+            // PostgreSQL 55P03 lock_not_available - vendor-specific error code is not 0
+            // in real life, but we match on SQLState rather than vendor code.
+            SQLException exception = new SQLException("could not obtain lock on row in relation", "55P03", 0);
+
+            Method method = DataBaseDistributedLocker.class.getDeclaredMethod("ignoreSQLException", SQLException.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(locker, exception);
+
+            assertTrue(result, "ignoreSQLException should treat PostgreSQL SQLState 55P03 as fast-fail");
+        }
+
+        @Test
+        void testStaticInitializer_PopulatesNoWaitIgnoreSets() throws Exception {
+            Field codeField = DataBaseDistributedLocker.class.getDeclaredField("IGNORE_NOWAIT_CODE");
+            codeField.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Set<Integer> ignoreNoWaitCode = (Set<Integer>) codeField.get(null);
+
+            Field stateField = DataBaseDistributedLocker.class.getDeclaredField("IGNORE_NOWAIT_SQLSTATE");
+            stateField.setAccessible(true);
+            @SuppressWarnings("unchecked")
+            Set<String> ignoreNoWaitSqlState = (Set<String>) stateField.get(null);
+
+            assertTrue(ignoreNoWaitCode.contains(3572), "IGNORE_NOWAIT_CODE should contain 3572 (MySQL)");
+            assertTrue(ignoreNoWaitCode.contains(54), "IGNORE_NOWAIT_CODE should contain 54 (Oracle)");
+            assertTrue(
+                    ignoreNoWaitSqlState.contains("55P03"), "IGNORE_NOWAIT_SQLSTATE should contain 55P03 (PostgreSQL)");
+        }
+
+        @Test
+        void testAcquireLock_NoWaitEnabled_UsesNoWaitSelectSql() throws Exception {
+            when(mockDataSource.getConnection()).thenReturn(mockConnection);
+            when(mockConnection.getAutoCommit()).thenReturn(true);
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+            when(mockResultSet.next()).thenReturn(false);
+            when(mockPreparedStatement.executeUpdate()).thenReturn(1);
+
+            // Force the locker into nowait mode and switch its dbType so that
+            // the SPI returns a dialect with a real NOWAIT implementation.
+            setNowaitEnabled(locker, true);
+            setDbType(locker, "mysql");
+            setDistributedLockTable(locker, "distributed_lock");
+
+            DistributedLockDO lockDO = new DistributedLockDO();
+            lockDO.setLockKey("test-key");
+            lockDO.setLockValue("test-value");
+            lockDO.setExpireTime(5000L);
+
+            ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+
+            boolean result = locker.acquireLock(lockDO);
+
+            assertTrue(result);
+            verify(mockConnection, atLeastOnce()).prepareStatement(sqlCaptor.capture());
+            boolean noWaitSqlSeen = sqlCaptor.getAllValues().stream()
+                    .anyMatch(sql -> sql.toUpperCase().contains("FOR UPDATE NOWAIT"));
+            assertTrue(noWaitSqlSeen, "NOWAIT mode should issue a SELECT ... FOR UPDATE NOWAIT statement");
+        }
+
+        @Test
+        void testAcquireLock_NoWaitDisabled_UsesBlockingSelectSql() throws Exception {
+            when(mockDataSource.getConnection()).thenReturn(mockConnection);
+            when(mockConnection.getAutoCommit()).thenReturn(true);
+            when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+            when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
+            when(mockResultSet.next()).thenReturn(false);
+            when(mockPreparedStatement.executeUpdate()).thenReturn(1);
+
+            setNowaitEnabled(locker, false);
+            setDbType(locker, "mysql");
+            setDistributedLockTable(locker, "distributed_lock");
+
+            DistributedLockDO lockDO = new DistributedLockDO();
+            lockDO.setLockKey("test-key");
+            lockDO.setLockValue("test-value");
+            lockDO.setExpireTime(5000L);
+
+            ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+
+            boolean result = locker.acquireLock(lockDO);
+
+            assertTrue(result);
+            verify(mockConnection, atLeastOnce()).prepareStatement(sqlCaptor.capture());
+            boolean noWaitSqlSeen = sqlCaptor.getAllValues().stream()
+                    .anyMatch(sql -> sql.toUpperCase().contains("NOWAIT"));
+            assertFalse(noWaitSqlSeen, "Blocking mode must keep the legacy SELECT ... FOR UPDATE without NOWAIT");
+        }
+
         // ===========================
         // Helper Methods for Reflection
         // ===========================
@@ -845,6 +964,24 @@ public class DataBaseDistributedLockerTest extends BaseSpringBootTest {
             Field dataSourceField = DataBaseDistributedLocker.class.getDeclaredField("distributedLockDataSource");
             dataSourceField.setAccessible(true);
             dataSourceField.set(locker, dataSource);
+        }
+
+        private void setNowaitEnabled(DataBaseDistributedLocker locker, boolean value) throws Exception {
+            Field field = DataBaseDistributedLocker.class.getDeclaredField("nowaitEnabled");
+            field.setAccessible(true);
+            field.set(locker, value);
+        }
+
+        private void setDbType(DataBaseDistributedLocker locker, String value) throws Exception {
+            Field field = DataBaseDistributedLocker.class.getDeclaredField("dbType");
+            field.setAccessible(true);
+            field.set(locker, value);
+        }
+
+        private void setDistributedLockTable(DataBaseDistributedLocker locker, String value) throws Exception {
+            Field field = DataBaseDistributedLocker.class.getDeclaredField("distributedLockTable");
+            field.setAccessible(true);
+            field.set(locker, value);
         }
     }
 }
