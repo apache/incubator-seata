@@ -568,7 +568,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── fastjson2-2.0.52.jar
+    │   ├── fastjson2-2.0.63.jar
     │   ├── fury-core-0.8.0.jar
     │   ├── grpc-api-1.55.1.jar
     │   ├── grpc-context-1.55.1.jar
@@ -1725,7 +1725,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── fastjson2-2.0.52.jar
+    │   ├── fastjson2-2.0.63.jar
     │   ├── fury-core-0.8.0.jar
     │   ├── grpc-api-1.55.1.jar
     │   ├── grpc-context-1.55.1.jar

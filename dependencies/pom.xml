@@ -81,7 +81,7 @@
         <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
-        <fastjson2.version>2.0.52</fastjson2.version>
+        <fastjson2.version>2.0.63</fastjson2.version>
         <groovy.version>4.0.31</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <jackson.version>2.18.3</jackson.version>
