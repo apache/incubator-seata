@@ -22,7 +22,8 @@ SHELL := /usr/bin/env bash
 # Declare all phony targets (targets that are not actual files, i.e. they don't produce a file
 # matching the target name — make will always execute them regardless of file timestamps)
 .PHONY: help clean spotless-check spotless-apply checkstyle checkstyle-diff license test \
-	package-only package \
+	generate-license-all generate-license-namingserver generate-license-server generate-license-distribution \
+	install-only install package-only package \
 	install-server-jar install-namingserver-jar \
 	install-run-namingserver-native-jar run-namingserver-native-jar \
 	install-run-server-jar run-server-jar \
@@ -87,8 +88,35 @@ checkstyle-diff: ## Run Checkstyle code check only on changed .java files
 license: ## Run license check
 	$(MVN) $(MAVEN_ARGS) verify -Dlicense.skip=false -DskipTests
 
+# LICENSE_STRICT — when set to 1, unknown licenses cause the build to fail (exit 1)
+# instead of just printing a warning.
+#
+# Examples:
+#   make generate-license-namingserver LICENSE_STRICT=1
+#   make generate-license-all LICENSE_STRICT=1
+LICENSE_STRICT ?= 0
+LICENSE_STRICT_FLAG = $(if $(filter 1 true,$(LICENSE_STRICT)),--strict,)
+
+generate-license-all: install-only ## Generate LICENSE-namingserver, LICENSE-server and LICENSE files
+	@./script/license/generate-license.sh all $(LICENSE_STRICT_FLAG)
+
+generate-license-namingserver: install-only ## Generate LICENSE-namingserver files
+	@./script/license/generate-license.sh namingserver $(LICENSE_STRICT_FLAG)
+
+generate-license-server: install-only ## Generate LICENSE-server files
+	@./script/license/generate-license.sh server $(LICENSE_STRICT_FLAG)
+
+generate-license-distribution: install-only ## Generate distribution LICENSE file
+	@./script/license/generate-license.sh distribution $(LICENSE_STRICT_FLAG)
+
 test: ## Run unit tests
 	$(MVN) $(MAVEN_ARGS) clean test
+
+install-only: ## Package the project without running tests
+	$(MVN) $(MAVEN_ARGS) clean install -DskipTests
+
+install: ## Package the project without running tests
+	$(MVN) $(MAVEN_ARGS) clean install
 
 package-only: ## Package the project without running tests
 	$(MVN) $(MAVEN_ARGS) clean package -DskipTests
