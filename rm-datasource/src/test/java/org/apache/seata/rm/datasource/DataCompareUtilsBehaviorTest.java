@@ -94,6 +94,82 @@ class DataCompareUtilsBehaviorTest {
         }
     }
 
+    static Stream<Arguments> fastjsonDateTimeValues() {
+        return Stream.of(
+                // MySQL Connector/J 8 returns LocalDateTime for DATETIME, which fastjson writes as an ISO string
+                Arguments.of("2024-03-02T12:34:56.123456", "2024-03-02T12:34:56.123456"),
+                Arguments.of("2025-01-01T00:00", "2025-01-01T00:00"),
+                Arguments.of("2024-03-02T12:34:56", LocalDateTime.parse("2024-03-02T12:34:56")),
+                Arguments.of(LocalDateTime.parse("2025-01-01T00:00"), "2025-01-01T00:00"),
+                // undo log written while the driver still returned Timestamp
+                Arguments.of("2024-03-02 12:34:56.123456", LocalDateTime.parse("2024-03-02T12:34:56.123456")),
+                Arguments.of("2024-03-02T12:34:56.5", Timestamp.valueOf("2024-03-02 12:34:56.5")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("fastjsonDateTimeValues")
+    void fastjsonDateTimeValuesCompareInEitherForm(Object left, Object right) {
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            assertTrue(DataCompareUtils.isFieldEquals(
+                            new Field("gmt_create", Types.TIMESTAMP, left),
+                            new Field("gmt_create", Types.TIMESTAMP, right))
+                    .getResult());
+            assertTrue(DataCompareUtils.isFieldEquals(
+                            new Field("gmt_create", Types.TIMESTAMP, right),
+                            new Field("gmt_create", Types.TIMESTAMP, left))
+                    .getResult());
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
+    @Test
+    void fastjsonDateTimeFieldsSurviveTheWholeUndoValidation() {
+        // same order as AbstractUndoExecutor#dataValidationAndGoOn, reusing the fields like it does:
+        // before vs after, after vs current, before vs current
+        Field before = new Field("gmt_modified", Types.TIMESTAMP, "2024-03-02T12:34:56.123456");
+        Field after = new Field("gmt_modified", Types.TIMESTAMP, "2025-01-01T00:00");
+        Field current = new Field("gmt_modified", Types.TIMESTAMP, LocalDateTime.parse("2025-01-01T00:00"));
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            assertFalse(DataCompareUtils.isFieldEquals(before, after).getResult());
+            assertTrue(DataCompareUtils.isFieldEquals(after, current).getResult());
+            assertFalse(DataCompareUtils.isFieldEquals(before, current).getResult());
+            assertEquals(LocalDateTime.parse("2024-03-02T12:34:56.123456"), before.getValue());
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
+    @Test
+    void fastjsonDifferentDateTimeStringsAreNotEqual() {
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            assertFalse(DataCompareUtils.isFieldEquals(
+                            new Field("gmt_create", Types.TIMESTAMP, "2024-03-02T12:34:56"),
+                            new Field("gmt_create", Types.TIMESTAMP, "2025-01-01T00:00"))
+                    .getResult());
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
     @Test
     void rowsMatchByCompositeKeyAndReportMissingColumnsOrRows() {
         TableMeta meta = mock(TableMeta.class);
