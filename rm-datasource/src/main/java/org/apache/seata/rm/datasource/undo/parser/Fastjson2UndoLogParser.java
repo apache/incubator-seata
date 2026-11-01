@@ -19,6 +19,8 @@ package org.apache.seata.rm.datasource.undo.parser;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.json.Fastjson2JsonbParser;
 import org.apache.seata.common.json.Fastjson2ObjectReaderWarmup;
@@ -31,6 +33,8 @@ import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.apache.seata.sqlparser.SQLType;
 
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 @LoadLevel(name = Fastjson2UndoLogParser.NAME)
@@ -39,6 +43,12 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
 
     private JSONReader.Feature[] jsonReaderFeature;
     private JSONWriter.Feature[] jsonWriterFeature;
+
+    /**
+     * Parser-local writer provider, so the Timestamp writer below doesn't change how fastjson2 writes
+     * Timestamp anywhere else in the application (e.g. the RPC serializer).
+     */
+    private final ObjectWriterProvider writerProvider = new ObjectWriterProvider();
 
     @Override
     public void init() {
@@ -62,6 +72,10 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
         };
+
+        // JSONB writes java.sql.Timestamp without its class name by default, so the value is decoded as LocalDateTime
+        // and no longer equals the Timestamp read from the database when the undo images are validated.
+        writerProvider.register(Timestamp.class, new TimestampWriter(), true);
 
         Fastjson2ObjectReaderWarmup.warmup(
                 Object.class,
@@ -89,11 +103,29 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        return JSONB.toBytes(branchUndoLog, jsonWriterFeature);
+        return JSONB.toBytes(branchUndoLog, new JSONWriter.Context(writerProvider, jsonWriterFeature));
     }
 
     @Override
     public BranchUndoLog decode(byte[] bytes) {
         return Fastjson2JsonbParser.parseObject(bytes, BranchUndoLog.class, jsonReaderFeature);
+    }
+
+    /**
+     * Writes the class name before the value, so fastjson2's built-in Timestamp reader decodes it back to a
+     * Timestamp, nanos included. Undo logs written this way are still readable by clients without this writer.
+     */
+    static class TimestampWriter implements ObjectWriter<Timestamp> {
+
+        @Override
+        public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            jsonWriter.writeLocalDateTime(((Timestamp) object).toLocalDateTime());
+        }
+
+        @Override
+        public void writeJSONB(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
+            jsonWriter.writeTypeName(Timestamp.class.getName());
+            jsonWriter.writeLocalDateTime(((Timestamp) object).toLocalDateTime());
+        }
     }
 }

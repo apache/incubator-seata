@@ -16,6 +16,9 @@
  */
 package org.apache.seata.rm.datasource.undo.parser;
 
+import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
+import com.alibaba.fastjson2.JSONWriter;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.sql.serial.SerialArray;
@@ -36,7 +39,9 @@ import java.sql.Array;
 import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +56,74 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
         return parser;
     }
 
-    @Override
-    public void testTimestampEncodeAndDecode() {}
+    @Test
+    public void testTimestampKeepsTypeAndNanos() {
+        Timestamp timestamp = Timestamp.valueOf("2024-03-02 12:34:56.123456789");
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, timestamp);
+
+        Field decodedField = getFieldFromLog(getParser().decode(getParser().encode(createTestUndoLog(field))));
+
+        Assertions.assertEquals(Timestamp.class, decodedField.getValue().getClass());
+        Assertions.assertEquals(timestamp, decodedField.getValue());
+        Assertions.assertEquals(123456789, ((Timestamp) decodedField.getValue()).getNanos());
+        Assertions.assertTrue(
+                DataCompareUtils.isFieldEquals(field, decodedField).getResult());
+    }
+
+    @Test
+    public void testTimestampBeforeEpoch() {
+        Timestamp timestamp = new Timestamp(-1L);
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, timestamp);
+
+        Field decodedField = getFieldFromLog(getParser().decode(getParser().encode(createTestUndoLog(field))));
+
+        Assertions.assertEquals(timestamp, decodedField.getValue());
+    }
+
+    @Test
+    public void testNullTimestamp() {
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, null);
+
+        Field decodedField = getFieldFromLog(getParser().decode(getParser().encode(createTestUndoLog(field))));
+
+        Assertions.assertNull(decodedField.getValue());
+    }
+
+    @Test
+    public void testLocalDateTimeIsNotConvertedToTimestamp() {
+        // e.g. MySQL Connector/J 8 returns LocalDateTime for DATETIME columns
+        LocalDateTime localDateTime = LocalDateTime.of(2024, 3, 2, 12, 34, 56, 123456789);
+        Field field = new Field("gmt_create", Types.TIMESTAMP, localDateTime);
+
+        Field decodedField = getFieldFromLog(getParser().decode(getParser().encode(createTestUndoLog(field))));
+
+        Assertions.assertEquals(localDateTime, decodedField.getValue());
+    }
+
+    @Test
+    public void testDecodeUndoLogWrittenWithoutTimestampCodec() {
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, Timestamp.valueOf("2024-03-02 12:34:56.123456789"));
+        byte[] previousFormat = JSONB.toBytes(
+                createTestUndoLog(field),
+                JSONWriter.Feature.WriteClassName,
+                JSONWriter.Feature.FieldBased,
+                JSONWriter.Feature.ReferenceDetection,
+                JSONWriter.Feature.WriteNulls,
+                JSONWriter.Feature.NotWriteDefaultValue,
+                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+                JSONWriter.Feature.WriteNameAsSymbol);
+
+        Field decodedField = getFieldFromLog(getParser().decode(previousFormat));
+
+        Assertions.assertEquals(LocalDateTime.of(2024, 3, 2, 12, 34, 56, 123456789), decodedField.getValue());
+    }
+
+    @Test
+    public void testTimestampWriterIsNotRegisteredGlobally() {
+        Assertions.assertFalse(
+                JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(Timestamp.class, Timestamp.class, true)
+                        instanceof Fastjson2UndoLogParser.TimestampWriter);
+    }
 
     @Test
     public void testSerializeAndDeserializeSerialArray() throws IOException, SQLException {
