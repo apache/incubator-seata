@@ -20,30 +20,72 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.MessageTypeAware;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class ProtocolEncoderV0Test {
 
     private ProtocolEncoderV0 encoder;
+    private Serializer serializer;
+    private MockedStatic<SerializerServiceLoader> serializers;
+    private AutoCloseable mocks;
+    private static final byte[] BODY = new byte[] {1, 2, 3, 4};
 
     @Mock
     private ChannelHandlerContext ctx;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
+        serializer = mock(Serializer.class);
+        when(serializer.serialize(any())).thenReturn(BODY);
+        serializers = mockStatic(SerializerServiceLoader.class);
+        serializers
+                .when(() -> SerializerServiceLoader.load(SerializerType.SEATA, ProtocolConstants.VERSION_0))
+                .thenReturn(serializer);
+        serializers
+                .when(() -> SerializerServiceLoader.load(SerializerType.HESSIAN, ProtocolConstants.VERSION_0))
+                .thenReturn(serializer);
         encoder = new ProtocolEncoderV0();
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+        serializers.close();
+        mocks.close();
+    }
+
+    private void assertEncodedBody(ByteBuf out, RpcMessage message) {
+        if (message.getCodec() == SerializerType.SEATA.getCode()) {
+            assertEquals(((MessageTypeAware) message.getBody()).getTypeCode(), out.readShort());
+        } else {
+            assertEquals(BODY.length, out.readShort());
+        }
+        assertEquals(message.getId(), out.readLong());
+        byte[] actual = new byte[out.readableBytes()];
+        out.readBytes(actual);
+        assertArrayEquals(BODY, actual);
+        verify(serializer).serialize(message.getBody());
+        serializers.verify(() -> SerializerServiceLoader.load(
+                SerializerType.getByCode(message.getCodec()), ProtocolConstants.VERSION_0));
     }
 
     @Test
@@ -137,6 +179,7 @@ public class ProtocolEncoderV0Test {
         short flags = out.readShort();
         assertEquals(ProtocolConstantsV0.FLAG_REQUEST | ProtocolConstantsV0.FLAG_SEATA_CODEC, flags);
 
+        assertEncodedBody(out, rpcMessage);
         out.release();
     }
 
@@ -164,6 +207,7 @@ public class ProtocolEncoderV0Test {
         short flags = out.readShort();
         assertEquals(ProtocolConstantsV0.FLAG_REQUEST, flags);
 
+        assertEncodedBody(out, rpcMessage);
         out.release();
     }
 
@@ -190,6 +234,7 @@ public class ProtocolEncoderV0Test {
         short flags = out.readShort();
         assertEquals(ProtocolConstantsV0.FLAG_SEATA_CODEC, flags);
 
+        assertEncodedBody(out, rpcMessage);
         out.release();
     }
 
@@ -217,6 +262,7 @@ public class ProtocolEncoderV0Test {
         assertEquals(true, (flags & ProtocolConstantsV0.FLAG_REQUEST) > 0);
         assertEquals(true, (flags & ProtocolConstantsV0.FLAG_SEATA_CODEC) > 0);
 
+        assertEncodedBody(out, rpcMessage);
         out.release();
     }
 
@@ -270,6 +316,7 @@ public class ProtocolEncoderV0Test {
         assertEquals(true, (flags & ProtocolConstantsV0.FLAG_REQUEST) > 0);
         assertEquals(true, (flags & ProtocolConstantsV0.FLAG_SEATA_CODEC) > 0);
 
+        assertEncodedBody(encoded, rpcMessage);
         encoded.release();
     }
 }
