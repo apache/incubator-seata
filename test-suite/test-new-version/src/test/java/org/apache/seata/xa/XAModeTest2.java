@@ -468,14 +468,14 @@ public class XAModeTest2 {
     @Test
     @Disabled
     public void testXid() throws Throwable {
-        XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
+        XAXid xaXid = XAXidBuilder.build(MOCK_XID, MOCK_BRANCH_ID);
 
         XAXid retrievedXAXid = XAXidBuilder.build(xaXid.getGlobalTransactionId(), xaXid.getBranchQualifier());
         String retrievedXid = retrievedXAXid.getGlobalXid();
         long retrievedBranchId = retrievedXAXid.getBranchId();
 
-        Assertions.assertEquals(mockXid, retrievedXid);
-        Assertions.assertEquals(mockBranchId, retrievedBranchId);
+        Assertions.assertEquals(MOCK_XID, retrievedXid);
+        Assertions.assertEquals(MOCK_BRANCH_ID, retrievedBranchId);
     }
 
     @Test
