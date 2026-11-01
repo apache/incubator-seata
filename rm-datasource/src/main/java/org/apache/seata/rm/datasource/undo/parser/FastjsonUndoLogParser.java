@@ -23,6 +23,7 @@ import com.alibaba.fastjson.parser.DefaultJSONParser;
 import com.alibaba.fastjson.parser.JSONToken;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
+import com.alibaba.fastjson.serializer.DateCodec;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 import static java.sql.Types.BIGINT;
 import static java.sql.Types.DECIMAL;
@@ -75,6 +77,10 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
         // Register SerialArray serializer and deserializer
         serializeConfig.put(SerialArray.class, new SerialArraySerializer());
         parserConfig.putDeserializer(SerialArray.class, new SerialArrayDeserializer());
+
+        // WriteDateUseDateFormat writes dates as "yyyy-MM-dd HH:mm:ss", which drops the fractional seconds of a
+        // Timestamp, so the undo would restore a truncated value.
+        serializeConfig.put(Timestamp.class, new TimestampSerializer());
     }
 
     @Override
@@ -102,6 +108,23 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
     public BranchUndoLog decode(byte[] bytes) {
         String text = new String(bytes, Constants.DEFAULT_CHARSET);
         return JSON.parseObject(text, BranchUndoLog.class, parserConfig);
+    }
+
+    /**
+     * Keeps the fractional seconds of a Timestamp. Values without them are written exactly as before, and the
+     * value is still a string, so undo logs stay readable by clients without this serializer.
+     */
+    static class TimestampSerializer implements ObjectSerializer {
+
+        @Override
+        public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features)
+                throws IOException {
+            if (object == null || ((Timestamp) object).getNanos() == 0) {
+                DateCodec.instance.write(serializer, object, fieldName, fieldType, features);
+                return;
+            }
+            serializer.write(object.toString());
+        }
     }
 
     /**

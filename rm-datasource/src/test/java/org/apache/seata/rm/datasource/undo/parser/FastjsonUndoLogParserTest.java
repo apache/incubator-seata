@@ -17,8 +17,6 @@
 package org.apache.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializeConfig;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.sql.serial.SerialArray;
@@ -26,6 +24,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import org.apache.seata.rm.datasource.undo.BranchUndoLog;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
@@ -64,15 +63,68 @@ public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
     }
 
     /**
-     * disable super testTimestampEncodeAndDecode
+     * fastjson decodes dates as strings (they are converted back when the undo images are compared), so check
+     * the string instead of expecting a Timestamp like the base test does.
      */
     @Override
+    @Test
     public void testTimestampEncodeAndDecode() {
-        Timestamp encodeStamp = new Timestamp(System.currentTimeMillis());
-        encodeStamp.setNanos(999999);
-        SerializeConfig.getGlobalInstance().addFilter(Timestamp.class, new TimestampSerializer());
-        byte[] encode = JSON.toJSONString(encodeStamp, SerializeConfig.getGlobalInstance())
-                .getBytes();
+        Timestamp timestamp = new Timestamp(Integer.MAX_VALUE + 1L);
+        timestamp.setNanos(999999);
+        Field field = new Field("gmt_create", Types.TIMESTAMP, timestamp);
+
+        Object decoded = getFieldFromLog(parser.decode(parser.encode(createTestUndoLog(field))))
+                .getValue();
+
+        Assertions.assertEquals(timestamp, Timestamp.valueOf((String) decoded));
+    }
+
+    @Test
+    public void testTimestampKeepsFractionalSeconds() {
+        Timestamp timestamp = Timestamp.valueOf("2024-03-02 12:34:56.123456789");
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, timestamp);
+
+        Object decoded = getFieldFromLog(parser.decode(parser.encode(createTestUndoLog(field))))
+                .getValue();
+
+        Assertions.assertEquals("2024-03-02 12:34:56.123456789", decoded);
+    }
+
+    @Test
+    public void testTimestampWithoutFractionIsWrittenAsBefore() {
+        Timestamp timestamp = Timestamp.valueOf("2024-03-02 12:34:56");
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, timestamp);
+
+        Object decoded = getFieldFromLog(parser.decode(parser.encode(createTestUndoLog(field))))
+                .getValue();
+
+        Assertions.assertEquals("2024-03-02 12:34:56", decoded);
+    }
+
+    @Test
+    public void testNullTimestamp() {
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, null);
+
+        Object decoded = getFieldFromLog(parser.decode(parser.encode(createTestUndoLog(field))))
+                .getValue();
+
+        Assertions.assertNull(decoded);
+    }
+
+    @Test
+    public void testUndoValidationMatchesFractionalTimestamp() {
+        Timestamp current = Timestamp.valueOf("2024-03-02 12:34:56.123456");
+        Field decoded = getFieldFromLog(
+                parser.decode(parser.encode(createTestUndoLog(new Field("gmt_modified", Types.TIMESTAMP, current)))));
+
+        AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+        try {
+            Assertions.assertTrue(
+                    DataCompareUtils.isFieldEquals(decoded, new Field("gmt_modified", Types.TIMESTAMP, current))
+                            .getResult());
+        } finally {
+            AbstractUndoLogManager.removeCurrentSerializer();
+        }
     }
 
     @Test
@@ -378,14 +430,6 @@ public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
         @Override
         public void free() throws SQLException {
             // do nothing
-        }
-    }
-
-    private class TimestampSerializer implements ValueFilter {
-
-        @Override
-        public Object process(Object object, String name, Object value) {
-            return null;
         }
     }
 }
