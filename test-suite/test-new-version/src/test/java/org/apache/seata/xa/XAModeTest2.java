@@ -19,7 +19,7 @@ package org.apache.seata.xa;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.xa.DruidXADataSource;
 import com.alibaba.druid.util.JdbcUtils;
-import com.mysql.jdbc.jdbc2.optional.MysqlXADataSource;
+import com.mysql.cj.jdbc.MysqlXADataSource;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -55,39 +55,39 @@ import java.sql.Statement;
 
 public class XAModeTest2 {
 
-    private static final int testRecordId = 888;
-    private static final String testRecordName = "xxx";
-    private static final long testTid = 1582688600006L;
-    private static final String mockXid = "127.0.0.1:8091:" + testTid;
-    private static final long mockBranchId = testTid + 1;
+    private static final int TEST_RECORD_ID = 888;
+    private static final String TEST_RECORD_NAME = "xxx";
+    private static final long TEST_TID = 1582688600006L;
+    private static final String MOCK_XID = "127.0.0.1:8091:" + TEST_TID;
+    private static final long MOCK_BRANCH_ID = TEST_TID + 1;
 
-    private static final String pg_jdbcUrl = "jdbc:postgresql://127.0.0.1:5432/postgres";
-    private static final String pg_username = "postgres";
-    private static final String pg_password = "postgres";
-    private static final String pg_driverClassName = JdbcUtils.POSTGRESQL_DRIVER;
+    private static final String PG_JDBC_URL = "jdbc:postgresql://127.0.0.1:5432/postgres";
+    private static final String PG_USERNAME = "postgres";
+    private static final String PG_PASSWORD = "postgres";
+    private static final String PG_DRIVER_CLASS_NAME = JdbcUtils.POSTGRESQL_DRIVER;
 
-    private static final String mysql_jdbcUrl = "jdbc:mysql://127.0.0.1:3306/demo";
-    private static final String mysql_username = "demo";
-    private static final String mysql_password = "demo";
-    private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
+    private static final String MYSQL_JDBC_URL = "jdbc:mysql://127.0.0.1:3306/demo";
+    private static final String MYSQL_USERNAME = "demo";
+    private static final String MYSQL_PASSWORD = "demo";
+    private static final String MYSQL_DRIVER_CLASS_NAME = JdbcUtils.MYSQL_DRIVER;
 
-    private static final String mysql8_jdbcUrl =
+    private static final String MYSQL8_JDBC_URL =
             "jdbc:mysql://0.0.0.0:3306/demo?useUnicode=true&characterEncoding=utf-8&useSSL=false";
-    private static final String mysql8_username = "demo";
-    private static final String mysql8_password = "demo";
-    private static final String mysql8_driverClassName = JdbcUtils.MYSQL_DRIVER_6;
+    private static final String MYSQL8_USERNAME = "demo";
+    private static final String MYSQL8_PASSWORD = "demo";
+    private static final String MYSQL8_DRIVER_CLASS_NAME = JdbcUtils.MYSQL_DRIVER_6;
 
-    private static final String oracle_jdbcUrl = "jdbc:oracle:thin:@localhost:1521:xe";
-    private static final String oracle_username = "demo";
-    private static final String oracle_password = "demo";
-    private static final String oracle_driverClassName = JdbcUtils.ORACLE_DRIVER;
+    private static final String ORACLE_JDBC_URL = "jdbc:oracle:thin:@localhost:1521:xe";
+    private static final String ORACLE_USERNAME = "demo";
+    private static final String ORACLE_PASSWORD = "demo";
+    private static final String ORACLE_DRIVER_CLASS_NAME = JdbcUtils.ORACLE_DRIVER;
 
     // Test on different DB, including: MySQL(5.7, 8.0), PostgreSQL(11), Oracle(11)
-    private static final String dbType = JdbcConstants.MYSQL;
+    private static final String DB_TYPE = JdbcConstants.MYSQL;
 
-    private static final boolean nativeXA = false;
+    private static final boolean NATIVE_XA = false;
 
-    private static final boolean mySQL8 = false;
+    private static final boolean MYSQL8 = false;
 
     private DruidDataSource createNewDruidDataSource() throws Throwable {
         DruidDataSource druidDataSource = new DruidDataSource();
@@ -102,32 +102,32 @@ public class XAModeTest2 {
     }
 
     private XADataSource createNewNativeXADataSource() throws Throwable {
-        if (dbType.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
+        if (DB_TYPE.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
             PGXADataSource pgxaDataSource = new PGXADataSource();
-            pgxaDataSource.setUrl(pg_jdbcUrl);
-            pgxaDataSource.setUser(pg_username);
-            pgxaDataSource.setPassword(pg_password);
+            pgxaDataSource.setUrl(PG_JDBC_URL);
+            pgxaDataSource.setUser(PG_USERNAME);
+            pgxaDataSource.setPassword(PG_PASSWORD);
             return pgxaDataSource;
 
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.MYSQL)) {
+        } else if (DB_TYPE.equalsIgnoreCase(JdbcConstants.MYSQL)) {
             MysqlXADataSource mysqlXADataSource = new MysqlXADataSource();
-            if (mySQL8) {
-                mysqlXADataSource.setURL(mysql8_jdbcUrl);
-                mysqlXADataSource.setUser(mysql8_username);
-                mysqlXADataSource.setPassword(mysql8_username);
+            if (MYSQL8) {
+                mysqlXADataSource.setURL(MYSQL8_JDBC_URL);
+                mysqlXADataSource.setUser(MYSQL8_USERNAME);
+                mysqlXADataSource.setPassword(MYSQL8_USERNAME);
 
             } else {
-                mysqlXADataSource.setURL(mysql_jdbcUrl);
-                mysqlXADataSource.setUser(mysql_username);
-                mysqlXADataSource.setPassword(mysql_username);
+                mysqlXADataSource.setURL(MYSQL_JDBC_URL);
+                mysqlXADataSource.setUser(MYSQL_USERNAME);
+                mysqlXADataSource.setPassword(MYSQL_USERNAME);
             }
             return mysqlXADataSource;
 
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
+        } else if (DB_TYPE.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             return createOracleXADataSource();
 
         } else {
-            throw new IllegalAccessError("Unknown dbType: " + dbType);
+            throw new IllegalAccessError("Unknown DB_TYPE: " + DB_TYPE);
         }
     }
 
@@ -137,16 +137,16 @@ public class XAModeTest2 {
             XADataSource xaDataSource = (XADataSource) oracleXADataSourceClass.newInstance();
 
             Method setURLMethod = oracleXADataSourceClass.getMethod("setURL", String.class);
-            setURLMethod.invoke(xaDataSource, oracle_jdbcUrl);
+            setURLMethod.invoke(xaDataSource, ORACLE_JDBC_URL);
 
             Method setUserMethod = oracleXADataSourceClass.getMethod("setUser", String.class);
-            setUserMethod.invoke(xaDataSource, oracle_username);
+            setUserMethod.invoke(xaDataSource, ORACLE_USERNAME);
 
             Method setPasswordMethod = oracleXADataSourceClass.getMethod("setPassword", String.class);
-            setPasswordMethod.invoke(xaDataSource, oracle_password);
+            setPasswordMethod.invoke(xaDataSource, ORACLE_PASSWORD);
 
             Method setDriverTypeMethod = oracleXADataSourceClass.getMethod("setDriverType", String.class);
-            setDriverTypeMethod.invoke(xaDataSource, oracle_driverClassName);
+            setDriverTypeMethod.invoke(xaDataSource, ORACLE_DRIVER_CLASS_NAME);
 
             return xaDataSource;
 
@@ -157,35 +157,35 @@ public class XAModeTest2 {
     }
 
     private void initDruidDataSource(DruidDataSource druidDataSource) throws Throwable {
-        druidDataSource.setDbType(dbType);
-        if (dbType.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
-            druidDataSource.setUrl(pg_jdbcUrl);
-            druidDataSource.setUsername(pg_username);
-            druidDataSource.setPassword(pg_password);
-            druidDataSource.setDriverClassName(pg_driverClassName);
+        druidDataSource.setDbType(DB_TYPE);
+        if (DB_TYPE.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
+            druidDataSource.setUrl(PG_JDBC_URL);
+            druidDataSource.setUsername(PG_USERNAME);
+            druidDataSource.setPassword(PG_PASSWORD);
+            druidDataSource.setDriverClassName(PG_DRIVER_CLASS_NAME);
 
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.MYSQL)) {
-            if (mySQL8) {
-                druidDataSource.setUrl(mysql8_jdbcUrl);
-                druidDataSource.setUsername(mysql8_username);
-                druidDataSource.setPassword(mysql8_password);
-                druidDataSource.setDriverClassName(mysql8_driverClassName);
+        } else if (DB_TYPE.equalsIgnoreCase(JdbcConstants.MYSQL)) {
+            if (MYSQL8) {
+                druidDataSource.setUrl(MYSQL8_JDBC_URL);
+                druidDataSource.setUsername(MYSQL8_USERNAME);
+                druidDataSource.setPassword(MYSQL8_PASSWORD);
+                druidDataSource.setDriverClassName(MYSQL8_DRIVER_CLASS_NAME);
 
             } else {
-                druidDataSource.setUrl(mysql_jdbcUrl);
-                druidDataSource.setUsername(mysql_username);
-                druidDataSource.setPassword(mysql_password);
-                druidDataSource.setDriverClassName(mysql_driverClassName);
+                druidDataSource.setUrl(MYSQL_JDBC_URL);
+                druidDataSource.setUsername(MYSQL_USERNAME);
+                druidDataSource.setPassword(MYSQL_PASSWORD);
+                druidDataSource.setDriverClassName(MYSQL_DRIVER_CLASS_NAME);
             }
 
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
-            druidDataSource.setUrl(oracle_jdbcUrl);
-            druidDataSource.setUsername(oracle_username);
-            druidDataSource.setPassword(oracle_password);
-            druidDataSource.setDriverClassName(oracle_driverClassName);
+        } else if (DB_TYPE.equalsIgnoreCase(JdbcConstants.ORACLE)) {
+            druidDataSource.setUrl(ORACLE_JDBC_URL);
+            druidDataSource.setUsername(ORACLE_USERNAME);
+            druidDataSource.setPassword(ORACLE_PASSWORD);
+            druidDataSource.setDriverClassName(ORACLE_DRIVER_CLASS_NAME);
 
         } else {
-            throw new IllegalAccessError("Unknown dbType: " + dbType);
+            throw new IllegalAccessError("Unknown DB_TYPE: " + DB_TYPE);
         }
         druidDataSource.init();
     }
@@ -209,7 +209,7 @@ public class XAModeTest2 {
                     String applicationData,
                     String lockKeys)
                     throws TransactionException {
-                return mockBranchId;
+                return MOCK_BRANCH_ID;
             }
 
             @Override
@@ -224,7 +224,7 @@ public class XAModeTest2 {
     public void testAllInOne() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
-        doTestXAModeNormalCaseAllInOne(mockXid, mockBranchId);
+        doTestXAModeNormalCaseAllInOne(MOCK_XID, MOCK_BRANCH_ID);
     }
 
     @Test
@@ -232,9 +232,9 @@ public class XAModeTest2 {
     public void testGlobalCommitOnDifferentDataSource() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
-        doTestXAModeNormalCasePhase1(mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase1(MOCK_XID, MOCK_BRANCH_ID);
         // Use new DataSource in phase 2
-        doTestXAModeNormalCasePhase2(true, mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase2(true, MOCK_XID, MOCK_BRANCH_ID);
     }
 
     @Test
@@ -242,9 +242,9 @@ public class XAModeTest2 {
     public void testGlobalRollbackOnDifferentDataSource() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
-        doTestXAModeNormalCasePhase1(mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase1(MOCK_XID, MOCK_BRANCH_ID);
         // Use new DataSource in phase 2
-        doTestXAModeNormalCasePhase2(false, mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase2(false, MOCK_XID, MOCK_BRANCH_ID);
     }
 
     @Test
@@ -252,19 +252,19 @@ public class XAModeTest2 {
     public void testOnlyPhase1() throws Throwable {
         testCleanXARecover();
         doTestXAModeNormalPrepareData();
-        doTestXAModeNormalCasePhase1(mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase1(MOCK_XID, MOCK_BRANCH_ID);
     }
 
     @Test
     @Disabled
     public void testOnlyPhase2Commit() throws Throwable {
-        doTestXAModeNormalCasePhase2(true, mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase2(true, MOCK_XID, MOCK_BRANCH_ID);
     }
 
     @Test
     @Disabled
     public void testOnlyPhase2Rollback() throws Throwable {
-        doTestXAModeNormalCasePhase2(false, mockXid, mockBranchId);
+        doTestXAModeNormalCasePhase2(false, MOCK_XID, MOCK_BRANCH_ID);
     }
 
     private void doTestXAModeNormalPrepareData() throws Throwable {
@@ -275,7 +275,7 @@ public class XAModeTest2 {
         Connection helperConn = helperDS.getConnection();
         Statement helperStat = helperConn.createStatement();
         ResultSet helperRes = null;
-        helperStat.execute("delete from test where id = " + testRecordId);
+        helperStat.execute("delete from test where id = " + TEST_RECORD_ID);
         helperStat.close();
         helperConn.close();
     }
@@ -293,7 +293,7 @@ public class XAModeTest2 {
         initRM();
 
         AbstractDataSourceProxyXA dataSourceProxyXA = null;
-        if (nativeXA) {
+        if (NATIVE_XA) {
             // init XADataSource runnerXA
             XADataSource runnerXADS = createNewNativeXADataSource();
             dataSourceProxyXA = new DataSourceProxyXANative(runnerXADS);
@@ -316,11 +316,11 @@ public class XAModeTest2 {
             // have a check
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
-            helperRes = helperStat.executeQuery("select * from test where id = " + testRecordId);
+            helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
             // should see the test record now
             Assertions.assertTrue(helperRes.next());
-            Assertions.assertEquals(helperRes.getInt(1), testRecordId);
-            Assertions.assertEquals(helperRes.getString(2), testRecordName);
+            Assertions.assertEquals(helperRes.getInt(1), TEST_RECORD_ID);
+            Assertions.assertEquals(helperRes.getString(2), TEST_RECORD_NAME);
             helperRes.close();
             helperStat.close();
             helperConn.close();
@@ -337,7 +337,7 @@ public class XAModeTest2 {
             // have a check
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
-            helperRes = helperStat.executeQuery("select * from test where id = " + testRecordId);
+            helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
             // should NOT see the test record now
             Assertions.assertFalse(helperRes.next());
             helperRes.close();
@@ -359,7 +359,7 @@ public class XAModeTest2 {
         initRM();
 
         AbstractDataSourceProxyXA dataSourceProxyXA = null;
-        if (nativeXA) {
+        if (NATIVE_XA) {
             // init XADataSource runnerXA
             XADataSource runnerXADS = createNewNativeXADataSource();
             dataSourceProxyXA = new DataSourceProxyXANative(runnerXADS);
@@ -374,7 +374,7 @@ public class XAModeTest2 {
         Connection testConn = dataSourceProxyXA.getConnection();
         Statement testStat = testConn.createStatement();
         // >>> insert the test record with XA mode
-        testStat.execute("insert into test(id, name) values(" + testRecordId + ", '" + testRecordName + "')");
+        testStat.execute("insert into test(id, name) values(" + TEST_RECORD_ID + ", '" + TEST_RECORD_NAME + "')");
         // >>> close the statement and connection
         testStat.close();
         testConn.close();
@@ -383,14 +383,14 @@ public class XAModeTest2 {
         // have a check
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        helperRes = helperStat.executeQuery("select * from test where id = " + testRecordId);
+        helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
         // should NOT see the record(id=888) now
         Assertions.assertFalse(helperRes.next());
         helperRes.close();
         helperStat.close();
         helperConn.close();
 
-        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
+        if (JdbcConstants.MYSQL.equalsIgnoreCase(DB_TYPE)) {
             XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
             dataSourceProxyXA.forceClosePhysicalConnection(xaXid);
         }
@@ -410,7 +410,7 @@ public class XAModeTest2 {
         initRM();
 
         AbstractDataSourceProxyXA dataSourceProxyXA = null;
-        if (nativeXA) {
+        if (NATIVE_XA) {
             // init XADataSource runnerXA
             XADataSource runnerXADS = createNewNativeXADataSource();
             dataSourceProxyXA = new DataSourceProxyXANative(runnerXADS);
@@ -425,7 +425,7 @@ public class XAModeTest2 {
         Connection testConn = dataSourceProxyXA.getConnection();
         Statement testStat = testConn.createStatement();
         // >>> insert the test record with XA mode
-        testStat.execute("insert into test(id, name) values(" + testRecordId + ", '" + testRecordName + "')");
+        testStat.execute("insert into test(id, name) values(" + TEST_RECORD_ID + ", '" + TEST_RECORD_NAME + "')");
         // >>> close the statement and connection
         testStat.close();
         testConn.close();
@@ -434,7 +434,7 @@ public class XAModeTest2 {
         // have a check
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        helperRes = helperStat.executeQuery("select * from test where id = " + testRecordId);
+        helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
         // should NOT see the record(id=888) now
         Assertions.assertFalse(helperRes.next());
         helperRes.close();
@@ -453,11 +453,11 @@ public class XAModeTest2 {
         // have a check
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        helperRes = helperStat.executeQuery("select * from test where id = " + testRecordId);
+        helperRes = helperStat.executeQuery("select * from test where id = " + TEST_RECORD_ID);
         // should see the test record now
         Assertions.assertTrue(helperRes.next());
-        Assertions.assertEquals(helperRes.getInt(1), testRecordId);
-        Assertions.assertEquals(helperRes.getString(2), testRecordName);
+        Assertions.assertEquals(helperRes.getInt(1), TEST_RECORD_ID);
+        Assertions.assertEquals(helperRes.getString(2), TEST_RECORD_NAME);
         helperRes.close();
         helperStat.close();
         helperConn.close();
@@ -468,14 +468,14 @@ public class XAModeTest2 {
     @Test
     @Disabled
     public void testXid() throws Throwable {
-        XAXid xaXid = XAXidBuilder.build(mockXid, mockBranchId);
+        XAXid xaXid = XAXidBuilder.build(MOCK_XID, MOCK_BRANCH_ID);
 
         XAXid retrievedXAXid = XAXidBuilder.build(xaXid.getGlobalTransactionId(), xaXid.getBranchQualifier());
         String retrievedXid = retrievedXAXid.getGlobalXid();
         long retrievedBranchId = retrievedXAXid.getBranchId();
 
-        Assertions.assertEquals(mockXid, retrievedXid);
-        Assertions.assertEquals(mockBranchId, retrievedBranchId);
+        Assertions.assertEquals(MOCK_XID, retrievedXid);
+        Assertions.assertEquals(MOCK_BRANCH_ID, retrievedBranchId);
     }
 
     @Test
@@ -512,10 +512,10 @@ public class XAModeTest2 {
     @Disabled
     public void testXADataSourceNormal() throws Throwable {
         DruidXADataSource druidDataSource = new DruidXADataSource();
-        druidDataSource.setUrl(oracle_jdbcUrl);
-        druidDataSource.setUsername(oracle_username);
-        druidDataSource.setPassword(oracle_password);
-        druidDataSource.setDriverClassName(oracle_driverClassName);
+        druidDataSource.setUrl(ORACLE_JDBC_URL);
+        druidDataSource.setUsername(ORACLE_USERNAME);
+        druidDataSource.setPassword(ORACLE_PASSWORD);
+        druidDataSource.setDriverClassName(ORACLE_DRIVER_CLASS_NAME);
 
         XAConnection xaConnection = druidDataSource.getXAConnection();
         XAResource xaResource = xaConnection.getXAResource();
@@ -606,7 +606,7 @@ public class XAModeTest2 {
         Connection testConn = ds.getConnection();
         Statement testStat = testConn.createStatement();
         // >>> insert the test record with XA mode
-        testStat.execute("insert into test(id, name) values(" + testRecordId + ", '" + testRecordName + "')");
+        testStat.execute("insert into test(id, name) values(" + TEST_RECORD_ID + ", '" + TEST_RECORD_NAME + "')");
         // >>> close the statement and connection
         testStat.close();
         testConn.close();
