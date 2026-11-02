@@ -1,0 +1,1064 @@
+[
+{
+  "name":"[Ljava.lang.constant.ClassDesc;"
+},
+{
+  "name":"[Ljava.lang.constant.ConstantDesc;"
+},
+{
+  "name":"[Lnet.bytebuddy.description.enumeration.EnumerationDescription;"
+},
+{
+  "name":"com.fasterxml.jackson.databind.ext.Java7SupportImpl",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture",
+  "fields":[{"name":"listeners"}, {"name":"value"}, {"name":"waiters"}]
+},
+{
+  "name":"com.google.common.util.concurrent.AbstractFuture$Waiter",
+  "fields":[{"name":"next"}, {"name":"thread"}]
+},
+{
+  "name":"com.intellij.junit5.JUnit5IdeaTestRunner",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"com.intellij.rt.debugger.agent.CaptureStorage",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"com.intellij.rt.execution.application.AppMainV2$Agent",
+  "methods":[{"name":"premain","parameterTypes":["java.lang.String","java.lang.instrument.Instrumentation"] }]
+},
+{
+  "name":"com.sun.tools.attach.VirtualMachine"
+},
+{
+  "name":"com.taobao.hsf.app.api.util.HSFApiConsumerBean"
+},
+{
+  "name":"io.netty.util.HashedWheelTimer",
+  "fields":[{"name":"workerState"}]
+},
+{
+  "name":"io.netty.util.ResourceLeakDetector$DefaultResourceLeak",
+  "fields":[{"name":"droppedRecords"}, {"name":"head"}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueColdProducerFields",
+  "fields":[{"name":"producerLimit"}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueConsumerFields",
+  "fields":[{"name":"consumerIndex"}]
+},
+{
+  "name":"io.netty.util.internal.shaded.org.jctools.queues.BaseMpscLinkedArrayQueueProducerFields",
+  "fields":[{"name":"producerIndex"}]
+},
+{
+  "name":"io.seata.config.ConfigurationProvider"
+},
+{
+  "name":"io.seata.config.ExtConfigurationProvider"
+},
+{
+  "name":"io.seata.config.file.FileConfig"
+},
+{
+  "name":"io.seata.core.context.ContextCore"
+},
+{
+  "name":"io.seata.core.model.TransactionManager"
+},
+{
+  "name":"io.seata.integration.tx.api.interceptor.parser.InterfaceParser"
+},
+{
+  "name":"io.seata.integration.tx.api.interceptor.parser.TargetClassParser"
+},
+{
+  "name":"io.seata.integration.tx.api.remoting.RemotingParser"
+},
+{
+  "name":"java.lang.Class",
+  "methods":[{"name":"forName","parameterTypes":["java.lang.String"] }, {"name":"getAnnotatedInterfaces","parameterTypes":[] }, {"name":"getAnnotatedSuperclass","parameterTypes":[] }, {"name":"getDeclaredMethod","parameterTypes":["java.lang.String","java.lang.Class[]"] }, {"name":"getMethod","parameterTypes":["java.lang.String","java.lang.Class[]"] }, {"name":"getModule","parameterTypes":[] }, {"name":"getNestHost","parameterTypes":[] }, {"name":"getNestMembers","parameterTypes":[] }, {"name":"getPermittedSubclasses","parameterTypes":[] }, {"name":"getRecordComponents","parameterTypes":[] }, {"name":"isNestmateOf","parameterTypes":["java.lang.Class"] }, {"name":"isRecord","parameterTypes":[] }, {"name":"isSealed","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.ClassLoader",
+  "methods":[{"name":"defineClass","parameterTypes":["java.lang.String","byte[]","int","int","java.security.ProtectionDomain"] }, {"name":"definePackage","parameterTypes":["java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.net.URL"] }, {"name":"findLoadedClass","parameterTypes":["java.lang.String"] }, {"name":"getClassLoadingLock","parameterTypes":["java.lang.String"] }, {"name":"getDefinedPackage","parameterTypes":["java.lang.String"] }, {"name":"getPackage","parameterTypes":["java.lang.String"] }, {"name":"getUnnamedModule","parameterTypes":[] }, {"name":"registerAsParallelCapable","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.ClassLoader$ByteBuddyAccessor$V1",
+  "methods":[{"name":"defineClass","parameterTypes":["java.lang.ClassLoader","java.lang.String","byte[]","int","int","java.security.ProtectionDomain"] }, {"name":"definePackage","parameterTypes":["java.lang.ClassLoader","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.lang.String","java.net.URL"] }, {"name":"findLoadedClass","parameterTypes":["java.lang.ClassLoader","java.lang.String"] }, {"name":"getClassLoadingLock","parameterTypes":["java.lang.ClassLoader","java.lang.String"] }, {"name":"getDefinedPackage","parameterTypes":["java.lang.ClassLoader","java.lang.String"] }, {"name":"getPackage","parameterTypes":["java.lang.ClassLoader","java.lang.String"] }]
+},
+{
+  "name":"java.lang.Module",
+  "methods":[{"name":"addExports","parameterTypes":["java.lang.String","java.lang.Module"] }, {"name":"addReads","parameterTypes":["java.lang.Module"] }, {"name":"canRead","parameterTypes":["java.lang.Module"] }, {"name":"getClassLoader","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"getPackages","parameterTypes":[] }, {"name":"getResourceAsStream","parameterTypes":["java.lang.String"] }, {"name":"isExported","parameterTypes":["java.lang.String"] }, {"name":"isExported","parameterTypes":["java.lang.String","java.lang.Module"] }, {"name":"isNamed","parameterTypes":[] }, {"name":"isOpen","parameterTypes":["java.lang.String"] }, {"name":"isOpen","parameterTypes":["java.lang.String","java.lang.Module"] }]
+},
+{
+  "name":"java.lang.Object",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"clone","parameterTypes":[] }, {"name":"getClass","parameterTypes":[] }, {"name":"toString","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.ProcessHandle",
+  "methods":[{"name":"current","parameterTypes":[] }, {"name":"pid","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Runtime",
+  "methods":[{"name":"version","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.Runtime$Version",
+  "methods":[{"name":"feature","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.SecurityManager",
+  "methods":[{"name":"checkPermission","parameterTypes":["java.security.Permission"] }]
+},
+{
+  "name":"java.lang.StackWalker",
+  "methods":[{"name":"getInstance","parameterTypes":["java.lang.StackWalker$Option"] }, {"name":"getInstance","parameterTypes":["java.util.Set","int"] }, {"name":"walk","parameterTypes":["java.util.function.Function"] }]
+},
+{
+  "name":"java.lang.StackWalker$Option"
+},
+{
+  "name":"java.lang.StackWalker$StackFrame",
+  "methods":[{"name":"getClassName","parameterTypes":[] }, {"name":"getDeclaringClass","parameterTypes":[] }, {"name":"getFileName","parameterTypes":[] }, {"name":"getLineNumber","parameterTypes":[] }, {"name":"getMethodName","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.System",
+  "methods":[{"name":"getSecurityManager","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.WeakPairMap"
+},
+{
+  "name":"java.lang.WeakPairMap$Pair"
+},
+{
+  "name":"java.lang.WeakPairMap$Pair$Weak"
+},
+{
+  "name":"java.lang.annotation.Retention",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.lang.annotation.Target",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.constant.ClassDesc",
+  "methods":[{"name":"descriptorString","parameterTypes":[] }, {"name":"ofDescriptor","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"java.lang.constant.ConstantDesc"
+},
+{
+  "name":"java.lang.constant.DirectMethodHandleDesc",
+  "methods":[{"name":"lookupDescriptor","parameterTypes":[] }, {"name":"methodName","parameterTypes":[] }, {"name":"owner","parameterTypes":[] }, {"name":"refKind","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.constant.DirectMethodHandleDesc$Kind",
+  "methods":[{"name":"valueOf","parameterTypes":["int","boolean"] }]
+},
+{
+  "name":"java.lang.constant.DynamicConstantDesc",
+  "methods":[{"name":"bootstrapArgs","parameterTypes":[] }, {"name":"bootstrapMethod","parameterTypes":[] }, {"name":"constantName","parameterTypes":[] }, {"name":"constantType","parameterTypes":[] }, {"name":"ofCanonical","parameterTypes":["java.lang.constant.DirectMethodHandleDesc","java.lang.String","java.lang.constant.ClassDesc","java.lang.constant.ConstantDesc[]"] }]
+},
+{
+  "name":"java.lang.constant.MethodHandleDesc",
+  "methods":[{"name":"invocationType","parameterTypes":[] }, {"name":"of","parameterTypes":["java.lang.constant.DirectMethodHandleDesc$Kind","java.lang.constant.ClassDesc","java.lang.String","java.lang.String"] }]
+},
+{
+  "name":"java.lang.constant.MethodTypeDesc",
+  "methods":[{"name":"of","parameterTypes":["java.lang.constant.ClassDesc","java.lang.constant.ClassDesc[]"] }, {"name":"ofDescriptor","parameterTypes":["java.lang.String"] }, {"name":"parameterArray","parameterTypes":[] }, {"name":"returnType","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.instrument.Instrumentation",
+  "methods":[{"name":"redefineModule","parameterTypes":["java.lang.Module","java.util.Set","java.util.Map","java.util.Map","java.util.Set","java.util.Map"] }]
+},
+{
+  "name":"java.lang.invoke.MethodHandle",
+  "methods":[{"name":"bindTo","parameterTypes":["java.lang.Object"] }, {"name":"invokeWithArguments","parameterTypes":["java.lang.Object[]"] }]
+},
+{
+  "name":"java.lang.invoke.MethodHandles",
+  "methods":[{"name":"lookup","parameterTypes":[] }, {"name":"privateLookupIn","parameterTypes":["java.lang.Class","java.lang.invoke.MethodHandles$Lookup"] }]
+},
+{
+  "name":"java.lang.invoke.MethodHandles$Lookup",
+  "methods":[{"name":"findVirtual","parameterTypes":["java.lang.Class","java.lang.String","java.lang.invoke.MethodType"] }]
+},
+{
+  "name":"java.lang.invoke.MethodType",
+  "methods":[{"name":"methodType","parameterTypes":["java.lang.Class","java.lang.Class[]"] }]
+},
+{
+  "name":"java.lang.reflect.AccessibleObject",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"setAccessible","parameterTypes":["boolean"] }]
+},
+{
+  "name":"java.lang.reflect.AnnotatedArrayType",
+  "methods":[{"name":"getAnnotatedGenericComponentType","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.AnnotatedElement",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.lang.reflect.AnnotatedParameterizedType",
+  "methods":[{"name":"getAnnotatedActualTypeArguments","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.AnnotatedType",
+  "methods":[{"name":"getType","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.AnnotatedTypeVariable",
+  "methods":[{"name":"getAnnotatedBounds","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.AnnotatedWildcardType",
+  "methods":[{"name":"getAnnotatedUpperBounds","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.Executable",
+  "methods":[{"name":"getAnnotatedExceptionTypes","parameterTypes":[] }, {"name":"getAnnotatedParameterTypes","parameterTypes":[] }, {"name":"getAnnotatedReceiverType","parameterTypes":[] }, {"name":"getParameterCount","parameterTypes":[] }, {"name":"getParameters","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.InvocationHandler",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"java.lang.reflect.Method",
+  "methods":[{"name":"getAnnotatedReturnType","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.Parameter",
+  "methods":[{"name":"getModifiers","parameterTypes":[] }, {"name":"getName","parameterTypes":[] }, {"name":"isNamePresent","parameterTypes":[] }]
+},
+{
+  "name":"java.lang.reflect.TypeVariable",
+  "methods":[{"name":"getAnnotatedBounds","parameterTypes":[] }]
+},
+{
+  "name":"java.nio.Bits",
+  "fields":[{"name":"MAX_MEMORY"}, {"name":"UNALIGNED"}]
+},
+{
+  "name":"java.nio.Buffer",
+  "fields":[{"name":"address"}]
+},
+{
+  "name":"java.nio.ByteBuffer",
+  "methods":[{"name":"alignedSlice","parameterTypes":["int"] }]
+},
+{
+  "name":"java.nio.DirectByteBuffer",
+  "methods":[{"name":"<init>","parameterTypes":["long","long"] }]
+},
+{
+  "name":"java.security.AccessController",
+  "methods":[{"name":"doPrivileged","parameterTypes":["java.security.PrivilegedAction"] }, {"name":"doPrivileged","parameterTypes":["java.security.PrivilegedExceptionAction"] }]
+},
+{
+  "name":"java.security.SecureRandomParameters"
+},
+{
+  "name":"java.util.AbstractList",
+  "methods":[{"name":"rangeCheckForAdd","parameterTypes":["int"] }]
+},
+{
+  "name":"java.util.AbstractMap",
+  "methods":[{"name":"clone","parameterTypes":[] }]
+},
+{
+  "name":"java.util.ArrayList",
+  "methods":[{"name":"rangeCheckForAdd","parameterTypes":["int"] }, {"name":"sort","parameterTypes":["java.util.Comparator"] }]
+},
+{
+  "name":"java.util.HashMap",
+  "methods":[{"name":"clone","parameterTypes":[] }, {"name":"remove","parameterTypes":["java.lang.Object","java.lang.Object"] }]
+},
+{
+  "name":"java.util.Map",
+  "methods":[{"name":"remove","parameterTypes":["java.lang.Object","java.lang.Object"] }, {"name":"sort","parameterTypes":["java.util.Comparator"] }]
+},
+{
+  "name":"java.util.concurrent.ForkJoinTask",
+  "fields":[{"name":"aux"}, {"name":"status"}]
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicBoolean",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"java.util.concurrent.atomic.AtomicReference",
+  "fields":[{"name":"value"}]
+},
+{
+  "name":"jdk.internal.misc.Unsafe",
+  "fields":[{"name":"theUnsafe"}],
+  "methods":[{"name":"defineClass","parameterTypes":["java.lang.String","byte[]","int","int","java.lang.ClassLoader","java.security.ProtectionDomain"] }, {"name":"getUnsafe","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.agent.Installer",
+  "methods":[{"name":"agentmain","parameterTypes":["java.lang.String","java.lang.instrument.Instrumentation"] }, {"name":"getInstrumentation","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$AllArguments",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"includeSelf","parameterTypes":[] }, {"name":"nullIfEmpty","parameterTypes":[] }, {"name":"readOnly","parameterTypes":[] }, {"name":"typing","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Argument",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"optional","parameterTypes":[] }, {"name":"readOnly","parameterTypes":[] }, {"name":"typing","parameterTypes":[] }, {"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Enter",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"readOnly","parameterTypes":[] }, {"name":"typing","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Exit",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$FieldGetterHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$FieldSetterHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Local",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$OnMethodEnter",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"inline","parameterTypes":[] }, {"name":"prependLineNumber","parameterTypes":[] }, {"name":"skipOn","parameterTypes":[] }, {"name":"skipOnIndex","parameterTypes":[] }, {"name":"suppress","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$OnMethodExit",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"backupArguments","parameterTypes":[] }, {"name":"inline","parameterTypes":[] }, {"name":"onThrowable","parameterTypes":[] }, {"name":"repeatOn","parameterTypes":[] }, {"name":"repeatOnIndex","parameterTypes":[] }, {"name":"suppress","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Origin",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Return",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"readOnly","parameterTypes":[] }, {"name":"typing","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$SelfCallHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.asm.Advice$This",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"optional","parameterTypes":[] }, {"name":"readOnly","parameterTypes":[] }, {"name":"typing","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.asm.Advice$Thrown",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.description.method.MethodDescription$InDefinedShape$AbstractBase$Executable",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.method.ParameterDescription$ForLoadedParameter$Parameter",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.method.ParameterList$ForLoadedExecutable$Executable",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDefinition$Sort$AnnotatedType",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$ForLoadedType$Dispatcher",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$Delegator$ForLoadedExecutableExceptionType$Dispatcher",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$Delegator$ForLoadedExecutableParameterType$Dispatcher",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$Delegator$ForLoadedMethodReturnType$Dispatcher",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$ForComponentType$AnnotatedParameterizedType",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$ForTypeArgument$AnnotatedParameterizedType",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$ForTypeVariableBoundType$AnnotatedTypeVariable",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$ForTypeVariableBoundType$OfFormalTypeVariable$FormalTypeVariable",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.description.type.TypeDescription$Generic$AnnotationReader$ForWildcardUpperBoundType$AnnotatedWildcardType",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.dynamic.loading.ClassInjector$UsingReflection$System",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.dynamic.loading.ClassInjector$UsingUnsafe$System",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.AllArguments",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"includeSelf","parameterTypes":[] }, {"name":"nullIfEmpty","parameterTypes":[] }, {"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.Argument",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"bindingMechanic","parameterTypes":[] }, {"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.Argument$BindingMechanic"
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.BindingPriority",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.Default",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.DefaultCall",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.DefaultCallHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.DefaultMethod",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.DefaultMethodHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.FieldGetterHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.FieldSetterHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.FieldValue",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"declaringType","parameterTypes":[] }, {"name":"value","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.Origin",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"cache","parameterTypes":[] }, {"name":"privileged","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.StubValue",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.Super",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.SuperCall",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"fallbackToDefault","parameterTypes":[] }, {"name":"nullIfImpossible","parameterTypes":[] }, {"name":"serializableProxy","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.SuperCallHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.SuperMethod",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.SuperMethodHandle",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"net.bytebuddy.implementation.bind.annotation.This",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"optional","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.mirror.AccessibleObject",
+  "fields":[{"name":"override"}]
+},
+{
+  "name":"net.bytebuddy.utility.Invoker",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.Invoker$Dispatcher",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfClassDesc",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfDirectMethodHandleDesc",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfDirectMethodHandleDesc$ForKind",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfDynamicConstantDesc",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfMethodHandleDesc",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaConstant$Simple$Dispatcher$OfMethodTypeDesc",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaModule$Module",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"net.bytebuddy.utility.JavaModule$Resolver",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.config.CachedConfigurationChangeListener",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.config.Configuration",
+  "methods":[{"name":"addConfigListener","parameterTypes":["java.lang.String","org.apache.seata.config.ConfigurationChangeListener"] }, {"name":"getBoolean","parameterTypes":["java.lang.String","boolean"] }, {"name":"getConfig","parameterTypes":["java.lang.String"] }, {"name":"getInt","parameterTypes":["java.lang.String","int"] }, {"name":"getLatestConfig","parameterTypes":["java.lang.String","java.lang.String","long"] }]
+},
+{
+  "name":"org.apache.seata.config.ConfigurationChangeListener",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.config.file.SimpleFileConfig",
+  "methods":[{"name":"<init>","parameterTypes":["java.io.File","java.lang.String"] }]
+},
+{
+  "name":"org.apache.seata.config.file.YamlFileConfig"
+},
+{
+  "name":"org.apache.seata.core.context.FastThreadLocalContextCore",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.core.context.ThreadLocalContextCore"
+},
+{
+  "name":"org.apache.seata.core.model.BranchType",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.fence.hook.TccHook",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"afterTccCommit","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }, {"name":"afterTccPrepare","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }, {"name":"afterTccRollback","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }, {"name":"beforeTccCommit","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }, {"name":"beforeTccPrepare","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }, {"name":"beforeTccRollback","parameterTypes":["java.lang.String","java.lang.Long","java.lang.String","org.apache.seata.rm.tcc.api.BusinessActionContext"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.fence.hook.TccHook$MockitoMock$yHF9d57K",
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.fence.hook.TccHookManagerTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testClear","parameterTypes":[] }, {"name":"testGetHooks","parameterTypes":[] }, {"name":"testRegisterHook","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandlerTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testBusinessActionContext","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.DefaultInvocationWrapperTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"proceed","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.DefaultInvocationWrapperTest$MyMockMethodInvocation",
+  "methods":[{"name":"proceed","parameterTypes":["int"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.SeataInterceptor",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.TestAction",
+  "methods":[{"name":"prepare","parameterTypes":["org.apache.seata.rm.tcc.api.BusinessActionContext","int","java.util.List","org.apache.seata.integration.tx.api.interceptor.TestParam"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.TestParam",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam",
+  "allDeclaredFields":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"getActionName","parameterTypes":[] }, {"name":"getBranchType","parameterTypes":[] }, {"name":"getBusinessActionContext","parameterTypes":[] }, {"name":"getDelayReport","parameterTypes":[] }, {"name":"getUseCommonFence","parameterTypes":[] }, {"name":"setActionName","parameterTypes":["java.lang.String"] }, {"name":"setBranchType","parameterTypes":["org.apache.seata.core.model.BranchType"] }, {"name":"setBusinessActionContext","parameterTypes":["java.util.Map"] }, {"name":"setDelayReport","parameterTypes":["java.lang.Boolean"] }, {"name":"setUseCommonFence","parameterTypes":["java.lang.Boolean"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParamTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testFillBusinessActionContext","parameterTypes":[] }, {"name":"testGetActionName","parameterTypes":[] }, {"name":"testGetBranchType","parameterTypes":[] }, {"name":"testIsCommonFenceUsed","parameterTypes":[] }, {"name":"testIsReportDelayed","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler",
+  "queryAllDeclaredMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.Business",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.BusinessCombineImpl",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"doBiz","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.BusinessCombineImpl$ByteBuddy$j7a8WfqS",
+  "fields":[{"name":"invocationHandler$1tgrr90"}],
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.BusinessImpl",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"doBiz","parameterTypes":["java.lang.String"] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.BusinessImpl$ByteBuddy$aEd7PC2Z",
+  "fields":[{"name":"invocationHandler$7hafo11"}],
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.CombineTransactionalInterceptorParser",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.CombineTransactionalInterceptorParserTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"parserInterfaceToProxy","parameterTypes":[] }, {"name":"parserInterfaceToProxyGlobalTransactionalIsFirst","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParserTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testHandlerOrdering","parameterTypes":[] }, {"name":"testSetOrderAndSorting","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParserTest$TestHandler"
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParserTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"parserInterfaceToProxy","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBeanTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testGetNeedEnhanceEnum","parameterTypes":[] }, {"name":"testIsEnhanceNeeded","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.interceptor.parser.ProxyUtilsGlobalTransactionalTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"afterAll","parameterTypes":[] }, {"name":"beforeAll","parameterTypes":[] }, {"name":"testTcc","parameterTypes":[] }, {"name":"testXAWithCombineTransaction","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.json.JsonParser",
+  "allDeclaredClasses":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.json.JsonParserImpl",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.json.JsonParserWrapTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testGetName","parameterTypes":[] }, {"name":"testParseObject","parameterTypes":[] }, {"name":"testParseObjectThrowsException","parameterTypes":[] }, {"name":"testToJSONString","parameterTypes":[] }, {"name":"testToJSONStringThrowsException","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.RemotingParser",
+  "allDeclaredClasses":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.TwoPhaseResultTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testGetMessage","parameterTypes":[] }, {"name":"testIsSuccess","parameterTypes":[] }, {"name":"testToStringEmptyMessage","parameterTypes":[] }, {"name":"testToStringNotEmptyMessage","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.DefaultRemotingParserTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"setUp","parameterTypes":[] }, {"name":"testGetRemotingBeanDesc","parameterTypes":[] }, {"name":"testGetRemotingDeanDescFail","parameterTypes":[] }, {"name":"testGetServiceDesc","parameterTypes":[] }, {"name":"testGetServiceDescFail","parameterTypes":[] }, {"name":"testIsReference","parameterTypes":[] }, {"name":"testIsReferenceFail","parameterTypes":[] }, {"name":"testIsRemoting","parameterTypes":[] }, {"name":"testIsRemotingFail","parameterTypes":[] }, {"name":"testIsServiceFromClass","parameterTypes":[] }, {"name":"testIsServiceFromClassFail","parameterTypes":[] }, {"name":"testIsServiceFromObject","parameterTypes":[] }, {"name":"testIsServiceFromObjectFail","parameterTypes":[] }, {"name":"testParserRemotingServiceInfo","parameterTypes":[] }, {"name":"testParserRemotingServiceInfoFail","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.DubboRemotingParser",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.HSFRemotingParser",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.RemoteBean"
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.SimpleBean",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.SimpleRemoteBean",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.SimpleRemotingParser",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.apache.seata.integration.tx.api.remoting.parser.SofaRpcRemotingParser",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.util.ClassUtilsTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testGetMostSpecificMethodFromSameClass","parameterTypes":[] }, {"name":"testGetMostSpecificMethodWhenClassIsNull","parameterTypes":[] }, {"name":"testGetMostSpecificMethodWhichNotExistsInTargetClass","parameterTypes":[] }, {"name":"testGetMostSpecificNotPublicMethod","parameterTypes":[] }, {"name":"testGetMostSpecificPrivateMethod","parameterTypes":[] }, {"name":"testGetMostSpecificPublicMethod","parameterTypes":[] }, {"name":"testGetPackageName","parameterTypes":[] }, {"name":"testGetPackageNameForSimpleName","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.util.DubboUtilTest",
+  "allDeclaredFields":true,
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "queryAllDeclaredConstructors":true,
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"testGetAssistInterfaceForNotDubboProxy","parameterTypes":[] }, {"name":"testGetAssistInterfaceForNull","parameterTypes":[] }, {"name":"testGetAssistInterfaceThrowsException","parameterTypes":[] }, {"name":"testIsDubbo3XPartialProxyName","parameterTypes":[] }, {"name":"testIsNotDubboProxyName","parameterTypes":[] }]
+},
+{
+  "name":"org.apache.seata.integration.tx.api.util.SimpleDubboProxy",
+  "allDeclaredClasses":true,
+  "queryAllDeclaredMethods":true,
+  "queryAllPublicMethods":true,
+  "fields":[{"name":"handler"}]
+},
+{
+  "name":"org.apache.seata.tm.DefaultTransactionManager",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.apiguardian.api.API",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.junit.internal.AssumptionViolatedException"
+},
+{
+  "name":"org.junit.jupiter.api.Test",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.junit.platform.commons.annotation.Testable",
+  "queryAllPublicMethods":true
+},
+{
+  "name":"org.mockito.configuration.MockitoConfiguration"
+},
+{
+  "name":"org.mockito.internal.configuration.DefaultDoNotMockEnforcer",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.configuration.InjectingAnnotationEngine",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.configuration.plugins.DefaultPluginSwitch",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.InlineByteBuddyMockMaker",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockAccess",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice$ForEquals",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice$ForHashCode",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice$ForReadObject",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice$ForStatic",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodAdvice$Identifier",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodInterceptor$DispatcherDefaultingToRealMethod",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodInterceptor$ForEquals",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodInterceptor$ForHashCode",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.MockMethodInterceptor$ForWriteReplace",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.creation.bytebuddy.inject.MockMethodDispatcher"
+},
+{
+  "name":"org.mockito.internal.creation.instance.DefaultInstantiatorProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.exceptions.stacktrace.DefaultStackTraceCleanerProvider",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.util.ConsoleMockitoLogger",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.util.reflection.InstrumentationMemberAccessor$Dispatcher",
+  "queryAllDeclaredMethods":true,
+  "queryAllDeclaredConstructors":true
+},
+{
+  "name":"org.mockito.internal.util.reflection.InstrumentationMemberAccessor$Dispatcher$ByteBuddy$roV9l3VG",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"org.mockito.internal.util.reflection.ModuleMemberAccessor",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+},
+{
+  "name":"sun.misc.Unsafe",
+  "allDeclaredFields":true,
+  "methods":[{"name":"allocateInstance","parameterTypes":["java.lang.Class"] }, {"name":"copyMemory","parameterTypes":["java.lang.Object","long","java.lang.Object","long","long"] }, {"name":"defineClass","parameterTypes":["java.lang.String","byte[]","int","int","java.lang.ClassLoader","java.security.ProtectionDomain"] }, {"name":"getAndAddLong","parameterTypes":["java.lang.Object","long","long"] }, {"name":"getAndSetObject","parameterTypes":["java.lang.Object","long","java.lang.Object"] }, {"name":"invokeCleaner","parameterTypes":["java.nio.ByteBuffer"] }, {"name":"objectFieldOffset","parameterTypes":["java.lang.reflect.Field"] }, {"name":"putBoolean","parameterTypes":["java.lang.Object","long","boolean"] }, {"name":"storeFence","parameterTypes":[] }]
+},
+{
+  "name":"sun.security.provider.NativePRNG",
+  "methods":[{"name":"<init>","parameterTypes":[] }, {"name":"<init>","parameterTypes":["java.security.SecureRandomParameters"] }]
+},
+{
+  "name":"sun.security.provider.SHA",
+  "methods":[{"name":"<init>","parameterTypes":[] }]
+}
+]
