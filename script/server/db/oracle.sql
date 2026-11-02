@@ -92,6 +92,6 @@ CREATE TABLE vgroup_table
 (
     vGroup    VARCHAR2(255),
     namespace VARCHAR2(255),
-    cluster   VARCHAR2(255),
-    CONSTRAINT uk_vgroup_namespace_cluster UNIQUE (vGroup, namespace, cluster)
+    cluster_name VARCHAR2(255),
+    CONSTRAINT uk_vgroup_namespace_cluster_name UNIQUE (vGroup, namespace, cluster_name)
 );
