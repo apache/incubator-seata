@@ -43,6 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -306,11 +307,8 @@ public class DefaultServerMessageListenerImplTest {
     public void testGetServerMessageSenderThrowsException() {
         DefaultServerMessageListenerImpl newListener = new DefaultServerMessageListenerImpl(transactionMessageHandler);
 
-        try {
-            newListener.getServerMessageSender();
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("must not be null"));
-        }
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, newListener::getServerMessageSender);
+        assertTrue(e.getMessage().contains("must not be null"));
     }
 
     @Test

@@ -144,11 +144,9 @@ public class MessageFutureTest {
         messageFuture.setTimeout(TIME_OUT_FIELD);
         RuntimeException runtimeException = new RuntimeException("test_runtime");
         messageFuture.setResultMessage(runtimeException);
-        try {
-            messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            assertThat(e.getMessage()).isEqualTo(runtimeException.getMessage());
-        }
+        RuntimeException e = Assertions.assertThrows(
+                RuntimeException.class, () -> messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS));
+        assertThat(e.getMessage()).isEqualTo(runtimeException.getMessage());
     }
 
     /**
@@ -177,11 +175,9 @@ public class MessageFutureTest {
         messageFuture.setTimeout(TIME_OUT_FIELD);
         Throwable throwable = new Throwable("test_throwable");
         messageFuture.setResultMessage(throwable);
-        try {
-            messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            assertThat(e.getMessage()).isEqualTo(new RuntimeException(throwable).getMessage());
-        }
+        RuntimeException e = Assertions.assertThrows(
+                RuntimeException.class, () -> messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS));
+        assertThat(e.getMessage()).isEqualTo(new RuntimeException(throwable).getMessage());
     }
 
     private RpcMessage buildRepcMessage() {
