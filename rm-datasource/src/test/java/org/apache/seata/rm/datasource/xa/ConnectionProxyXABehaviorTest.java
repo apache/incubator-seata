@@ -25,11 +25,14 @@ import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.util.SeataXAResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -159,6 +162,91 @@ class ConnectionProxyXABehaviorTest {
             assertDoesNotThrow(() -> proxy.rollback());
             proxy.closeForce();
             verify(original, times(2)).close();
+        }
+    }
+
+    @Test
+    void dmPhaseTwoCommitRetriesLegacyIdentityWhenPerBranchXidIsMissing() throws Exception {
+        when(resource.getDbType()).thenReturn("dm");
+        try (MockedStatic<DefaultResourceManager> managers = mockStatic(DefaultResourceManager.class)) {
+            managers.when(DefaultResourceManager::get).thenReturn(manager);
+            proxy.setAutoCommit(false);
+            proxy.close();
+            // a branch prepared by an RM before the per-branch-gtrid format keeps the legacy
+            // physical identity: the rebuilt per-branch Xid misses it (XAER_NOTA) and the legacy
+            // identity must be retried once, so an upgraded RM can still resolve the branch
+            doThrow(new XAException(XAException.XAER_NOTA)).doNothing().when(xa).commit(any(), eq(false));
+            assertDoesNotThrow(() -> proxy.xaCommit(xid, 42, null));
+
+            ArgumentCaptor<Xid> committed = ArgumentCaptor.forClass(Xid.class);
+            verify(xa, times(2)).commit(committed.capture(), eq(false));
+            Xid perBranch = committed.getAllValues().get(0);
+            Xid legacy = committed.getAllValues().get(1);
+            assertEquals(XABranchXid.SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID, perBranch.getFormatId());
+            assertEquals(XABranchXid.SEATA_XA_XID_FORMAT_ID, legacy.getFormatId());
+            assertArrayEquals((xid + "-" + 42).getBytes(StandardCharsets.UTF_8), perBranch.getGlobalTransactionId());
+            assertArrayEquals(xid.getBytes(StandardCharsets.UTF_8), legacy.getGlobalTransactionId());
+        }
+    }
+
+    @Test
+    void dmPhaseTwoRollbackRetriesLegacyIdentityWhenPerBranchXidIsMissing() throws Exception {
+        when(resource.getDbType()).thenReturn("dm");
+        try (MockedStatic<DefaultResourceManager> managers = mockStatic(DefaultResourceManager.class)) {
+            managers.when(DefaultResourceManager::get).thenReturn(manager);
+            proxy.setAutoCommit(false);
+            proxy.close();
+            doThrow(new XAException(XAException.XAER_NOTA)).doNothing().when(xa).rollback(any());
+            assertDoesNotThrow(() -> proxy.xaRollback(xid, 42, null));
+
+            ArgumentCaptor<Xid> rolledBack = ArgumentCaptor.forClass(Xid.class);
+            verify(xa, times(2)).rollback(rolledBack.capture());
+            Xid legacy = rolledBack.getAllValues().get(1);
+            assertEquals(XABranchXid.SEATA_XA_XID_FORMAT_ID, legacy.getFormatId());
+            assertArrayEquals(xid.getBytes(StandardCharsets.UTF_8), legacy.getGlobalTransactionId());
+        }
+    }
+
+    @Test
+    void xaerNotaStaysPropagatingForDatabasesWithoutTheLegacyIdentity() throws Exception {
+        // non-DM databases keep the legacy encoding in phase one: XAER_NOTA must not trigger any
+        // retry and propagates to the TC retryable handling exactly as before
+        try (MockedStatic<DefaultResourceManager> managers = mockStatic(DefaultResourceManager.class)) {
+            managers.when(DefaultResourceManager::get).thenReturn(manager);
+            proxy.setAutoCommit(false);
+            proxy.close();
+            doThrow(new XAException(XAException.XAER_NOTA)).when(xa).commit(any(), eq(false));
+            assertThrows(XAException.class, () -> proxy.xaCommit(xid, 42, null));
+            verify(xa, times(1)).commit(any(), eq(false));
+        }
+    }
+
+    @Test
+    void longXidDmBranchSurvivesRegistrationPhaseOneAndPhaseTwoRollback() throws Exception {
+        // the overflow case from the review: the readable per-branch gtrid would exceed the X/Open
+        // limit, yet registration, xa start, prepare and the TC driven rollback must all work
+        String longXid = "2001:db8:1234:5678:90ab:cdef:1234:5678:8091:812345678901234567";
+        when(resource.getDbType()).thenReturn("dm");
+        when(manager.branchRegister(BranchType.XA, "resource", null, longXid, null, null))
+                .thenReturn(43L);
+        try (MockedStatic<DefaultResourceManager> managers = mockStatic(DefaultResourceManager.class)) {
+            managers.when(DefaultResourceManager::get).thenReturn(manager);
+            XAConnection xaConnection = mock(XAConnection.class);
+            when(xaConnection.getXAResource()).thenReturn(xa);
+            ConnectionProxyXA longXidProxy = new ConnectionProxyXA(original, xaConnection, resource, longXid);
+            longXidProxy.init();
+
+            // phase one: registration succeeds and the physical xa branch starts with a bounded gtrid
+            assertDoesNotThrow(() -> longXidProxy.setAutoCommit(false));
+            ArgumentCaptor<Xid> started = ArgumentCaptor.forClass(Xid.class);
+            verify(xa).start(started.capture(), eq(XAResource.TMNOFLAGS));
+            assertTrue(started.getValue().getGlobalTransactionId().length <= XABranchXid.MAX_GTRID_LENGTH);
+
+            longXidProxy.close();
+            // phase two: the TC driven rollback resolves without any encoder failure
+            doThrow(new XAException(XAException.XAER_NOTA)).doNothing().when(xa).rollback(any());
+            assertDoesNotThrow(() -> longXidProxy.xaRollback(longXid, 43L, null));
+            verify(xa, times(2)).rollback(any());
         }
     }
 }
