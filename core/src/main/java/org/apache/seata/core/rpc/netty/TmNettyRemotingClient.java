@@ -34,6 +34,7 @@ import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
@@ -214,6 +215,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
+            ServerVersionHolder.attach(NettyPoolKey.TransactionRole.TMROLE.name());
             if (isNotBlank(transactionServiceGroup)) {
                 initConnection();
             }
@@ -247,7 +249,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                     registerTMResponse.getVersion(),
                     channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel, registerTMRequest.getVersion());
+        getClientChannelManager().registerChannel(serverAddress, channel, registerTMResponse.getVersion());
+        ServerVersionHolder.putServerVersion(serverAddress, registerTMResponse.getVersion());
     }
 
     @Override
@@ -266,6 +269,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
+        ServerVersionHolder.detach(NettyPoolKey.TransactionRole.TMROLE.name());
     }
 
     @Override
