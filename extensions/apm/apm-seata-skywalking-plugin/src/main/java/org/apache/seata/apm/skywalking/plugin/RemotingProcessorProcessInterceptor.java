@@ -69,7 +69,7 @@ public class RemotingProcessorProcessInterceptor implements InstanceMethodsAroun
     public Object afterMethod(
             EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Object ret)
             throws Throwable {
-        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        RpcMessage rpcMessage = (RpcMessage) allArguments[1];
         if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
         }
