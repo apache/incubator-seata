@@ -19,6 +19,7 @@ package org.apache.seata.apm.skywalking.plugin;
 import io.netty.channel.Channel;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.core.rpc.netty.AbstractNettyRemoting;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.tag.StringTag;
@@ -33,6 +34,8 @@ import org.mockito.Mockito;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -52,7 +55,7 @@ public class NettyRemotingClientSendSyncInterceptorTest {
     public void setUp() throws Exception {
         interceptor = new NettyRemotingClientSendSyncInterceptor();
         enhancedInstance = mock(EnhancedInstance.class);
-        method = Object.class.getDeclaredMethod("toString");
+        method = AbstractNettyRemoting.class.getDeclaredMethod("sendSync", Channel.class, RpcMessage.class, long.class);
         result = mock(MethodInterceptResult.class);
     }
 
@@ -67,8 +70,8 @@ public class NettyRemotingClientSendSyncInterceptorTest {
         rpcMessage.setBody(request);
         rpcMessage.setHeadMap(new HashMap<>());
 
-        Object[] allArguments = new Object[] {channel, rpcMessage};
-        Class<?>[] argumentTypes = new Class[] {Channel.class, RpcMessage.class};
+        Object[] allArguments = new Object[] {channel, rpcMessage, 1000L};
+        Class<?>[] argumentTypes = method.getParameterTypes();
 
         try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
             AbstractSpan span = mock(AbstractSpan.class);
@@ -83,18 +86,27 @@ public class NettyRemotingClientSendSyncInterceptorTest {
             verify(span, atLeastOnce()).setComponent(any());
             verify(span, atLeastOnce()).setPeer(anyString());
             verify(span, atLeastOnce()).tag(any(StringTag.class), any(String.class));
-        }
 
-        // afterMethod should call ContextManager.stopSpan if body is AbstractMessage
-        Object[] afterArgs = new Object[] {rpcMessage};
-        try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
-            contextManagerMockedStatic.when(ContextManager::stopSpan).then(invocation -> null);
-
-            // When
-            interceptor.afterMethod(enhancedInstance, method, afterArgs, argumentTypes, null);
-
-            // Then
+            Object response = new Object();
+            assertSame(
+                    response, interceptor.afterMethod(enhancedInstance, method, allArguments, argumentTypes, response));
             contextManagerMockedStatic.verify(ContextManager::stopSpan, times(1));
+        }
+    }
+
+    @Test
+    public void testNullChannelDoesNotStopSpan() throws Throwable {
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setBody(new GlobalCommitRequest());
+        Object[] allArguments = new Object[] {null, rpcMessage, 1000L};
+        Class<?>[] argumentTypes = method.getParameterTypes();
+
+        try (MockedStatic<ContextManager> contextManager = Mockito.mockStatic(ContextManager.class)) {
+            interceptor.beforeMethod(enhancedInstance, method, allArguments, argumentTypes, result);
+            Object response = interceptor.afterMethod(enhancedInstance, method, allArguments, argumentTypes, null);
+
+            assertNull(response);
+            contextManager.verifyNoInteractions();
         }
     }
 }

@@ -72,7 +72,10 @@ public class NettyRemotingClientSendSyncInterceptor implements InstanceMethodsAr
     public Object afterMethod(
             EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Object ret)
             throws Throwable {
-        RpcMessage rpcMessage = (RpcMessage) allArguments[0];
+        if (allArguments[0] == null) {
+            return ret;
+        }
+        RpcMessage rpcMessage = (RpcMessage) allArguments[1];
         if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
         }
