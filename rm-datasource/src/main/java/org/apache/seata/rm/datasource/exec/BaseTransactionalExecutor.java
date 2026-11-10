@@ -32,6 +32,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizer;
@@ -556,7 +557,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                     List<Object> pkColumnValueList = pkValuesMap.get(pkColumnNameList.get(c));
                     int dataType =
                             tableMeta.getColumnMeta(pkColumnNameList.get(c)).getDataType();
-                    ps.setObject(paramIndex, pkColumnValueList.get(r), dataType);
+                    JdbcUtils.setObject(ps, paramIndex, pkColumnValueList.get(r), dataType);
                     paramIndex++;
                 }
             }

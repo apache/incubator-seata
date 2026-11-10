@@ -29,10 +29,13 @@ import org.mockito.Mockito;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -291,5 +294,36 @@ public class JdbcUtilsTest {
 
         verify(connection).close();
         verify(xaConnection).close();
+    }
+
+    @Test
+    public void testGetTargetSqlTypeKeepsValuesInRange() {
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(2147483647L, Types.INTEGER));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(-2147483648L, Types.INTEGER));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(5, Types.INTEGER));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(Long.MAX_VALUE, Types.BIGINT));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(BigInteger.valueOf(Long.MIN_VALUE), Types.BIGINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(null, Types.INTEGER));
+        assertEquals(Types.VARCHAR, JdbcUtils.getTargetSqlType(4294967295L, Types.VARCHAR));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.DECIMAL));
+    }
+
+    @Test
+    public void testGetTargetSqlTypeWidensUnsignedValuesAboveSignedRange() {
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(2147483648L, Types.INTEGER));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(4294967295L, Types.INTEGER));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(BigInteger.valueOf(4294967295L), Types.INTEGER));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("9223372036854775808"), Types.BIGINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.BIGINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.INTEGER));
+    }
+
+    @Test
+    public void testSetObjectUsesWidenedTargetSqlType() throws SQLException {
+        PreparedStatement ps = mock(PreparedStatement.class);
+        JdbcUtils.setObject(ps, 1, 4294967295L, Types.INTEGER);
+        JdbcUtils.setObject(ps, 2, 5L, Types.INTEGER);
+        verify(ps).setObject(1, 4294967295L, Types.BIGINT);
+        verify(ps).setObject(2, 5L, Types.INTEGER);
     }
 }

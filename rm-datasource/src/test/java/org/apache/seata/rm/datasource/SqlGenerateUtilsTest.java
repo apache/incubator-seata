@@ -16,12 +16,22 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class SqlGenerateUtilsTest {
 
@@ -63,5 +73,22 @@ class SqlGenerateUtilsTest {
         Assertions.assertEquals(
                 "select id,name from t_order where  (id,name) in ( (?,?),(?,?) ) union select id,name from t_order where  (id,name) in ( (?,?),(?,?) )",
                 sqlJoiner.toString());
+    }
+
+    @Test
+    void testSetParamForPkWithUnsignedValuesAboveSignedRange() throws Exception {
+        BigInteger unsignedBigint = new BigInteger("9223372036854775808");
+        Map<String, Field> row = new HashMap<>();
+        row.put("id", new Field("id", Types.INTEGER, 4294967295L));
+        row.put("big_id", new Field("big_id", Types.BIGINT, unsignedBigint));
+        List<String> pkNames = new ArrayList<>();
+        pkNames.add("id");
+        pkNames.add("big_id");
+        PreparedStatement pst = mock(PreparedStatement.class);
+
+        SqlGenerateUtils.setParamForPk(Collections.singletonList(row), pkNames, pst);
+
+        verify(pst).setObject(1, 4294967295L, Types.BIGINT);
+        verify(pst).setObject(2, unsignedBigint, Types.DECIMAL);
     }
 }

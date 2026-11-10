@@ -30,6 +30,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.JoinRecognizer;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLRecognizer;
@@ -201,7 +202,7 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             Map<String, Field> rowData = pkRowsList.get(i);
             for (String columnName : pkColumnNameList) {
                 Field pkField = rowData.get(columnName);
-                pst.setObject(paramIndex, pkField.getValue(), pkField.getType());
+                JdbcUtils.setObject(pst, paramIndex, pkField.getValue(), pkField.getType());
                 paramIndex++;
             }
         }

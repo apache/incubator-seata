@@ -26,9 +26,12 @@ import org.apache.seata.sqlparser.util.DbTypeParser;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public final class JdbcUtils {
 
@@ -127,5 +130,47 @@ public final class JdbcUtils {
         } catch (IllegalAccessException | InstantiationException e) {
             throw new SQLException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Set a parameter with the given JDBC type, using a wider integer type when the value does not fit it.
+     * <p>
+     * MySQL reports {@code INT UNSIGNED} as {@link Types#INTEGER} and {@code BIGINT UNSIGNED} as {@link Types#BIGINT},
+     * but the values are read as {@link Long} and {@link BigInteger}. When such a type is passed as the target type,
+     * the driver narrows the value, so {@code 4294967295} is sent as {@code -1}.
+     *
+     * @param ps the prepared statement
+     * @param parameterIndex the parameter index
+     * @param value the parameter value
+     * @param targetSqlType the JDBC type of the column
+     * @throws SQLException if the parameter can not be set
+     */
+    public static void setObject(PreparedStatement ps, int parameterIndex, Object value, int targetSqlType)
+            throws SQLException {
+        ps.setObject(parameterIndex, value, getTargetSqlType(value, targetSqlType));
+    }
+
+    static int getTargetSqlType(Object value, int targetSqlType) {
+        if (targetSqlType != Types.TINYINT
+                && targetSqlType != Types.SMALLINT
+                && targetSqlType != Types.INTEGER
+                && targetSqlType != Types.BIGINT) {
+            return targetSqlType;
+        }
+        int bitLength;
+        if (value instanceof BigInteger) {
+            bitLength = ((BigInteger) value).bitLength();
+        } else if (value instanceof Long) {
+            bitLength = BigInteger.valueOf((Long) value).bitLength();
+        } else {
+            return targetSqlType;
+        }
+        if (bitLength > Long.SIZE - 1) {
+            return Types.DECIMAL;
+        }
+        if (bitLength > Integer.SIZE - 1 && targetSqlType != Types.BIGINT) {
+            return Types.BIGINT;
+        }
+        return targetSqlType;
     }
 }
