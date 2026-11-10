@@ -36,6 +36,7 @@ import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 
 import java.io.IOException;
@@ -47,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -327,6 +329,8 @@ public class NettyRemotingServerBehaviorTest {
         mergedMessage.msgIds.add(101);
         mergedMessage.msgIds.add(102);
 
+        RemotingProcessor processor = mock(RemotingProcessor.class);
+        server.registerProcessor(request1.getTypeCode(), processor, null);
         rpcMessage.setBody(mergedMessage);
 
         RpcContext rpcContext = mock(RpcContext.class);
@@ -338,6 +342,15 @@ public class NettyRemotingServerBehaviorTest {
                     .thenReturn(rpcContext);
 
             server.processMessage(ctx, rpcMessage);
+            ArgumentCaptor<RpcMessage> captured = ArgumentCaptor.forClass(RpcMessage.class);
+            verify(processor, times(2)).process(eq(ctx), captured.capture());
+            for (int i = 0; i < 2; i++) {
+                RpcMessage child = captured.getAllValues().get(i);
+                assertEquals(mergedMessage.msgIds.get(i).intValue(), child.getId());
+                assertSame(mergedMessage.msgs.get(i), child.getBody());
+                assertEquals(rpcMessage.getCodec(), child.getCodec());
+                assertEquals(rpcMessage.getCompressor(), child.getCompressor());
+            }
         }
     }
 
@@ -356,6 +369,8 @@ public class NettyRemotingServerBehaviorTest {
         mergedMessage.msgs.add(request);
         mergedMessage.msgIds.add(101);
 
+        RemotingProcessor processor = mock(RemotingProcessor.class);
+        server.registerProcessor(mergedMessage.getTypeCode(), processor, null);
         rpcMessage.setBody(mergedMessage);
 
         RpcContext rpcContext = mock(RpcContext.class);
@@ -367,6 +382,7 @@ public class NettyRemotingServerBehaviorTest {
                     .thenReturn(rpcContext);
 
             server.processMessage(ctx, rpcMessage);
+            verify(processor).process(ctx, rpcMessage);
         }
     }
 
@@ -381,6 +397,8 @@ public class NettyRemotingServerBehaviorTest {
 
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName("test-tx");
+        RemotingProcessor processor = mock(RemotingProcessor.class);
+        server.registerProcessor(request.getTypeCode(), processor, null);
         rpcMessage.setBody(request);
 
         RpcContext rpcContext = mock(RpcContext.class);
@@ -392,6 +410,7 @@ public class NettyRemotingServerBehaviorTest {
                     .thenReturn(rpcContext);
 
             server.processMessage(ctx, rpcMessage);
+            verify(processor).process(ctx, rpcMessage);
         }
     }
 
@@ -405,6 +424,8 @@ public class NettyRemotingServerBehaviorTest {
         rpcMessage.setId(1);
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName("test-tx");
+        RemotingProcessor processor = mock(RemotingProcessor.class);
+        server.registerProcessor(request.getTypeCode(), processor, null);
         rpcMessage.setBody(request);
 
         RpcContext rpcContext = mock(RpcContext.class);
@@ -417,6 +438,7 @@ public class NettyRemotingServerBehaviorTest {
 
             AbstractNettyRemotingServer.ServerHandler handler = server.new ServerHandler();
             handler.channelRead(ctx, rpcMessage);
+            verify(processor).process(ctx, rpcMessage);
         }
     }
 

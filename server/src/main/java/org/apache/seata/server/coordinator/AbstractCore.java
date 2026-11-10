@@ -34,8 +34,8 @@ import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
 import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.server.lock.DelegatingLockManager;
 import org.apache.seata.server.lock.LockManager;
-import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
@@ -62,7 +62,8 @@ public abstract class AbstractCore implements Core {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractCore.class);
 
-    protected LockManager lockManager = LockerManagerFactory.getLockManager();
+    /** Retained for existing subclasses; resolves the current manager lazily. */
+    protected LockManager lockManager = new DelegatingLockManager();
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private int appDataErrSize;

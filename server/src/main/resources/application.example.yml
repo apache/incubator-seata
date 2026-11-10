@@ -189,6 +189,8 @@ seata:
     lock:
       mode: file
     file:
+      # support: default and other FileStoreProvider implementations
+      engine: default
       dir: sessionStore
       max-branch-session-size: 16384
       max-global-session-size: 512

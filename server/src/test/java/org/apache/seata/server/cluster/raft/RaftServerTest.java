@@ -18,17 +18,35 @@ package org.apache.seata.server.cluster.raft;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.store.LockMode;
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.LockerManagerFactory;
+import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.raft.session.RaftSessionManager;
+import org.apache.seata.server.storage.raft.store.RaftVGroupMappingStoreManager;
 import org.apache.seata.server.store.StoreConfig;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.IOException;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_ENABLED;
@@ -38,22 +56,66 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_TMF_ALGO
 
 public class RaftServerTest extends BaseSpringBootTest {
 
+    private static StoreMode originalStoreMode;
+    private static SessionMode originalSessionMode;
+    private static LockMode originalLockMode;
+    private static String originalRaftPort;
+    private static String originalRaftServerAddr;
+
     @BeforeAll
     public static void setUp(ApplicationContext context) {
+        originalStoreMode = (StoreMode) ReflectionTestUtils.getField(StoreConfig.class, "storeMode");
+        originalSessionMode = (SessionMode) ReflectionTestUtils.getField(StoreConfig.class, "sessionMode");
+        originalLockMode = (LockMode) ReflectionTestUtils.getField(StoreConfig.class, "lockMode");
+        originalRaftPort = System.getProperty("server.raftPort");
+        originalRaftServerAddr = System.getProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
+        DefaultCoordinator.getInstance().destroy();
         LockerManagerFactory.destroy();
-        SessionHolder.destroy();
-        RaftServerManager.destroy();
+    }
+
+    @BeforeEach
+    public void prepareSessionDependencies() throws IOException {
+        System.setProperty("server.raftPort", "0");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
+        ConfigurationCache.clear();
+        StoreConfig.setStartupParameter("raft", "raft", "raft");
+        // Provide real state-machine dependencies while leaving RaftServerManager uninitialized.
+        ReflectionTestUtils.setField(
+                SessionHolder.class,
+                "ROOT_SESSION_MANAGER",
+                new RaftSessionManager(SessionHolder.ROOT_SESSION_MANAGER_NAME));
+        ReflectionTestUtils.setField(
+                SessionHolder.class, "ROOT_VGROUP_MAPPING_MANAGER", new RaftVGroupMappingStoreManager());
+        LockerManagerFactory.init(LockMode.RAFT);
     }
 
     @AfterEach
     public void destroy() {
-        System.setProperty("server.raftPort", "0");
-        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
+        try {
+            SessionHolder.destroy();
+        } finally {
+            LockerManagerFactory.destroy();
+        }
+    }
+
+    @AfterAll
+    public static void restoreStore() {
+        ReflectionTestUtils.setField(StoreConfig.class, "storeMode", originalStoreMode);
+        ReflectionTestUtils.setField(StoreConfig.class, "sessionMode", originalSessionMode);
+        ReflectionTestUtils.setField(StoreConfig.class, "lockMode", originalLockMode);
+        restoreProperty("server.raftPort", originalRaftPort);
+        restoreProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, originalRaftServerAddr);
         ConfigurationCache.clear();
-        StoreConfig.setStartupParameter("file", "file", "file");
-        LockerManagerFactory.destroy();
-        SessionHolder.destroy();
-        RaftServerManager.destroy();
+        SessionHolder.init();
+        LockerManagerFactory.init();
+    }
+
+    private static void restoreProperty(String key, String value) {
+        if (value == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, value);
+        }
     }
 
     @Test
@@ -79,6 +141,25 @@ public class RaftServerTest extends BaseSpringBootTest {
         Assertions.assertNotNull(RaftServerManager.getCliClientServiceInstance());
         Assertions.assertFalse(RaftServerManager.isLeader("default"));
         RaftServerManager.start();
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+            value = GlobalStatus.class,
+            names = {"CommitRetryTimeout", "RollbackRetryTimeout"})
+    public void testReloadPreservesRetryTimeoutSession(GlobalStatus status) throws TransactionException {
+        SessionManager sessionManager = SessionHolder.getRootSessionManager();
+        GlobalSession session = new GlobalSession("app", "group", "transaction", 60000);
+        session.setStatus(status);
+        sessionManager.addGlobalSession(session);
+
+        // PR1 keeps the existing recovery policy for records awaiting manual intervention.
+        Assertions.assertAll(
+                () -> Assertions.assertThrows(
+                        ShouldNeverHappenException.class,
+                        () -> SessionHolder.reload(sessionManager.allSessions(), SessionMode.RAFT, false)),
+                () -> Assertions.assertSame(session, sessionManager.findGlobalSession(session.getXid())),
+                () -> Assertions.assertEquals(status, session.getStatus()));
     }
 
     @Test

@@ -93,7 +93,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                         byte compress = Byte.parseByte(compressType);
                         rpcMsg.setCompressor(compress);
                         Compressor compressor = CompressorFactory.getCompressor(compress);
-                        bodyBytes = compressor.decompress(bodyBytes);
+                        bodyBytes = compressor.decompress(bodyBytes, ProtocolConstants.MAX_FRAME_LENGTH);
                     }
                     String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
                     int codec = StringUtils.isBlank(codecValue)

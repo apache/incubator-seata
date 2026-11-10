@@ -48,8 +48,8 @@ echo "Set etcd3Addr=$etcd3Addr"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  keyBase64=$(printf "%s""$2" | base64)
-	valueBase64=$(printf "%s""$3" | base64)
+  keyBase64=$(printf "%s" "$2" | base64 | tr -d '\r\n')
+  valueBase64=$(printf "%s" "$3" | base64 | tr -d '\r\n')
   curl -X POST -H "${1}" -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$4/v3/kv/put" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat "${tempLog}") ]]; then
     echo " Please check the cluster status. "

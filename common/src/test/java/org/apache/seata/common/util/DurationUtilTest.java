@@ -17,10 +17,12 @@
 package org.apache.seata.common.util;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.format.DateTimeParseException;
 import java.util.stream.Stream;
 
 public class DurationUtilTest {
@@ -77,5 +79,31 @@ public class DurationUtilTest {
     @MethodSource("provideValueSetsTestParseThrowException")
     public void testParseThrowException(String str) {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> DurationUtil.parse(str));
+    }
+
+    @Test
+    public void testParseUnsupportedUnit() {
+        UnsupportedOperationException exception =
+                Assertions.assertThrows(UnsupportedOperationException.class, () -> DurationUtil.parse("8w"));
+
+        Assertions.assertEquals("\"8w\" can't parse to Duration", exception.getMessage());
+        Assertions.assertNull(exception.getCause());
+    }
+
+    @Test
+    public void testParseInvalidIso8601PreservesCause() {
+        UnsupportedOperationException exception =
+                Assertions.assertThrows(UnsupportedOperationException.class, () -> DurationUtil.parse("P"));
+
+        Assertions.assertTrue(exception.getCause() instanceof DateTimeParseException);
+        Assertions.assertEquals("P", ((DateTimeParseException) exception.getCause()).getParsedString());
+    }
+
+    @Test
+    public void testParseSimpleValueOverflowPreservesCause() {
+        UnsupportedOperationException exception = Assertions.assertThrows(
+                UnsupportedOperationException.class, () -> DurationUtil.parse("9223372036854775808ms"));
+
+        Assertions.assertTrue(exception.getCause() instanceof NumberFormatException);
     }
 }

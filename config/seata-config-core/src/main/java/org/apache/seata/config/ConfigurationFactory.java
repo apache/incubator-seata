@@ -220,11 +220,23 @@ public final class ConfigurationFactory {
         } catch (Exception exx) {
             LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }
+        ConfigurationProvider provider;
         try {
-            Configuration configuration = EnhancedServiceLoader.load(
-                            ConfigurationProvider.class, Objects.requireNonNull(configTypeName), false)
-                    .provide();
-            return configuration;
+            provider = EnhancedServiceLoader.load(
+                    ConfigurationProvider.class, Objects.requireNonNull(configTypeName), false);
+        } catch (EnhancedServiceNotFoundException exx) {
+            if (FILE_TYPE.equalsIgnoreCase(configTypeName) && exx.getCause() == null) {
+                LOGGER.debug("No optional file configuration provider found; using FileConfiguration");
+            } else {
+                LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
+            }
+            return null;
+        } catch (Exception exx) {
+            LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
+            return null;
+        }
+        try {
+            return provider.provide();
         } catch (Exception exx) {
             LOGGER.error("failed to load non-spring configuration :{}", exx.getMessage(), exx);
         }

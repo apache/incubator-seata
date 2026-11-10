@@ -1,0 +1,102 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: "RISC-V64 JDK 25 Build"
+
+on:
+  push:
+    branches: [ 2.x, develop, master ]
+  pull_request:
+    branches: [ 2.x, develop, master ]
+    types: [opened, reopened, synchronize]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build_riscv64-binary:
+    name: "build for RISC-V64 with JDK 25"
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master' || github.ref_name == '2.x') }}
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Set up QEMU for RISC-V64"
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+        with:
+          platforms: riscv64
+
+      - name: "Restore local maven repository cache for RISC-V64"
+        uses: actions/cache/restore@v4
+        id: cache-maven-repository-riscv64
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-riscv64-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-riscv64-maven-
+
+      - name: "Build with Maven and JDK 25 on RISC-V64 (Skip tests)"
+        run: |
+          mkdir -p "$HOME/.m2/repository"
+          docker run --rm \
+            --platform linux/riscv64 \
+            --volume "$GITHUB_WORKSPACE:/workspace" \
+            --volume "$HOME/.m2/repository:/root/.m2/repository" \
+            --workdir /workspace \
+            riscv64/ubuntu:24.04 \
+            bash -euxo pipefail -c '
+              apt-get update
+              apt-get install -y --no-install-recommends \
+                openjdk-25-jdk-headless \
+                ca-certificates \
+                curl \
+                protobuf-compiler \
+                protobuf-compiler-grpc-java-plugin
+              rm -rf /var/lib/apt/lists/*
+
+              test "$(uname -m)" = "riscv64"
+              test -x /usr/bin/protoc
+              test -x /usr/bin/grpc_java_plugin
+              uname -a
+              java -version
+              java -XshowSettings:properties -version 2>&1 | grep "os.arch = riscv64"
+              protoc --version
+              ./mvnw -version
+
+              ./mvnw -T 2 clean install \
+                -Prelease-seata \
+                -DskipTests \
+                -Dskip.installnodenpm=true \
+                -Dskip.npm=true \
+                -Dos-maven-plugin.version=1.7.1 \
+                -DprotocExecutable=/usr/bin/protoc \
+                -DprotocPluginExecutable=/usr/bin/grpc_java_plugin \
+                -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+            '
+
+      - name: "Save local maven repository cache for RISC-V64"
+        uses: actions/cache/save@v4
+        if: steps.cache-maven-repository-riscv64.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-riscv64-maven-${{ hashFiles('**/pom.xml') }}

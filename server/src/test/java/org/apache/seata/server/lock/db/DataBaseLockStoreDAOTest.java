@@ -23,13 +23,14 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.LockDO;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.storage.db.lock.LockStoreDataBaseDAO;
-import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.ApplicationContext;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,11 +46,14 @@ public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
 
     static BasicDataSource dataSource = null;
 
+    @TempDir
+    static Path databaseDirectory;
+
     @BeforeAll
     public static void start(ApplicationContext context) {
         dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:./db_store/lock");
+        dataSource.setUrl("jdbc:h2:" + databaseDirectory.resolve("lock"));
         dataSource.setUsername("sa");
         dataSource.setPassword("");
 
@@ -260,7 +264,7 @@ public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
             IOUtil.close(rs, conn);
         }
 
-        List<LockDO> lockDOs_2 = new ArrayList<>();
+        List<LockDO> lockDOs2 = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
@@ -270,10 +274,10 @@ public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
             lock.setRowKey("test_isLockable_cannot-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
-            lockDOs_2.add(lock);
+            lockDOs2.add(lock);
         }
 
-        boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2);
+        boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs2);
         Assertions.assertFalse(ret2);
     }
 
@@ -311,7 +315,7 @@ public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
             IOUtil.close(rs, conn);
         }
 
-        List<LockDO> lockDOs_2 = new ArrayList<>();
+        List<LockDO> lockDOs2 = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
@@ -321,15 +325,15 @@ public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
             lock.setRowKey("test_isLockable_cannot1-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
-            lockDOs_2.add(lock);
+            lockDOs2.add(lock);
         }
 
-        boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2, true, true);
+        boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs2, true, true);
         Assertions.assertFalse(ret2);
     }
 
     @AfterAll
-    public static void clearStoreDB() {
-        FileUtils.deleteRecursive("db_store", true);
+    public static void clearStoreDB() throws SQLException {
+        dataSource.close();
     }
 }

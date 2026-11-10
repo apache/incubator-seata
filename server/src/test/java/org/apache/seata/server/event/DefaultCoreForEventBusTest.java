@@ -29,9 +29,7 @@ import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.coordinator.DefaultCoordinatorTest;
 import org.apache.seata.server.coordinator.DefaultCore;
 import org.apache.seata.server.metrics.MetricsManager;
-import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,7 +54,6 @@ public class DefaultCoreForEventBusTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) throws InterruptedException {
-        StoreUtil.deleteDataFile();
         Thread.sleep(5000);
     }
 
@@ -102,12 +99,9 @@ public class DefaultCoreForEventBusTest extends BaseSpringBootTest {
             }
         }
         RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
-        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
-        coordinator.init();
         GlobalTransactionEventSubscriber subscriber = null;
         try {
             DefaultCore core = new DefaultCore(remotingServer);
-            SessionHolder.init(null);
             subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().unregisterAll();
             EventBusManager.get().register(subscriber);

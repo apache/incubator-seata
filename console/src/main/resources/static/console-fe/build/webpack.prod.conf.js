@@ -32,7 +32,13 @@ module.exports = Object.assign({}, base, {
       new TerserPlugin({
         parallel: true,
       }),
-      new CssMinimizerPlugin(),
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          // The patched postcss-selector-parser treats preserved multi-line
+          // third-party license banners as selectors while merging rules.
+          preset: ['default', { mergeRules: false }],
+        },
+      }),
     ],
   },
   plugins: [

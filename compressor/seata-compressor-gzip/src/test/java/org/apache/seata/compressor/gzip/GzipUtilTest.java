@@ -137,4 +137,13 @@ public class GzipUtilTest {
 
         Assertions.assertEquals(text, new String(secondDecompressed, StandardCharsets.UTF_8));
     }
+
+    @Test
+    public void testLimitAcrossMembers() throws Exception {
+        java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+        bytes.write(GzipUtil.compress(new byte[1024]));
+        bytes.write(GzipUtil.compress(new byte[1024]));
+        Assertions.assertArrayEquals(new byte[2048], GzipUtil.decompress(bytes.toByteArray(), 2048));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> GzipUtil.decompress(bytes.toByteArray(), 2047));
+    }
 }

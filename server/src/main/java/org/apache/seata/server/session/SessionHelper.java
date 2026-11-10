@@ -68,11 +68,6 @@ public class SessionHelper {
 
     private static final String GROUP = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
 
-    /**
-     * The instance of DefaultCoordinator
-     */
-    private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
-
     private static final boolean DELAY_HANDLE_SESSION = !(Objects.equals(StoreConfig.getSessionMode(), SessionMode.FILE)
             || Objects.equals(StoreConfig.getSessionMode(), SessionMode.RAFT));
 
@@ -439,7 +434,7 @@ public class SessionHelper {
             throws TransactionException {
         globalSession.unlockBranch(branchSession);
         if (isEnableBranchRemoveAsync() && isAsync) {
-            COORDINATOR.doBranchRemoveAsync(globalSession, branchSession);
+            DefaultCoordinator.getInstance().doBranchRemoveAsync(globalSession, branchSession);
         } else {
             globalSession.removeBranch(branchSession);
         }
@@ -464,7 +459,7 @@ public class SessionHelper {
             }
         }
         if (isAsyncRemove) {
-            COORDINATOR.doBranchRemoveAllAsync(globalSession);
+            DefaultCoordinator.getInstance().doBranchRemoveAllAsync(globalSession);
         }
     }
 
