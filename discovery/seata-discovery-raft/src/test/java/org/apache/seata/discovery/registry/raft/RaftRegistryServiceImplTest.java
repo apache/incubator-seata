@@ -54,6 +54,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -130,17 +131,20 @@ class RaftRegistryServiceImplTest {
 
     @AfterEach
     public void tearDown() throws Exception {
-        // Reset the CLOSED flag after each test
-        Field closedField = RaftRegistryServiceImpl.class.getDeclaredField("CLOSED");
-        closedField.setAccessible(true);
-        AtomicBoolean closed = (AtomicBoolean) closedField.get(null);
-        closed.set(false);
+        setClosed(true);
 
         Method closeHttp2WatchMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("closeHttp2Watch");
         closeHttp2WatchMethod.setAccessible(true);
         closeHttp2WatchMethod.invoke(null);
 
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) getStaticField("REFRESH_METADATA_EXECUTOR");
+        if (executor != null) {
+            executor.shutdownNow();
+            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS), "Metadata worker should terminate after close");
+            setStaticField("REFRESH_METADATA_EXECUTOR", null);
+        }
         setStaticField("HTTP2_WATCH_GROUP", null);
+        setClosed(false);
     }
 
     /**
@@ -1273,11 +1277,19 @@ class RaftRegistryServiceImplTest {
 
             assertTrue(invokeWatchHttp2(clusterName));
             assertTrue(invokeWatchHttp2(clusterName));
+            assertSame(watch, getStaticField("HTTP2_WATCH"));
+            verify(watch, times(2)).next();
+            Metadata metadata = (Metadata) getStaticField("METADATA");
+            assertEquals(3L, metadata.getClusterTerm(clusterName).get(group).longValue());
 
             mockedStatic.verify(
                     () -> HttpClientUtil.watchPost(
                             anyString(), anyMap(), anyMap(), eq(ClusterWatchEvent.class), anyInt()),
                     times(1));
+        } finally {
+            tearDown();
+            verify(watch, times(1)).close();
+            assertNull(getStaticField("HTTP2_WATCH"));
         }
     }
 
@@ -1763,7 +1775,6 @@ class RaftRegistryServiceImplTest {
     public void startQueryMetadataTest() throws Exception {
         Field executorField = RaftRegistryServiceImpl.class.getDeclaredField("REFRESH_METADATA_EXECUTOR");
         executorField.setAccessible(true);
-        executorField.set(null, null);
 
         Method startQueryMetadataMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("startQueryMetadata");
         startQueryMetadataMethod.setAccessible(true);
@@ -1772,9 +1783,6 @@ class RaftRegistryServiceImplTest {
         ThreadPoolExecutor executor = (ThreadPoolExecutor) executorField.get(null);
         assertNotNull(executor, "Thread pool should be created");
         assertTrue(executor.getCorePoolSize() > 0, "Thread pool should have core threads");
-
-        executor.shutdownNow();
-        executorField.set(null, null);
     }
 
     /**
@@ -1784,7 +1792,6 @@ class RaftRegistryServiceImplTest {
     public void startQueryMetadataMultipleCallsTest() throws Exception {
         Field executorField = RaftRegistryServiceImpl.class.getDeclaredField("REFRESH_METADATA_EXECUTOR");
         executorField.setAccessible(true);
-        executorField.set(null, null);
 
         Method startQueryMetadataMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("startQueryMetadata");
         startQueryMetadataMethod.setAccessible(true);
@@ -1796,8 +1803,5 @@ class RaftRegistryServiceImplTest {
         ThreadPoolExecutor executor2 = (ThreadPoolExecutor) executorField.get(null);
 
         assertSame(executor1, executor2, "Multiple calls should return the same thread pool instance");
-
-        executor1.shutdownNow();
-        executorField.set(null, null);
     }
 }

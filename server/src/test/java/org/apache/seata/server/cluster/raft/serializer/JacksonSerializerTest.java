@@ -16,11 +16,18 @@
  */
 package org.apache.seata.server.cluster.raft.serializer;
 
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -76,5 +83,50 @@ public class JacksonSerializerTest {
         assertThrows(RuntimeException.class, () -> {
             serializer.serialize(null);
         });
+    }
+
+    @Test
+    public void testDeserializeLegacyClassName() {
+        RaftBaseMsg original = new RaftBaseMsg();
+        original.setMsgType(RaftSyncMsgType.ADD_GLOBAL_SESSION);
+        original.setGroup("legacy-group");
+        String json = new String(serializer.serialize(original), StandardCharsets.UTF_8)
+                .replace(RaftBaseMsg.class.getName(), "io.seata.server.cluster.raft.sync.msg.RaftBaseMsg");
+
+        RaftBaseMsg deserialized = serializer.deserialize(json.getBytes(StandardCharsets.UTF_8));
+        assertEquals(original.getMsgType(), deserialized.getMsgType());
+        assertEquals(original.getGroup(), deserialized.getGroup());
+    }
+
+    @Test
+    public void testSerializeAndDeserializeHashMap() {
+        Map<String, String> original = new HashMap<>();
+        original.put("vgroup", "default");
+        Map<String, String> deserialized = serializer.deserialize(serializer.serialize(original));
+        assertEquals(original, deserialized);
+    }
+
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                "org.apache.seataOther.Marker",
+                "org.apache.seata",
+                "io.seata.serverOther.Marker",
+                "io.seata.server",
+                "java.util.HashMapOther",
+                "java.util.HashMap$Node",
+                "java.util.HashMap.Other",
+                "java.lang.String"
+            })
+    public void testRejectClassNamesOutsideAllowedScope(String className) {
+        byte[] bytes = ("{\"obj\":\"e30=\",\"clz\":\"" + className + "\"}").getBytes(StandardCharsets.UTF_8);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> serializer.deserialize(bytes));
+        Throwable cause = exception;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+        // A missing class must be rejected by name, before attempting to load it.
+        assertInstanceOf(SeataRuntimeException.class, cause);
+        assertTrue(cause.getMessage().contains("is not permitted"));
     }
 }

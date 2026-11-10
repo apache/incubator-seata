@@ -21,6 +21,7 @@ import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.AbstractNettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
+import org.apache.seata.core.rpc.processor.server.UnregRmProcessor;
 import org.apache.seata.mockserver.processor.MockHeartbeatProcessor;
 import org.apache.seata.mockserver.processor.MockOnReqProcessor;
 import org.apache.seata.mockserver.processor.MockOnRespProcessor;
@@ -104,6 +105,7 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
         // 3. registry rm reg processor
         MockRegisterProcessor regRmProcessor = new MockRegisterProcessor(this, MockRegisterProcessor.Role.RM);
         super.registerProcessor(MessageType.TYPE_REG_RM, regRmProcessor, messageExecutor);
+        super.registerProcessor(MessageType.TYPE_UNREG_RM, new UnregRmProcessor(this), messageExecutor);
 
         // 4. registry tm reg processor
         MockRegisterProcessor regTmProcessor = new MockRegisterProcessor(this, MockRegisterProcessor.Role.TM);

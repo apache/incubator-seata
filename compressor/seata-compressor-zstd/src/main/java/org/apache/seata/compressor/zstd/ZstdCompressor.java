@@ -35,4 +35,9 @@ public class ZstdCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return ZstdUtil.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return ZstdUtil.decompress(bytes, maxOutputSize);
+    }
 }

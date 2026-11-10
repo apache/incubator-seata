@@ -19,7 +19,7 @@ package org.apache.seata.mcp.tools;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.service.ConsoleApiService;
-import org.springaicommunity.mcp.annotation.McpTool;
+import org.springframework.ai.mcp.annotation.McpTool;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
