@@ -52,12 +52,15 @@ public class Fastjson2ConcurrentRefDeserializationTest {
     public static void main(String[] args) throws Exception {
         Fastjson2UndoLogParser parser =
                 (Fastjson2UndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, Fastjson2UndoLogParser.NAME);
+        Fastjson2UndoLogParser otherParser = new Fastjson2UndoLogParser();
+        otherParser.init();
+        Fastjson2UndoLogParser[] parsers = {parser, otherParser};
         byte[] bytes = parser.encode(referenceHeavyUndoLog());
 
-        int nullTasks =
-                runConcurrentStress(parser, bytes, Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200));
-        if (nullTasks > 0) {
-            throw new AssertionError("Concurrent deserialization dropped $ref fields: " + nullTasks);
+        int invalidTasks =
+                runConcurrentStress(parsers, bytes, Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200));
+        if (invalidTasks > 0) {
+            throw new AssertionError("Concurrent deserialization lost reference identity: " + invalidTasks);
         }
     }
 
@@ -92,41 +95,46 @@ public class Fastjson2ConcurrentRefDeserializationTest {
         return tableRecords;
     }
 
-    private static int countNullRefFields(BranchUndoLog branchUndoLog) {
+    private static int countInvalidRefFields(BranchUndoLog branchUndoLog) {
         if (branchUndoLog == null || branchUndoLog.getSqlUndoLogs() == null) {
             return 1;
         }
-        int nullCount = 0;
+        int invalidCount = 0;
+        TableRecords sharedImage = branchUndoLog.getSqlUndoLogs().get(0).getBeforeImage();
         for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
             if (sqlUndoLog == null) {
-                nullCount++;
+                invalidCount++;
                 continue;
             }
             if (sqlUndoLog.getBeforeImage() == null
+                    || sqlUndoLog.getBeforeImage() != sharedImage
                     || sqlUndoLog.getBeforeImage().getRows() == null) {
-                nullCount++;
+                invalidCount++;
             }
-            if (sqlUndoLog.getAfterImage() == null || sqlUndoLog.getAfterImage().getRows() == null) {
-                nullCount++;
+            if (sqlUndoLog.getAfterImage() == null
+                    || sqlUndoLog.getAfterImage() != sharedImage
+                    || sqlUndoLog.getAfterImage().getRows() == null) {
+                invalidCount++;
             }
         }
-        return nullCount;
+        return invalidCount;
     }
 
-    private static int runConcurrentStress(Fastjson2UndoLogParser parser, byte[] bytes, int threadCount)
+    private static int runConcurrentStress(Fastjson2UndoLogParser[] parsers, byte[] bytes, int threadCount)
             throws Exception {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         CyclicBarrier barrier = new CyclicBarrier(threadCount);
         CountDownLatch endLatch = new CountDownLatch(threadCount);
-        AtomicInteger nullTasks = new AtomicInteger();
+        AtomicInteger invalidTasks = new AtomicInteger();
         for (int i = 0; i < threadCount; i++) {
+            Fastjson2UndoLogParser parser = parsers[i % parsers.length];
             Thread thread = new Thread(
                     () -> {
                         try {
                             barrier.await(CONCURRENT_TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                            if (countNullRefFields(parser.decode(bytes)) > 0) {
-                                nullTasks.incrementAndGet();
+                            if (countInvalidRefFields(parser.decode(bytes)) > 0) {
+                                invalidTasks.incrementAndGet();
                             }
                         } catch (Throwable throwable) {
                             failure.compareAndSet(null, throwable);
@@ -144,12 +152,14 @@ public class Fastjson2ConcurrentRefDeserializationTest {
             throw new AssertionError("Concurrent deserialization failed", failure.get());
         }
 
-        return nullTasks.get();
+        return invalidTasks.get();
     }
 
     private static void assertChildProcessSucceeds() throws Exception {
         Process process = new ProcessBuilder(
                         System.getProperty("java.home") + "/bin/java",
+                        "-Dseata.fastjson2.concurrentRef.threads="
+                                + Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200),
                         "-cp",
                         System.getProperty("java.class.path"),
                         Fastjson2ConcurrentRefDeserializationTest.class.getName())

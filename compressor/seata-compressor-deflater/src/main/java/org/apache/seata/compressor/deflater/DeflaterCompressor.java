@@ -31,4 +31,9 @@ public class DeflaterCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return DeflaterUtil.decompress(bytes);
     }
+
+    @Override
+    public byte[] decompress(byte[] bytes, int maxOutputSize) {
+        return DeflaterUtil.decompress(bytes, maxOutputSize);
+    }
 }

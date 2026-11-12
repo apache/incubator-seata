@@ -30,6 +30,27 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Enhanced service loader test.
  */
 public class EnhancedServiceLoaderTest {
+    @Test
+    public void providerConstructionFailuresPreserveTheirCause() {
+        EnhancedServiceNotFoundException named = Assertions.assertThrows(
+                EnhancedServiceNotFoundException.class,
+                () -> EnhancedServiceLoader.load(FailingService.class, "broken"));
+        Assertions.assertNotNull(named.getCause());
+        Assertions.assertTrue(named.getCause().getMessage().contains("could not be instantiated"));
+        EnhancedServiceNotFoundException defaultProvider = Assertions.assertThrows(
+                EnhancedServiceNotFoundException.class, () -> EnhancedServiceLoader.load(FailingService.class));
+        Assertions.assertNotNull(defaultProvider.getCause());
+    }
+
+    public interface FailingService {}
+
+    @LoadLevel(name = "broken")
+    public static class BrokenProvider implements FailingService {
+        public BrokenProvider() {
+            throw new IllegalStateException("injected provider constructor failure");
+        }
+    }
+
     /**
      * Test load by class and class loader.
      */
