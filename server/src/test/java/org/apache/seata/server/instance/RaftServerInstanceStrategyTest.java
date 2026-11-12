@@ -45,6 +45,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.StandardEnvironment;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,6 +64,10 @@ import static org.mockito.Mockito.when;
 class RaftServerInstanceStrategyTest extends BaseSpringBootTest {
 
     private RaftServerInstanceStrategy strategy;
+    private MockedStatic<Instance> instances;
+    private Instance sharedInstance;
+    private Node.Endpoint originalTransaction;
+    private Object originalEnvironment;
 
     private ServerRaftProperties raftProperties;
 
@@ -71,6 +77,13 @@ class RaftServerInstanceStrategyTest extends BaseSpringBootTest {
 
     @BeforeEach
     void setUp() {
+        sharedInstance = Instance.getInstance();
+        originalTransaction = sharedInstance.getTransaction();
+        originalEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        Instance isolatedInstance = mock(Instance.class, Mockito.CALLS_REAL_METHODS);
+        instances = Mockito.mockStatic(Instance.class);
+        instances.when(Instance::getInstance).thenReturn(isolatedInstance);
+        resetInstance();
         strategy = new RaftServerInstanceStrategy();
         raftProperties = new ServerRaftProperties();
         namingProps = new RegistryNamingServerProperties();
@@ -87,8 +100,16 @@ class RaftServerInstanceStrategyTest extends BaseSpringBootTest {
 
     @AfterEach
     void tearDown() {
-        resetInstance();
-        // Do not put null into ObjectHolder to avoid ConcurrentHashMap NPE
+        instances.close();
+        if (originalEnvironment != null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, originalEnvironment);
+        } else {
+            Map<String, Object> objects =
+                    (Map<String, Object>) ReflectionTestUtils.getField(ObjectHolder.class, "OBJECT_MAP");
+            objects.remove(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        }
+        assertSame(sharedInstance, Instance.getInstance());
+        assertSame(originalTransaction, sharedInstance.getTransaction());
     }
 
     @Test
