@@ -133,17 +133,20 @@ public final class JdbcUtils {
     }
 
     /**
-     * Set a parameter with the given JDBC type, using a wider integer type when the value does not fit it.
+     * Set a parameter with the given JDBC type, widening the integer type when the value does not fit it.
      * <p>
-     * MySQL reports {@code INT UNSIGNED} as {@link Types#INTEGER} and {@code BIGINT UNSIGNED} as {@link Types#BIGINT},
-     * but the values are read as {@link Long} and {@link BigInteger}. When such a type is passed as the target type,
-     * the driver narrows the value, so {@code 4294967295} is sent as {@code -1}.
+     * MySQL reports unsigned integer columns as {@link Types#TINYINT}, {@link Types#SMALLINT},
+     * {@link Types#INTEGER} or {@link Types#BIGINT}. A value above that signed range is read as {@link Byte},
+     * {@link Short}, {@link Integer}, {@link Long} or {@link BigInteger}. Passing the column type to
+     * {@code setObject} makes the driver narrow it, so {@code 4294967295} is sent as {@code -1}. The type is
+     * widened to the narrowest of {@code SMALLINT}, {@code INTEGER}, {@code BIGINT} and {@code DECIMAL} that can
+     * hold the value.
      *
      * @param ps the prepared statement
      * @param parameterIndex the parameter index
      * @param value the parameter value
      * @param targetSqlType the JDBC type of the column
-     * @throws SQLException if the parameter can not be set
+     * @throws SQLException if the parameter cannot be set
      */
     public static void setObject(PreparedStatement ps, int parameterIndex, Object value, int targetSqlType)
             throws SQLException {
@@ -151,26 +154,64 @@ public final class JdbcUtils {
     }
 
     static int getTargetSqlType(Object value, int targetSqlType) {
-        if (targetSqlType != Types.TINYINT
-                && targetSqlType != Types.SMALLINT
-                && targetSqlType != Types.INTEGER
-                && targetSqlType != Types.BIGINT) {
+        int signedBits = signedBits(targetSqlType);
+        if (signedBits < 0) {
             return targetSqlType;
         }
-        int bitLength;
-        if (value instanceof BigInteger) {
-            bitLength = ((BigInteger) value).bitLength();
-        } else if (value instanceof Long) {
-            bitLength = BigInteger.valueOf((Long) value).bitLength();
-        } else {
+        BigInteger number = toBigInteger(value);
+        if (number == null) {
             return targetSqlType;
         }
-        if (bitLength > Long.SIZE - 1) {
-            return Types.DECIMAL;
+        int bitLength = number.bitLength();
+        if (bitLength <= signedBits) {
+            return targetSqlType;
         }
-        if (bitLength > Integer.SIZE - 1 && targetSqlType != Types.BIGINT) {
+        if (bitLength <= Short.SIZE - 1) {
+            return Types.SMALLINT;
+        }
+        if (bitLength <= Integer.SIZE - 1) {
+            return Types.INTEGER;
+        }
+        if (bitLength <= Long.SIZE - 1) {
             return Types.BIGINT;
         }
-        return targetSqlType;
+        return Types.DECIMAL;
+    }
+
+    /**
+     * Signed magnitude of the JDBC integer type, excluding the sign bit. Negative when the type is not an integer.
+     */
+    private static int signedBits(int targetSqlType) {
+        switch (targetSqlType) {
+            case Types.TINYINT:
+                return Byte.SIZE - 1;
+            case Types.SMALLINT:
+                return Short.SIZE - 1;
+            case Types.INTEGER:
+                return Integer.SIZE - 1;
+            case Types.BIGINT:
+                return Long.SIZE - 1;
+            default:
+                return -1;
+        }
+    }
+
+    private static BigInteger toBigInteger(Object value) {
+        if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        }
+        if (value instanceof Long) {
+            return BigInteger.valueOf((Long) value);
+        }
+        if (value instanceof Integer) {
+            return BigInteger.valueOf((Integer) value);
+        }
+        if (value instanceof Short) {
+            return BigInteger.valueOf((Short) value);
+        }
+        if (value instanceof Byte) {
+            return BigInteger.valueOf((Byte) value);
+        }
+        return null;
     }
 }

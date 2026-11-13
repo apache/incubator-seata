@@ -297,33 +297,80 @@ public class JdbcUtilsTest {
     }
 
     @Test
-    public void testGetTargetSqlTypeKeepsValuesInRange() {
+    public void testGetTargetSqlTypeKeepsValuesInsideSignedRange() {
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType((byte) 127, Types.TINYINT));
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType((byte) -128, Types.TINYINT));
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType((short) 127, Types.TINYINT));
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType(127, Types.TINYINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType((short) 32767, Types.SMALLINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType((short) -32768, Types.SMALLINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType(32767, Types.SMALLINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(2147483647, Types.INTEGER));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(-2147483648, Types.INTEGER));
         assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(2147483647L, Types.INTEGER));
         assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(-2147483648L, Types.INTEGER));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType((byte) 5, Types.INTEGER));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType((short) 5, Types.INTEGER));
         assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(5, Types.INTEGER));
         assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(Long.MAX_VALUE, Types.BIGINT));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(Long.MIN_VALUE, Types.BIGINT));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(BigInteger.valueOf(Long.MAX_VALUE), Types.BIGINT));
         assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(BigInteger.valueOf(Long.MIN_VALUE), Types.BIGINT));
-        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(null, Types.INTEGER));
-        assertEquals(Types.VARCHAR, JdbcUtils.getTargetSqlType(4294967295L, Types.VARCHAR));
-        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.DECIMAL));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(0, Types.INTEGER));
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType((byte) -1, Types.TINYINT));
     }
 
     @Test
-    public void testGetTargetSqlTypeWidensUnsignedValuesAboveSignedRange() {
+    public void testGetTargetSqlTypeWidensByEachIntegerRange() {
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType((short) 128, Types.TINYINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType(128, Types.TINYINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType(255, Types.TINYINT));
+        assertEquals(Types.SMALLINT, JdbcUtils.getTargetSqlType(-129, Types.TINYINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(32768, Types.TINYINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(32768, Types.SMALLINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(65535, Types.SMALLINT));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(-32769, Types.SMALLINT));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(2147483648L, Types.TINYINT));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(2147483648L, Types.SMALLINT));
         assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(2147483648L, Types.INTEGER));
         assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(4294967295L, Types.INTEGER));
+        assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(-2147483649L, Types.INTEGER));
         assertEquals(Types.BIGINT, JdbcUtils.getTargetSqlType(BigInteger.valueOf(4294967295L), Types.INTEGER));
-        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("9223372036854775808"), Types.BIGINT));
-        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.BIGINT));
-        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.INTEGER));
+        BigInteger unsignedBigint = new BigInteger("9223372036854775808");
+        BigInteger maxUnsignedBigint = new BigInteger("18446744073709551615");
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(unsignedBigint, Types.TINYINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(unsignedBigint, Types.SMALLINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(unsignedBigint, Types.INTEGER));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(unsignedBigint, Types.BIGINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(maxUnsignedBigint, Types.BIGINT));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(maxUnsignedBigint, Types.INTEGER));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("-9223372036854775809"), Types.BIGINT));
+    }
+
+    @Test
+    public void testGetTargetSqlTypeLeavesNonIntegralValuesAndTypes() {
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(null, Types.INTEGER));
+        assertEquals(Types.TINYINT, JdbcUtils.getTargetSqlType("255", Types.TINYINT));
+        assertEquals(Types.VARCHAR, JdbcUtils.getTargetSqlType(4294967295L, Types.VARCHAR));
+        assertEquals(Types.DECIMAL, JdbcUtils.getTargetSqlType(new BigInteger("18446744073709551615"), Types.DECIMAL));
+        assertEquals(Types.INTEGER, JdbcUtils.getTargetSqlType(1.5d, Types.INTEGER));
     }
 
     @Test
     public void testSetObjectUsesWidenedTargetSqlType() throws SQLException {
         PreparedStatement ps = mock(PreparedStatement.class);
-        JdbcUtils.setObject(ps, 1, 4294967295L, Types.INTEGER);
-        JdbcUtils.setObject(ps, 2, 5L, Types.INTEGER);
-        verify(ps).setObject(1, 4294967295L, Types.BIGINT);
-        verify(ps).setObject(2, 5L, Types.INTEGER);
+        BigInteger unsignedBigint = new BigInteger("9223372036854775808");
+        JdbcUtils.setObject(ps, 1, 255, Types.TINYINT);
+        JdbcUtils.setObject(ps, 2, 65535, Types.SMALLINT);
+        JdbcUtils.setObject(ps, 3, 4294967295L, Types.INTEGER);
+        JdbcUtils.setObject(ps, 4, unsignedBigint, Types.BIGINT);
+        JdbcUtils.setObject(ps, 5, 5L, Types.INTEGER);
+        JdbcUtils.setObject(ps, 6, (byte) 7, Types.TINYINT);
+        verify(ps).setObject(1, 255, Types.SMALLINT);
+        verify(ps).setObject(2, 65535, Types.INTEGER);
+        verify(ps).setObject(3, 4294967295L, Types.BIGINT);
+        verify(ps).setObject(4, unsignedBigint, Types.DECIMAL);
+        verify(ps).setObject(5, 5L, Types.INTEGER);
+        verify(ps).setObject(6, (byte) 7, Types.TINYINT);
     }
 }
