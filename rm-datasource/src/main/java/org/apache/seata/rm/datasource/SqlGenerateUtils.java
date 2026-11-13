@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 
 import java.sql.PreparedStatement;
@@ -131,7 +132,7 @@ public class SqlGenerateUtils {
             Map<String, Field> rowData = pkRowsList.get(i);
             for (String columnName : pkColumnNameList) {
                 Field pkField = rowData.get(columnName);
-                pst.setObject(paramIndex, pkField.getValue(), pkField.getType());
+                JdbcUtils.setObject(pst, paramIndex, pkField.getValue(), pkField.getType());
                 paramIndex++;
             }
         }

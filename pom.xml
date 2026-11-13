@@ -515,6 +515,9 @@
                 <configuration>
                     <excludes>
                         <exclude>**/test/**</exclude>
+                        <!-- Druid is copied into target/classes/lib for the SQL parser. Leave that jar out of
+                             every report so Codecov does not merge it into Seata sources with the same file name. -->
+                        <exclude>**/lib/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -24,6 +24,7 @@ import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.PreparedStatement;
@@ -64,7 +65,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         int undoIndex = 0;
         for (Field pkField : pkValueList) {
             undoIndex++;
-            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+            JdbcUtils.setObject(undoPST, undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 

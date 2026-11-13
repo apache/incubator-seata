@@ -30,6 +30,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.slf4j.Logger;
@@ -204,7 +205,7 @@ public abstract class AbstractUndoExecutor {
                 undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
-                undoPST.setObject(undoIndex, value, type);
+                JdbcUtils.setObject(undoPST, undoIndex, value, type);
             }
         }
         // PK is always at last.
@@ -213,7 +214,7 @@ public abstract class AbstractUndoExecutor {
         // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
         for (Field pkField : pkValueList) {
             undoIndex++;
-            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+            JdbcUtils.setObject(undoPST, undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 
@@ -325,7 +326,7 @@ public abstract class AbstractUndoExecutor {
                         List<Field> pkColumnValueList = pkRowValues.get(pkNameList.get(c));
                         Field field = pkColumnValueList.get(totalRowIndex + r);
                         int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
-                        statement.setObject(paramIndex, field.getValue(), dataType);
+                        JdbcUtils.setObject(statement, paramIndex, field.getValue(), dataType);
                         paramIndex++;
                     }
                 }
