@@ -17,6 +17,11 @@
 package org.apache.seata.common.thread;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.lang.reflect.Field;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,14 +65,40 @@ public class PositiveAtomicCounterTest {
     }
 
     @Test
-    public void testPositiveValueGuarantee() {
-        PositiveAtomicCounter counter = new PositiveAtomicCounter();
+    public void testIncrementAndGetWrapsAtIntegerMaxValue() throws ReflectiveOperationException {
+        PositiveAtomicCounter counter = counterWithValue(Integer.MAX_VALUE - 1);
 
-        // Simulate reaching maximum value and wrapping around
-        // This is a simplified test - in practice, the counter uses masking to ensure positivity
-        for (int i = 0; i < 100; i++) {
-            int value = counter.incrementAndGet();
-            assertThat(value).isPositive();
-        }
+        assertThat(counter.incrementAndGet()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(counter.incrementAndGet()).isZero();
+        assertThat(counter.get()).isZero();
+        assertThat(counter.incrementAndGet()).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetAndIncrementWrapsAtIntegerMaxValue() throws ReflectiveOperationException {
+        PositiveAtomicCounter counter = counterWithValue(Integer.MAX_VALUE);
+
+        assertThat(counter.getAndIncrement()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(counter.get()).isZero();
+        assertThat(counter.getAndIncrement()).isZero();
+        assertThat(counter.get()).isEqualTo(1);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-2147483648, 0", "-2147483647, 1", "-1, 2147483647"})
+    public void testGetReturnsNonNegativeValueWithoutIncrementing(int internalValue, int expectedValue)
+            throws ReflectiveOperationException {
+        PositiveAtomicCounter counter = counterWithValue(internalValue);
+
+        assertThat(counter.get()).isEqualTo(expectedValue);
+        assertThat(counter.get()).isEqualTo(expectedValue);
+    }
+
+    private PositiveAtomicCounter counterWithValue(int value) throws ReflectiveOperationException {
+        PositiveAtomicCounter counter = new PositiveAtomicCounter();
+        Field atomField = PositiveAtomicCounter.class.getDeclaredField("atom");
+        atomField.setAccessible(true);
+        ((AtomicInteger) atomField.get(counter)).set(value);
+        return counter;
     }
 }
