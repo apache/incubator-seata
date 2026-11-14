@@ -16,167 +16,108 @@
  */
 package org.apache.seata.core.protocol;
 
+import io.netty.channel.Channel;
+import io.netty.channel.embedded.EmbeddedChannel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * The server version holder test.
  */
 class ServerVersionHolderTest {
 
-    private static final String SERVER_ADDRESS = "127.0.0.1:8091";
+    private EmbeddedChannel channel;
 
     @BeforeEach
     void setUp() {
-        detachAllClients();
-        ServerVersionHolder.clear();
+        channel = new EmbeddedChannel();
     }
 
     @AfterEach
     void tearDown() {
-        detachAllClients();
-        ServerVersionHolder.clear();
-    }
-
-    /**
-     * A client attached by another test class would keep the holder from discarding its entries, so
-     * drain the active clients to make the detach cases independent of the execution order.
-     */
-    private static void detachAllClients() {
-        ServerVersionHolder.detach("RMROLE");
-        ServerVersionHolder.detach("TMROLE");
+        channel.finishAndReleaseAll();
     }
 
     @Test
     void putAndGetServerVersionTest() {
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.1.0");
-        assertEquals("2.1.0", ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
+        ServerVersionHolder.putServerVersion(channel, "2.1.0");
+        assertEquals("2.1.0", ServerVersionHolder.getServerVersion(channel));
 
-        // a re-registration overwrites the previous version
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
-        assertEquals("2.6.0", ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
+        // a re-registration on the same channel overwrites the previous version
+        ServerVersionHolder.putServerVersion(channel, "2.6.0");
+        assertEquals("2.6.0", ServerVersionHolder.getServerVersion(channel));
     }
 
     @Test
-    void getServerVersionReturnNullWhenNotExistTest() {
-        assertNull(ServerVersionHolder.getServerVersion("127.0.0.1:9999"));
+    void getServerVersionReturnNullWhenNotRegisteredTest() {
+        assertNull(ServerVersionHolder.getServerVersion(channel));
         assertNull(ServerVersionHolder.getServerVersion(null));
     }
 
     @Test
     void putBlankValueIgnoredTest() {
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, null);
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "");
-        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
+        ServerVersionHolder.putServerVersion(channel, null);
+        ServerVersionHolder.putServerVersion(channel, "");
+        assertNull(ServerVersionHolder.getServerVersion(channel));
 
         ServerVersionHolder.putServerVersion(null, "2.6.0");
         assertNull(ServerVersionHolder.getServerVersion(null));
     }
 
     @Test
+    void versionIsBoundToEachChannelTest() {
+        // two channels to the same address may reach different TC instances behind a load balancer
+        EmbeddedChannel otherChannel = new EmbeddedChannel();
+        try {
+            ServerVersionHolder.putServerVersion(channel, "2.5.0");
+            ServerVersionHolder.putServerVersion(otherChannel, "2.6.0");
+
+            assertEquals("2.5.0", ServerVersionHolder.getServerVersion(channel));
+            assertEquals("2.6.0", ServerVersionHolder.getServerVersion(otherChannel));
+            assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, Version.VERSION_2_6_0));
+            assertTrue(ServerVersionHolder.isServerAboveOrEqualVersion(otherChannel, Version.VERSION_2_6_0));
+        } finally {
+            otherChannel.finishAndReleaseAll();
+        }
+    }
+
+    @Test
     void isServerAboveOrEqualVersionTest() {
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
-        assertTrue(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, Version.VERSION_2_6_0));
-        assertTrue(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, "2.5.0"));
-        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, "2.7.0"));
+        ServerVersionHolder.putServerVersion(channel, "2.6.0");
+        assertTrue(ServerVersionHolder.isServerAboveOrEqualVersion(channel, Version.VERSION_2_6_0));
+        assertTrue(ServerVersionHolder.isServerAboveOrEqualVersion(channel, "2.5.0"));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, "2.7.0"));
     }
 
     @Test
     void isServerAboveOrEqualVersionReturnFalseWhenTargetVersionIsBlankTest() {
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
+        ServerVersionHolder.putServerVersion(channel, "2.6.0");
 
-        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, null));
-        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, ""));
-        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, "  "));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, null));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, ""));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, "  "));
     }
 
     @Test
     void isServerAboveOrEqualVersionReturnFalseWhenUnknownTest() {
-        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion("127.0.0.1:9999", Version.VERSION_2_6_0));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(channel, Version.VERSION_2_6_0));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(null, Version.VERSION_2_6_0));
     }
 
     @Test
-    void detachKeepsVersionsWhileAnotherClientIsActiveTest() {
-        ServerVersionHolder.attach("RMROLE");
-        ServerVersionHolder.attach("TMROLE");
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
+    void channelWithoutAttributesIsTreatedAsUnknownTest() {
+        Channel mockChannel = mock(Channel.class);
 
-        ServerVersionHolder.detach("RMROLE");
-        assertEquals("2.6.0", ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
+        ServerVersionHolder.putServerVersion(mockChannel, "2.6.0");
 
-        ServerVersionHolder.detach("TMROLE");
-        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
-    }
-
-    @Test
-    void detachOfUnknownClientKeepsVersionsTest() {
-        ServerVersionHolder.attach("RMROLE");
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
-
-        ServerVersionHolder.detach("TMROLE");
-        ServerVersionHolder.detach(null);
-        ServerVersionHolder.detach("");
-        assertEquals("2.6.0", ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
-
-        ServerVersionHolder.detach("RMROLE");
-        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
-    }
-
-    @Test
-    void clearTest() {
-        ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
-        ServerVersionHolder.putServerVersion("127.0.0.1:8092", "2.6.0");
-
-        ServerVersionHolder.clear();
-
-        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
-        assertNull(ServerVersionHolder.getServerVersion("127.0.0.1:8092"));
-    }
-
-    @Test
-    void concurrentAttachAndLastDetachKeepsNewClientVersionTest() throws Exception {
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        try {
-            for (int round = 0; round < 10000; round++) {
-                ServerVersionHolder.detach("RMROLE");
-                ServerVersionHolder.attach("TMROLE");
-                ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.5.0");
-                CountDownLatch start = new CountDownLatch(1);
-                Future<?> detach = executor.submit(() -> {
-                    start.await();
-                    ServerVersionHolder.detach("TMROLE");
-                    return null;
-                });
-                Future<?> attach = executor.submit(() -> {
-                    start.await();
-                    ServerVersionHolder.attach("RMROLE");
-                    ServerVersionHolder.putServerVersion(SERVER_ADDRESS, "2.6.0");
-                    return null;
-                });
-                start.countDown();
-                detach.get(5, TimeUnit.SECONDS);
-                attach.get(5, TimeUnit.SECONDS);
-                assertTrue(
-                        ServerVersionHolder.isServerAboveOrEqualVersion(SERVER_ADDRESS, Version.VERSION_2_6_0),
-                        "The active RM client lost its version in round " + round);
-            }
-        } finally {
-            executor.shutdownNow();
-            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
-        }
-        ServerVersionHolder.detach("RMROLE");
-        assertNull(ServerVersionHolder.getServerVersion(SERVER_ADDRESS));
+        assertNull(ServerVersionHolder.getServerVersion(mockChannel));
+        assertFalse(ServerVersionHolder.isServerAboveOrEqualVersion(mockChannel, Version.VERSION_2_6_0));
     }
 }

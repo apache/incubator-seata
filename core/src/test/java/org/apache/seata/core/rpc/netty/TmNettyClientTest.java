@@ -29,7 +29,6 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
-import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
@@ -172,7 +171,6 @@ public class TmNettyClientTest {
 
     @Test
     public void onRegisterMsgSuccessRecordsServerVersionTest() throws Exception {
-        ServerVersionHolder.clear();
         TmNettyRemotingClient.getInstance().destroy();
         TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("app", "default_tx_group");
 
@@ -194,9 +192,7 @@ public class TmNettyClientTest {
 
             // the version carried by the register channel is the peer(server) version
             verify(channelManager).registerChannel(eq(serverAddress), eq(channel), eq("2.6.0"));
-            Assertions.assertEquals("2.6.0", ServerVersionHolder.getServerVersion(serverAddress));
         } finally {
-            ServerVersionHolder.clear();
             TmNettyRemotingClient.getInstance().destroy();
         }
     }

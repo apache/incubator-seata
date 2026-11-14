@@ -17,8 +17,10 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.channel.embedded.EmbeddedChannel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -34,10 +36,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
@@ -270,6 +275,37 @@ class NettyClientChannelManagerTest {
         // Should replace the inactive channel
         assertEquals(channel, channelManager.getChannels().get(serverAddress));
         assertEquals(version, Version.getChannelVersion(channel));
+    }
+
+    @Test
+    void testRegisterChannelBindsServerVersionBeforePublishing() throws Exception {
+        String serverAddress = "127.0.0.1:8091";
+        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1", 8091);
+        EmbeddedChannel registeredChannel = new EmbeddedChannel() {
+            @Override
+            protected SocketAddress remoteAddress0() {
+                return remoteAddress;
+            }
+        };
+        AtomicReference<String> versionSeenOnPublication = new AtomicReference<>();
+        Field field = NettyClientChannelManager.class.getDeclaredField("channels");
+        field.setAccessible(true);
+        field.set(channelManager, new ConcurrentHashMap<String, Channel>() {
+            @Override
+            public Channel put(String key, Channel value) {
+                versionSeenOnPublication.set(ServerVersionHolder.getServerVersion(value));
+                return super.put(key, value);
+            }
+        });
+        try {
+            channelManager.registerChannel(serverAddress, registeredChannel, "2.6.0");
+
+            assertEquals(registeredChannel, channelManager.getChannels().get(serverAddress));
+            assertEquals("2.6.0", versionSeenOnPublication.get());
+            assertEquals("2.6.0", ServerVersionHolder.getServerVersion(registeredChannel));
+        } finally {
+            registeredChannel.finishAndReleaseAll();
+        }
     }
 
     @Test

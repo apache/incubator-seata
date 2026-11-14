@@ -16,127 +16,88 @@
  */
 package org.apache.seata.core.protocol;
 
+import io.netty.channel.Channel;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import org.apache.seata.common.util.StringUtils;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * Holds the version of each server (TC) the client has registered to.
+ * Holds the version of the server (TC) at the other end of a client channel.
  * <p>
  * The server always echoes its own version back in the register response
  * ({@link AbstractIdentifyResponse#getVersion()}). This holder keeps that version so that upper
  * layers can decide whether a feature is supported by the target server before sending a request,
  * which is the client side counterpart of {@code RpcContext#getVersion()} on the server side.
  * <p>
- * Note that the key is the server address used by the client to connect (the same key as
- * {@code NettyClientChannelManager#channels}), NOT the resolved remote address of a channel, so it
- * must not be mixed up with {@link Version#getChannelVersion(io.netty.channel.Channel)}.
- * <p>
- * Entries are not removed when a single channel disconnects, and that is intentional: TM and RM
- * connect to the same servers through two independent channel managers, so dropping an entry when
- * one of them disconnects would break feature detection for the other one. A version is an
- * intrinsic attribute of the server at a given address and is overwritten on every successful
- * registration, so a stale entry can never be read through a live channel, since such a channel can
- * only exist after a registration that has just refreshed the entry. A caller that looks a version
- * up by address without holding a channel to that server is not covered by this and has to handle a
- * stale or absent version itself.
- * <p>
- * The recorded versions are discarded once every client that could read them has been destroyed,
- * see {@link #attach(String)} and {@link #detach(String)}, so the map does not outlive the clients
- * that populated it.
+ * The version is bound to the registered channel itself (as a channel attribute), NOT to the
+ * server address nor to the remote address of the channel:
+ * <ul>
+ *     <li>a server address may be a Kubernetes Service or a TCP load balancer, so the TM channel and
+ *     the RM channel to the same address can reach different TC instances, possibly running
+ *     different versions during a rolling upgrade; each channel only ever reports the version of the
+ *     TC it is actually connected to;</li>
+ *     <li>a reconnected channel starts without any version, so it can never inherit the version of
+ *     a previous connection to the same address. The rpc layer records the version before it
+ *     publishes the channel, and an unknown version is treated as not supported;</li>
+ *     <li>the version lives and dies with its channel, so no cleanup or client lifecycle
+ *     coordination is required, and destroying a client can never affect the channels of another
+ *     (or a newly created) client.</li>
+ * </ul>
  *
  * @since 2.6.0
  */
-public class ServerVersionHolder {
+public final class ServerVersionHolder {
 
-    private static final Map<String, String> SERVER_VERSION_MAP = new ConcurrentHashMap<>();
-
-    private static final Set<String> ACTIVE_CLIENTS = ConcurrentHashMap.newKeySet();
+    private static final AttributeKey<String> SERVER_VERSION_KEY =
+            AttributeKey.valueOf(ServerVersionHolder.class.getName() + ".SERVER_VERSION");
 
     private ServerVersionHolder() {}
 
     /**
-     * Mark a client as active. Should be called by a client once it is initialized, so that the
-     * recorded versions are kept as long as that client may read them.
+     * Record the version of the server the channel is connected to. Should only be called by the rpc
+     * layer once the registration on that channel succeeds, and before the channel is published.
      *
-     * @param clientRole the role of the client, that is the name of a
-     *                   {@code NettyPoolKey.TransactionRole}
+     * @param channel the registered channel
+     * @param version the version reported by the server in its register response
      */
-    public static synchronized void attach(String clientRole) {
-        if (StringUtils.isBlank(clientRole)) {
+    public static void putServerVersion(Channel channel, String version) {
+        if (channel == null || StringUtils.isBlank(version)) {
             return;
         }
-        ACTIVE_CLIENTS.add(clientRole);
-    }
-
-    /**
-     * Mark a client as destroyed, and discard the recorded versions once no client is left. This is
-     * the only point at which entries are removed, see the class javadoc for why a single channel
-     * disconnection must not remove them.
-     *
-     * @param clientRole the role of the client, that is the name of a
-     *                   {@code NettyPoolKey.TransactionRole}
-     */
-    public static synchronized void detach(String clientRole) {
-        if (StringUtils.isBlank(clientRole)) {
-            return;
-        }
-        // Serialize last-client cleanup with attach so a new client's registration cannot be erased.
-        if (ACTIVE_CLIENTS.remove(clientRole) && ACTIVE_CLIENTS.isEmpty()) {
-            clear();
+        Attribute<String> attribute = channel.attr(SERVER_VERSION_KEY);
+        if (attribute != null) {
+            attribute.set(version);
         }
     }
 
     /**
-     * Record the version of the server. Should only be called by the rpc layer once the
-     * registration to the server succeeds.
+     * Gets the version of the server the channel is connected to.
      *
-     * @param serverAddress the server address
-     * @param version       the version reported by the server
+     * @param channel the channel to the server
+     * @return the server version, null if the channel has not been registered successfully
      */
-    public static void putServerVersion(String serverAddress, String version) {
-        if (StringUtils.isBlank(serverAddress) || StringUtils.isBlank(version)) {
-            return;
-        }
-        SERVER_VERSION_MAP.put(serverAddress, version);
-    }
-
-    /**
-     * Gets the version of the server.
-     *
-     * @param serverAddress the server address
-     * @return the server version, null if the client has never registered to that server
-     */
-    public static String getServerVersion(String serverAddress) {
-        if (StringUtils.isBlank(serverAddress)) {
+    public static String getServerVersion(Channel channel) {
+        if (channel == null) {
             return null;
         }
-        return SERVER_VERSION_MAP.get(serverAddress);
+        Attribute<String> attribute = channel.attr(SERVER_VERSION_KEY);
+        return attribute == null ? null : attribute.get();
     }
 
     /**
-     * Determine whether the server is above or equal to the given version. An unknown server
-     * version is treated as not satisfied, so that a feature relying on this check stays disabled
-     * until the version is really known.
+     * Determine whether the server the channel is connected to is above or equal to the given
+     * version. An unknown server version is treated as not satisfied, so that a feature relying on
+     * this check stays disabled until the version is really known.
      *
-     * @param serverAddress  the server address
-     * @param targetVersion  the version to compare with
+     * @param channel       the channel to the server
+     * @param targetVersion the version to compare with
      * @return true if the server version is known and above or equal to the target version
      */
-    public static boolean isServerAboveOrEqualVersion(String serverAddress, String targetVersion) {
-        String serverVersion = getServerVersion(serverAddress);
+    public static boolean isServerAboveOrEqualVersion(Channel channel, String targetVersion) {
+        String serverVersion = getServerVersion(channel);
         if (StringUtils.isBlank(serverVersion) || StringUtils.isBlank(targetVersion)) {
             return false;
         }
         return Version.isAboveOrEqualVersion(serverVersion, targetVersion);
-    }
-
-    /**
-     * Clear all recorded server versions.
-     */
-    public static void clear() {
-        SERVER_VERSION_MAP.clear();
     }
 }

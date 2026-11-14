@@ -81,7 +81,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
-            ServerVersionHolder.attach(TransactionRole.RMROLE.name());
 
             // Found one or more resources that were registered before initialization
             if (resourceManager != null
@@ -223,7 +222,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                     channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel, registerRMResponse.getVersion());
-        ServerVersionHolder.putServerVersion(serverAddress, registerRMResponse.getVersion());
         String dbKey = getMergedResourceKeys();
         if (registerRMRequest.getResourceIds() != null) {
             if (!registerRMRequest.getResourceIds().equals(dbKey)) {
@@ -319,11 +317,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (!channel.isActive()) {
                     continue;
                 }
-                if (!ServerVersionHolder.isServerAboveOrEqualVersion(serverAddress, Version.VERSION_2_6_0)) {
+                // check the version of the TC this very channel is connected to
+                if (!ServerVersionHolder.isServerAboveOrEqualVersion(channel, Version.VERSION_2_6_0)) {
                     LOGGER.warn(
-                            "Server {} does not support UnregisterRMRequest (version: {})",
+                            "Server {} does not support UnregisterRMRequest (version: {}), channel: {}",
                             serverAddress,
-                            ServerVersionHolder.getServerVersion(serverAddress));
+                            ServerVersionHolder.getServerVersion(channel),
+                            channel);
                     continue;
                 }
                 UnregisterRMRequest message = new UnregisterRMRequest(applicationId, transactionServiceGroup);
@@ -395,8 +395,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         initialized.getAndSet(false);
         instance = null;
         transactionServiceGroup = null;
-        // after sendUnregisterToServers, which is the only reader of the recorded versions
-        ServerVersionHolder.detach(TransactionRole.RMROLE.name());
     }
 
     @Override

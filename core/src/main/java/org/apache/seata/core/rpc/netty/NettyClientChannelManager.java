@@ -24,6 +24,7 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
 import org.apache.seata.discovery.registry.RegistryFactory;
@@ -298,6 +299,9 @@ class NettyClientChannelManager {
      *                      its register response
      */
     void registerChannel(final String serverAddress, final Channel channel, String version) {
+        // bind the version to the channel before publishing it, so that whoever reads the channel
+        // from channels also sees the version of the server it is actually connected to
+        ServerVersionHolder.putServerVersion(channel, version);
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null && channelToServer.isActive()) {
             return;

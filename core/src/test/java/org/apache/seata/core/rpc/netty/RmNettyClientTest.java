@@ -18,6 +18,9 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.util.AttributeKey;
+import io.netty.util.DefaultAttributeMap;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
@@ -27,23 +30,30 @@ import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.ServerVersionHolder;
+import org.apache.seata.core.protocol.UnregisterRMRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -72,12 +82,6 @@ class RmNettyClientTest {
     @AfterAll
     public static void afterAll() {
         RmNettyRemotingClient.getInstance().destroy();
-        ServerVersionHolder.clear();
-    }
-
-    @BeforeEach
-    public void beforeEach() {
-        ServerVersionHolder.clear();
     }
 
     @Test
@@ -198,7 +202,6 @@ class RmNettyClientTest {
 
         // the version carried by the register channel is the peer(server) version
         verify(channelManager).registerChannel(eq(serverAddress), eq(channel), eq("1.5.0"));
-        Assertions.assertEquals("1.5.0", ServerVersionHolder.getServerVersion(serverAddress));
     }
 
     @Test
@@ -397,7 +400,7 @@ class RmNettyClientTest {
         RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
 
         ChannelFuture channelFuture = mock(ChannelFuture.class);
-        Channel channel = mock(Channel.class);
+        Channel channel = mockChannelWithAttributes();
         when(channel.isActive()).thenReturn(true);
         when(channel.isWritable()).thenReturn(true);
         when(channel.writeAndFlush(any())).thenReturn(channelFuture);
@@ -410,7 +413,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        ServerVersionHolder.putServerVersion(serverAddress, "2.6.0");
+        ServerVersionHolder.putServerVersion(channel, "2.6.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
@@ -421,7 +424,7 @@ class RmNettyClientTest {
     public void unregisterResourceSkipsOldServerVersionTest() throws Exception {
         RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
 
-        Channel channel = mock(Channel.class);
+        Channel channel = mockChannelWithAttributes();
         when(channel.isActive()).thenReturn(true);
 
         String serverAddress = "127.0.0.1:8091";
@@ -432,7 +435,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        ServerVersionHolder.putServerVersion(serverAddress, "2.5.0");
+        ServerVersionHolder.putServerVersion(channel, "2.5.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
@@ -463,7 +466,7 @@ class RmNettyClientTest {
     public void unregisterResourceHandlesChannelNotWritableTest() throws Exception {
         RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
 
-        Channel channel = mock(Channel.class);
+        Channel channel = mockChannelWithAttributes();
         when(channel.isActive()).thenReturn(true);
         when(channel.isWritable()).thenReturn(false);
 
@@ -475,7 +478,7 @@ class RmNettyClientTest {
         when(channelManager.getChannels()).thenReturn(channels);
         setChannelManager(client, channelManager);
 
-        ServerVersionHolder.putServerVersion(serverAddress, "2.6.0");
+        ServerVersionHolder.putServerVersion(channel, "2.6.0");
 
         client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test");
 
@@ -493,7 +496,256 @@ class RmNettyClientTest {
         Assertions.assertDoesNotThrow(() -> client.unregisterResource("group1", "jdbc:mysql://localhost:3306/test"));
     }
 
-    private void setChannelManager(RmNettyRemotingClient client, NettyClientChannelManager channelManager)
+    @Test
+    public void unregisterResourceSkipsChannelWithUnknownVersionTest() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mockChannelWithAttributes();
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(true);
+
+        ConcurrentHashMap<String, Channel> channels = new ConcurrentHashMap<>();
+        channels.put("127.0.0.1:8091", channel);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(channels);
+        setChannelManager(client, channelManager);
+
+        client.unregisterResource("group1", RESOURCE_ID);
+
+        verify(channel, never()).writeAndFlush(any());
+    }
+
+    /**
+     * The RM and TM connections to one service address (a Kubernetes Service or a TCP load balancer)
+     * may reach different TC instances during a rolling upgrade. The TM registration must not change
+     * the version the RM sees on its own channel, whatever the registration order is.
+     */
+    @Test
+    public void unregisterFollowsVersionOfRmChannelWhenTmReachesAnotherTcBehindSameAddressTest() throws Exception {
+        assertRmUnregisterFollowsRmChannelVersion("2.5.0", "2.6.0", false);
+        assertRmUnregisterFollowsRmChannelVersion("2.6.0", "2.5.0", true);
+    }
+
+    private void assertRmUnregisterFollowsRmChannelVersion(
+            String rmServerVersion, String tmServerVersion, boolean unregisterExpected) throws Exception {
+        RmNettyRemotingClient rmClient = RmNettyRemotingClient.getInstance("app", "test_group");
+        rmClient.setResourceManager(resourceManagerOf(RESOURCE_ID));
+        setChannelManager(rmClient, newChannelManager());
+        TmNettyRemotingClient tmClient = TmNettyRemotingClient.getInstance("app", "test_group");
+        NettyClientChannelManager originalTmChannelManager = tmClient.getClientChannelManager();
+        setChannelManager(tmClient, newChannelManager());
+
+        // both channels see the same remote (virtual) address, but are served by different TCs
+        EmbeddedChannel rmChannel = newServerChannel();
+        EmbeddedChannel tmChannel = newServerChannel();
+        try {
+            rmClient.onRegisterMsgSuccess(
+                    SERVICE_ADDRESS, rmChannel, rmResponse(rmServerVersion), rmRequest(RESOURCE_ID));
+            tmClient.onRegisterMsgSuccess(
+                    SERVICE_ADDRESS,
+                    tmChannel,
+                    tmResponse(tmServerVersion),
+                    new RegisterTMRequest("app", "test_group"));
+
+            assertEquals(rmServerVersion, ServerVersionHolder.getServerVersion(rmChannel));
+            assertEquals(tmServerVersion, ServerVersionHolder.getServerVersion(tmChannel));
+
+            rmClient.unregisterResource("group1", RESOURCE_ID);
+
+            assertUnregisterSent(rmChannel, unregisterExpected);
+            assertNull(tmChannel.readOutbound());
+        } finally {
+            setChannelManager(tmClient, originalTmChannelManager);
+            rmChannel.finishAndReleaseAll();
+            tmChannel.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * A reconnect at the same address may reach an older TC than the previous connection did. An
+     * unregister racing with the publication of the new channel must only ever see the version of the
+     * new channel, never the one of the previous connection.
+     */
+    @Test
+    public void unregisterInterleavedWithChannelPublicationTest() throws Exception {
+        assertUnregisterInterleavedWithChannelPublication("2.6.0", "2.5.0", false);
+        assertUnregisterInterleavedWithChannelPublication("2.5.0", "2.6.0", true);
+    }
+
+    private void assertUnregisterInterleavedWithChannelPublication(
+            String previousServerVersion, String newServerVersion, boolean unregisterExpected) throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+        client.setResourceManager(resourceManagerOf(RESOURCE_ID));
+        NettyClientChannelManager channelManager = newChannelManager();
+        setChannelManager(client, channelManager);
+
+        EmbeddedChannel previousChannel = newServerChannel();
+        EmbeddedChannel newChannel = newServerChannel();
+        try {
+            client.onRegisterMsgSuccess(
+                    SERVICE_ADDRESS, previousChannel, rmResponse(previousServerVersion), rmRequest(RESOURCE_ID));
+            previousChannel.close();
+
+            // unregister right after the new channel is published, before registerChannel returns
+            AtomicInteger unregisterCalls = new AtomicInteger();
+            ConcurrentHashMap<String, Channel> channels =
+                    new ConcurrentHashMap<String, Channel>(channelManager.getChannels()) {
+                        @Override
+                        public Channel put(String key, Channel value) {
+                            Channel previous = super.put(key, value);
+                            if (value == newChannel) {
+                                unregisterCalls.incrementAndGet();
+                                client.unregisterResource("group1", RESOURCE_ID);
+                            }
+                            return previous;
+                        }
+                    };
+            setChannels(channelManager, channels);
+
+            client.onRegisterMsgSuccess(
+                    SERVICE_ADDRESS, newChannel, rmResponse(newServerVersion), rmRequest(RESOURCE_ID));
+
+            assertEquals(1, unregisterCalls.get());
+            assertEquals(newChannel, channelManager.getChannels().get(SERVICE_ADDRESS));
+            assertUnregisterSent(newChannel, unregisterExpected);
+            assertNull(previousChannel.readOutbound());
+        } finally {
+            previousChannel.finishAndReleaseAll();
+            newChannel.finishAndReleaseAll();
+        }
+    }
+
+    /**
+     * Destroying a client must not affect a client of the same role that replaced it, even when the
+     * replacement registers before the old client finishes destroying.
+     */
+    @Test
+    public void destroyOfReplacedClientKeepsVersionOfNewClientTest() throws Exception {
+        RmNettyRemotingClient oldClient = RmNettyRemotingClient.getInstance("app", "test_group");
+        oldClient.setResourceManager(null);
+        oldClient.init();
+        TmNettyRemotingClient oldTmClient = TmNettyRemotingClient.getInstance("app", null);
+        oldTmClient.init();
+
+        // the new clients are created and registered while the old ones are still being destroyed
+        setStaticInstance(RmNettyRemotingClient.class, null);
+        setStaticInstance(TmNettyRemotingClient.class, null);
+        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("app", "test_group");
+        TmNettyRemotingClient newTmClient = TmNettyRemotingClient.getInstance("app", "test_group");
+        Assertions.assertNotSame(oldClient, newClient);
+        Assertions.assertNotSame(oldTmClient, newTmClient);
+        newClient.setResourceManager(resourceManagerOf(RESOURCE_ID));
+        setChannelManager(newClient, newChannelManager());
+        setChannelManager(newTmClient, newChannelManager());
+
+        EmbeddedChannel rmChannel = newServerChannel();
+        EmbeddedChannel tmChannel = newServerChannel();
+        try {
+            newClient.onRegisterMsgSuccess(SERVICE_ADDRESS, rmChannel, rmResponse("2.6.0"), rmRequest(RESOURCE_ID));
+            newTmClient.onRegisterMsgSuccess(
+                    SERVICE_ADDRESS, tmChannel, tmResponse("2.6.0"), new RegisterTMRequest("app", "test_group"));
+
+            oldClient.destroy();
+            oldTmClient.destroy();
+
+            assertEquals("2.6.0", ServerVersionHolder.getServerVersion(rmChannel));
+            assertEquals("2.6.0", ServerVersionHolder.getServerVersion(tmChannel));
+            newClient.setTransactionServiceGroup("test_group");
+            newClient.unregisterResource("group1", RESOURCE_ID);
+            assertUnregisterSent(rmChannel, true);
+        } finally {
+            rmChannel.finishAndReleaseAll();
+            tmChannel.finishAndReleaseAll();
+            newClient.destroy();
+            newTmClient.destroy();
+        }
+    }
+
+    private static final String RESOURCE_ID = "jdbc:mysql://localhost:3306/test";
+
+    private static final String SERVICE_ADDRESS = "seata-server.default.svc:8091";
+
+    private static final InetSocketAddress SERVICE_REMOTE_ADDRESS = new InetSocketAddress("10.96.0.10", 8091);
+
+    /**
+     * A channel accepting writes into its outbound queue, connected to the service virtual address.
+     */
+    private static EmbeddedChannel newServerChannel() {
+        return new EmbeddedChannel() {
+            @Override
+            protected SocketAddress remoteAddress0() {
+                return SERVICE_REMOTE_ADDRESS;
+            }
+        };
+    }
+
+    private static void assertUnregisterSent(EmbeddedChannel channel, boolean expected) {
+        Object outbound = channel.readOutbound();
+        if (!expected) {
+            assertNull(outbound);
+            return;
+        }
+        assertTrue(outbound instanceof RpcMessage);
+        assertTrue(((RpcMessage) outbound).getBody() instanceof UnregisterRMRequest);
+        assertNull(channel.readOutbound());
+    }
+
+    private static Channel mockChannelWithAttributes() {
+        Channel channel = mock(Channel.class);
+        DefaultAttributeMap attributes = new DefaultAttributeMap();
+        when(channel.attr(any()))
+                .thenAnswer(invocation -> attributes.attr(invocation.<AttributeKey<Object>>getArgument(0)));
+        return channel;
+    }
+
+    private static NettyClientChannelManager newChannelManager() {
+        return new NettyClientChannelManager(
+                mock(NettyPoolableFactory.class), serverAddress -> null, new NettyClientConfig());
+    }
+
+    private static ResourceManager resourceManagerOf(String resourceId) {
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resources = new HashMap<>();
+        resources.put(resourceId, mock(Resource.class));
+        when(resourceManager.getManagedResources()).thenReturn(resources);
+        return resourceManager;
+    }
+
+    private static RegisterRMRequest rmRequest(String resourceIds) {
+        RegisterRMRequest request = new RegisterRMRequest("app", "test_group");
+        request.setResourceIds(resourceIds);
+        return request;
+    }
+
+    private static RegisterRMResponse rmResponse(String serverVersion) {
+        RegisterRMResponse response = new RegisterRMResponse();
+        response.setVersion(serverVersion);
+        response.setResultCode(ResultCode.Success);
+        return response;
+    }
+
+    private static RegisterTMResponse tmResponse(String serverVersion) {
+        RegisterTMResponse response = new RegisterTMResponse();
+        response.setVersion(serverVersion);
+        response.setResultCode(ResultCode.Success);
+        return response;
+    }
+
+    private static void setChannels(
+            NettyClientChannelManager channelManager, ConcurrentHashMap<String, Channel> channels) throws Exception {
+        Field field = NettyClientChannelManager.class.getDeclaredField("channels");
+        field.setAccessible(true);
+        field.set(channelManager, channels);
+    }
+
+    private static void setStaticInstance(Class<?> clientClass, Object value) throws Exception {
+        Field field = clientClass.getDeclaredField("instance");
+        field.setAccessible(true);
+        field.set(null, value);
+    }
+
+    private static void setChannelManager(AbstractNettyRemotingClient client, NettyClientChannelManager channelManager)
             throws Exception {
         Field field = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
         field.setAccessible(true);
