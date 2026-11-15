@@ -20,8 +20,6 @@ import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
-import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,14 +41,8 @@ public class RaftCoordinatorTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setup(ApplicationContext context) throws Exception {
-        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         raftCoordinator = new RaftCoordinator(remotingServer);
-    }
-
-    @AfterAll
-    public static void cleanup() {
-        SessionHolder.destroy();
     }
 
     @AfterEach

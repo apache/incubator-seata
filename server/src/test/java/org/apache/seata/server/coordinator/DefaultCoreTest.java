@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.coordinator;
 
-import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -27,7 +26,6 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,23 +47,23 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     private static DefaultCore core;
     private static RemotingServer remotingServer;
 
-    private static final String applicationId = "demo-child-app";
+    private static final String APPLICATION_ID = "demo-child-app";
 
-    private static final String txServiceGroup = "default_tx_group";
+    private static final String TX_SERVICE_GROUP = "default_tx_group";
 
-    private static final String txName = "tx-1";
+    private static final String TX_NAME = "tx-1";
 
-    private static final int timeout = 3000;
+    private static final int TIMEOUT = 3000;
 
-    private static final String resourceId = "tb_1";
+    private static final String RESOURCE_ID = "tb_1";
 
-    private static final String clientId = "c_1";
+    private static final String CLIENT_ID = "c_1";
 
-    private static final String lockKeys_1 = "tb_11:11";
+    private static final String LOCK_KEYS_1 = "tb_11:11";
 
-    private static final String lockKeys_2 = "tb_12:12";
+    private static final String LOCK_KEYS_2 = "tb_12:12";
 
-    private static final String applicationData = "{\"data\":\"test\"}";
+    private static final String APPLICATION_DATA = "{\"data\":\"test\"}";
 
     private GlobalSession globalSession;
 
@@ -76,17 +74,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
      */
     @BeforeAll
     public static void initSessionManager(ApplicationContext context) throws Exception {
-        SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         core = new DefaultCore(remotingServer);
-    }
-
-    /**
-     * Destroy session manager.
-     */
-    @AfterAll
-    public static void destroySessionManager() {
-        SessionHolder.destroy();
     }
 
     /**
@@ -125,7 +114,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void branchRegisterTest(String xid) throws Exception {
-        core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
+        core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, "abc", LOCK_KEYS_1);
         globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
     }
@@ -140,7 +129,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     @ParameterizedTest
     @MethodSource("xidAndBranchIdProvider")
     public void branchReportTest(String xid, Long branchId) throws Exception {
-        core.branchReport(BranchType.AT, xid, branchId, BranchStatus.PhaseOne_Done, applicationData);
+        core.branchReport(BranchType.AT, xid, branchId, BranchStatus.PhaseOne_Done, APPLICATION_DATA);
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
         Assertions.assertEquals(branchSession.getStatus(), BranchStatus.PhaseOne_Done);
@@ -153,7 +142,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
      */
     @Test
     public void beginTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
     }
@@ -182,7 +171,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalCommitCommitTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.XA, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.XA, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.XA, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
@@ -201,7 +190,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.TCC, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.TCC, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(
@@ -222,7 +211,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalCommitExpTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.XA, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.XA, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.XA, new MockCore(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
@@ -254,7 +243,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalRollBackRollbackedTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.AT, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.AT, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
@@ -273,7 +262,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalRollBackUnretryableTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.AT, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.AT, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(
@@ -294,7 +283,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
     public void doGlobalRollBackRetryableExpTest(String xid) throws Exception {
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.AT, resourceId, applicationData, "t1:1", clientId);
+                globalSession, BranchType.AT, RESOURCE_ID, APPLICATION_DATA, "t1:1", CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.mockCore(
@@ -311,7 +300,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
      * @throws Exception the exception
      */
     static Stream<Arguments> xidProvider() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         Assertions.assertNotNull(xid);
         return Stream.of(Arguments.of(xid));
     }
@@ -323,8 +312,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
      * @throws Exception the exception
      */
     static Stream<Arguments> xidAndBranchIdProvider() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, null, lockKeys_2);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        Long branchId = core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, null, LOCK_KEYS_2);
         Assertions.assertNotNull(xid);
         Assertions.assertTrue(branchId != 0);
         return Stream.of(Arguments.of(xid, branchId));
@@ -358,8 +347,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void lockQueryTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        boolean result = core.lockQuery(BranchType.AT, resourceId, xid, lockKeys_1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        boolean result = core.lockQuery(BranchType.AT, RESOURCE_ID, xid, LOCK_KEYS_1);
         Assertions.assertTrue(result);
 
         globalSession = SessionHolder.findGlobalSession(xid);
@@ -374,7 +363,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void getStatusSessionFoundTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalStatus status = core.getStatus(xid);
         Assertions.assertEquals(GlobalStatus.Begin, status);
 
@@ -396,7 +385,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void commitTimeoutTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 1);
         Thread.sleep(100);
 
         GlobalStatus status = core.commit(xid);
@@ -416,7 +405,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void rollbackStatusNotBeginTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
         globalSession.changeGlobalStatus(GlobalStatus.Committed);
 
@@ -428,7 +417,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doGlobalCommitNoBranchesTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
         globalSession.changeGlobalStatus(GlobalStatus.Committing);
 
@@ -438,7 +427,7 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doGlobalRollbackNoBranchesTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
         globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
 
@@ -448,11 +437,11 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doGlobalCommitPhaseOne_FailedTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
 
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.AT, resourceId, applicationData, lockKeys_1, clientId);
+                globalSession, BranchType.AT, RESOURCE_ID, APPLICATION_DATA, LOCK_KEYS_1, CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Failed);
         globalSession.changeGlobalStatus(GlobalStatus.Committing);
@@ -463,11 +452,11 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doGlobalRollbackPhaseOneFailedTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         globalSession = SessionHolder.findGlobalSession(xid);
 
         BranchSession branchSession = SessionHelper.newBranchByGlobal(
-                globalSession, BranchType.AT, resourceId, applicationData, lockKeys_1, clientId);
+                globalSession, BranchType.AT, RESOURCE_ID, APPLICATION_DATA, LOCK_KEYS_1, CLIENT_ID);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Failed);
         globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
@@ -478,8 +467,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void branchDeleteATTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        Long branchId = core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_1);
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
 
@@ -491,8 +480,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doBranchDeleteATPhaseTwoCommittedTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        Long branchId = core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_1);
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
 
@@ -511,8 +500,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void doBranchDeleteUnretryableTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        Long branchId = core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_1);
         globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
 
@@ -531,8 +520,8 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void commitAsyncCommitTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_1);
         globalSession = SessionHolder.findGlobalSession(xid);
 
         core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked) {

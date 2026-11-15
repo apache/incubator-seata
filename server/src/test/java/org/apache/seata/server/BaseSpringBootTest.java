@@ -26,26 +26,33 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"server.port=${random.int[10000,60000]}"})
+import java.io.IOException;
+import java.net.ServerSocket;
+
+@TestPropertySource(properties = {"server.port=${seata.test.server-port}"})
 @SpringBootTest
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public abstract class BaseSpringBootTest {
 
     @BeforeAll
-    public static void beforeAll() {
+    public static void beforeAll() throws IOException {
         System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "1");
         ConfigurationCache.clear();
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        try (ServerSocket socket = new ServerSocket(0)) {
+            System.setProperty("seata.test.server-port", String.valueOf(socket.getLocalPort()));
+        }
     }
 
     @AfterAll
     public static void afterAll() {
         ConfigurationCache.clear();
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty("seata.test.server-port");
     }
 
     @AfterEach
-    public void AfterEach() {
+    public void reloadConfigurationAfterEach() {
         ConfigurationFactory.reload();
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }

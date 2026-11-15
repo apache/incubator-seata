@@ -96,7 +96,7 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         branchSession.setXid(param.getXid());
         branchSession.setBranchId(Long.parseLong(param.getBranchId()));
         try {
-            lockManager.releaseLock(branchSession);
+            getLockManager().releaseLock(branchSession);
         } catch (TransactionException e) {
             throw new ConsoleException(
                     e,

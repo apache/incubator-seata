@@ -25,6 +25,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
@@ -42,6 +43,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
+import java.nio.file.Files;
 
 import static java.io.File.separator;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
@@ -62,6 +64,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
+        // Recovery tests own the store lifecycle and must not race the coordinator's retry tasks.
+        DefaultCoordinator.getInstance().destroy();
         CONFIG = ConfigurationFactory.getInstance();
     }
 
@@ -72,18 +76,15 @@ public class SessionStoreTest extends BaseSpringBootTest {
      */
     @BeforeEach
     public void clean() throws Exception {
+        SessionHolder.destroy();
         String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
                 + separator
                 + XID.getPort();
         File rootDataFile = new File(sessionStorePath + separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
         File rootDataFileHis = new File(sessionStorePath + separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 
-        if (rootDataFile.exists()) {
-            rootDataFile.delete();
-        }
-        if (rootDataFileHis.exists()) {
-            rootDataFileHis.delete();
-        }
+        Files.deleteIfExists(rootDataFile.toPath());
+        Files.deleteIfExists(rootDataFileHis.toPath());
         LockManager lockManager = new FileLockManagerForTest();
         lockManager.cleanAllLocks();
     }
@@ -132,7 +133,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:2"));
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:3"));
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
 
             long tid = globalSession.getTransactionId();
@@ -166,7 +168,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
             globalSession.begin();
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
         } finally {
             SessionHolder.destroy();
@@ -207,7 +210,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
 
             GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
@@ -263,7 +267,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
 
             long tid = globalSession.getTransactionId();
@@ -323,7 +328,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
 
             long tid = globalSession.getTransactionId();
@@ -386,7 +392,8 @@ public class SessionStoreTest extends BaseSpringBootTest {
 
             Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
-            // Re-init SessionHolder: restore sessions from file
+            // Close the writer before reopening the same persisted store.
+            SessionHolder.destroy();
             SessionHolder.init(SessionMode.FILE);
 
             long tid = globalSession.getTransactionId();
