@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.rpc.RpcContext;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -291,11 +293,10 @@ public class ChannelManagerTest {
     @Test
     public void testGetChannelWithInvalidClientId() {
         String clientId = "invalid-client-id";
-        try {
-            ChannelManager.getChannel("jdbc:mysql://localhost:3306/seata", clientId, false);
-        } catch (Exception e) {
-            assertTrue(e.getMessage().contains("Invalid Client ID"), "Should throw exception for invalid client ID");
-        }
+        FrameworkException e = assertThrows(
+                FrameworkException.class,
+                () -> ChannelManager.getChannel("jdbc:mysql://localhost:3306/seata", clientId, false));
+        assertTrue(e.getMessage().contains("Invalid Client ID"), "Should throw exception for invalid client ID");
     }
 
     @Test
@@ -595,13 +596,12 @@ public class ChannelManagerTest {
         ChannelManager.registerRMChannel(request, channel);
 
         String clientIdWithoutSplit = "testappnosplit";
-        try {
-            ChannelManager.getChannel("jdbc:mysql://localhost:3306/seata", clientIdWithoutSplit, false);
-        } catch (Exception e) {
-            assertTrue(
-                    e.getMessage().contains("Invalid Client ID"),
-                    "Should throw exception for clientId without split character");
-        }
+        FrameworkException e = assertThrows(
+                FrameworkException.class,
+                () -> ChannelManager.getChannel("jdbc:mysql://localhost:3306/seata", clientIdWithoutSplit, false));
+        assertTrue(
+                e.getMessage().contains("Invalid Client ID"),
+                "Should throw exception for clientId without split character");
     }
 
     @Test
