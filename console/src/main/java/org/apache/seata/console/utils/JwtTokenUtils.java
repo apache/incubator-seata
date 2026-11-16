@@ -18,6 +18,7 @@ package org.apache.seata.console.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -105,6 +106,14 @@ public class JwtTokenUtils {
          * Expiration date
          */
         Date expirationDate = new Date(now + tokenValidityInMilliseconds);
+        return signToken(Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, "")
+                .setExpiration(expirationDate));
+    }
+
+    /** Sign using the effective configured or generated console key. */
+    public String signToken(JwtBuilder builder) {
         /**
          * Key
          */
@@ -113,12 +122,7 @@ public class JwtTokenUtils {
         /**
          * create token
          */
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, "")
-                .setExpiration(expirationDate)
-                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
-                .compact();
+        return builder.signWith(secretKeySpec, SignatureAlgorithm.HS256).compact();
     }
 
     /**
