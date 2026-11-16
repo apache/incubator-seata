@@ -192,36 +192,36 @@ public class TccHookTest {
     }
 
     public class MyTccHook implements TccHook {
-        private final Logger LOGGER = LoggerFactory.getLogger(MyTccHook.class);
+        private final Logger logger = LoggerFactory.getLogger(MyTccHook.class);
 
         @Override
         public void beforeTccPrepare(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations before tcc prepare");
+            logger.info("do some business operations before tcc prepare");
         }
 
         @Override
         public void afterTccPrepare(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations after tcc prepare");
+            logger.info("do some business operations after tcc prepare");
         }
 
         @Override
         public void beforeTccCommit(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations before tcc commit");
+            logger.info("do some business operations before tcc commit");
         }
 
         @Override
         public void afterTccCommit(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations after tcc commit");
+            logger.info("do some business operations after tcc commit");
         }
 
         @Override
         public void beforeTccRollback(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations before tcc rollback");
+            logger.info("do some business operations before tcc rollback");
         }
 
         @Override
         public void afterTccRollback(String xid, Long branchId, String actionName, BusinessActionContext context) {
-            LOGGER.info("do some business operations after tcc rollback");
+            logger.info("do some business operations after tcc rollback");
         }
     }
 }

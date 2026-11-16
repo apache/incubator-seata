@@ -23,6 +23,7 @@ import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
@@ -66,6 +67,13 @@ public class Server {
         // Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
+        // fail fast when a host name is configured instead of an ip address literal,
+        // so the xid always carries an unambiguous address
+        // see https://github.com/apache/incubator-seata/issues/8158
+        if (StringUtils.isNotBlank(parameterParser.getHost())) {
+            requireIpLiteral(parameterParser.getHost());
+        }
+
         // initialize the metrics
         MetricsManager.get().init();
 
@@ -84,12 +92,12 @@ public class Server {
         } else {
             // Get preferred network patterns from configuration (regex or prefix match)
             // Used to select specific network interfaces when multiple are available
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
+            String preferredNetworks = getRegistryConfig(REGISTRY_PREFERRED_NETWORKS);
 
             // Get ignored interface patterns from configuration (regex supported)
             // Useful for filtering out virtual interfaces like VMware, VirtualBox, Docker, etc.
             // Example: "VMware.*,VirtualBox.*,bridge.*,docker.*,veth.*"
-            String ignoredInterfaces = ConfigurationFactory.getInstance().getConfig(REGISTRY_IGNORED_INTERFACES);
+            String ignoredInterfaces = getRegistryConfig(REGISTRY_IGNORED_INTERFACES);
             String[] ignoredInterfacesSplit = null;
             if (ignoredInterfaces != null) {
                 ignoredInterfacesSplit = ignoredInterfaces.split(",");
@@ -126,5 +134,33 @@ public class Server {
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
+    }
+
+    static String getRegistryConfig(String dataId) {
+        Configuration registryConfiguration = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+        if (registryConfiguration != null) {
+            String config = registryConfiguration.getConfig(dataId);
+            if (config != null) {
+                return config;
+            }
+        }
+        return ConfigurationFactory.getInstance().getConfig(dataId);
+    }
+
+    /**
+     * Ensure the configured host is an ipv4/ipv6 address literal.
+     *
+     * <p>The xid generated from the configured host must stay stable and
+     * unambiguous, so host names are rejected at deploy time instead of
+     * being resolved to an ip at startup. See
+     * <a href="https://github.com/apache/incubator-seata/issues/8158">#8158</a>.
+     *
+     * @param host the host configured through --host or the SEATA_IP environment variable
+     */
+    static void requireIpLiteral(String host) {
+        if (!NetUtil.isValidIPv4(host) && !NetUtil.isValidIPv6(host)) {
+            throw new IllegalArgumentException("SEATA_IP must be an IP address literal; got \"" + host
+                    + "\". Resolve the host name at deploy time and pass the IP.");
+        }
     }
 }

@@ -450,6 +450,10 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         this.defaultTenantId = defaultTenantId;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public void setSagaJsonParser(String sagaJsonParser) {
         this.sagaJsonParser = sagaJsonParser;
     }
@@ -462,6 +466,10 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         this.stateMachineDefInputStreamArray = stateMachineDefInputStreamArray;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public String getSagaJsonParser() {
         return sagaJsonParser;
     }

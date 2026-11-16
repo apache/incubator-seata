@@ -186,9 +186,13 @@
             <outputDirectory>seata-namingserver/target/</outputDirectory>
             <destName>seata-namingserver.jar</destName>
         </file>
+        <!-- Use logback-spring-jvm.xml (with &lt;if&gt; conditional for external conf support)
+             as the distribution config, renamed to logback-spring.xml so the existing
+             launch script (-Dlogging.config=.../conf/logback-spring.xml) picks it up. -->
         <file>
-            <source>../namingserver/src/main/resources/logback-spring.xml</source>
+            <source>../namingserver/src/main/resources/logback-spring-jvm.xml</source>
             <outputDirectory>seata-namingserver/conf/</outputDirectory>
+            <destName>logback-spring.xml</destName>
         </file>
         <file>
             <source>../namingserver/src/main/resources/application.yml</source>

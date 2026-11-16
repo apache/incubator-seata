@@ -35,6 +35,7 @@ import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.NetUtil;
@@ -61,9 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -120,22 +119,28 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             new ConcurrentHashMap<>();
     private static final ConcurrentMap<String /* vgroup */, List<NamingListener>> LISTENER_SERVICE_MAP =
             new ConcurrentHashMap<>();
-    protected static final ScheduledExecutorService SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(
-            1, new NamedThreadFactory("seata-namingser-scheduled", THREAD_POOL_NUM, true));
-    private static final ExecutorService NOTIFIER_EXECUTOR = new ThreadPoolExecutor(
+    protected static final ScheduledExecutorService SCHEDULED_THREAD_POOL_EXECUTOR =
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(
+                    "seata-namingser-scheduled", THREAD_POOL_NUM, true);
+    private static final ExecutorService NOTIFIER_EXECUTOR = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+            "serviceNamingNotifier",
             THREAD_POOL_NUM,
             THREAD_POOL_NUM,
             Integer.MAX_VALUE,
             TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("serviceNamingNotifier", THREAD_POOL_NUM));
+            true);
 
     static {
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = FILE_CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
         USERNAME = FILE_CONFIG.getConfig(getUserNameKey());
         PASSWORD = FILE_CONFIG.getConfig(getPassWordKey());
-        Runtime.getRuntime().addShutdownHook(new Thread(NOTIFIER_EXECUTOR::shutdown));
-        Runtime.getRuntime().addShutdownHook(new Thread(SCHEDULED_THREAD_POOL_EXECUTOR::shutdown));
+        Runtime.getRuntime()
+                .addShutdownHook(new NamedThreadFactory("namingserver-notifier-shutdown", 1, false)
+                        .newThread(NOTIFIER_EXECUTOR::shutdown));
+        Runtime.getRuntime()
+                .addShutdownHook(new NamedThreadFactory("namingserver-scheduler-shutdown", 1, false)
+                        .newThread(SCHEDULED_THREAD_POOL_EXECUTOR::shutdown));
     }
 
     private NamingserverRegistryServiceImpl() {

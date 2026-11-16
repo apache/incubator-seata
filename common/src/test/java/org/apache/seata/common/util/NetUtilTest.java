@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -203,6 +204,46 @@ public class NetUtilTest {
     @Test
     public void testGetLocalAddress() {
         assertThat(NetUtil.getLocalAddress()).isNotNull();
+    }
+
+    @Test
+    public void testIgnoredInterfacesAreAppliedAfterDefaultAddressIsCached() {
+        // populate the default cache first, then a lookup ignoring every interface
+        // must still evaluate its filter instead of returning the cached default (#8169)
+        assertThat(NetUtil.getLocalAddress()).isNotNull();
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"}))
+                .isNull();
+    }
+
+    @Test
+    public void testFilteredLookupDoesNotOverwriteDefaultCache() {
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+
+        // a filtered lookup that matches nothing must not clear or replace the default cache
+        NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"});
+        assertThat(NetUtil.getLocalAddress()).isEqualTo(defaultAddress);
+    }
+
+    @Test
+    public void testBlankPatternsStillUseDefaultCache() {
+        // an empty config value split into [""] applies no filtering, so the lookup
+        // behaves exactly like the unfiltered default lookup and shares its cache
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {""})).isEqualTo(defaultAddress);
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(null, "")).isEqualTo(defaultAddress);
+    }
+
+    @Test
+    public void testPreferredNetworksLookupResolvesAfterDefaultAddressIsCached() {
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+
+        // a preferred-network lookup runs the interface scan (falling back to the first
+        // valid ip when nothing matches) and leaves the default cache untouched
+        assertThat(NetUtil.getLocalAddress("240.0.0.")).isNotNull();
+        assertThat(NetUtil.getLocalAddress()).isEqualTo(defaultAddress);
     }
 
     @Test

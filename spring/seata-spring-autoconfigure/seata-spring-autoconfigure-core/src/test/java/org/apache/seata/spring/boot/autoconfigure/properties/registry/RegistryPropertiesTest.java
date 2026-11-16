@@ -26,7 +26,9 @@ public class RegistryPropertiesTest {
         RegistryProperties registryProperties = new RegistryProperties();
         registryProperties.setType("type");
         registryProperties.setPreferredNetworks("network");
+        registryProperties.setIgnoredInterfaces("interface");
         Assertions.assertEquals("type", registryProperties.getType());
         Assertions.assertEquals("network", registryProperties.getPreferredNetworks());
+        Assertions.assertEquals("interface", registryProperties.getIgnoredInterfaces());
     }
 }

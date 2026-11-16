@@ -16,8 +16,8 @@
  */
 package org.apache.seata.rm.tcc.json;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.integration.tx.api.json.JsonParser;
 
@@ -30,12 +30,12 @@ public class FastJsonParser implements JsonParser {
 
     @Override
     public String toJSONString(Object object) {
-        return JSON.toJSONString(object);
+        return JsonUtil.toJSONString(object);
     }
 
     @Override
     public <T> T parseObject(String text, Class<T> clazz) {
-        return JSON.parseObject(text, clazz);
+        return JsonUtil.parseObject(text, clazz);
     }
 
     @Override

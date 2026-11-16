@@ -33,8 +33,8 @@ public class JsonParserFactory {
     private static final Map<String, JsonParserWrap> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
 
     public static JsonParserWrap getInstance(String jsonParserName) {
-        final String name = Optional.ofNullable(jsonParserName)
-                .orElse(DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+        final String name =
+                Optional.ofNullable(jsonParserName).orElse(DefaultValues.BUSINESS_ACTION_CONTEXT_JSON_PARSER);
         return CollectionUtils.computeIfAbsent(
                 JSON_PARSER_INSTANCES,
                 name,

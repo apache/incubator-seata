@@ -31,6 +31,8 @@ public class RegistryProperties {
 
     private String preferredNetworks;
 
+    private String ignoredInterfaces;
+
     public String getType() {
         return type;
     }
@@ -46,6 +48,15 @@ public class RegistryProperties {
 
     public RegistryProperties setPreferredNetworks(String preferredNetworks) {
         this.preferredNetworks = preferredNetworks;
+        return this;
+    }
+
+    public String getIgnoredInterfaces() {
+        return ignoredInterfaces;
+    }
+
+    public RegistryProperties setIgnoredInterfaces(String ignoredInterfaces) {
+        this.ignoredInterfaces = ignoredInterfaces;
         return this;
     }
 }

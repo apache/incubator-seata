@@ -260,4 +260,29 @@ public interface Constants {
      * CW stands for Cluster Watch
      */
     String WATCH_EVENT_PREFIX = "CW:";
+
+    /**
+     * Framework-reserved action status key (sys:: prefix avoids collisions with business keys)
+     */
+    String ACTION_STATUS = "sys::actionStatus";
+
+    /**
+     * Action status: phase one not started (branch registered, business never executed)
+     */
+    String ACTION_STATUS_NONE = "none";
+
+    /**
+     * Action status: phase one is in progress (anti-suspension guard)
+     */
+    String ACTION_STATUS_RUNNING = "running";
+
+    /**
+     * Action status: prepare method executed successfully
+     */
+    String ACTION_STATUS_SUCCESS = "success";
+
+    /**
+     * Action status: prepare method execution failed
+     */
+    String ACTION_STATUS_FAILED = "failed";
 }

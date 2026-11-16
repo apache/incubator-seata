@@ -533,5 +533,33 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>release-seata-jar</id>
+            <properties>
+                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
+                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <dependencies.copy.skip>false</dependencies.copy.skip>
+            </properties>
+            <build>
+                <finalName>seata-server</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${spring-boot-for-server.version}</version>
+                        <configuration>
+                            <mainClass>org.apache.seata.server.ServerApplication</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>repackage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 </project>

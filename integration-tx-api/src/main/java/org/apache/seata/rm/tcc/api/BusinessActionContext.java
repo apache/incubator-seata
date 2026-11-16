@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.tcc.api;
 
+import org.apache.seata.common.Constants;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
 
@@ -261,6 +262,30 @@ public class BusinessActionContext implements Serializable {
 
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
+    }
+
+    /**
+     * Gets action status.
+     *
+     * @return the action status
+     */
+    public String getActionStatus() {
+        if (actionContext == null) {
+            return null;
+        }
+        Object status = actionContext.get(Constants.ACTION_STATUS);
+        return status != null ? status.toString() : null;
+    }
+
+    /**
+     * Sets action status.
+     *
+     * @param status the action status
+     */
+    public void setActionStatus(String status) {
+        if (actionContext != null && status != null) {
+            actionContext.put(Constants.ACTION_STATUS, status);
+        }
     }
 
     private void markUpdatedOnActionContextMutation() {

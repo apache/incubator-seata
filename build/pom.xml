@@ -43,8 +43,8 @@
     </licenses>
 
     <organization>
-        <name>Apache</name>
-        <url>https://github.com/apache</url>
+        <name>The Apache Software Foundation</name>
+        <url>https://www.apache.org/</url>
     </organization>
 
     <url>https://seata.apache.org</url>
@@ -126,6 +126,7 @@
         <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
         <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
         <frontend-maven-plugin.version>1.15.0</frontend-maven-plugin.version>
+        <nodeVersion>v19.5.0</nodeVersion>
         <!-- Deploy && GPG -->
         <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.7</nexus-staging-maven-plugin.version>
@@ -150,6 +151,10 @@
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
         <mysql.copy.skip>true</mysql.copy.skip>
+
+        <native-maven-plugin.version>1.1.5</native-maven-plugin.version>
+        <!-- Default native platform classifier; overridden by OS/arch-specific profiles -->
+        <native.platform>${os.arch}</native.platform>
     </properties>
 
     <build>
@@ -255,6 +260,11 @@
                     <groupId>com.github.eirslett</groupId>
                     <artifactId>frontend-maven-plugin</artifactId>
                     <version>${frontend-maven-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

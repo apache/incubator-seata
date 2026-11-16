@@ -17,6 +17,21 @@
     limitations under the License.
 
 -->
+
+<!--
+    Default logback configuration for both JVM (direct java -jar) and
+    GraalVM native image.
+
+    This file omits <if> conditional tags that require Janino runtime
+    compilation (not available in native image). All appender includes
+    are resolved from classpath resources.
+
+    Distribution packaging (distribution/release-seata.xml):
+        For the JVM distribution, this file is NOT used. Instead,
+        logback-spring-jvm.xml is copied to conf/logback-spring.xml
+        so the launch script picks up the variant with <if> conditionals
+        and external conf directory support.
+-->
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
 
     <!-- The conversion rules are copied from `defaults.xml` in the `spring-boot-xxx.jar` -->
@@ -28,23 +43,13 @@
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="8081"/>
-    <springProperty name="LOG_BASH_DIR" source="spring.config.additional-location" defaultValue="" />
     <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="seata-namingserver"/>
 
-    <if condition='property("LOG_BASH_DIR").equals("")' >
-        <then>
-            <!-- console-appender -->
-            <include resource="logback/console-appender.xml"/>
+    <!-- console-appender -->
+    <include resource="logback/console-appender.xml"/>
 
-            <!-- file-appender -->
-            <include resource="logback/file-appender.xml"/>
-
-        </then>
-        <else>
-            <include file="${LOG_BASH_DIR}/logback/console-appender.xml"/>
-            <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
-        </else>
-    </if>
+    <!-- file-appender -->
+    <include resource="logback/file-appender.xml"/>
 
 
 

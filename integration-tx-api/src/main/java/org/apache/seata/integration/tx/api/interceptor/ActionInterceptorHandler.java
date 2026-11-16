@@ -16,14 +16,18 @@
  */
 package org.apache.seata.integration.tx.api.interceptor;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.common.executor.Callback;
 import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.hook.TccHook;
 import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
@@ -52,6 +56,22 @@ import java.util.Map;
 public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
+
+    private static final boolean ACTION_STATUS_REPORT_ENABLED = ConfigurationFactory.getInstance()
+            .getBoolean(
+                    ConfigurationKeys.CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE,
+                    DefaultValues.DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE);
+
+    /**
+     * Whether action status report is enabled. Restricted to {@link BranchType#SAGA_ANNOTATION} so that enabling
+     * this option does not affect normal TCC behavior. Overridable for testing.
+     *
+     * @param branchType the branch type of the current action
+     * @return true if action status should be reported
+     */
+    protected boolean isActionStatusReportEnabled(BranchType branchType) {
+        return branchType == BranchType.SAGA_ANNOTATION && ACTION_STATUS_REPORT_ENABLED;
+    }
 
     /**
      * Handler the Tx Aspect
@@ -96,10 +116,19 @@ public class ActionInterceptorHandler {
 
         // save the previous action context
         BusinessActionContext previousActionContext = BusinessActionContextUtil.getContext();
+        final boolean reportStatus = isActionStatusReportEnabled(businessActionParam.getBranchType());
         try {
             // share actionContext implicitly
             BusinessActionContextUtil.setContext(actionContext);
-            doBeforeTccPrepare(xid, branchId, actionName, actionContext);
+            try {
+                doBeforeTccPrepare(xid, branchId, actionName, actionContext);
+            } catch (Throwable t) {
+                // before-prepare hook failed: phase one business never executed, mark as none (empty rollback).
+                if (reportStatus) {
+                    actionContext.setActionStatus(Constants.ACTION_STATUS_NONE);
+                }
+                throw t;
+            }
             if (businessActionParam.getUseCommonFence()) {
                 try {
                     // Use common Fence, and return the business result
@@ -113,8 +142,28 @@ public class ActionInterceptorHandler {
                     throw originException;
                 }
             } else {
+                // Mark action status: running and report immediately so TC can observe it if the business
+                // callback hangs (anti-suspension). The final success/failed status is reported in finally.
+                if (reportStatus) {
+                    actionContext.setActionStatus(Constants.ACTION_STATUS_RUNNING);
+                    BusinessActionContextUtil.reportContext(actionContext);
+                }
                 // Execute business, and return the business result
-                return targetCallback.execute();
+                try {
+                    Object result = targetCallback.execute();
+                    // Mark action status: success (only for non-CommonFence mode)
+                    if (reportStatus) {
+                        actionContext.setActionStatus(Constants.ACTION_STATUS_SUCCESS);
+                    }
+                    return result;
+                } catch (Throwable t) {
+                    // Mark action status: failed (only for non-CommonFence mode).
+                    // Note: failed only indicates the callback threw; it does not prove no business side effects.
+                    if (reportStatus) {
+                        actionContext.setActionStatus(Constants.ACTION_STATUS_FAILED);
+                    }
+                    throw t;
+                }
             }
         } finally {
             try {

@@ -291,6 +291,30 @@ public class ChannelManager {
     }
 
     /**
+     * Remove a closed channel from the identified channels, only if it is still bound to the given context.
+     *
+     * @param channel    the closed channel
+     * @param rpcContext the context the channel was bound to when it was closed
+     */
+    static void removeIdentifiedChannel(Channel channel, RpcContext rpcContext) {
+        IDENTIFIED_CHANNELS.remove(channel, rpcContext);
+    }
+
+    /**
+     * Release a closed channel and remove it from the identified channels at once. Used when the channel was
+     * registered after it had closed, so the disconnect handling found nothing to clean up.
+     *
+     * @param channel the closed channel
+     */
+    public static void removeClosedChannel(Channel channel) {
+        RpcContext rpcContext = getContextFromIdentified(channel);
+        if (rpcContext != null) {
+            rpcContext.release();
+            removeIdentifiedChannel(channel, rpcContext);
+        }
+    }
+
+    /**
      * Gets get same income client channel.
      *
      * @param channel the channel

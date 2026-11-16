@@ -157,4 +157,19 @@ public class SpringBeanServiceInvokerTest {
         String output = (String) springBeanServiceInvoker.invoke(serviceTaskState, input);
         Assertions.assertEquals(output, "param");
     }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    public void testSagaJsonParserCompatibilityApiIsDeprecated() throws NoSuchMethodException {
+        SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
+        springBeanServiceInvoker.setSagaJsonParser("json");
+
+        Assertions.assertEquals("json", springBeanServiceInvoker.getSagaJsonParser());
+        Assertions.assertTrue(SpringBeanServiceInvoker.class
+                .getDeclaredMethod("getSagaJsonParser")
+                .isAnnotationPresent(Deprecated.class));
+        Assertions.assertTrue(SpringBeanServiceInvoker.class
+                .getDeclaredMethod("setSagaJsonParser", String.class)
+                .isAnnotationPresent(Deprecated.class));
+    }
 }

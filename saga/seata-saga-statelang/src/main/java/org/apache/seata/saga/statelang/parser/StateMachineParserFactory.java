@@ -24,6 +24,10 @@ import org.apache.seata.saga.statelang.parser.impl.StateMachineParserImpl;
  */
 public class StateMachineParserFactory {
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public static StateMachineParser getStateMachineParser(String jsonParserName) {
         return new StateMachineParserImpl(jsonParserName);
     }
