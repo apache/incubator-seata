@@ -156,7 +156,8 @@ for (const c of contracts) {
     risk: c.risk,
     confirmation: c.confirmation,
     backends: c.backends,
-    skills: c.skills,
+    // Expose the consolidated Skill while preserving the command baseline.
+    skills: c.skills.includes("seata-") ? "seata-shared" : c.skills,
     schema_version: "0.1",
     remote: c.remote,
     invocation,
@@ -189,10 +190,8 @@ await copyFile(
   resolve(root, "src/adapter/statestore/schema.sql"),
   resolve(root, "api/store/schema.sql"),
 );
-const skillIds = ["seata-shared", "seata-onboarding", "seata-integration-check",
-  "seata-transaction-analysis", "seata-incident-diagnosis", "seata-recovery-plan",
-  "seata-controlled-recovery"];
-const skillPaths = ["SKILL.md", "references/evidence.md", "examples/scenario.md", "tests/acceptance.md"];
+const skillIds = ["seata-shared"];
+const skillPaths = ["SKILL.md", "references/evidence.md"];
 const skills = [];
 for (const id of skillIds) {
   const entries = [];

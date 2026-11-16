@@ -124,7 +124,9 @@ assert.deepEqual(sbom.components.map(component => `${component.name}@${component
 const shim = join(prefix, "node_modules/.bin/seata-ai");
 await access(shim);
 const bundledSkills = JSON.parse(await readFile(join(installed, "api/skills.json"), "utf8"));
-assert.equal(bundledSkills.skills.length, 7);
+assert.deepEqual(bundledSkills.skills.map(skill => skill.skill_id), ["seata-shared"]);
+assert.deepEqual([...packed].filter(path => path.startsWith("skills/")).sort(),
+  ["skills/seata-shared/SKILL.md", "skills/seata-shared/references/evidence.md"]);
 // Exercise the installed entrypoint, not just the manifest validator. Damaged
 // package resources must fail before any user state or Skill deployment exists.
 const missingResource = [...Object.keys(manifest)].find(path => path.startsWith("schemas/"));
@@ -208,7 +210,7 @@ assert.equal(skillStatus.exposure_valid, true);
 assert.equal(skillStatus.installation_mode, "direct");
 assert.equal(skillStatus.session_loaded, "unknown");
 const skillDirectory = join(testHome, ".agents", "skills");
-assert.equal((await readdir(skillDirectory)).filter(name => name.startsWith("seata-")).length, 7);
+assert.deepEqual((await readdir(skillDirectory)).filter(name => name.startsWith("seata-")), ["seata-shared"]);
 for (const skill of bundledSkills.skills) {
   const skillRoot = join(skillDirectory, skill.skill_id);
   assert.equal((await lstat(skillRoot)).isSymbolicLink(), false);

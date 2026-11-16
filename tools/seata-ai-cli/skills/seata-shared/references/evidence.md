@@ -1,3 +1,7 @@
-# Evidence boundaries
+# Investigation starting points
 
-Use the installed CLI's help/schema as the command and field contract. For remote observations select the intended Profile explicitly. Report source and collection time, unknown values, missing sources and truncation. Local file evidence does not establish remote effective configuration. This release supports no server mutations or mutation dry-run. Local configuration, authentication, Skills and export operations do not grant authority to modify Seata state.
+- **Cannot connect or find transactions:** separate Profile/trust/login problems from route discovery and management access. Check the intended namespace, cluster and vgroup before diagnosing an empty result as missing data. A reachable endpoint does not establish every capability.
+- **Transaction stuck or retrying:** follow one XID through global state, branches and their RM/resource identities, then locks and the observation timeline. Compare repeated observations when necessary. Identify missing log or RM evidence explicitly; the current CLI does not collect these sources.
+- **Lock contention:** relate locks to owning transactions/branches and resources. A lock row or shared resource alone does not establish an active waiter, deadlock or orphan. Check owner/session evidence and collection limits before recommending cleanup.
+- **Integration/configuration mismatch:** compare local configuration with observed topology and connectivity. Project files and the CLI's environment do not establish effective TC/RM JVM configuration. Identify the unobserved configuration source rather than silently rewriting it.
+- **Recovery or deletion:** gather fresh state and explain the intended target, effects and missing evidence for an operator handoff. The current CLI cannot execute these actions or dry-run plans. An empty management query does not establish completion or a safe cleanup target.

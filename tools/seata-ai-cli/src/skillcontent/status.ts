@@ -31,7 +31,12 @@ export function skillsStatus(input: Obj, signal: AbortSignal,
       // Inspect only our named directories; unrelated user Skills are neither
       // validated nor traversed. Reject extra content inside a managed Skill.
       for (const section of ["", "references", "examples", "tests"]) {
-        const dir = new ConfigDirectory(join(paths.directory, id, section), signal);
+        let dir: ConfigDirectory;
+        try { dir = new ConfigDirectory(join(paths.directory, id, section), signal); }
+        catch (error) {
+          if (section && error instanceof CliError && error.subtype === "config_directory_missing") continue;
+          throw error;
+        }
         try {
           const listed = dir.list(signal);
           const allowed = section === "" ? ["SKILL.md", "references", "examples", "tests"] :

@@ -24,7 +24,7 @@ execution/authentication model. It preserves Protocol `0.1`, contract revision
 
 The package is a private development snapshot. `seata-ai-cli-development` is a
 local package identifier, not an approved Apache npm package name. Read-only
-management handlers, browser login, diagnostics and the seven managed Skills
+management handlers, browser login, diagnostics and one lightweight Seata Skill
 are implemented; server writes remain disabled. `capabilities` reports actual
 handler/storage availability. The command catalog alone does not imply
 implemented behavior.
@@ -61,6 +61,12 @@ alternative private state directory. Use a fresh directory for this development
 build. No migration from the discarded Go implementation is performed.
 Profile mutations require explicit commands; management endpoint trust remains
 separate from authenticated/compatible server support.
+
+The bundled `seata-shared` Skill introduces the transaction model and points
+Agents to `--help`, `schema` and `capabilities`; scenario guidance is loaded on
+demand. Install it explicitly with `seata-ai skills install --global`. Upgrades
+remove unchanged files from the six retired Skills using the installation
+record and refuse to overwrite edited managed files.
 
 ## Validation
 
@@ -107,8 +113,11 @@ helper; create the macOS development tarball on macOS. Input contracts live in
 `src/command/contracts.json`; supplied fixtures under `test/contract/r11`
 remain independent. Generated files are not
 edited. `package-lock.json` and `npm-shrinkwrap.json` pin identical dependency
-trees; update both when dependencies change. No install lifecycle hook deploys
-Skills, opens a browser or changes the user's StateStore.
+trees; update both when dependencies change. Runtime dependencies, including
+transitive packages, are also pinned directly because local-tarball installation
+can resolve dependency ranges independently of the bundled shrinkwrap. No
+install lifecycle hook deploys Skills, opens a browser or changes the user's
+StateStore.
 
 Further gates include native macOS x86_64 and Windows validation, failure
 recovery under power loss or disk exhaustion, and certified server combinations.

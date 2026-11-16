@@ -25,20 +25,19 @@ import { skillsStatus } from "../dist/skillcontent/status.js";
 
 const root = new URL("../", import.meta.url);
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
-test("all seven packaged Skills have source-bound digests and bounded entrypoints", () => {
+test("one lightweight Skill has source-bound digests and opt-in investigation guidance", () => {
   const catalog = skillCatalog();
-  assert.equal(catalog.length, 7);
-  assert.equal(new Set(catalog.map(s => s.skill_id)).size, 7);
+  assert.deepEqual(catalog.map(s => s.skill_id), ["seata-shared"]);
   validateOutput("skills.list", { skills: catalog });
   let entryBytes = 0;
   for (const skill of catalog) {
     assert.equal(hash(JSON.stringify(skill.files)), skill.digest);
-    assert.deepEqual(skill.files.map(f => f.path), ["SKILL.md", "references/evidence.md", "examples/scenario.md", "tests/acceptance.md"]);
+    assert.deepEqual(skill.files.map(f => f.path), ["SKILL.md", "references/evidence.md"]);
     for (const file of skill.files) {
       const source = readFileSync(new URL(`skills/${skill.skill_id}/${file.path}`, root));
       assert.equal(source.length, file.bytes); assert.equal(hash(source), file.digest);
     }
-    for (const section of ["main", "references", "examples"]) {
+    for (const section of ["main", "references"]) {
       const result = readSkill({ skill_id: skill.skill_id, section });
       validateOutput("skills.read", result);
       assert.equal(hash(result.content), result.digest);
@@ -52,7 +51,11 @@ test("all seven packaged Skills have source-bound digests and bounded entrypoint
       }
     }
   }
-  assert.ok(entryBytes <= 12 * 1024, "The seven entrypoints must remain a lightweight bundle");
+  assert.ok(entryBytes <= 2500, "The entrypoint must remain lightweight");
+  const registry = JSON.parse(readFileSync(new URL("api/protocol/registry.json", root)));
+  for (const command of registry) {
+    if (command.skills !== "—") assert.equal(command.skills, "seata-shared", command.id);
+  }
 });
 
 test("Skill reads reject traversal and unlisted resources without filesystem fallback", () => {
@@ -61,6 +64,8 @@ test("Skill reads reject traversal and unlisted resources without filesystem fal
   }
   assert.throws(() => readSkill({ skill_id: "seata-shared", section: "references", relative_path: "missing.md" }), e => e.type === "not_found");
   assert.throws(() => readSkill({ skill_id: "unknown" }), e => e.type === "not_found");
+  assert.throws(() => readSkill({ skill_id: "seata-onboarding" }), e => e.subtype === "skill_not_found");
+  assert.throws(() => readSkill({ skill_id: "seata-shared", section: "examples" }), e => e.subtype === "skill_resource_not_found");
   assert.throws(() => readSkill({ skill_id: "seata-shared", section: "main", relative_path: "references/evidence.md" }), e => e.type === "validation");
 });
 
@@ -74,10 +79,10 @@ test("typed and canonical Skill commands agree outside package cwd without State
     assert.equal(existsSync(state), false);
     return JSON.parse(result.stdout).data;
   };
-  assert.equal(run(["skills", "list"]).skills.length, 7);
-  const typed = run(["skills", "read", "--skill-id", "seata-shared", "--section", "examples"]);
+  assert.equal(run(["skills", "list"]).skills.length, 1);
+  const typed = run(["skills", "read", "--skill-id", "seata-shared", "--section", "references"]);
   const canonical = run(["invoke"], JSON.stringify({ protocol_version: "0.1", contract_revision: "R9", command: "skills.read",
-    input: { skill_id: "seata-shared", section: "examples" }, context: {}, options: {} }));
+    input: { skill_id: "seata-shared", section: "references" }, context: {}, options: {} }));
   assert.deepEqual(typed, canonical);
 });
 
@@ -85,7 +90,7 @@ test("bundled and custom Skill validation checks exact contents without executin
   const signal = new AbortController().signal;
   const bundled = validateSkills({}, signal);
   validateOutput("skills.validate", bundled);
-  assert.equal(bundled.valid, true); assert.equal(bundled.files_checked, 28);
+  assert.equal(bundled.valid, true); assert.equal(bundled.files_checked, 2);
   const temp = mkdtempSync(join(tmpdir(), "seata-skills-validation-"));
   cpSync(new URL("skills/seata-shared", root), join(temp, "seata-shared"), { recursive: true });
   const original = validateSkills({ root: temp }, signal);
@@ -122,12 +127,12 @@ test("Skill export round-trips all resources and requires unchanged owned files 
   try {
     const result = await exportSkills(inv, signal);
     validateOutput("skills.export", result);
-    assert.equal(result.files.length, 29); assert.equal(result.export_manifest.complete, true);
+    assert.equal(result.files.length, 3); assert.equal(result.export_manifest.complete, true);
     assert.equal(validateSkills({ root: join(temp, "exported") }, signal).valid, true);
     assert.equal(result.export_manifest.host_discovered, "unknown");
     await assert.rejects(exportSkills(inv, signal), e => e.subtype === "export_exists");
     inv.input.overwrite = true;
-    assert.equal((await exportSkills(inv, signal)).files.length, 29);
+    assert.equal((await exportSkills(inv, signal)).files.length, 3);
     const changed = join(temp, "exported", "seata-shared", "SKILL.md");
     writeFileSync(changed, "USER-EDIT");
     await assert.rejects(exportSkills(inv, signal), e => e.type === "policy");
@@ -142,13 +147,13 @@ test("export preflight leaves earlier payloads unwritten when a later unowned fi
   const temp = mkdtempSync(join(tmpdir(), "seata-skills-conflict-")), state = join(temp, "state");
   const oldState = process.env.SEATA_AI_STATE_DIR; process.env.SEATA_AI_STATE_DIR = state;
   const output = join(temp, "exported"), skill = join(output, "seata-shared");
-  mkdirSync(join(skill, "tests"), { recursive: true, mode: 0o700 });
-  writeFileSync(join(skill, "tests", "acceptance.md"), "USER-FILE", { mode: 0o600 });
+  mkdirSync(join(skill, "references"), { recursive: true, mode: 0o700 });
+  writeFileSync(join(skill, "references", "evidence.md"), "USER-FILE", { mode: 0o600 });
   const inv = { command: "skills.export", input: { root: temp, path: "exported", skill_id: "seata-shared", overwrite: true }, context: {}, options: { timeout_ms: 30000 } };
   try {
     await assert.rejects(exportSkills(inv, new AbortController().signal), e => e.subtype === "export_not_owned");
     assert.equal(existsSync(join(skill, "SKILL.md")), false);
-    assert.equal(readFileSync(join(skill, "tests", "acceptance.md"), "utf8"), "USER-FILE");
+    assert.equal(readFileSync(join(skill, "references", "evidence.md"), "utf8"), "USER-FILE");
     assert.equal(existsSync(join(output, "seata-skills-manifest.json")), false);
     inv.input.path = "../outside";
     await assert.rejects(exportSkills(inv, new AbortController().signal), e => e.subtype === "unsafe_export_path");
@@ -164,7 +169,7 @@ test("interrupted multi-file export reports completed files without a complete m
   const original = ExportFile.prototype.write;
   let writes = 0;
   ExportFile.prototype.write = async function(bytes, signal) {
-    if (++writes === 3) throw new Error("synthetic write interruption");
+    if (++writes === 2) throw new Error("synthetic write interruption");
     return original.call(this, bytes, signal);
   };
   const inv = { command: "skills.export", input: { root: temp, path: "exported", skill_id: "seata-shared" }, context: {}, options: { timeout_ms: 30000 } };
@@ -172,7 +177,7 @@ test("interrupted multi-file export reports completed files without a complete m
     await assert.rejects(exportSkills(inv, new AbortController().signal), error => {
       assert.equal(error.type, "partial_failure"); assert.equal(error.exitCode, 9);
       validateOutput("skills.export", error.data);
-      assert.equal(error.data.files.length, 2); assert.equal(error.data.export_manifest.complete, false);
+      assert.equal(error.data.files.length, 1); assert.equal(error.data.export_manifest.complete, false);
       for (const file of error.data.files) assert.equal("sha256:" + hash(readFileSync(file.path)), file.digest);
       return true;
     });
@@ -197,7 +202,7 @@ test("public CLI exports a selected Skill and validates it in typed and canonica
   assert.equal(run(["skills", "validate"]).valid, true);
   assert.equal(existsSync(state), false);
   const result = run(["skills", "export", "--skill-id", "seata-shared", "--root", temp, "--path", "out"]);
-  validateOutput("skills.export", result); assert.equal(result.files.length, 5);
+  validateOutput("skills.export", result); assert.equal(result.files.length, 3);
   const typed = run(["skills", "validate", "--root", join(temp, "out")]);
   const canonical = run(["invoke"], JSON.stringify({ protocol_version: "0.1", contract_revision: "R9",
     command: "skills.validate", input: { root: join(temp, "out") }, context: {}, options: {} }));

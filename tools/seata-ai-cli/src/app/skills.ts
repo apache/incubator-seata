@@ -35,8 +35,13 @@ export function validateSkills(input: Obj, signal: AbortSignal): Obj {
   const root = input.root === undefined ? undefined : resolve(str(input.root));
   const add = (code: string, skill: string | null = null, path: string | null = null) =>
     findings.push({ code, skill_id: skill, relative_path: path });
-  function names(path: string): string[] {
-    const dir = new ConfigDirectory(path, signal);
+  function names(path: string, optional = false): string[] {
+    let dir: ConfigDirectory;
+    try { dir = new ConfigDirectory(path, signal); }
+    catch (error) {
+      if (optional && error instanceof CliError && error.subtype === "config_directory_missing") return [];
+      throw error;
+    }
     try {
       const result = dir.list(signal);
       if (result.truncated) add("directory_limit_exceeded");
@@ -69,7 +74,7 @@ export function validateSkills(input: Obj, signal: AbortSignal): Obj {
         if (entryNames.some(n => !["SKILL.md", "references", "examples", "tests"].includes(n))) add("unexpected_skill_entries", id);
         for (const section of ["references", "examples", "tests"]) {
           const allowed = files.filter(f => str(f.path).startsWith(section + "/")).map(f => str(f.path).slice(section.length + 1));
-          if (names(join(root, id, section)).some(n => !allowed.includes(n))) add("unexpected_section_entries", id, section);
+          if (names(join(root, id, section), true).some(n => !allowed.includes(n))) add("unexpected_section_entries", id, section);
         }
       } catch (error) {
         signal.throwIfAborted();

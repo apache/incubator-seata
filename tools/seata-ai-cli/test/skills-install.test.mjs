@@ -76,11 +76,11 @@ function revisedBundle(home, addResource = false, removeResource = false) {
   skill.digest = hash(JSON.stringify(skill.files));
   // Change a later file too: killing after the first payload leaves genuinely
   // mixed old/new content, so recovery must consult the durable old baseline.
-  const secondRelative = "skills/seata-onboarding/SKILL.md";
+  const secondRelative = "skills/seata-shared/references/evidence.md";
   const secondBytes = Buffer.concat([readFileSync(join(root, secondRelative)), Buffer.from("\nLater revision fixture.\n")]);
   writeFileSync(join(root, secondRelative), secondBytes);
-  const secondSkill = manifest.skills.find(skill => skill.skill_id === "seata-onboarding");
-  const secondFile = secondSkill.files.find(file => file.path === "SKILL.md");
+  const secondSkill = skill;
+  const secondFile = secondSkill.files.find(file => file.path === "references/evidence.md");
   secondFile.bytes = secondBytes.length; secondFile.digest = hash(secondBytes);
   secondSkill.digest = hash(JSON.stringify(secondSkill.files));
   const addedRelative = "skills/seata-shared/references/new-evidence.md";
@@ -90,20 +90,106 @@ function revisedBundle(home, addResource = false, removeResource = false) {
     skill.files.push({ path: "references/new-evidence.md", bytes: addedBytes.length, digest: hash(addedBytes) });
     skill.digest = hash(JSON.stringify(skill.files));
   }
-  const removedRelative = "skills/seata-shared/examples/scenario.md";
+  const removedRelative = secondRelative;
   if (removeResource) {
     unlinkSync(join(root, removedRelative));
-    skill.files = skill.files.filter(file => file.path !== "examples/scenario.md");
+    skill.files = skill.files.filter(file => file.path !== "references/evidence.md");
     skill.digest = hash(JSON.stringify(skill.files));
   }
   writeFileSync(join(root, "api/skills.json"), JSON.stringify(manifest));
   const resources = JSON.parse(readFileSync(join(root, "api/resources.json")));
-  for (const name of [relative, secondRelative, "api/skills.json"]) resources[name] = hash(readFileSync(join(root, name)));
+  for (const name of [relative, ...(removeResource ? [] : [secondRelative]), "api/skills.json"]) resources[name] = hash(readFileSync(join(root, name)));
   if (addResource) resources[addedRelative] = hash(readFileSync(join(root, addedRelative)));
   if (removeResource) delete resources[removedRelative];
   writeFileSync(join(root, "api/resources.json"), JSON.stringify(resources));
   return { cli: join(root, "dist/cli.js"), bytes };
 }
+
+// A self-contained old-release inventory exercises seven-to-one migration
+// without depending on deleted source files or a developer's installed Skills.
+function legacyBundle(home) {
+  const bundle = revisedBundle(home), root = join(home, "revised-package");
+  const ids = ["seata-shared", "seata-onboarding", "seata-integration-check", "seata-transaction-analysis",
+    "seata-incident-diagnosis", "seata-recovery-plan", "seata-controlled-recovery"];
+  const hash = bytes => createHash("sha256").update(bytes).digest("hex");
+  const resources = JSON.parse(readFileSync(join(root, "api/resources.json")));
+  for (const name of Object.keys(resources)) if (name.startsWith("skills/")) delete resources[name];
+  const skills = ids.map(id => {
+    const files = ["SKILL.md", "references/evidence.md", "examples/scenario.md", "tests/acceptance.md"].map(path => {
+      const relative = `skills/${id}/${path}`;
+      mkdirSync(join(root, relative, ".."), { recursive: true });
+      const bytes = Buffer.from(path === "SKILL.md"
+        ? `---\nname: ${id}\ndescription: Legacy release fixture.\n---\n\nLegacy entrypoint.\n`
+        : `Legacy ${id} ${path}.\n`);
+      writeFileSync(join(root, relative), bytes);
+      resources[relative] = hash(bytes);
+      return { path, bytes: bytes.length, digest: hash(bytes) };
+    });
+    return { skill_id: id, version: "0.1.0-r11.0", description: "Legacy release fixture.", digest: hash(JSON.stringify(files)), files };
+  });
+  writeFileSync(join(root, "api/skills.json"), JSON.stringify({ version: "0.1.0-r11.0", skills }));
+  resources["api/skills.json"] = hash(readFileSync(join(root, "api/skills.json")));
+  writeFileSync(join(root, "api/resources.json"), JSON.stringify(resources));
+  return { ...bundle, ids };
+}
+
+test("seven owned legacy Skills consolidate to one entrypoint without retaining old content", () => {
+  const f = fixture(), legacy = legacyBundle(f.home), initial = f.run(legacy.cli);
+  assert.equal(initial.code, 0, initial.stderr);
+  assert.equal(initial.data.data.manifest.files.length, 28);
+  const unrelated = join(f.directory, "user-owned", "SKILL.md");
+  mkdirSync(join(f.directory, "user-owned"), { mode: 0o700 });
+  writeFileSync(unrelated, "USER SKILL");
+  const result = f.run(); assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.data.data.host_status.content_installed, true);
+  assert.equal(result.data.data.manifest.files.length, 2);
+  for (const file of initial.data.data.manifest.files) {
+    const retained = result.data.data.manifest.files.some(current => current.relative_path === file.relative_path);
+    assert.equal(existsSync(file.path), retained, file.relative_path);
+  }
+  assert.equal(readFileSync(unrelated, "utf8"), "USER SKILL");
+  assert.equal(f.run().data.data.installation_state, "unchanged");
+});
+
+for (const modification of ["owned-file", "extra-file"]) test(`legacy consolidation preserves ${modification} and refuses before payload changes`, () => {
+  const f = fixture(), legacy = legacyBundle(f.home), initial = f.run(legacy.cli);
+  assert.equal(initial.code, 0, initial.stderr);
+  const first = join(f.directory, "seata-shared", "SKILL.md"), before = readFileSync(first);
+  const user = join(f.directory, "seata-onboarding", modification === "owned-file" ? "SKILL.md" : "user-notes.md");
+  writeFileSync(user, "USER CONTENT");
+  const result = f.run(); assert.equal(result.code, 8, result.stderr);
+  assert.equal(readFileSync(user, "utf8"), "USER CONTENT");
+  assert.deepEqual(readFileSync(first), before);
+  for (const file of initial.data.data.manifest.files) assert.equal(existsSync(file.path), true, file.relative_path);
+  assert.deepEqual(installationRecord(f), initial.data.data.manifest);
+});
+
+test("unowned retired entrypoints are not adopted or deleted by a fresh installation", () => {
+  const f = fixture(), user = join(f.directory, "seata-onboarding", "SKILL.md");
+  mkdirSync(join(f.directory, "seata-onboarding"), { recursive: true, mode: 0o700 });
+  writeFileSync(user, "USER SKILL");
+  const result = f.run(); assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.data.data.manifest.files.length, 2);
+  assert.equal(readFileSync(user, "utf8"), "USER SKILL");
+});
+
+test("consolidation resumes after a retired entrypoint is captured but before its deletion completes", () => {
+  const f = fixture(), legacy = legacyBundle(f.home), initial = f.run(legacy.cli);
+  assert.equal(initial.code, 0, initial.stderr);
+  // Linux removal uses a descriptor-anchored path, not the full host pathname.
+  // The retained shared entrypoint is updated, so every removed SKILL.md here
+  // belongs to a retired Skill.
+  const killed = f.run(cli, removalRenameFault("kill", "/SKILL.md"));
+  assert.equal(killed.signal, "SIGKILL", killed.stderr);
+  const interrupted = installationRecord(f); assert.equal(interrupted.phase, "writing");
+  const result = f.run(); assert.equal(result.code, 0, result.stderr);
+  assert.equal(result.data.data.manifest.operation_id, interrupted.operation_id);
+  assert.equal(result.data.data.host_status.content_installed, true);
+  for (const id of legacy.ids.filter(id => id !== "seata-shared"))
+    assert.equal(existsSync(join(f.directory, id, "SKILL.md")), false);
+  assert.equal(f.run().data.data.installation_state, "unchanged");
+});
+
 test("direct Skills installation creates ordinary directories, verifies content and is idempotent", () => {
   const f = fixture();
   const unrelated = join(f.directory, "user-owned", "SKILL.md");
@@ -114,7 +200,7 @@ test("direct Skills installation creates ordinary directories, verifies content 
   assert.equal(first.data.data.installation_state, "complete");
   assert.equal(first.data.data.host_status.content_installed, true);
   assert.equal(first.data.data.host_status.session_loaded, "unknown");
-  assert.equal(readdirSync(f.directory).filter(name => name.startsWith("seata-")).length, 7);
+  assert.deepEqual(readdirSync(f.directory).filter(name => name.startsWith("seata-")), ["seata-shared"]);
   const file = join(f.directory, "seata-shared", "SKILL.md");
   assert.equal(lstatSync(join(f.directory, "seata-shared")).isSymbolicLink(), false);
   assert.equal(existsSync(join(f.state, "skills")), false);
@@ -176,14 +262,13 @@ test("a changed bundled release replaces unchanged owned Skills in place and ver
   assert.equal(lstatSync(file).ino, before.ino);
   assert.notEqual(result.data.data.manifest.content_digest, initial.data.data.manifest.content_digest);
   assert.equal(f.run(revised.cli).data.data.installation_state, "unchanged");
-  assert.deepEqual(readdirSync(f.directory).sort(), [".seata-ai-install.lock", "seata-shared", "seata-onboarding",
-    "seata-integration-check", "seata-transaction-analysis", "seata-incident-diagnosis", "seata-recovery-plan", "seata-controlled-recovery"].sort());
+  assert.deepEqual(readdirSync(f.directory).sort(), [".seata-ai-install.lock", "seata-shared"]);
 });
 
 test("upgrade preflight preserves all old files and journal when any installed Skill was edited", () => {
   const f = fixture(), initial = f.run(); assert.equal(initial.code, 0, initial.stderr);
   const first = join(f.directory, "seata-shared", "SKILL.md"), before = readFileSync(first);
-  const edited = join(f.directory, "seata-onboarding", "SKILL.md"); writeFileSync(edited, "USER EDIT");
+  const edited = join(f.directory, "seata-shared", "references", "evidence.md"); writeFileSync(edited, "USER EDIT");
   const revised = revisedBundle(f.home), result = f.run(revised.cli);
   assert.equal(result.code, 8, result.stderr);
   assert.deepEqual(readFileSync(first), before);
@@ -302,14 +387,14 @@ test("upgrade removes only unchanged owned obsolete resources and leaves no old-
   assert.equal(result.code, 0, result.stderr);
   assert.equal(result.data.data.host_status.content_installed, true);
   assert.equal(result.data.data.manifest.files.length, initial.data.data.manifest.files.length - 1);
-  assert.deepEqual(readdirSync(join(f.directory, "seata-shared", "examples")), []);
+  assert.deepEqual(readdirSync(join(f.directory, "seata-shared", "references")), []);
   assert.equal(f.run(revised.cli).data.data.installation_state, "unchanged");
 });
 
 test("a modified obsolete resource blocks the upgrade before writes or deletions", () => {
   const f = fixture(), initial = f.run(); assert.equal(initial.code, 0, initial.stderr);
   const first = join(f.directory, "seata-shared", "SKILL.md"), before = readFileSync(first);
-  const obsolete = join(f.directory, "seata-shared", "examples", "scenario.md"); writeFileSync(obsolete, "USER EDIT");
+  const obsolete = join(f.directory, "seata-shared", "references", "evidence.md"); writeFileSync(obsolete, "USER EDIT");
   const revised = revisedBundle(f.home, false, true), result = f.run(revised.cli);
   assert.equal(result.code, 8, result.stderr);
   assert.equal(readFileSync(obsolete, "utf8"), "USER EDIT");
@@ -317,11 +402,11 @@ test("a modified obsolete resource blocks the upgrade before writes or deletions
   assert.deepEqual(installationRecord(f), initial.data.data.manifest);
 });
 
-function removalRenameFault(mode) {
+function removalRenameFault(mode, suffix = "/evidence.md") {
   const bootstrap = `import fs from 'node:fs'; import { syncBuiltinESMExports } from 'node:module';
     const rename = fs.renameSync;
     fs.renameSync = function(source, destination) {
-      const removal = String(destination).endsWith('/payload') && String(source).endsWith('/scenario.md');
+      const removal = String(destination).endsWith('/payload') && String(source).endsWith(${JSON.stringify(suffix)});
       if (removal && ${JSON.stringify(mode)} === 'replace') {
         rename(source, source + '.user-moved');
         fs.writeFileSync(source, 'USER REPLACEMENT', {mode: 0o600});
@@ -342,14 +427,14 @@ for (const point of ["removing", "captured", "removed"]) test(`obsolete resource
   const resumed = f.run(revised.cli); assert.equal(resumed.code, 0, resumed.stderr);
   assert.equal(resumed.data.data.manifest.operation_id, interrupted.operation_id);
   assert.equal(resumed.data.data.host_status.content_installed, true);
-  assert.deepEqual(readdirSync(join(f.directory, "seata-shared", "examples")), []);
+  assert.deepEqual(readdirSync(join(f.directory, "seata-shared", "references")), []);
 });
 
 test("a replacement raced into the removal source is restored rather than deleted", () => {
   const f = fixture(), initial = f.run(); assert.equal(initial.code, 0, initial.stderr);
   const revised = revisedBundle(f.home, false, true), result = f.run(revised.cli, removalRenameFault("replace"));
   assert.equal(result.code, 8, result.stderr);
-  const source = join(f.directory, "seata-shared", "examples", "scenario.md");
+  const source = join(f.directory, "seata-shared", "references", "evidence.md");
   assert.equal(readFileSync(source, "utf8"), "USER REPLACEMENT");
   assert.equal(existsSync(source + ".user-moved"), true);
   assert.equal(installationRecord(f).phase, "writing");
