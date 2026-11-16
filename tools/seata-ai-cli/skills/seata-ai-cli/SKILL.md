@@ -1,9 +1,9 @@
 ---
-name: seata-shared
+name: seata-ai-cli
 description: Use Seata AI CLI to understand transaction incidents, investigate integration or locking problems, and prepare evidence-based recovery advice.
 ---
 
-# Seata CLI
+# Seata AI CLI
 
 ## Mental model
 

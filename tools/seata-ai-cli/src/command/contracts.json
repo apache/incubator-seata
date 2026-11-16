@@ -6950,7 +6950,7 @@
     "risk": "sensitive_read",
     "confirmation": "none",
     "backends": "filesystem, environment",
-    "skills": "seata-onboarding"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "setup.initialize",
@@ -7151,7 +7151,7 @@
     "risk": "local_write",
     "confirmation": "agent_judgment",
     "backends": "filesystem / console_auth, naming_management",
-    "skills": "seata-onboarding"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "profile.list",
@@ -7396,7 +7396,7 @@
     "risk": "local_write",
     "confirmation": "agent_judgment",
     "backends": "filesystem",
-    "skills": "seata-onboarding"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "profile.update",
@@ -7676,7 +7676,7 @@
     "risk": "local_write",
     "confirmation": "none",
     "backends": "local_auth, console_auth, credential_store",
-    "skills": "seata-onboarding, seata-shared"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "auth.login.status",
@@ -7705,7 +7705,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "local / credential_store",
-    "skills": "seata-onboarding"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "auth.login.cancel",
@@ -7756,7 +7756,7 @@
     "risk": "sensitive_read",
     "confirmation": "none",
     "backends": "credential_store / console_auth",
-    "skills": "seata-onboarding, seata-shared"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "auth.logout",
@@ -7827,7 +7827,7 @@
     "output_contract": "skill_id、version、content、digest",
     "notes": "",
     "input_example": {
-      "skill_id": "seata-shared"
+      "skill_id": "seata-ai-cli"
     },
     "remote": false,
     "path": "seata-ai skills read",
@@ -7980,7 +7980,7 @@
     "risk": "sensitive_read",
     "confirmation": "none",
     "backends": "filesystem, environment",
-    "skills": "seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "connectivity.check",
@@ -7998,7 +7998,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "console_auth, naming_management",
-    "skills": "seata-onboarding, seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "namespace.list",
@@ -8016,7 +8016,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-onboarding, seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "cluster.list",
@@ -8034,7 +8034,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-onboarding, seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "server.list",
@@ -8052,7 +8052,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "config.inspect",
@@ -8099,7 +8099,7 @@
     "risk": "sensitive_read",
     "confirmation": "none",
     "backends": "filesystem, environment / naming_management",
-    "skills": "seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "config.validate",
@@ -8149,7 +8149,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "rules, filesystem / naming_management",
-    "skills": "seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "config.diff",
@@ -8220,7 +8220,7 @@
     "risk": "sensitive_read",
     "confirmation": "none",
     "backends": "filesystem / naming_management",
-    "skills": "seata-integration-check"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.list",
@@ -8299,7 +8299,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.get",
@@ -8327,7 +8327,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.abnormal",
@@ -8417,7 +8417,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "naming_management, rules",
-    "skills": "seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.trace",
@@ -8445,7 +8445,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-incident-diagnosis, seata-recovery-plan"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "branch.list",
@@ -8491,7 +8491,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "branch.get",
@@ -8527,7 +8527,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "lock.list",
@@ -8618,7 +8618,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-transaction-analysis, seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "lock.check",
@@ -8654,7 +8654,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "naming_management",
-    "skills": "seata-incident-diagnosis, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "lock.conflicts",
@@ -8745,7 +8745,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "naming_management, rules",
-    "skills": "seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "diagnose.rules.list",
@@ -8763,7 +8763,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "local",
-    "skills": "seata-integration-check, seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "diagnose.rules.get",
@@ -8792,7 +8792,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "local",
-    "skills": "seata-integration-check, seata-incident-diagnosis"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "diagnose.run",
@@ -8857,7 +8857,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "rules / naming_management",
-    "skills": "seata-integration-check, seata-incident-diagnosis, seata-recovery-plan"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "diagnose.snapshot",
@@ -8884,7 +8884,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "naming_management / filesystem",
-    "skills": "seata-incident-diagnosis, seata-recovery-plan"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "diagnose.snapshot.export",
@@ -8939,7 +8939,7 @@
     "risk": "local_write",
     "confirmation": "agent_judgment",
     "backends": "filesystem / naming_management",
-    "skills": "seata-incident-diagnosis, seata-recovery-plan"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "execution.get",
@@ -9010,7 +9010,7 @@
     "risk": "read",
     "confirmation": "none",
     "backends": "execution_store",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "execution.reconcile",
@@ -9081,7 +9081,7 @@
     "risk": "diagnostic_read",
     "confirmation": "none",
     "backends": "execution_store, naming_management",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.retry.resume",
@@ -9117,7 +9117,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.retry.pause",
@@ -9153,7 +9153,7 @@
     "risk": "controlled_write",
     "confirmation": "agent_judgment",
     "backends": "naming_management, execution_store",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "branch.retry.resume",
@@ -9197,7 +9197,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "branch.retry.pause",
@@ -9241,7 +9241,7 @@
     "risk": "controlled_write",
     "confirmation": "agent_judgment",
     "backends": "naming_management, execution_store",
-    "skills": "seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.dispatch",
@@ -9277,7 +9277,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-recovery-plan, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.status.recover",
@@ -9313,7 +9313,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-recovery-plan, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "transaction.delete",
@@ -9341,7 +9341,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-recovery-plan, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "branch.delete",
@@ -9377,7 +9377,7 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-recovery-plan, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   },
   {
     "id": "lock.delete",
@@ -9434,6 +9434,6 @@
     "risk": "high_risk_write",
     "confirmation": "hard_gate",
     "backends": "naming_management, execution_store",
-    "skills": "seata-recovery-plan, seata-controlled-recovery"
+    "skills": "seata-ai-cli"
   }
 ]

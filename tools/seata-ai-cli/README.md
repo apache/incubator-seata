@@ -62,11 +62,9 @@ build. No migration from the discarded Go implementation is performed.
 Profile mutations require explicit commands; management endpoint trust remains
 separate from authenticated/compatible server support.
 
-The bundled `seata-shared` Skill introduces the transaction model and points
+The bundled `seata-ai-cli` Skill introduces the transaction model and points
 Agents to `--help`, `schema` and `capabilities`; scenario guidance is loaded on
-demand. Install it explicitly with `seata-ai skills install --global`. Upgrades
-remove unchanged files from the six retired Skills using the installation
-record and refuse to overwrite edited managed files.
+demand. Install it explicitly with `seata-ai skills install --global`.
 
 ## Validation
 

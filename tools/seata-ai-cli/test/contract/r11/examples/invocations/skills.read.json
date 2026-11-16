@@ -4,7 +4,7 @@
   "command": "skills.read",
   "context": {},
   "input": {
-    "skill_id": "seata-shared"
+    "skill_id": "seata-ai-cli"
   },
   "options": {
     "timeout_ms": 30000

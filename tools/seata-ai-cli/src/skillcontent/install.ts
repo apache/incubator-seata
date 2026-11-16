@@ -27,11 +27,6 @@ import { resource } from "../resources.js";
 import { skillCatalog } from "./catalog.js";
 import { skillsStatus, skillVersion } from "./status.js";
 
-// Old entrypoints may only be removed through an unchanged, owned inventory.
-// Do not treat arbitrary names in saved state as managed host directories.
-const retiredSkillIds = new Set(["seata-onboarding", "seata-integration-check", "seata-transaction-analysis",
-  "seata-incident-diagnosis", "seata-recovery-plan", "seata-controlled-recovery"]);
-
 export async function installSkills(inv: Invocation, signal: AbortSignal): Promise<Obj> {
   if (inv.input.host_id !== undefined && inv.input.host_id !== "generic_agent_skills")
     throw new CliError("policy", "host_adapter_unavailable", "Only generic_agent_skills is supported.");
@@ -46,7 +41,7 @@ export async function installSkills(inv: Invocation, signal: AbortSignal): Promi
   })));
   const managedPath = (value: string): boolean => {
     const parts = value.split("/");
-    return (catalog.some(skill => skill.skill_id === parts[0]) || retiredSkillIds.has(parts[0]!)) && !parts.some(part => part === "." || part === "..") &&
+    return catalog.some(skill => skill.skill_id === parts[0]) && !parts.some(part => part === "." || part === "..") &&
       ((parts.length === 2 && parts[1] === "SKILL.md") || (parts.length === 3 &&
         ["references", "examples", "tests"].includes(parts[1]!) && /^[a-zA-Z0-9_.-]+$/.test(parts[2]!)));
   };
@@ -126,11 +121,9 @@ export async function installSkills(inv: Invocation, signal: AbortSignal): Promi
     if (upgrading || resuming) {
       // Reject extra user content before updating any payload, not only during
       // post-write verification. A preparing operation may have no directories.
-      const ids = new Set([...catalog.map(skill => str(skill.skill_id)), ...[...baseline.keys()].map(p => p.split("/")[0]!)]);
-      for (const id of ids) for (const section of ["", "references", "examples", "tests"]) {
-        const skill = catalog.find(skill => skill.skill_id === id);
+      for (const skill of catalog) for (const section of ["", "references", "examples", "tests"]) {
         let dir: ConfigDirectory;
-        try { dir = new ConfigDirectory(join(path, id, section), signal); }
+        try { dir = new ConfigDirectory(join(path, str(skill.skill_id), section), signal); }
         catch (error) {
           if ((section || resuming) && error instanceof CliError && error.subtype === "config_directory_missing") continue;
           throw error;
@@ -138,10 +131,10 @@ export async function installSkills(inv: Invocation, signal: AbortSignal): Promi
         try {
           const listed = dir.list(signal);
           const allowed = section === "" ? ["SKILL.md", "references", "examples", "tests"] :
-            ((skill?.files ?? []) as Obj[]).filter(f => str(f.path).startsWith(section + "/")).map(f => str(f.path).slice(section.length + 1));
-          const prefix = id + "/" + section + "/";
+            (skill.files as Obj[]).filter(f => str(f.path).startsWith(section + "/")).map(f => str(f.path).slice(section.length + 1));
+          const prefix = str(skill.skill_id) + "/" + section + "/";
           for (const oldPath of baseline.keys()) if (oldPath.startsWith(prefix)) allowed.push(oldPath.slice(prefix.length));
-          for (const removal of removals) if (dirname(removal.absolutePath) === join(path, id, section) && removal.stagingName)
+          for (const removal of removals) if (dirname(removal.absolutePath) === join(path, str(skill.skill_id), section) && removal.stagingName)
             allowed.push(removal.stagingName);
           if (listed.truncated || listed.names.some(name => !allowed.includes(name))) throw conflict();
         } finally { dir.close(); }
