@@ -146,8 +146,11 @@ public class SessionStoreTest extends BaseSpringBootTest {
             Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:3"));
             Assertions.assertTrue(lockManager.isLockable(xid, RESOURCE_ID, "tb:3"));
 
-            // clear
+            // Clear the restored session after verifying file recovery.
+            reloadSession.setStatus(GlobalStatus.Committed);
             reloadSession.end();
+
+            Assertions.assertNull(SessionHolder.findGlobalSession(reloadSession.getXid()));
         } finally {
             SessionHolder.destroy();
         }
