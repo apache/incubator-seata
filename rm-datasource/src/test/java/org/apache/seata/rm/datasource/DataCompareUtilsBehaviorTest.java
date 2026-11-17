@@ -153,6 +153,30 @@ class DataCompareUtilsBehaviorTest {
     }
 
     @Test
+    void fastjsonTimestampFormUndoLogSurvivesTheWholeUndoValidationAfterDriverUpgrade() {
+        // undo log written while the driver returned Timestamp, rolled back with a driver returning LocalDateTime
+        Field before = new Field("gmt_modified", Types.TIMESTAMP, "2024-03-02 12:34:56.123456");
+        Field after = new Field("gmt_modified", Types.TIMESTAMP, "2025-01-01 00:00:00.0");
+        Field current = new Field("gmt_modified", Types.TIMESTAMP, LocalDateTime.parse("2025-01-01T00:00"));
+        Field rolledBack =
+                new Field("gmt_modified", Types.TIMESTAMP, LocalDateTime.parse("2024-03-02T12:34:56.123456"));
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            assertFalse(DataCompareUtils.isFieldEquals(before, after).getResult());
+            assertTrue(DataCompareUtils.isFieldEquals(after, current).getResult());
+            assertFalse(DataCompareUtils.isFieldEquals(before, current).getResult());
+            assertTrue(DataCompareUtils.isFieldEquals(before, rolledBack).getResult());
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
+    @Test
     void fastjsonDifferentDateTimeStringsAreNotEqual() {
         String previous = AbstractUndoLogManager.getCurrentSerializer();
         try {

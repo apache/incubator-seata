@@ -135,6 +135,17 @@ public class DataCompareUtils {
         return Timestamp.valueOf(dateTime);
     }
 
+    /**
+     * An earlier comparison of the same undo validation may already have turned the string into a Timestamp, for an
+     * undo log written while the driver still returned Timestamp. Compare it as a LocalDateTime when the other value
+     * is one.
+     */
+    private static void alignDateTime(Field field, Field other) {
+        if (field.getValue() instanceof Timestamp && other.getValue() instanceof LocalDateTime) {
+            field.setValue(((Timestamp) field.getValue()).toLocalDateTime());
+        }
+    }
+
     private static void convertType(Field f0, Field f1) {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
@@ -157,6 +168,10 @@ public class DataCompareUtils {
         }
         if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
             f1.setValue(parseDateTime(f1.getValue().toString(), f0.getValue()));
+        }
+        if (f0Type == Types.TIMESTAMP) {
+            alignDateTime(f0, f1);
+            alignDateTime(f1, f0);
         }
         if (f0Type == Types.DECIMAL && f0.getValue().getClass().equals(Integer.class)) {
             f0.setValue(new BigDecimal(f0.getValue().toString()));
