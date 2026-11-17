@@ -16,6 +16,7 @@
  */
 package org.apache.seata.serializer.fastjson2;
 
+import com.alibaba.fastjson2.JSONB;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.BatchResultMessage;
@@ -55,7 +56,17 @@ public class Fastjson2ConcurrentRefDeserializationTest {
         int invalidTasks = runConcurrentStress(
                 serializers, bytes, Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200));
         if (invalidTasks > 0) {
-            throw new AssertionError("Concurrent deserialization lost reference identity: " + invalidTasks);
+            MergedWarpMessage sequential = serializer.deserialize(bytes);
+            int sequentialInvalid = countInvalidRefFields(sequential);
+            BatchResultMessage first = (BatchResultMessage) sequential.msgs.get(0);
+            throw new AssertionError("Concurrent deserialization lost reference identity: " + invalidTasks
+                    + "; sequential invalid fields: " + sequentialInvalid
+                    + "; first msgIds=" + first.getMsgIds()
+                    + "; first resultMessages=" + first.getResultMessages()
+                    + "; same instance=" + (first.getMsgIds() == (Object) first.getResultMessages())
+                    + "; java=" + System.getProperty("java.runtime.version")
+                    + "; vendor=" + System.getProperty("java.vendor")
+                    + "; JSONB=" + JSONB.toJSONString(bytes));
         }
     }
 
