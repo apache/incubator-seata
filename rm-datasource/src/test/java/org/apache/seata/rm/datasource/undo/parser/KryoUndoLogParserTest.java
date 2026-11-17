@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 class KryoUndoLogParserTest extends BaseUndoLogParserTest {
@@ -115,7 +116,7 @@ class KryoUndoLogParserTest extends BaseUndoLogParserTest {
                 }));
             }
             for (Future<?> future : futures) {
-                future.get();
+                future.get(30, TimeUnit.SECONDS);
             }
         } finally {
             executor.shutdownNow();
