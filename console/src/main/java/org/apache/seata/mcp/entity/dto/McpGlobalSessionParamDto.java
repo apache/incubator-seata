@@ -18,7 +18,7 @@ package org.apache.seata.mcp.entity.dto;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.param.McpGlobalAbnormalSessionParam;
-import org.springaicommunity.mcp.annotation.McpToolParam;
+import org.springframework.ai.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 

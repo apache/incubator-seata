@@ -18,10 +18,14 @@ package org.apache.seata.server.cluster.raft;
 
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
+import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.entity.PeerId;
+import com.alipay.sofa.jraft.entity.Task;
+import com.alipay.sofa.jraft.rpc.RpcClient;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -40,6 +44,8 @@ import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -47,6 +53,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,10 +64,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,15 +81,50 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
     private RaftStateMachine raftStateMachine;
     private static final String TEST_GROUP = "test-group";
+    private final PeerId localPeer = new PeerId("127.0.0.1", 18091);
+    private MockedStatic<RaftServerManager> servers;
+    private MockedStatic<CompletableFuture> async;
+    private com.alipay.sofa.jraft.Node raftNode;
+    private CliClientServiceImpl cliClient;
+    private RpcClient rpcClient;
 
     @BeforeEach
     public void setUp() {
         StoreConfig.setStartupParameter("file", "file", "file");
+        RaftServer server = mock(RaftServer.class);
+        raftNode = mock(com.alipay.sofa.jraft.Node.class);
+        when(server.getServerId()).thenReturn(localPeer);
+        when(server.getNode()).thenReturn(raftNode);
+        cliClient = mock(CliClientServiceImpl.class);
+        rpcClient = mock(RpcClient.class);
+        when(cliClient.getRpcClient()).thenReturn(rpcClient);
+        servers = mockStatic(RaftServerManager.class);
+        servers.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(server);
+        servers.when(RaftServerManager::getCliClientServiceInstance).thenReturn(cliClient);
+        // Run metadata tasks deterministically so failures and results belong to this test.
+        async = mockStatic(CompletableFuture.class, CALLS_REAL_METHODS);
+        async.when(() -> CompletableFuture.runAsync(any(Runnable.class), any(Executor.class)))
+                .thenAnswer(invocation -> {
+                    invocation.getArgument(0, Runnable.class).run();
+                    return CompletableFuture.completedFuture(null);
+                });
+        doAnswer(invocation -> {
+                    invocation.getArgument(0, Task.class).getDone().run(Status.OK());
+                    return null;
+                })
+                .when(raftNode)
+                .apply(any(Task.class));
+        Configuration configuration = new Configuration();
+        configuration.addPeer(localPeer);
+        RouteTable.getInstance().updateConfiguration(TEST_GROUP, configuration);
         raftStateMachine = new RaftStateMachine(TEST_GROUP);
     }
 
     @AfterEach
     public void tearDown() {
+        async.close();
+        servers.close();
+        RouteTable.getInstance().removeGroup(TEST_GROUP);
         StoreConfig.setStartupParameter("file", "file", "file");
     }
 
@@ -97,6 +144,17 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
         assertTrue(raftStateMachine.isLeader());
         assertEquals(term, raftStateMachine.getCurrentTerm().get());
+        ArgumentCaptor<Task> task = ArgumentCaptor.forClass(Task.class);
+        verify(raftNode).apply(task.capture());
+        assertTrue(task.getValue().getData().hasRemaining());
+        assertEquals(term, raftStateMachine.getRaftLeaderMetadata().getTerm());
+        assertEquals(
+                localPeer.getPort(),
+                raftStateMachine
+                        .getRaftLeaderMetadata()
+                        .getLeader()
+                        .getInternal()
+                        .getPort());
     }
 
     @Test
@@ -123,7 +181,7 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
     @Test
     public void testOnStartFollowingUpdatesCurrentTerm() {
-        LeaderChangeContext ctx = new LeaderChangeContext(null, 1L, Status.OK());
+        LeaderChangeContext ctx = new LeaderChangeContext(localPeer, 1L, Status.OK());
 
         raftStateMachine.onStartFollowing(ctx);
 
@@ -132,7 +190,7 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
     @Test
     public void testOnStopFollowingDoesNotThrow() {
-        LeaderChangeContext ctx = new LeaderChangeContext(null, 1L, Status.OK());
+        LeaderChangeContext ctx = new LeaderChangeContext(localPeer, 1L, Status.OK());
 
         assertDoesNotThrow(() -> raftStateMachine.onStopFollowing(ctx));
     }
@@ -212,11 +270,11 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
 
     @Test
     public void testFollowerStartWithDifferentTerms() {
-        LeaderChangeContext ctx1 = new LeaderChangeContext(null, 5L, Status.OK());
+        LeaderChangeContext ctx1 = new LeaderChangeContext(localPeer, 5L, Status.OK());
         raftStateMachine.onStartFollowing(ctx1);
         assertEquals(5L, raftStateMachine.getCurrentTerm().get());
 
-        LeaderChangeContext ctx2 = new LeaderChangeContext(null, 10L, Status.OK());
+        LeaderChangeContext ctx2 = new LeaderChangeContext(localPeer, 10L, Status.OK());
         raftStateMachine.onStartFollowing(ctx2);
         assertEquals(10L, raftStateMachine.getCurrentTerm().get());
     }
@@ -449,12 +507,9 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
         // Call onConfigurationCommitted which should trigger changePeers
         raftStateMachine.onConfigurationCommitted(conf);
 
-        // Give some time for async operations
-        Thread.sleep(100);
-
         // Verify that the metadata has been updated
         RaftClusterMetadata updatedMetadata = raftStateMachine.getRaftLeaderMetadata();
-        assertNotNull(updatedMetadata);
+        assertEquals(Collections.singletonList(follower1), updatedMetadata.getFollowers());
     }
 
     @Test
@@ -484,12 +539,9 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
         // Call onConfigurationCommitted which should trigger changePeers
         raftStateMachine.onConfigurationCommitted(conf);
 
-        // Give some time for async operations
-        Thread.sleep(100);
-
         // Verify that the metadata has been updated
         RaftClusterMetadata updatedMetadata = raftStateMachine.getRaftLeaderMetadata();
-        assertNotNull(updatedMetadata);
+        assertEquals(Collections.singletonList(learner1), updatedMetadata.getLearner());
     }
 
     @Test
@@ -548,21 +600,16 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
                 (java.util.concurrent.atomic.AtomicBoolean) initSyncField.get(raftStateMachine);
         assertFalse(initSync.get());
 
-        // Invoke the method - it will try to refresh leader and may fail due to test environment
-        // but we're just testing that the code path is executed without throwing unexpected exceptions
-        assertDoesNotThrow(() -> {
-            try {
-                method.invoke(raftStateMachine, TEST_GROUP);
-            } catch (java.lang.reflect.InvocationTargetException e) {
-                // Expected if dependencies are not set up - just ensure it's not a null pointer
-                Throwable cause = e.getCause();
-                // We expect some kind of initialization or configuration error in test environment
-                assertTrue(cause == null
-                        || cause instanceof NullPointerException
-                        || cause instanceof IllegalStateException
-                        || cause instanceof RuntimeException);
-            }
-        });
+        RouteTable routeTable = mock(RouteTable.class);
+        try (MockedStatic<RouteTable> routes = mockStatic(RouteTable.class)) {
+            routes.when(RouteTable::getInstance).thenReturn(routeTable);
+            // No elected leader is a normal retry condition, not a transport failure.
+            when(routeTable.selectLeader(TEST_GROUP)).thenReturn(null);
+            method.invoke(raftStateMachine, TEST_GROUP);
+            verify(routeTable).refreshLeader(cliClient, TEST_GROUP, 1000);
+            verify(routeTable).selectLeader(TEST_GROUP);
+            assertFalse(initSync.get());
+        }
     }
 
     @Test
@@ -607,19 +654,8 @@ public class RaftStateMachineTest extends BaseSpringBootTest {
         metadata.setLeader(leader);
         raftStateMachine.setRaftLeaderMetadata(metadata);
 
-        // Invoke the method - it will fail due to missing dependencies but we're testing the code path
-        assertDoesNotThrow(() -> {
-            try {
-                method.invoke(raftStateMachine, leaderPeerId);
-            } catch (java.lang.reflect.InvocationTargetException e) {
-                // Expected if RaftServerManager is not initialized in test environment
-                Throwable cause = e.getCause();
-                assertTrue(cause == null
-                        || cause instanceof NullPointerException
-                        || cause instanceof IllegalStateException
-                        || cause instanceof RuntimeException);
-            }
-        });
+        method.invoke(raftStateMachine, leaderPeerId);
+        verify(rpcClient).invokeAsync(eq(leaderPeerId.getEndpoint()), any(), any(), any(), eq(30000L));
     }
 
     @Test

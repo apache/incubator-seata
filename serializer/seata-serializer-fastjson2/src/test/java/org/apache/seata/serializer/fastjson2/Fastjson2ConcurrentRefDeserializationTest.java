@@ -47,12 +47,15 @@ public class Fastjson2ConcurrentRefDeserializationTest {
     public static void main(String[] args) throws Exception {
         Fastjson2Serializer serializer = new Fastjson2Serializer();
         ((Initialize) serializer).init();
+        Fastjson2Serializer otherSerializer = new Fastjson2Serializer();
+        otherSerializer.init();
+        Fastjson2Serializer[] serializers = {serializer, otherSerializer};
         byte[] bytes = serializer.serialize(referenceHeavyMessage());
 
-        int nullTasks = runConcurrentStress(
-                serializer, bytes, Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200));
-        if (nullTasks > 0) {
-            throw new AssertionError("Concurrent deserialization dropped $ref fields: " + nullTasks);
+        int invalidTasks = runConcurrentStress(
+                serializers, bytes, Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200));
+        if (invalidTasks > 0) {
+            throw new AssertionError("Concurrent deserialization lost reference identity: " + invalidTasks);
         }
     }
 
@@ -70,41 +73,43 @@ public class Fastjson2ConcurrentRefDeserializationTest {
         return message;
     }
 
-    private static int countNullRefFields(MergedWarpMessage message) {
+    private static int countInvalidRefFields(MergedWarpMessage message) {
         if (message == null || message.msgs == null) {
             return 1;
         }
-        int nullCount = 0;
+        int invalidCount = 0;
+        Object sharedList = ((BatchResultMessage) message.msgs.get(0)).getResultMessages();
         for (AbstractMessage child : message.msgs) {
             if (!(child instanceof BatchResultMessage)) {
-                nullCount++;
+                invalidCount++;
                 continue;
             }
             BatchResultMessage batchResult = (BatchResultMessage) child;
-            if (batchResult.getResultMessages() == null) {
-                nullCount++;
+            if (batchResult.getResultMessages() == null || batchResult.getResultMessages() != sharedList) {
+                invalidCount++;
             }
-            if (batchResult.getMsgIds() == null) {
-                nullCount++;
+            if (batchResult.getMsgIds() == null || batchResult.getMsgIds() != sharedList) {
+                invalidCount++;
             }
         }
-        return nullCount;
+        return invalidCount;
     }
 
-    private static int runConcurrentStress(Fastjson2Serializer serializer, byte[] bytes, int threadCount)
+    private static int runConcurrentStress(Fastjson2Serializer[] serializers, byte[] bytes, int threadCount)
             throws Exception {
         AtomicReference<Throwable> failure = new AtomicReference<>();
 
         CyclicBarrier barrier = new CyclicBarrier(threadCount);
         CountDownLatch endLatch = new CountDownLatch(threadCount);
-        AtomicInteger nullTasks = new AtomicInteger();
+        AtomicInteger invalidTasks = new AtomicInteger();
         for (int i = 0; i < threadCount; i++) {
+            Fastjson2Serializer serializer = serializers[i % serializers.length];
             Thread thread = new Thread(
                     () -> {
                         try {
                             barrier.await(CONCURRENT_TEST_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-                            if (countNullRefFields((MergedWarpMessage) serializer.deserialize(bytes)) > 0) {
-                                nullTasks.incrementAndGet();
+                            if (countInvalidRefFields((MergedWarpMessage) serializer.deserialize(bytes)) > 0) {
+                                invalidTasks.incrementAndGet();
                             }
                         } catch (Throwable throwable) {
                             failure.compareAndSet(null, throwable);
@@ -122,12 +127,14 @@ public class Fastjson2ConcurrentRefDeserializationTest {
             throw new AssertionError("Concurrent deserialization failed", failure.get());
         }
 
-        return nullTasks.get();
+        return invalidTasks.get();
     }
 
     private static void assertChildProcessSucceeds() throws Exception {
         Process process = new ProcessBuilder(
                         System.getProperty("java.home") + "/bin/java",
+                        "-Dseata.fastjson2.concurrentRef.threads="
+                                + Integer.getInteger("seata.fastjson2.concurrentRef.threads", 200),
                         "-cp",
                         System.getProperty("java.class.path"),
                         Fastjson2ConcurrentRefDeserializationTest.class.getName())
