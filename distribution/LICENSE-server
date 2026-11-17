@@ -344,7 +344,7 @@ Apache-2.0 licenses
     io.prometheus:simpleclient_tracer_otel_agent 0.15.0 Apache-2.0
     org.yaml:snakeyaml 2.0 Apache-2.0
     org.xerial.snappy:snappy-java 1.1.10.5 Apache-2.0
-    com.alipay.sofa.common:sofa-common-tools 1.0.12 Apache-2.0
+    com.alipay.sofa.common:sofa-common-tools 2.1.0 Apache-2.0
     org.springframework:spring-aop 5.3.39 Apache-2.0
     org.springframework:spring-beans 5.3.39 Apache-2.0
     org.springframework.boot:spring-boot 2.7.18 Apache-2.0
