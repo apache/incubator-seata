@@ -16,7 +16,9 @@
  */
 package org.apache.seata.serializer.fastjson2;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.BatchResultMessage;
@@ -64,6 +66,9 @@ public class Fastjson2ConcurrentRefDeserializationTest {
                     + "; first msgIds=" + first.getMsgIds()
                     + "; first resultMessages=" + first.getResultMessages()
                     + "; same instance=" + (first.getMsgIds() == (Object) first.getResultMessages())
+                    + "; fastjson=" + JSON.VERSION
+                    + "; batchReferenceDetectionDisabled="
+                    + ObjectWriterProvider.isNotReferenceDetect(BatchResultMessage.class)
                     + "; java=" + System.getProperty("java.runtime.version")
                     + "; vendor=" + System.getProperty("java.vendor")
                     + "; JSONB=" + JSONB.toJSONString(bytes));
