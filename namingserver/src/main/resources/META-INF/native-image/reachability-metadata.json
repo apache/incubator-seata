@@ -1778,11 +1778,11 @@
   }, {
     "type" : "org.slf4j.helpers.Log4jLoggerFactory"
   }, {
-    "type" : "org.springaicommunity.mcp.annotation.McpTool"
+    "type" : "org.springframework.ai.mcp.annotation.McpTool"
   }, {
-    "type" : "org.springaicommunity.mcp.annotation.McpTool$McpAnnotations"
+    "type" : "org.springframework.ai.mcp.annotation.McpTool$McpAnnotations"
   }, {
-    "type" : "org.springaicommunity.mcp.method.tool.utils.ConcurrentReferenceHashMap$Segment[]"
+    "type" : "org.springframework.ai.mcp.method.tool.utils.ConcurrentReferenceHashMap$Segment[]"
   }, {
     "type" : "org.springframework.ai.mcp.annotation.spring.scan.AbstractAnnotatedMethodBeanFactoryInitializationAotProcessor"
   }, {

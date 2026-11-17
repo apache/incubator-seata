@@ -35,6 +35,7 @@ import org.apache.seata.integration.grpc.interceptor.proto.Response;
 import org.apache.seata.integration.grpc.interceptor.server.ServerTransactionInterceptor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 
@@ -47,7 +48,7 @@ import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class GrpcTest {
+class GrpcTest {
 
     private final ServerInterceptor mockServerInterceptor =
             mock(ServerInterceptor.class, delegatesTo(new ServerTransactionInterceptor()));
@@ -59,21 +60,26 @@ public class GrpcTest {
     void tearDown() throws InterruptedException {
         RootContext.unbind();
         RootContext.unbindBranchType();
-        if (channel != null) {
-            channel.shutdown();
-            if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
-                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        try {
+            if (channel != null) {
+                channel.shutdown();
+                if (!channel.awaitTermination(5, TimeUnit.SECONDS)) {
+                    assertTrue(
+                            channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS), "channel did not terminate");
+                }
             }
-        }
-        if (server != null) {
-            server.shutdown();
-            if (!server.awaitTermination(5, TimeUnit.SECONDS)) {
-                server.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+        } finally {
+            if (server != null) {
+                server.shutdown();
+                if (!server.awaitTermination(5, TimeUnit.SECONDS)) {
+                    assertTrue(server.shutdownNow().awaitTermination(5, TimeUnit.SECONDS), "server did not terminate");
+                }
             }
         }
     }
 
     @Test
+    @Timeout(10)
     void clientHeaderDeliveredToServer() throws Exception {
 
         CountDownLatch countDownLatch = new CountDownLatch(1);

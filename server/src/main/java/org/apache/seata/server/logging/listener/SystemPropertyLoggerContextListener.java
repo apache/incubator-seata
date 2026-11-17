@@ -25,9 +25,18 @@ import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.spi.LifeCycle;
 import org.apache.seata.core.constants.ConfigurationKeys;
 
+import java.io.File;
+import java.util.Locale;
+
 /**
  */
 public class SystemPropertyLoggerContextListener extends ContextAwareBase implements LoggerContextListener, LifeCycle {
+
+    private static final String EXTERNAL_CONF_DIR_PROPERTY = "EXTERNAL_CONF_DIR";
+
+    private static final String EXTERNAL_APPENDER_SUFFIX = "_APPENDER_EXTERNAL";
+
+    private static final String[] EXTERNAL_APPENDER_NAMES = {"console", "file", "logstash", "metric", "kafka"};
 
     private boolean started = false;
 
@@ -39,8 +48,26 @@ public class SystemPropertyLoggerContextListener extends ContextAwareBase implem
 
         Context context = getContext();
         context.putProperty("RPC_PORT", System.getProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL));
+        markExternalAppenders(context);
 
         started = true;
+    }
+
+    /**
+     * Marks which appender definitions exist in the external configuration directory, so that the logback
+     * configuration can prefer the external file and fall back to the classpath copy when it is absent.
+     */
+    private void markExternalAppenders(Context context) {
+        String externalConfDir = context.getProperty(EXTERNAL_CONF_DIR_PROPERTY);
+        boolean hasExternalConfDir =
+                externalConfDir != null && !externalConfDir.trim().isEmpty();
+        for (String appenderName : EXTERNAL_APPENDER_NAMES) {
+            boolean externalFileExists = hasExternalConfDir
+                    && new File(externalConfDir, "logback/" + appenderName + "-appender.xml").exists();
+            context.putProperty(
+                    appenderName.toUpperCase(Locale.ROOT) + EXTERNAL_APPENDER_SUFFIX,
+                    Boolean.toString(externalFileExists));
+        }
     }
 
     @Override

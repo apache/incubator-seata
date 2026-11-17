@@ -259,9 +259,9 @@ public class SqlServerEscapeHandler implements EscapeHandler {
          */
         ELSE("ELSE"),
         /**
-         * End is sqlserver keyword.
+         * END is sqlserver keyword.
          */
-        End("End"),
+        END("END"),
         /**
          * ERRLVL is sqlserver keyword.
          */
