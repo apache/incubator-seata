@@ -580,13 +580,15 @@ MIT licenses
     The following font files are bundled with @alicloud/console-components (MIT):
     console/src/main/resources/static/console-fe/public/css/fonts/
 
-    aliyun-console-font.eot MIT (bundled with @alicloud/console-components)
-    aliyun-console-font.ttf MIT (bundled with @alicloud/console-components)
-    aliyun-console-font.woff MIT (bundled with @alicloud/console-components)
+    aliyun-console-font.eot MIT (bundled with @alicloud/console-components) see:licenses/alicloud-console-components-MIT
+    aliyun-console-font.ttf MIT (bundled with @alicloud/console-components) see:licenses/alicloud-console-components-MIT
+    aliyun-console-font.woff MIT (bundled with @alicloud/console-components) see:licenses/alicloud-console-components-MIT
 
     The following icon font files are from iconfont.cn (Alibaba):
-    font_515771_emcns5054x3whfr.ttf MIT (iconfont.cn - https://www.iconfont.cn)
-    font_515771_emcns5054x3whfr.woff MIT (iconfont.cn - https://www.iconfont.cn)
+    console/src/main/resources/static/console-fe/public/css/fonts/
+
+    font_515771_emcns5054x3whfr.ttf MIT (iconfont.cn - https://www.iconfont.cn) see:licenses/alicloud-console-components-MIT
+    font_515771_emcns5054x3whfr.woff MIT (iconfont.cn - https://www.iconfont.cn) see:licenses/alicloud-console-components-MIT
 
     @alicloud/css-var-utils 0.1.0 MIT
     @alifd/babel-runtime-jsx-style-transform 1.0.0 MIT
