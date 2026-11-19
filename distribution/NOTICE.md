@@ -14,7 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-Due to license compatibility issues, we cannot include jar dependencies such as mysql, mariadb, oracle, etc., in the distribution package.
+Due to license compatibility issues, we cannot include jar dependencies such as mysql, mariadb, oracle, dameng, etc., in the distribution package.
 Please copy database driver dependencies, such as `mysql-connector-java.jar`, to this directory. The following is an example of a directory structure:
 
 ```aidl
@@ -545,7 +545,6 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │       │   └── apm-seata-skywalking-plugin-2.5.0.jar
     │       └── skywalking-agent.jar
     ├── lib
-    │   ├── DmJdbcDriver18-8.1.2.192.jar
     │   ├── HikariCP-4.0.3.jar
     │   ├── ant-1.10.12.jar
     │   ├── ant-launcher-1.10.12.jar
@@ -1204,7 +1203,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 
 ---
 
-由于license兼容性问题，我们不能将mysql、mariadb、oracle等jar依赖包含在发布包中。
+由于license兼容性问题，我们不能将mysql、mariadb、oracle、dameng等jar依赖包含在发布包中。
 请将数据库driver相关依赖例如：`mysql-connector-java.jar`，拷贝到此目录下。目录结构示例如下：
 ```aidl
 .
@@ -1734,7 +1733,6 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │       │   └── apm-seata-skywalking-plugin-2.5.0.jar
     │       └── skywalking-agent.jar
     ├── lib
-    │   ├── DmJdbcDriver18-8.1.2.192.jar
     │   ├── HikariCP-4.0.3.jar
     │   ├── ant-1.10.12.jar
     │   ├── ant-launcher-1.10.12.jar

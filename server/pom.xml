@@ -226,6 +226,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -350,28 +351,8 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <!--resolve slf4j-simple conflicts-->
                             <includeScope>runtime</includeScope>
-                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql,com.mysql</excludeGroupIds>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql,com.mysql,com.dameng</excludeGroupIds>
                             <skip>${dependencies.copy.skip}</skip>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-mysql</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.mysql</groupId>
-                                    <artifactId>mysql-connector-j</artifactId>
-                                    <version>${mysql8.jdbc.version}</version>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/lib/jdbc
-                            </outputDirectory>
-                            <skip>${mysql.copy.skip}</skip>
                         </configuration>
                     </execution>
                 </executions>
@@ -434,7 +415,8 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>target/lib/jdbc</from>
+                                <from>../distribution</from>
+                                <includes>NOTICE.md</includes>
                                 <into>/seata-server/libs/jdbc</into>
                             </path>
                             <path>
@@ -508,7 +490,6 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
             <build>
@@ -544,7 +525,6 @@
         <profile>
             <id>release-seata-jar</id>
             <properties>
-                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
             <build>
