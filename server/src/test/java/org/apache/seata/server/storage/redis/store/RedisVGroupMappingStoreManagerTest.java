@@ -43,7 +43,7 @@ public class RedisVGroupMappingStoreManagerTest extends BaseSpringBootTest {
         instance.setUnit("123");
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("testVGroup");
-        mappingDO.setCluster("testCluster");
+        mappingDO.setClusterName("testCluster");
         mappingDO.setNamespace("public");
         redisVGroupMappingStoreManager.addVGroup(mappingDO);
         Map<String, Object> map = redisVGroupMappingStoreManager.loadVGroups();
