@@ -18,12 +18,18 @@ package org.apache.seata.core.rpc.netty.grpc;
 
 import com.google.protobuf.ByteString;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.ServerChannel;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpScheme;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
+import io.netty.handler.codec.http2.Http2ConnectionHandler;
 import io.netty.handler.codec.http2.Http2Headers;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
@@ -39,7 +45,16 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
+    private final Boolean server;
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
+
+    public GrpcEncoder() {
+        this.server = null;
+    }
+
+    public GrpcEncoder(boolean server) {
+        this.server = server;
+    }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
@@ -53,12 +68,23 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         Object body = rpcMessage.getBody();
         int id = rpcMessage.getId();
 
+        ChannelFuture headerFuture = null;
         if (headerSent.compareAndSet(false, true)) {
             Http2Headers headers = new DefaultHttp2Headers();
-            headers.add(GrpcHeaderEnum.HTTP2_STATUS.header, String.valueOf(200));
-            headers.add(GrpcHeaderEnum.GRPC_STATUS.header, String.valueOf(0));
+            if (isServer(ctx, messageType)) {
+                headers.add(GrpcHeaderEnum.HTTP2_STATUS.header, String.valueOf(200));
+                headers.add(GrpcHeaderEnum.GRPC_STATUS.header, String.valueOf(0));
+            } else {
+                headers.method(HttpMethod.POST.asciiName());
+                headers.scheme(HttpScheme.HTTP.name());
+                headers.path("/");
+            }
             headers.add(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header, "application/grpc");
-            ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
+            headerFuture = ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
+            if (headerFuture != null && headerFuture.isDone() && !headerFuture.isSuccess()) {
+                promise.tryFailure(headerFuture.cause());
+                return;
+            }
         }
 
         ByteString dataBytes;
@@ -93,7 +119,51 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
             // The remaining bytes are body
             System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
-            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)));
+            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)), promise);
+        } else if (headerFuture != null) {
+            headerFuture.addListener(future -> {
+                if (future.isSuccess()) {
+                    promise.trySuccess();
+                } else {
+                    promise.tryFailure(future.cause());
+                }
+            });
+        } else {
+            promise.trySuccess();
         }
+    }
+
+    private boolean isServer(ChannelHandlerContext ctx, byte messageType) {
+        if (server != null) {
+            return server;
+        }
+        if (ctx != null && ctx.channel() != null) {
+            Channel channel = ctx.channel();
+            Channel parent = channel.parent();
+            Boolean resolved = resolveServerFromChannel(parent);
+            if (resolved != null) {
+                return resolved;
+            }
+            if (parent != null && parent.parent() instanceof ServerChannel) {
+                return true;
+            }
+            resolved = resolveServerFromChannel(channel);
+            if (resolved != null) {
+                return resolved;
+            }
+        }
+        return messageType == ProtocolConstants.MSGTYPE_RESPONSE
+                || messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE;
+    }
+
+    private Boolean resolveServerFromChannel(Channel channel) {
+        if (channel == null || channel.pipeline() == null) {
+            return null;
+        }
+        Http2ConnectionHandler connectionHandler = channel.pipeline().get(Http2ConnectionHandler.class);
+        if (connectionHandler != null && connectionHandler.connection() != null) {
+            return connectionHandler.connection().isServer();
+        }
+        return null;
     }
 }
