@@ -68,7 +68,6 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         Object body = rpcMessage.getBody();
         int id = rpcMessage.getId();
 
-        ChannelFuture headerFuture = null;
         if (headerSent.compareAndSet(false, true)) {
             Http2Headers headers = new DefaultHttp2Headers();
             if (isServer(ctx, messageType)) {
@@ -80,7 +79,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
                 headers.path("/");
             }
             headers.add(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header, "application/grpc");
-            headerFuture = ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
+            ChannelFuture headerFuture = ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
             if (headerFuture != null && headerFuture.isDone() && !headerFuture.isSuccess()) {
                 promise.tryFailure(headerFuture.cause());
                 return;
@@ -108,36 +107,24 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         GrpcMessageProto grpcMessageProto = builder.build();
 
         byte[] bodyBytes = grpcMessageProto.toByteArray();
-        if (bodyBytes != null) {
-            byte[] messageWithPrefix = new byte[bodyBytes.length + 5];
-            // The first byte is 0, indicating no compression
-            messageWithPrefix[0] = 0;
-            ByteBuffer buffer = ByteBuffer.allocate(4);
-            buffer.putInt(bodyBytes.length);
-            byte[] lengthBytes = buffer.array();
-            // The last four bytes indicate the length
-            System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
-            // The remaining bytes are body
-            System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
-            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)), promise);
-        } else if (headerFuture != null) {
-            headerFuture.addListener(future -> {
-                if (future.isSuccess()) {
-                    promise.trySuccess();
-                } else {
-                    promise.tryFailure(future.cause());
-                }
-            });
-        } else {
-            promise.trySuccess();
-        }
+        byte[] messageWithPrefix = new byte[bodyBytes.length + 5];
+        // The first byte is 0, indicating no compression
+        messageWithPrefix[0] = 0;
+        ByteBuffer buffer = ByteBuffer.allocate(4);
+        buffer.putInt(bodyBytes.length);
+        byte[] lengthBytes = buffer.array();
+        // The last four bytes indicate the length
+        System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
+        // The remaining bytes are body
+        System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
+        ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)), promise);
     }
 
     private boolean isServer(ChannelHandlerContext ctx, byte messageType) {
         if (server != null) {
             return server;
         }
-        if (ctx != null && ctx.channel() != null) {
+        if (ctx.channel() != null) {
             Channel channel = ctx.channel();
             Channel parent = channel.parent();
             Boolean resolved = resolveServerFromChannel(parent);
