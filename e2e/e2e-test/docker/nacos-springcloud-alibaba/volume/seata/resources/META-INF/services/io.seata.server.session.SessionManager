@@ -1,0 +1,3 @@
+io.seata.server.storage.file.session.FileSessionManager
+io.seata.server.storage.db.session.DataBaseSessionManager
+io.seata.server.storage.redis.session.RedisSessionManager
