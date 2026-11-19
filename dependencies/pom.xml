@@ -75,7 +75,6 @@
         <lz4.version>1.10.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <netty.version>4.1.101.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
         <kryo.version>5.4.0</kryo.version>
@@ -105,7 +104,6 @@
 
         <!-- # for database -->
         <!-- db -->
-        <mysql.version>5.1.42</mysql.version>
         <ojdbc.version>19.3.0.0</ojdbc.version>
         <dm.version>8.1.2.192</dm.version>
         <postgresql.version>42.3.10</postgresql.version>
@@ -121,8 +119,7 @@
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
-        <mysql5.version>${mysql.version}</mysql5.version>
-        <mysql8.version>8.0.27</mysql8.version>
+        <mysql8.version>8.4.0</mysql8.version>
         <!-- rocketmq -->
         <rocketmq-version>5.0.0</rocketmq-version>
 
@@ -171,6 +168,24 @@
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
                 <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Keep every gRPC module on the same release, including transitive modules. -->
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Keep every Netty module on the same 4.2 release. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -301,9 +316,9 @@
                 <version>${h2.version}</version>
             </dependency>
             <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql.version}</version>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql8.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>
