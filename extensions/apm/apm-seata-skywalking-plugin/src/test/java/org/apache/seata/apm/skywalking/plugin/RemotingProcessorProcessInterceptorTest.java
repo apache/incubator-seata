@@ -16,8 +16,10 @@
  */
 package org.apache.seata.apm.skywalking.plugin;
 
+import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.skywalking.apm.agent.core.context.ContextCarrier;
 import org.apache.skywalking.apm.agent.core.context.ContextManager;
 import org.apache.skywalking.apm.agent.core.context.tag.StringTag;
@@ -31,6 +33,7 @@ import org.mockito.Mockito;
 
 import java.lang.reflect.Method;
 
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.atLeastOnce;
@@ -49,7 +52,7 @@ public class RemotingProcessorProcessInterceptorTest {
     public void setUp() throws Exception {
         interceptor = new RemotingProcessorProcessInterceptor();
         enhancedInstance = mock(EnhancedInstance.class);
-        method = Object.class.getDeclaredMethod("toString");
+        method = RemotingProcessor.class.getDeclaredMethod("process", ChannelHandlerContext.class, RpcMessage.class);
         result = mock(MethodInterceptResult.class);
     }
 
@@ -62,8 +65,9 @@ public class RemotingProcessorProcessInterceptorTest {
         rpcMessage.setBody(request);
         rpcMessage.setHeadMap(new java.util.HashMap<>());
 
-        Object[] allArguments = new Object[] {null, rpcMessage};
-        Class<?>[] argumentTypes = new Class[] {Object.class, RpcMessage.class};
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Object[] allArguments = new Object[] {ctx, rpcMessage};
+        Class<?>[] argumentTypes = method.getParameterTypes();
 
         try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
             AbstractSpan span = mock(AbstractSpan.class);
@@ -74,20 +78,13 @@ public class RemotingProcessorProcessInterceptorTest {
             // When
             interceptor.beforeMethod(enhancedInstance, method, allArguments, argumentTypes, result);
 
-            // THen
+            // Then
             verify(span, atLeastOnce()).setComponent(any());
             verify(span, atLeastOnce()).tag(any(StringTag.class), any(String.class));
-        }
 
-        // afterMethod should call ContextManager.stopSpan if body is AbstractMessage
-        Object[] afterArgs = new Object[] {rpcMessage};
-        try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
-            contextManagerMockedStatic.when(ContextManager::stopSpan).then(invocation -> null);
-
-            // When
-            interceptor.afterMethod(enhancedInstance, method, afterArgs, argumentTypes, null);
-
-            // Then
+            Object response = new Object();
+            assertSame(
+                    response, interceptor.afterMethod(enhancedInstance, method, allArguments, argumentTypes, response));
             contextManagerMockedStatic.verify(ContextManager::stopSpan, times(1));
         }
     }
