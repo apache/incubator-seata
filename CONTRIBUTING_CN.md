@@ -32,7 +32,7 @@
 
 ## 报告安全问题
 
-安全问题总会认真对待。通常，我们不鼓励任何人传播安全问题。如果您发现Apache Seata(incubating)的安全问题，请不要公开讨论，甚至不要公开问题。相反，我们鼓励您向 [private@seata.apache.org](mailto:private@seata.apache.org) 发送私人电子邮件 以报告此情况。
+安全问题总会认真对待。通常，我们不鼓励任何人公开传播安全问题。如果您发现 Apache Seata(incubating) 的安全漏洞，请不要公开讨论，也不要提交公开的 Issue。相反，请参考我们的[安全策略](./SECURITY.md)，并遵循 [ASF 漏洞报告流程](https://apache.org/security/#reporting-a-vulnerability)，向 [security@apache.org](mailto:security@apache.org) 或 [private@seata.apache.org](mailto:private@seata.apache.org) 发送私人电子邮件进行报告。
 
 ## 报告一般问题
 

@@ -48,6 +48,12 @@
             <includes>
                 <include>licenses/*</include>
             </includes>
+        </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
             <outputDirectory>seata-namingserver/</outputDirectory>
         </fileSet>
 
@@ -130,8 +136,18 @@
         </file>
 
         <file>
+            <source>LICENSE</source>
+            <destName>LICENSE</destName>
+        </file>
+
+        <file>
             <source>../DISCLAIMER</source>
             <destName>DISCLAIMER</destName>
+        </file>
+
+        <file>
+            <source>NOTICE</source>
+            <destName>NOTICE</destName>
         </file>
 
         <file>
