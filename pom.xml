@@ -202,8 +202,7 @@
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
                 <mysql.copy.skip>false</mysql.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
@@ -514,6 +513,9 @@
                 <configuration>
                     <excludes>
                         <exclude>**/test/**</exclude>
+                        <!-- Druid is copied into target/classes/lib for the SQL parser. Leave that jar out of
+                             every report so Codecov does not merge it into Seata sources with the same file name. -->
+                        <exclude>**/lib/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -39,11 +39,20 @@
         <spring-framework-for-server.version>7.0.7</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
         <tomcat-embed.version>11.0.25</tomcat-embed.version>
-        <spring-ai.version>1.1.0</spring-ai.version>
+        <spring-ai.version>2.0.1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Keep Netty aligned with the rest of the Seata runtime. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>

@@ -24,6 +24,8 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.UnregisterRMRequest;
 import org.apache.seata.core.protocol.UnregisterRMResponse;
@@ -115,21 +117,26 @@ public class MockServerTest {
         Channel channel = ChannelManagerTestHelper.getChannelConcurrentMap(client)
                 .get("127.0.0.1:" + ProtocolTestConstants.MOCK_SERVER_PORT);
         Assertions.assertNotNull(channel);
-        Channel serverChannel = ChannelManager.getRmChannels().get(RESOURCE_ID);
+        // Keep this resource out of the client's managed resources so asynchronous
+        // registration of the shared test resource cannot race with its removal.
+        String resourceId = RESOURCE_ID + "-unregister";
+        RegisterRMRequest registerRequest =
+                new RegisterRMRequest(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
+        registerRequest.setResourceIds(resourceId);
+        RegisterRMResponse registerResponse = (RegisterRMResponse) client.sendSyncRequest(channel, registerRequest);
+        Assertions.assertEquals(ResultCode.Success, registerResponse.getResultCode());
+        Assertions.assertTrue(registerResponse.isIdentified());
+        Channel serverChannel = ChannelManager.getRmChannels().get(resourceId);
         Assertions.assertNotNull(serverChannel);
         String clientId = ChannelManager.getContextFromIdentified(serverChannel).getClientId();
-        Assertions.assertNotNull(ChannelManager.getChannel(RESOURCE_ID, clientId, false));
-        try {
-            UnregisterRMRequest request =
-                    new UnregisterRMRequest(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
-            request.setResourceIds(RESOURCE_ID);
-            UnregisterRMResponse response = (UnregisterRMResponse) client.sendSyncRequest(channel, request);
-            Assertions.assertEquals(ResultCode.Success, response.getResultCode());
-            Assertions.assertTrue(response.isIdentified());
-            Assertions.assertNull(ChannelManager.getChannel(RESOURCE_ID, clientId, false));
-        } finally {
-            RmClientTest.getRm(RESOURCE_ID);
-        }
+        Assertions.assertNotNull(ChannelManager.getChannel(resourceId, clientId, false));
+        UnregisterRMRequest request =
+                new UnregisterRMRequest(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
+        request.setResourceIds(resourceId);
+        UnregisterRMResponse response = (UnregisterRMResponse) client.sendSyncRequest(channel, request);
+        Assertions.assertEquals(ResultCode.Success, response.getResultCode());
+        Assertions.assertTrue(response.isIdentified());
+        Assertions.assertNull(ChannelManager.getChannel(resourceId, clientId, false));
     }
 
     private String doTestCommit(int times) throws TransactionException {
