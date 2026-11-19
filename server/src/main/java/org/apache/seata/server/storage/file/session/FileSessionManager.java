@@ -30,11 +30,14 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.Reloadable;
 import org.apache.seata.server.session.SessionCondition;
+import org.apache.seata.server.storage.file.FileStoreEngine;
 import org.apache.seata.server.storage.file.ReloadableStore;
 import org.apache.seata.server.storage.file.TransactionWriteStore;
 import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
+import org.apache.seata.server.storage.file.store.RocksDBTransactionStoreManager;
 import org.apache.seata.server.store.AbstractTransactionStoreManager;
 import org.apache.seata.server.store.SessionStorable;
+import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.TransactionStoreManager;
 
 import java.io.File;
@@ -62,10 +65,27 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     private static final int READ_SIZE = ConfigurationFactory.getInstance()
             .getInt(ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE);
 
+    private static final GlobalStatus[] ACTIVE_STATUSES = {
+        GlobalStatus.UnKnown,
+        GlobalStatus.Begin,
+        GlobalStatus.Committing,
+        GlobalStatus.CommitRetrying,
+        GlobalStatus.Rollbacking,
+        GlobalStatus.RollbackRetrying,
+        GlobalStatus.TimeoutRollbacking,
+        GlobalStatus.TimeoutRollbackRetrying,
+        GlobalStatus.AsyncCommitting,
+        GlobalStatus.StopRollbackOrRollbackRetry,
+        GlobalStatus.StopCommitOrCommitRetry,
+        GlobalStatus.Deleting
+    };
+
     /**
      * The Session map.
      */
     protected Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>(64);
+
+    private final FileStoreEngine fileStoreEngine;
 
     /**
      * Instantiates a new File based session manager.
@@ -74,6 +94,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
      */
     public FileSessionManager(String name) {
         super(name);
+        fileStoreEngine = FileStoreEngine.FILE;
         transactionStoreManager = new AbstractTransactionStoreManager() {
             @Override
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
@@ -91,9 +112,15 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
      */
     public FileSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
+        fileStoreEngine = StoreConfig.getFileStoreEngine();
         if (StringUtils.isNotBlank(sessionStoreFilePath)) {
-            transactionStoreManager =
-                    new FileTransactionStoreManager(sessionStoreFilePath + File.separator + name, this);
+            if (fileStoreEngine == FileStoreEngine.ROCKSDB) {
+                transactionStoreManager =
+                        new RocksDBTransactionStoreManager(sessionStoreFilePath + File.separator + name + ".rocksdb");
+            } else {
+                transactionStoreManager =
+                        new FileTransactionStoreManager(sessionStoreFilePath + File.separator + name, this);
+            }
         } else {
             transactionStoreManager = new AbstractTransactionStoreManager() {
                 @Override
@@ -106,11 +133,18 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public void reload() {
+        if (isRocksDBStore()) {
+            return;
+        }
         restoreSessions();
     }
 
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
+        if (isRocksDBStore()) {
+            super.addGlobalSession(session);
+            return;
+        }
         CollectionUtils.computeIfAbsent(sessionMap, session.getXid(), k -> {
             try {
                 super.addGlobalSession(session);
@@ -123,17 +157,27 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public GlobalSession findGlobalSession(String xid) {
+        if (isRocksDBStore()) {
+            return transactionStoreManager.readSession(xid);
+        }
         return sessionMap.get(xid);
     }
 
     @Override
     public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        if (isRocksDBStore()) {
+            return transactionStoreManager.readSession(xid, withBranchSessions);
+        }
         // withBranchSessions without process in memory
         return sessionMap.get(xid);
     }
 
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
+        if (isRocksDBStore()) {
+            super.removeGlobalSession(session);
+            return;
+        }
         if (sessionMap.remove(session.getXid()) != null) {
             super.removeGlobalSession(session);
         }
@@ -141,11 +185,17 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public Collection<GlobalSession> allSessions() {
+        if (isRocksDBStore()) {
+            return findGlobalSessions(new SessionCondition(ACTIVE_STATUSES));
+        }
         return sessionMap.values();
     }
 
     @Override
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+        if (isRocksDBStore()) {
+            return transactionStoreManager.readSession(condition);
+        }
         List<GlobalStatus> globalStatuses = null;
         if (null != condition.getStatuses() && condition.getStatuses().length > 0) {
             globalStatuses = Arrays.asList(condition.getStatuses());
@@ -383,6 +433,10 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     public void setSessionMap(Map<String, GlobalSession> sessionMap) {
         this.sessionMap = sessionMap;
+    }
+
+    private boolean isRocksDBStore() {
+        return fileStoreEngine == FileStoreEngine.ROCKSDB;
     }
 
     @Override
