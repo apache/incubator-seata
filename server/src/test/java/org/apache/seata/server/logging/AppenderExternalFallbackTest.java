@@ -22,11 +22,13 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
+import ch.qos.logback.core.status.Status;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.ByteArrayOutputStream;
@@ -38,7 +40,9 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -73,6 +77,8 @@ public class AppenderExternalFallbackTest extends BaseSpringBootTest {
             System.setProperty(
                     EXTERNAL_CONF_DIR_PROPERTY,
                     confDir.toAbsolutePath().toString().replace('\\', '/') + "/");
+            LoggingSystem.get(AppenderExternalFallbackTest.class.getClassLoader())
+                    .cleanUp();
             return confDir;
         } catch (IOException e) {
             throw new IllegalStateException("Cannot prepare the partial external configuration directory", e);
@@ -114,6 +120,7 @@ public class AppenderExternalFallbackTest extends BaseSpringBootTest {
             System.setProperty(EXTERNAL_CONF_DIR_PROPERTY, ORIGINAL_EXTERNAL_CONF_DIR);
         }
         deleteRecursively(EXTERNAL_CONF_DIR);
+        LoggingSystem.get(AppenderExternalFallbackTest.class.getClassLoader()).cleanUp();
     }
 
     private static void deleteRecursively(Path root) throws IOException {
@@ -158,5 +165,13 @@ public class AppenderExternalFallbackTest extends BaseSpringBootTest {
         Assertions.assertTrue(
                 encoder.getPattern().contains(CONSOLE_PROBE),
                 "the console appender must be loaded from the external directory");
+
+        List<String> errorStatuses = context.getStatusManager().getCopyOfStatusList().stream()
+                .filter(status -> status.getLevel() == Status.ERROR)
+                .map(Status::getMessage)
+                .collect(Collectors.toList());
+        Assertions.assertTrue(
+                errorStatuses.isEmpty(),
+                "Logback StatusManager must not contain ERROR statuses, but found: " + errorStatuses);
     }
 }
