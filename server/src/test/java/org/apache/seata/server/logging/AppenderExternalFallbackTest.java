@@ -26,6 +26,7 @@ import ch.qos.logback.core.status.Status;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.logging.LoggingSystem;
@@ -107,12 +108,21 @@ public class AppenderExternalFallbackTest extends BaseSpringBootTest {
         return output.toByteArray();
     }
 
+    @BeforeAll
+    static void resetLoggingSystem() {
+        LoggingSystem.get(AppenderExternalFallbackTest.class.getClassLoader()).cleanUp();
+    }
+
     @AfterAll
     static void cleanUp() throws IOException {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Appender<ILoggingEvent> logstashAppender = context.getLogger("ROOT").getAppender("LOGSTASH");
-        if (logstashAppender != null) {
-            logstashAppender.stop();
+        ch.qos.logback.classic.Logger rootLogger = context.getLogger("ROOT");
+        for (String appenderName : new String[] {"LOGSTASH", "KAFKA", "METRIC"}) {
+            Appender<ILoggingEvent> appender = rootLogger.getAppender(appenderName);
+            if (appender != null) {
+                rootLogger.detachAppender(appender);
+                appender.stop();
+            }
         }
         if (ORIGINAL_EXTERNAL_CONF_DIR == null) {
             System.clearProperty(EXTERNAL_CONF_DIR_PROPERTY);
