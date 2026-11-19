@@ -26,7 +26,21 @@ class DistributedLockSqlFactoryTest {
     void testGetDistributedLogStoreSqlForMysql() {
         DistributedLockSql sql = DistributedLockSqlFactory.getDistributedLogStoreSql("mysql");
         assertNotNull(sql);
-        assertTrue(sql instanceof BaseDistributedLockSql);
+        assertTrue(sql instanceof MysqlDistributedLockSql);
+    }
+
+    @Test
+    void testGetDistributedLogStoreSqlForPostgresql() {
+        DistributedLockSql sql = DistributedLockSqlFactory.getDistributedLogStoreSql("postgresql");
+        assertNotNull(sql);
+        assertTrue(sql instanceof PostgresqlDistributedLockSql);
+    }
+
+    @Test
+    void testGetDistributedLogStoreSqlForOracle() {
+        DistributedLockSql sql = DistributedLockSqlFactory.getDistributedLogStoreSql("oracle");
+        assertNotNull(sql);
+        assertTrue(sql instanceof OracleDistributedLockSql);
     }
 
     @Test
