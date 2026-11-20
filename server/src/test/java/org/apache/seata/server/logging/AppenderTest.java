@@ -21,14 +21,17 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.status.Status;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.logging.logback.appender.MetricLogbackAppender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.test.context.TestPropertySource;
 
 import java.io.BufferedReader;
@@ -40,6 +43,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,6 +52,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @TestPropertySource(
         properties = {
@@ -102,18 +107,28 @@ public class AppenderTest extends BaseSpringBootTest {
                     }
                 }
             });
+            LoggingSystem.get(AppenderTest.class.getClassLoader()).cleanUp();
             return server;
         } catch (IOException error) {
             throw new IllegalStateException("Cannot start Logstash test sink", error);
         }
     }
 
+    @BeforeAll
+    static void resetLoggingSystem() {
+        LoggingSystem.get(AppenderTest.class.getClassLoader()).cleanUp();
+    }
+
     @AfterAll
     static void closeSink() throws Exception {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        Appender<ILoggingEvent> appender = context.getLogger("ROOT").getAppender("LOGSTASH");
-        if (appender != null) {
-            appender.stop();
+        ch.qos.logback.classic.Logger rootLogger = context.getLogger("ROOT");
+        for (String appenderName : new String[] {"LOGSTASH", "KAFKA", "METRIC"}) {
+            Appender<ILoggingEvent> appender = rootLogger.getAppender(appenderName);
+            if (appender != null) {
+                rootLogger.detachAppender(appender);
+                appender.stop();
+            }
         }
         SINK.close();
         for (Socket connection : CONNECTIONS) {
@@ -126,6 +141,7 @@ public class AppenderTest extends BaseSpringBootTest {
         } else {
             System.setProperty(DESTINATION_PROPERTY, ORIGINAL_DESTINATION);
         }
+        LoggingSystem.get(AppenderTest.class.getClassLoader()).cleanUp();
     }
 
     @Test
@@ -186,6 +202,14 @@ public class AppenderTest extends BaseSpringBootTest {
         }
         Assertions.assertNull(SINK_FAILURE.get());
         Assertions.assertTrue(delivered, "The configured Logstash appender must deliver the event to the local sink");
+
+        List<String> errorStatuses = lc.getStatusManager().getCopyOfStatusList().stream()
+                .filter(status -> status.getLevel() == Status.ERROR)
+                .map(Status::getMessage)
+                .collect(Collectors.toList());
+        Assertions.assertTrue(
+                errorStatuses.isEmpty(),
+                "Logback StatusManager must not contain ERROR statuses, but found: " + errorStatuses);
     }
 
     private static Field getDeclaredFieldRecursive(Class<?> clazz, String fieldName) throws NoSuchFieldException {
