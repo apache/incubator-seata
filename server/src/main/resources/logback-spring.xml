@@ -41,7 +41,10 @@
     <!-- Context listeners -->
     <contextListener class="org.apache.seata.server.logging.listener.SystemPropertyLoggerContextListener"/>
 
-    <if condition='property("LOG_BASH_DIR").equals("")' >
+    <condition class="ch.qos.logback.core.boolex.ExpressionPropertyCondition">
+        <expression>isNull("LOG_BASH_DIR") || propertyEquals("LOG_BASH_DIR", "")</expression>
+    </condition>
+    <if>
         <then>
             <!-- console-appender -->
             <include resource="logback/console-appender.xml"/>
@@ -50,21 +53,33 @@
             <include resource="logback/file-appender.xml"/>
 
             <!-- logstash-appender: off by default -->
-            <if condition='property("LOGSTASH_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>LOGSTASH_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <include resource="logback/logstash-appender.xml"/>
                 </then>
             </if>
 
             <!-- metric-appender: off by default -->
-            <if condition='property("METRIC_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>METRIC_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <include resource="logback/metric-appender.xml"/>
                 </then>
             </if>
 
             <!-- kafka-appender: off by default -->
-            <if condition='property("KAFKA_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>KAFKA_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <include resource="logback/kafka-appender.xml"/>
                 </then>
@@ -75,10 +90,18 @@
             <include file="${LOG_BASH_DIR}/logback/file-appender.xml"/>
 
             <!-- logstash-appender: off by default -->
-            <if condition='property("LOGSTASH_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>LOGSTASH_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <!-- prefer the external file, fall back to the classpath copy when it is absent -->
-                    <if condition='property("LOGSTASH_APPENDER_EXTERNAL").equals("true")'>
+                    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                        <key>LOGSTASH_APPENDER_EXTERNAL</key>
+                        <value>true</value>
+                    </condition>
+                    <if>
                         <then>
                             <include file="${LOG_BASH_DIR}/logback/logstash-appender.xml"/>
                         </then>
@@ -90,10 +113,18 @@
             </if>
 
             <!-- metric-appender: off by default -->
-            <if condition='property("METRIC_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>METRIC_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <!-- prefer the external file, fall back to the classpath copy when it is absent -->
-                    <if condition='property("METRIC_APPENDER_EXTERNAL").equals("true")'>
+                    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                        <key>METRIC_APPENDER_EXTERNAL</key>
+                        <value>true</value>
+                    </condition>
+                    <if>
                         <then>
                             <include file="${LOG_BASH_DIR}/logback/metric-appender.xml"/>
                         </then>
@@ -105,10 +136,18 @@
             </if>
 
             <!-- kafka-appender: off by default -->
-            <if condition='property("KAFKA_APPENDER_ENABLED").equals("true")'>
+            <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                <key>KAFKA_APPENDER_ENABLED</key>
+                <value>true</value>
+            </condition>
+            <if>
                 <then>
                     <!-- prefer the external file, fall back to the classpath copy when it is absent -->
-                    <if condition='property("KAFKA_APPENDER_EXTERNAL").equals("true")'>
+                    <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+                        <key>KAFKA_APPENDER_EXTERNAL</key>
+                        <value>true</value>
+                    </condition>
+                    <if>
                         <then>
                             <include file="${LOG_BASH_DIR}/logback/kafka-appender.xml"/>
                         </then>
@@ -161,21 +200,33 @@
         <appender-ref ref="ASYNC_FILE_ERROR"/>
 
         <!-- logstash-appender: off by default -->
-        <if condition='property("LOGSTASH_APPENDER_ENABLED").equals("true")'>
+        <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+            <key>LOGSTASH_APPENDER_ENABLED</key>
+            <value>true</value>
+        </condition>
+        <if>
             <then>
                 <appender-ref ref="LOGSTASH"/>
             </then>
         </if>
 
         <!-- kafka-appender: off by default -->
-        <if condition='property("KAFKA_APPENDER_ENABLED").equals("true")'>
+        <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+            <key>KAFKA_APPENDER_ENABLED</key>
+            <value>true</value>
+        </condition>
+        <if>
             <then>
                 <appender-ref ref="KAFKA"/>
             </then>
         </if>
 
         <!-- metric-appender: off by default -->
-        <if condition='property("METRIC_APPENDER_ENABLED").equals("true")'>
+        <condition class="ch.qos.logback.core.boolex.PropertyEqualityCondition">
+            <key>METRIC_APPENDER_ENABLED</key>
+            <value>true</value>
+        </condition>
+        <if>
             <then>
                 <appender-ref ref="METRIC"/>
             </then>

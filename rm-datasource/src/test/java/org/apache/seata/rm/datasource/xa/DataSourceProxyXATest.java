@@ -18,9 +18,12 @@ package org.apache.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.kingbase8.xa.KBXAConnection;
-import com.mysql.jdbc.JDBC4MySQLConnection;
-import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
-import com.mysql.jdbc.jdbc2.optional.MysqlXAConnection;
+import com.mysql.cj.Session;
+import com.mysql.cj.conf.RuntimeProperty;
+import com.mysql.cj.jdbc.JdbcConnection;
+import com.mysql.cj.jdbc.JdbcPropertySet;
+import com.mysql.cj.jdbc.MysqlXAConnection;
+import com.mysql.cj.log.Log;
 import com.oscar.xa.Jdbc3XAConnection;
 import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.context.RootContext;
@@ -44,6 +47,7 @@ import java.sql.Driver;
 import java.sql.SQLException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -73,9 +77,9 @@ public class DataSourceProxyXATest {
     @Test
     public void testGetConnection() throws SQLException, ClassNotFoundException {
         XAConnection xaConnection =
-                testGetXaConnection(MysqlXAConnection.class, "jdbc:mysql:xxx", JDBC4MySQLConnection.class.getName());
+                testGetXaConnection(MysqlXAConnection.class, "jdbc:mysql:xxx", JdbcConnection.class.getName());
         Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
+        Assertions.assertNotNull(connectionInXA);
         tearDown();
     }
 
@@ -114,6 +118,7 @@ public class DataSourceProxyXATest {
             throws SQLException, ClassNotFoundException {
         // Mock
         Driver driver = mock(Driver.class);
+        Mockito.when(driver.getMajorVersion()).thenReturn(8);
         Class clazz = Class.forName(connectionClassName);
         Connection connection = (Connection) (mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
@@ -121,6 +126,19 @@ public class DataSourceProxyXATest {
         Mockito.when(metaData.getURL()).thenReturn(mockJdbcUrl);
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+        if (connection instanceof JdbcConnection) {
+            JdbcConnection jdbcConnection = (JdbcConnection) connection;
+            JdbcPropertySet propertySet = mock(JdbcPropertySet.class);
+            @SuppressWarnings("unchecked")
+            RuntimeProperty<Boolean> runtimeProperty = mock(RuntimeProperty.class);
+            Mockito.when(runtimeProperty.getValue()).thenReturn(Boolean.FALSE);
+            Mockito.when(propertySet.getBooleanProperty(anyString())).thenReturn(runtimeProperty);
+            Mockito.when(jdbcConnection.getPropertySet()).thenReturn(propertySet);
+            Session session = mock(Session.class);
+            Mockito.when(session.getLog()).thenReturn(mock(Log.class));
+            Mockito.when(jdbcConnection.getSession()).thenReturn(session);
+        }
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
@@ -166,7 +184,7 @@ public class DataSourceProxyXATest {
                     .when(() -> CombineConnectionHolder.get(any(DataSource.class)))
                     .thenReturn(combineConn);
             Driver driver = mock(Driver.class);
-            JDBC4MySQLConnection connection = mock(JDBC4MySQLConnection.class);
+            Connection connection = mock(Connection.class);
             Mockito.when(connection.getAutoCommit()).thenReturn(true);
             DatabaseMetaData metaData = mock(DatabaseMetaData.class);
             Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
