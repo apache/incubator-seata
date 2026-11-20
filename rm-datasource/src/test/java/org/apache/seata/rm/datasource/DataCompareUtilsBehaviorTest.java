@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.core.model.Result;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -214,5 +215,91 @@ class DataCompareUtilsBehaviorTest {
         assertFalse(DataCompareUtils.isRowsEquals(
                         meta, Collections.singletonList(original), Collections.singletonList(missing))
                 .getResult());
+    }
+
+    private static Row datetimeKeyRow(Object key, String value) {
+        Row row = new Row();
+        row.add(new Field("gmt_create", Types.TIMESTAMP, key));
+        row.add(new Field("value", Types.VARCHAR, value));
+        return row;
+    }
+
+    static Stream<Arguments> fastjsonDateTimePrimaryKeys() {
+        return Stream.of(
+                // Timestamp-returning driver: fastjson writes "yyyy-MM-dd HH:mm:ss[.f]", Timestamp#toString adds ".0"
+                Arguments.of("2024-03-02 12:34:56", Timestamp.valueOf("2024-03-02 12:34:56")),
+                Arguments.of("2024-03-02 12:34:56.123456", Timestamp.valueOf("2024-03-02 12:34:56.123456")),
+                // undo log written while the driver returned Timestamp, rolled back with a LocalDateTime driver
+                Arguments.of("2024-03-02 12:34:56", LocalDateTime.parse("2024-03-02T12:34:56")),
+                Arguments.of("2024-03-02 12:34:56.5", LocalDateTime.parse("2024-03-02T12:34:56.5")),
+                // LocalDateTime-returning driver
+                Arguments.of("2024-03-02T12:34:56", LocalDateTime.parse("2024-03-02T12:34:56")),
+                Arguments.of("2025-01-01T00:00", LocalDateTime.parse("2025-01-01T00:00")),
+                Arguments.of("2024-03-02T12:34:56.5", Timestamp.valueOf("2024-03-02 12:34:56.5")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("fastjsonDateTimePrimaryKeys")
+    void fastjsonRowsMatchByDateTimePrimaryKeyInEitherForm(Object undoKey, Object currentKey) {
+        TableMeta meta = mock(TableMeta.class);
+        when(meta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("gmt_create"));
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            assertTrue(DataCompareUtils.isRowsEquals(
+                            meta,
+                            Collections.singletonList(datetimeKeyRow(undoKey, "same")),
+                            Collections.singletonList(datetimeKeyRow(currentKey, "same")))
+                    .getResult());
+            assertTrue(DataCompareUtils.isRowsEquals(
+                            meta,
+                            Collections.singletonList(datetimeKeyRow(currentKey, "same")),
+                            Collections.singletonList(datetimeKeyRow(undoKey, "same")))
+                    .getResult());
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
+    @Test
+    void fastjsonRowsWithDifferentDateTimePrimaryKeysDoNotMatch() {
+        TableMeta meta = mock(TableMeta.class);
+        when(meta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("gmt_create"));
+        String previous = AbstractUndoLogManager.getCurrentSerializer();
+        try {
+            AbstractUndoLogManager.setCurrentSerializer(FastjsonUndoLogParser.NAME);
+            Result<Boolean> result = DataCompareUtils.isRowsEquals(
+                    meta,
+                    Arrays.asList(
+                            datetimeKeyRow("2024-03-02 12:34:56", "a"), datetimeKeyRow("2024-03-02 12:34:57", "b")),
+                    Arrays.asList(
+                            datetimeKeyRow(LocalDateTime.parse("2024-03-02T12:34:57"), "b"),
+                            datetimeKeyRow(LocalDateTime.parse("2024-03-02T12:34:58"), "a")));
+            assertFalse(result.getResult());
+            assertTrue(result.getErrMsg().contains("newRow is null"));
+            // a value that is not a date time keeps its plain text as the key
+            assertTrue(DataCompareUtils.rowListToMap(
+                            Collections.singletonList(datetimeKeyRow("not a date", "a")),
+                            Collections.singletonList("gmt_create"))
+                    .containsKey("not a date"));
+        } finally {
+            if (previous == null) {
+                AbstractUndoLogManager.removeCurrentSerializer();
+            } else {
+                AbstractUndoLogManager.setCurrentSerializer(previous);
+            }
+        }
+    }
+
+    @Test
+    void rowKeysOfOtherSerializersKeepTheValueText() {
+        Timestamp key = Timestamp.valueOf("2024-03-02 12:34:56");
+        assertTrue(DataCompareUtils.rowListToMap(
+                        Collections.singletonList(datetimeKeyRow(key, "a")), Collections.singletonList("gmt_create"))
+                .containsKey(key.toString()));
     }
 }
