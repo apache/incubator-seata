@@ -21,6 +21,16 @@ server:
 spring:
   application:
     name: seata-namingserver
+  ai:
+    mcp:
+      server:
+        # This property must be set explicitly. Since spring-ai 2.0.1 the streamable
+        # HTTP transport is auto-configured only when the property is present
+        # (matchIfMissing = false), while McpServerProperties defaults its protocol
+        # field to STREAMABLE. Without it MCPProperties#init fails to load the context.
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
 logging:
   config: classpath:logback-spring.xml
   file:
@@ -33,7 +43,8 @@ seata:
     metrics:
       enabled: true
   security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    # Empty: generate a temporary random key during Java initialization.
+    secretKey: ${SEATA_SECRET_KEY:}
     tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/naming/v1/**
