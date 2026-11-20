@@ -38,6 +38,7 @@ import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialDatalink;
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigInteger;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
@@ -87,6 +88,22 @@ class UndoExecutorBehaviorTest {
             verify(statement).setObject(i, null);
         }
         verify(statement).setObject(14, 42, Types.INTEGER);
+    }
+
+    @Test
+    void bindsUnsignedValuesAboveSignedRangeWithWiderType() throws Exception {
+        AbstractUndoExecutor executor = mock(AbstractUndoExecutor.class, CALLS_REAL_METHODS);
+        PreparedStatement statement = mock(PreparedStatement.class);
+        BigInteger unsignedBigint = new BigInteger("18446744073709551615");
+        ArrayList<Field> values = new ArrayList<>(Arrays.asList(
+                new Field("int_unsigned", Types.INTEGER, 4294967295L),
+                new Field("bigint_unsigned", Types.BIGINT, unsignedBigint),
+                new Field("small", Types.INTEGER, 5L)));
+        executor.undoPrepare(statement, values, Collections.singletonList(new Field("id", Types.INTEGER, 2147483648L)));
+        verify(statement).setObject(1, 4294967295L, Types.BIGINT);
+        verify(statement).setObject(2, unsignedBigint, Types.DECIMAL);
+        verify(statement).setObject(3, 5L, Types.INTEGER);
+        verify(statement).setObject(4, 2147483648L, Types.BIGINT);
     }
 
     @ParameterizedTest

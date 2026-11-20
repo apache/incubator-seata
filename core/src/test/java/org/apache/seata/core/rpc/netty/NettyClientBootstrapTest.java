@@ -16,15 +16,21 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.util.internal.PlatformDependent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.when;
@@ -67,18 +73,53 @@ class NettyClientBootstrapTest {
     void testStartWithSharedEventLoopAndChannelSelection() {
         when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(true);
         when(nettyClientConfig.getClientChannelClazz()).thenAnswer(invocation -> {
-            if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
-                return NioSocketChannel.class;
-            } else if (Epoll.isAvailable()) {
+            if (Epoll.isAvailable()) {
                 return EpollSocketChannel.class;
-            } else {
-                return NioSocketChannel.class;
             }
+            return NioSocketChannel.class;
         });
 
         NettyClientBootstrap tmNettyClientBootstrap =
                 new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
         tmNettyClientBootstrap.start();
+
+        Assertions.assertSame(
+                PooledByteBufAllocator.DEFAULT,
+                getBootstrap(tmNettyClientBootstrap).config().options().get(ChannelOption.ALLOCATOR));
+    }
+
+    @Test
+    void testStartWithNioChannelDoesNotApplyEpollOptions() {
+        when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(false);
+        when(nettyClientConfig.getClientChannelClazz()).thenAnswer(invocation -> NioSocketChannel.class);
+
+        NettyClientBootstrap bootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+        try {
+            bootstrap.start();
+            Assertions.assertFalse(
+                    getBootstrap(bootstrap).config().options().containsKey(EpollChannelOption.EPOLL_MODE));
+            Assertions.assertFalse(
+                    getBootstrap(bootstrap).config().options().containsKey(EpollChannelOption.TCP_QUICKACK));
+        } finally {
+            getEventLoopGroupWorker(bootstrap).shutdownGracefully().syncUninterruptibly();
+        }
+    }
+
+    @Test
+    void testNioEventLoopGroup() {
+        when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(false);
+
+        try (MockedStatic<NettyServerConfig> mockedConfig =
+                Mockito.mockStatic(NettyServerConfig.class, Mockito.CALLS_REAL_METHODS)) {
+            mockedConfig.when(NettyServerConfig::enableEpoll).thenReturn(false);
+
+            NettyClientBootstrap bootstrap =
+                    new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+            EventLoopGroup eventLoopGroup = getEventLoopGroupWorker(bootstrap);
+            Assertions.assertInstanceOf(MultiThreadIoEventLoopGroup.class, eventLoopGroup);
+            eventLoopGroup.shutdownGracefully().syncUninterruptibly();
+        }
     }
 
     private EventLoopGroup getEventLoopGroupWorker(NettyClientBootstrap bootstrap) {
@@ -87,7 +128,17 @@ class NettyClientBootstrapTest {
             field.setAccessible(true);
             return (EventLoopGroup) field.get(bootstrap);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Failed to access Netty client event loop group", e);
+        }
+    }
+
+    private Bootstrap getBootstrap(NettyClientBootstrap bootstrap) {
+        try {
+            java.lang.reflect.Field field = NettyClientBootstrap.class.getDeclaredField("bootstrap");
+            field.setAccessible(true);
+            return (Bootstrap) field.get(bootstrap);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to access Netty client bootstrap", e);
         }
     }
 }
