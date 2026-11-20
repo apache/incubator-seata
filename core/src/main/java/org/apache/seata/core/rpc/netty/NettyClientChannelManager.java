@@ -24,6 +24,7 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
 import org.apache.seata.discovery.registry.RegistryFactory;
@@ -57,8 +58,6 @@ class NettyClientChannelManager {
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
 
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
-
-    private final ConcurrentMap<String, String> serverVersionMap = new ConcurrentHashMap<>();
 
     private final GenericKeyedObjectPool<NettyPoolKey, Channel> nettyClientKeyPool;
 
@@ -161,7 +160,6 @@ class NettyClientChannelManager {
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
-                serverVersionMap.remove(serverAddress);
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {
@@ -251,17 +249,21 @@ class NettyClientChannelManager {
                 }
             }
             if (failedMap.size() > 0) {
+                // Merge all failed addresses into a single log entry to avoid flooding logs.
+                // info level: output summary without stack traces
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.error(
+                    LOGGER.info(
                             "{} can not connect to {} cause:{}",
                             FrameworkErrorCode.NetConnect.getErrCode(),
                             failedMap.keySet(),
                             failedMap.values().stream()
                                     .map(Throwable::getMessage)
                                     .collect(Collectors.toSet()));
-                } else if (LOGGER.isDebugEnabled()) {
+                }
+                // debug level: output detailed stack traces for each failed address
+                if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error(
+                        LOGGER.debug(
                                 "{} can not connect to {} cause:{} trace information:",
                                 FrameworkErrorCode.NetConnect.getErrCode(),
                                 key,
@@ -292,25 +294,24 @@ class NettyClientChannelManager {
         nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
     }
 
+    /**
+     * Register the channel to the server address.
+     *
+     * @param serverAddress server address
+     * @param channel       channel to the server
+     * @param version       the version of the peer, that is the version reported by the server in
+     *                      its register response
+     */
     void registerChannel(final String serverAddress, final Channel channel, String version) {
+        // bind the version to the channel before publishing it, so that whoever reads the channel
+        // from channels also sees the version of the server it is actually connected to
+        ServerVersionHolder.putServerVersion(channel, version);
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null && channelToServer.isActive()) {
             return;
         }
         channels.put(serverAddress, channel);
         Version.putChannelVersion(channel, version);
-    }
-
-    void putServerVersion(String serverAddress, String version) {
-        serverVersionMap.put(serverAddress, version);
-    }
-
-    String getServerVersion(String serverAddress) {
-        return serverVersionMap.get(serverAddress);
-    }
-
-    void clearServerVersions() {
-        serverVersionMap.clear();
     }
 
     /**
@@ -329,7 +330,6 @@ class NettyClientChannelManager {
             return;
         }
         boolean removed = false;
-        removed |= serverVersionMap.remove(serverAddress) != null;
         removed |= poolKeyMap.remove(serverAddress) != null;
         removed |= channelLocks.remove(serverAddress) != null;
         if (removed && LOGGER.isInfoEnabled()) {

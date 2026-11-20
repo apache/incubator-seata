@@ -168,7 +168,7 @@ store.redis.queryLimit=100
 
 #Transaction rule configuration, only for the server
 server.recovery.committingRetryPeriod=1000
-server.recovery.asynCommittingRetryPeriod=1000
+server.recovery.asyncCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000
 server.recovery.endstatusRetryPeriod=1000
 server.recovery.timeoutRetryPeriod=1000
