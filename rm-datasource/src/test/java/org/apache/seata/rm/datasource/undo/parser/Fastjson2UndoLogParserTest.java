@@ -126,6 +126,15 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
     }
 
     @Test
+    public void testTimestampWriterWritesLocalDateTimeAsJsonText() {
+        Timestamp timestamp = Timestamp.valueOf("2024-03-02 12:34:56.123456789");
+        try (JSONWriter jsonWriter = JSONWriter.of()) {
+            new Fastjson2UndoLogParser.TimestampWriter().write(jsonWriter, timestamp, null, null, 0L);
+            Assertions.assertEquals("\"2024-03-02 12:34:56.123456789\"", jsonWriter.toString());
+        }
+    }
+
+    @Test
     public void testSerializeAndDeserializeSerialArray() throws IOException, SQLException {
         // create a mock Array object for testing SerialArray
         Array mockArray = new MockArray();
