@@ -22,9 +22,9 @@
     Default logback configuration for both JVM (direct java -jar) and
     GraalVM native image.
 
-    This file omits <if> conditional tags that require Janino runtime
-    compilation (not available in native image). All appender includes
-    are resolved from classpath resources.
+    This file omits <condition> and <if> conditional tags for external
+    conf directory resolution so that all appender includes are resolved
+    directly from classpath resources in both java -jar and native image.
 
     Distribution packaging (distribution/release-seata.xml):
         For the JVM distribution, this file is NOT used. Instead,
