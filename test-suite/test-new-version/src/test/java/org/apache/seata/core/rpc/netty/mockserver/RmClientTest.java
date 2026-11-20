@@ -79,10 +79,9 @@ public class RmClientTest {
         rm.getResourceManager(BranchType.TCC).getManagedResources().clear();
 
         // register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
-        Action1 target = new Action1Impl();
+        RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
         registryTccResource(target);
         LOGGER.info("registerResource ok");
-        RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
         return rm;
     }
 
