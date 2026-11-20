@@ -55,10 +55,13 @@ import java.util.stream.Collectors;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 /**
- * Verifies Logback 1.5.38 native {@code <condition>} / {@code <if>} migrations for both
- * {@code server/src/main/resources/logback-spring.xml} and
- * {@code namingserver/src/main/resources/logback-spring-jvm.xml} across default classpath
+ * Verifies Logback 1.5.38 native {@code <condition>} / {@code <if>} migrations for
+ * {@code server/src/main/resources/logback-spring.xml} across default classpath
  * and external {@code LOG_BASH_DIR} modes.
+ *
+ * <p>The corresponding regression tests for {@code namingserver} live in the
+ * {@code seata-namingserver} module so that its {@code logback/...} includes resolve
+ * against {@code namingserver}'s own classpath resources.
  */
 class LogbackConditionalMigrationTest {
 
@@ -178,66 +181,10 @@ class LogbackConditionalMigrationTest {
         }
     }
 
-    @Test
-    void namingserverLogbackSpringJvmXmlParsesDefaultAndExternalModesWithZeroErrors() throws Exception {
-        Path namingResourcesDir = resolveNamingserverResourcesDir();
-        Path jvmXml = namingResourcesDir.resolve("logback-spring-jvm.xml");
-        Assertions.assertTrue(Files.isRegularFile(jvmXml), "Missing namingserver logback-spring-jvm.xml at " + jvmXml);
-
-        Path defaultLogDir = Files.createDirectories(tempDir.resolve("naming-logs-default"));
-        Map<String, Object> defaultProps = new HashMap<>();
-        defaultProps.put("logging.file.path", defaultLogDir.toString());
-        LoggerContext defaultContext = configureLogbackFromPath(jvmXml, defaultProps);
-        try {
-            assertNoErrorStatuses(defaultContext);
-            Set<String> attached = getRootAppenderNames(defaultContext);
-            Assertions.assertTrue(attached.contains("ASYNC_CONSOLE"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_ALL"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_WARN"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_ERROR"));
-        } finally {
-            defaultContext.stop();
-        }
-
-        Path externalConfDir = Files.createDirectories(tempDir.resolve("naming-external-conf"));
-        Path externalLogbackDir = Files.createDirectories(externalConfDir.resolve("logback"));
-        Path namingConsoleXml = namingResourcesDir.resolve("logback/console-appender.xml");
-        Path namingFileXml = namingResourcesDir.resolve("logback/file-appender.xml");
-        String consoleContent = new String(Files.readAllBytes(namingConsoleXml), StandardCharsets.UTF_8)
-                .replace("${CONSOLE_LOG_PATTERN}", EXTERNAL_CONSOLE_PROBE);
-        Files.write(
-                externalLogbackDir.resolve("console-appender.xml"), consoleContent.getBytes(StandardCharsets.UTF_8));
-        Files.copy(namingFileXml, externalLogbackDir.resolve("file-appender.xml"));
-
-        Path externalLogDir = Files.createDirectories(tempDir.resolve("naming-logs-external"));
-        Map<String, Object> externalProps = new HashMap<>();
-        externalProps.put("logging.file.path", externalLogDir.toString());
-        externalProps.put("spring.config.additional-location", toLogbackDirProperty(externalConfDir));
-        LoggerContext externalContext = configureLogbackFromPath(jvmXml, externalProps);
-        try {
-            assertNoErrorStatuses(externalContext);
-            Set<String> attached = getRootAppenderNames(externalContext);
-            Assertions.assertTrue(attached.contains("ASYNC_CONSOLE"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_ALL"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_WARN"));
-            Assertions.assertTrue(attached.contains("ASYNC_FILE_ERROR"));
-            assertExternalConsoleProbe(externalContext);
-        } finally {
-            externalContext.stop();
-        }
-    }
-
     private static LoggerContext configureServerLogback(Map<String, Object> properties) throws Exception {
         try (InputStream input =
                 LogbackConditionalMigrationTest.class.getClassLoader().getResourceAsStream("logback-spring.xml")) {
             Assertions.assertNotNull(input, "Missing classpath resource: logback-spring.xml");
-            return configureLogbackStream(input, properties);
-        }
-    }
-
-    private static LoggerContext configureLogbackFromPath(Path xmlPath, Map<String, Object> properties)
-            throws Exception {
-        try (InputStream input = Files.newInputStream(xmlPath)) {
             return configureLogbackStream(input, properties);
         }
     }
@@ -337,18 +284,5 @@ class LogbackConditionalMigrationTest {
 
     private static String toLogbackDirProperty(Path dir) {
         return dir.toAbsolutePath().toString().replace('\\', '/') + "/";
-    }
-
-    private static Path resolveNamingserverResourcesDir() {
-        Path direct = Path.of("namingserver/src/main/resources");
-        if (Files.isDirectory(direct)) {
-            return direct;
-        }
-        Path fromModule = Path.of("../namingserver/src/main/resources");
-        if (Files.isDirectory(fromModule)) {
-            return fromModule;
-        }
-        throw new IllegalStateException("Cannot locate namingserver/src/main/resources from "
-                + Path.of("").toAbsolutePath());
     }
 }
