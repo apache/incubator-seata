@@ -25,7 +25,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
@@ -98,7 +99,7 @@ public class ProtocolV1Client {
 
     private EventLoopGroup createWorkerGroup() {
         NamedThreadFactory threadName = new NamedThreadFactory("CLI-WORKER", false);
-        return new NioEventLoopGroup(10, threadName);
+        return new MultiThreadIoEventLoopGroup(10, threadName, NioIoHandler.newFactory());
     }
 
     public void close() {

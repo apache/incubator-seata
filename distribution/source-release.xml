@@ -33,6 +33,8 @@
         <exclude>.git/**</exclude>
         <exclude>.github/**</exclude>
         <exclude>.idea/**</exclude>
+        <exclude>.mvn/wrapper/*.jar</exclude>
+        <exclude>.mvn/wrapper/maven-wrapper.jar</exclude>
         <exclude>**/target/**</exclude>
         <exclude>**/*.iml</exclude>
         <exclude>**/*.class</exclude>
