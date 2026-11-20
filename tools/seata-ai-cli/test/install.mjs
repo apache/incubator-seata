@@ -21,10 +21,6 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const developmentLock = JSON.parse(await readFile(join(root, "package-lock.json"), "utf8"));
-const publishedLock = JSON.parse(await readFile(join(root, "npm-shrinkwrap.json"), "utf8"));
-assert.deepEqual(developmentLock.packages, publishedLock.packages,
-  "The CI cache lock and published shrinkwrap must pin the same dependency tree");
 const temp = await mkdtemp(join(tmpdir(), "seata-r11-install-"));
 const prefix = join(temp, "安装 prefix with spaces");
 await mkdir(prefix);
@@ -33,7 +29,6 @@ const run = (command, args, options = {}) => {
     cwd: root,
     encoding: "utf8",
     timeout: 120000,
-    env: { ...process.env, SEATA_AI_STATE_DIR: join(temp, "state") },
     ...options,
   });
   assert.equal(r.status, 0, r.stderr + r.stdout);
@@ -125,7 +120,7 @@ assert.equal(version.data.contract_revision, "R9");
 assert.equal(version.data.state_store_id, null);
 const schema = JSON.parse(run(shim, ["schema", "system.invoke"], { cwd: temp }).stdout);
 assert.equal(schema.data.command_id, "system.invoke");
-assert.ok(schema.data.invocation_schema.properties.input.properties.invocation.oneOf.length > 0);
+assert.ok(schema.data.invocation_schema.oneOf.length > 0);
 
 // Verify the installed entrypoint fails closed if package resources are missing.
 const target = join(installed, "api/protocol/registry.json");

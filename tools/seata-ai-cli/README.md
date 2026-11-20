@@ -32,8 +32,9 @@ node dist/cli.js schema system.version
 node dist/cli.js capabilities
 ```
 
-Use `invoke` with a JSON request from stdin or `--file`. The same command
-validation applies to typed arguments and JSON input.
+Use `invoke` with a JSON request from stdin, or pass `--file <path>` to read
+only that file. The same command validation applies to typed arguments and JSON
+input. Run `node dist/cli.js schema system.invoke` for the JSON request schema.
 
 ```sh
 printf '%s\n' '{"protocol_version":"0.1","contract_revision":"R9","command":"system.version","context":{},"input":{},"options":{}}' |
@@ -46,6 +47,6 @@ the registered commands. The per-command fixtures in `test/contract/r11` check
 the generated contract independently. The generated `api/` and `schemas/`
 directories are excluded from Git.
 
-Run `npm test` for the protocol tests. Install the Python dependencies in
-`test/requirements.txt` and run `npm run check` to include independent contract
-validation and installation from the packed tarball.
+Run `npm test` for the protocol tests. With Python 3.11 or newer, install the
+dependencies in `test/requirements.txt` and run `npm run check` to include
+independent contract validation and installation from the packed tarball.

@@ -69,6 +69,10 @@ export const registry: readonly Spec[] = catalog.map((v) => {
     output_contract: str(o.output_contract),
   };
 });
+const commandPaths = [...registry].sort((a, b) => b.path.length - a.path.length);
+export function matchCommand(args: readonly string[]): Spec | undefined {
+  return commandPaths.find(spec => spec.path.every((part, index) => args[index] === part));
+}
 const validators = new Map<string, ValidateFunction>();
 export const validateEnvelope = ajv.compile(
   object(

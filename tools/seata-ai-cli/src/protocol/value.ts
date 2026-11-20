@@ -12,7 +12,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { createHash } from "node:crypto";
 import { CliError } from "./error.js";
 
 export type Json =
@@ -51,12 +50,6 @@ export function canonical(value: Json): string {
     throw new CliError("internal", "contract_violation", "Non-finite number.");
   return JSON.stringify(value);
 }
-export function digest(value: Json): string {
-  return (
-    "sha256:" + createHash("sha256").update(canonical(value)).digest("hex")
-  );
-}
-
 /** Parse before conversion: keys are compared after decoding; unsafe integers never round. */
 export function parseJson(
   bytes: Uint8Array,

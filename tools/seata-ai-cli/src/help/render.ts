@@ -17,6 +17,8 @@ import { object } from "../protocol/value.js";
 import { CliError } from "../protocol/error.js";
 
 export function renderHelp(path: string[], field?: string): string {
+  if (field && path.length === 0)
+    throw new CliError("validation", "invalid_argument", "Field help requires a leaf command.");
   if (path.length === 0)
     return (
       [
@@ -57,6 +59,15 @@ export function renderHelp(path: string[], field?: string): string {
       ].join("\n") + "\n"
     );
   }
+  if (exact.id === "system.invoke") {
+    if (field)
+      throw new CliError("validation", "invalid_argument", "Use schema system.invoke for request fields.");
+    return [
+      "Usage: seata-ai invoke [--file <path>]",
+      "Read a JSON command request from stdin or from the specified file.",
+      "Exact request schema: seata-ai schema system.invoke",
+    ].join("\n") + "\n";
+  }
   const props = object(exact.invocation.properties);
   if (field) {
     for (const group of ["input", "context", "options"]) {
@@ -89,14 +100,7 @@ export function renderHelp(path: string[], field?: string): string {
     )) {
       const def = object(val);
       lines.push(
-        "  --" +
-          (key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-")) +
-          (def.type === "boolean"
-            ? " / --no-" + (key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-"))
-            : " <" + String(def.type ?? "JSON") + ">") +
-          " (" +
-          group +
-          ")",
+        "  --" + key.replaceAll("_", "-") + " <" + String(def.type ?? "JSON") + "> (" + group + ")",
       );
     }
   lines.push(

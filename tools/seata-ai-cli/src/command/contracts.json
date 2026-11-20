@@ -65,13 +65,13 @@
       "additionalProperties": false
     },
     "output_contract": "commands[]、runtime、assurance",
-    "notes": "未给 Profile 时不联网；只求静态/本地状态",
+    "notes": "查询静态、本地能力",
     "input_example": {},
     "remote": false,
     "path": "seata-ai capabilities",
     "risk": "read",
     "confirmation": "none",
-    "backends": "local / console_auth, naming_management",
+    "backends": "local",
     "skills": "—"
   },
   {
@@ -93,7 +93,7 @@
     "output_contract": "command_id、schema_version、invocation_schema、output_schema",
     "notes": "",
     "input_example": {
-      "command_id": "transaction.get"
+      "command_id": "system.version"
     },
     "remote": false,
     "path": "seata-ai schema",
@@ -104,31 +104,15 @@
   },
   {
     "id": "system.invoke",
-    "input_schema": {
-      "type": "object",
-      "properties": {
-        "invocation": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "invocation"
-      ],
-      "additionalProperties": false
-    },
     "output_contract": "目标命令 Envelope",
-    "notes": "CLI 内部分派模型；禁止作为另一个 invoke 的目标",
+    "notes": "从标准输入或文件读取目标命令请求",
     "input_example": {
-      "invocation": {
-        "protocol_version": "0.1",
-        "contract_revision": "R9",
-        "command": "system.version",
-        "context": {},
-        "input": {},
-        "options": {
-          "timeout_ms": 30000
-        }
-      }
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "system.version",
+      "context": {},
+      "input": {},
+      "options": {}
     },
     "remote": false,
     "path": "seata-ai invoke",

@@ -37,9 +37,6 @@ export class CliError extends Error {
   ) {
     super(message);
   }
-  get exitCode(): number {
-    return exits[this.type];
-  }
 }
 export function safeError(error: unknown): CliError {
   return error instanceof CliError

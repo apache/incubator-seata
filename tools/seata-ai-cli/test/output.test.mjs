@@ -15,12 +15,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Writable } from "node:stream";
-import { mkdtempSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
+import { execFile, spawnSync } from "node:child_process";
+import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
-import { wireResult, emit, serialize } from "../dist/output/emitter.js";
+import { wireResult, write, serialize } from "../dist/output/emitter.js";
 const cli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
 const base = {
   protocol_version: "0.1",
@@ -113,7 +114,8 @@ test("backpressure waits for write completion; EPIPE rejects without another emi
       }, 20);
     },
   });
-  await emit(wireResult(base), sink, sink);
+  const text = serialize(wireResult(base));
+  await write(sink, text);
   assert.equal(done, true);
   assert.equal(writes, 1);
   const broken = new Writable({
@@ -122,7 +124,7 @@ test("backpressure waits for write completion; EPIPE rejects without another emi
     },
   });
   await assert.rejects(
-    emit(wireResult(base), broken, sink),
+    write(broken, text),
     (e) => e.code === "EPIPE",
   );
   assert.equal(writes, 1);
@@ -134,31 +136,38 @@ test("backpressure waits for write completion; EPIPE rejects without another emi
     (e) => e.subtype === "output_limit",
   );
 });
-test("--file and stdin are mutually exclusive", () => {
+test("--file reads the request independently of stdin", async (t) => {
   const dir = mkdtempSync(join(tmpdir(), "seata-r11-wire-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
   const file = join(dir, "invocation.json");
-  const invocation = JSON.stringify({
-    protocol_version: "0.1",
-    contract_revision: "R9",
-    command: "system.version",
-    context: {},
-    input: {},
-    options: {},
+  writeFileSync(file, readFileSync(new URL("./contract/r11/examples/invocations/system.version.json", import.meta.url)));
+  const { stdout } = await promisify(execFile)(process.execPath, [cli, "invoke", "--file", file], {
+    timeout: 5000,
+    killSignal: "SIGKILL",
   });
-  writeFileSync(file, invocation);
-  const r = spawnSync(process.execPath, [cli, "invoke", "--file", file], {
-    input: invocation,
-    encoding: "utf8",
-    timeout: 10000,
-  });
-  assert.equal(r.status, 2);
-  assert.equal(r.stdout, "");
-  assert.equal(JSON.parse(r.stderr).error.subtype, "invalid_argument");
-  const fromFile = spawnSync(process.execPath, [cli, "invoke", "--file", file], {
-    input: "",
-    encoding: "utf8",
-    timeout: 10000,
-  });
-  assert.equal(fromFile.status, 0, fromFile.stderr);
-  assert.equal(JSON.parse(fromFile.stdout).command, "system.version");
+  assert.equal(JSON.parse(stdout).command, "system.version");
+});
+test("--file reports missing paths and rejects non-regular files without blocking", (t) => {
+  const dir = mkdtempSync(join(tmpdir(), "seata-r11-wire-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const link = join(dir, "link");
+  const fifo = join(dir, "pipe");
+  symlinkSync(dir, link);
+  assert.equal(spawnSync("mkfifo", [fifo]).status, 0);
+  for (const [path, status, subtype] of [
+    [join(dir, "missing"), 2, "invalid_argument"],
+    [dir, 6, "unsafe_path"],
+    [link, 6, "unsafe_path"],
+    [fifo, 6, "unsafe_path"],
+  ]) {
+    const child = spawnSync(process.execPath, [cli, "invoke", "--file", path], {
+      encoding: "utf8",
+      timeout: 5000,
+      killSignal: "SIGKILL",
+    });
+    assert.ifError(child.error);
+    assert.equal(child.status, status);
+    assert.equal(child.stdout, "");
+    assert.equal(JSON.parse(child.stderr).error.subtype, subtype);
+  }
 });

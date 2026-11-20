@@ -17,8 +17,63 @@
 import { randomUUID } from "node:crypto";
 import { open } from "node:fs/promises";
 import { constants } from "node:fs";
-import type { Obj } from "./protocol/value.js";
+import type { CliError as InvocationError } from "./protocol/error.js";
 let outputStarted = false;
+
+async function readInvocation(
+  path: string | undefined,
+  abort: AbortController,
+  CliError: typeof InvocationError,
+): Promise<Buffer> {
+  const timer = setTimeout(() => {
+    abort.abort(new CliError("network", "timeout", "Input deadline exceeded."));
+  }, 30000);
+  let file: Awaited<ReturnType<typeof open>> | undefined;
+  try {
+    if (path !== undefined) {
+      try {
+        file = await open(
+          path,
+          constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+        );
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException | undefined)?.code;
+        if (code === "ELOOP")
+          throw new CliError(
+            "policy",
+            "unsafe_path",
+            "Invocation source must be a regular file without a symbolic link.",
+          );
+        if (code && ["ENOENT", "ENOTDIR", "EACCES", "EPERM", "ENAMETOOLONG", "EINVAL"].includes(code))
+          throw new CliError("validation", "invalid_argument", "Cannot open the invocation file.");
+        throw error;
+      }
+      if (!(await file.stat()).isFile())
+        throw new CliError("policy", "unsafe_path", "Invocation source must be a regular file.");
+    }
+    abort.signal.throwIfAborted();
+    const input = file ? file.createReadStream({ autoClose: false }) : process.stdin;
+    const stop = () => input.destroy(abort.signal.reason as Error);
+    abort.signal.addEventListener("abort", stop, { once: true });
+    try {
+      const chunks: Buffer[] = [];
+      let size = 0;
+      for await (const chunk of input) {
+        const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        size += bytes.length;
+        if (size > 1024 * 1024)
+          throw new CliError("validation", "input_too_large", "Invocation exceeds 1 MiB.");
+        chunks.push(bytes);
+      }
+      return Buffer.concat(chunks, size);
+    } finally {
+      abort.signal.removeEventListener("abort", stop);
+    }
+  } finally {
+    clearTimeout(timer);
+    await file?.close();
+  }
+}
 
 async function main(): Promise<void> {
   const started = performance.now();
@@ -28,7 +83,7 @@ async function main(): Promise<void> {
     throw new Error("unsupported_runtime");
   const [
     { parseArgs },
-    { validate, registry, validateOutput },
+    { validate, matchCommand, registry, validateOutput },
     { parseJson, object },
     { dispatch },
     { envelope, serialize, write },
@@ -51,14 +106,10 @@ async function main(): Promise<void> {
   let command = "system.help",
     context = {},
     invoked = false;
-  let timer: NodeJS.Timeout | undefined;
-  const warnings: Obj[] = [];
+  let clientRequestId: string | undefined;
   try {
     const args = process.argv.slice(2);
-    const known = [...registry]
-      .sort((a, b) => b.path.length - a.path.length)
-      .find((s) => s.path.every((p, i) => args[i] === p));
-    command = known?.id ?? "system.help";
+    command = matchCommand(args)?.id ?? "system.help";
     const parsed = parseArgs(args);
     if (parsed.kind === "help") {
       const { renderHelp } = await import("./help/render.js");
@@ -71,112 +122,22 @@ async function main(): Promise<void> {
     if (parsed.kind === "invoke") {
       invoked = true;
       command = "system.invoke";
-      const chunks: Buffer[] = [];
-      let size = 0;
-      const file = parsed.file
-        ? await open(parsed.file, constants.O_RDONLY | constants.O_NOFOLLOW)
-        : undefined;
-      try {
-        if (file && !(await file.stat()).isFile())
-          throw new CliError(
-            "policy",
-            "unsafe_path",
-            "Invocation source must be a regular file.",
-          );
-        if (file && !process.stdin.isTTY) {
-          const stop = () =>
-            process.stdin.destroy(
-              abort.signal.reason instanceof Error
-                ? abort.signal.reason
-                : undefined,
-            );
-          abort.signal.addEventListener("abort", stop, { once: true });
-          timer = setTimeout(
-            () =>
-              abort.abort(
-                new CliError(
-                  "validation",
-                  "invalid_argument",
-                  "Close unused stdin when passing --file.",
-                ),
-              ),
-            30000,
-          );
-          try {
-            for await (const chunk of process.stdin)
-              if (chunk.length)
-                throw new CliError(
-                  "validation",
-                  "invalid_argument",
-                  "Do not supply both stdin and --file.",
-                );
-          } finally {
-            clearTimeout(timer);
-            abort.signal.removeEventListener("abort", stop);
-          }
-        }
-        const input = file
-          ? file.createReadStream({ autoClose: false })
-          : process.stdin;
-        const stop = () =>
-          input.destroy(
-            abort.signal.reason instanceof Error
-              ? abort.signal.reason
-              : undefined,
-          );
-        abort.signal.addEventListener("abort", stop, { once: true });
-        timer = setTimeout(
-          () =>
-            abort.abort(
-              new CliError("network", "timeout", "Input deadline exceeded."),
-            ),
-          30000,
-        );
-        try {
-          for await (const chunk of input) {
-            const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-            size += bytes.length;
-            if (size > 1024 * 1024)
-              throw new CliError(
-                "validation",
-                "input_too_large",
-                "Invocation exceeds 1 MiB.",
-              );
-            chunks.push(bytes);
-          }
-        } finally {
-          abort.signal.removeEventListener("abort", stop);
-          clearTimeout(timer);
-        }
-      } finally {
-        await file?.close();
-      }
-      value = parseJson(Buffer.concat(chunks));
+      value = parseJson(await readInvocation(parsed.file, abort, CliError));
       const candidate = object(value).command;
       if (
         typeof candidate === "string" &&
-        registry.some((s) => s.id === candidate)
+        registry.some(spec => spec.id === candidate)
       )
         command = candidate;
     } else value = parsed.value;
     const inv = validate(value);
     command = inv.command;
     context = inv.context;
-    timer = setTimeout(
-      () =>
-        abort.abort(
-          new CliError("network", "timeout", "Invocation deadline exceeded."),
-        ),
-      Number(inv.options.timeout_ms),
-    );
-    let data: Obj, partial: unknown;
-    try { data = dispatch(inv, abort.signal); }
-    catch (error) {
-      if (!(error instanceof PartialResult)) throw error;
-      data = error.data; partial = error;
-    }
+    if (typeof inv.options.client_request_id === "string")
+      clientRequestId = inv.options.client_request_id;
+    const data = dispatch(inv, abort.signal);
     validateOutput(inv.command, data);
-    const result = envelope(inv.command, inv.context, started, data, partial, invoked, warnings);
+    const result = envelope(command, context, started, data, undefined, invoked, clientRequestId);
     const text = serialize(result);
     outputStarted = true;
     await write(
@@ -195,7 +156,7 @@ async function main(): Promise<void> {
       data,
       error,
       invoked,
-      warnings,
+      clientRequestId,
     );
     // Once output begins, EPIPE is handled by the outer boundary, never by a second envelope.
     const text = serialize(result);
@@ -206,7 +167,6 @@ async function main(): Promise<void> {
     );
     process.exitCode = result.exit;
   } finally {
-    clearTimeout(timer);
     process.removeListener("SIGINT", cancel);
     process.removeListener("SIGTERM", cancel);
   }

@@ -58,7 +58,7 @@ for (const c of contracts) {
     },
     client_request_id: uuid,
   });
-  const invocation = {
+  const invocation = c.id === "system.invoke" ? {} : {
     $schema: "https://json-schema.org/draft/2020-12/schema",
     title: c.id + " invocation",
     ...object(
@@ -98,7 +98,9 @@ for (const c of contracts) {
 }
 // Build the delegated schema from the same commands that invoke can dispatch.
 const invoke = registry.find(spec => spec.id === "system.invoke");
-invoke.invocation.properties.input.properties.invocation = {
+invoke.invocation = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  title: "Seata AI CLI invoke request",
   oneOf: registry.filter(spec => spec.id !== invoke.id).map(spec => spec.invocation),
 };
 await write("api/protocol/registry.json", registry);

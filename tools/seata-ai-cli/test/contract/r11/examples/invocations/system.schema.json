@@ -4,7 +4,7 @@
   "command": "system.schema",
   "context": {},
   "input": {
-    "command_id": "transaction.get"
+    "command_id": "system.version"
   },
   "options": {
     "timeout_ms": 30000

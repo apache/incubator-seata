@@ -14,8 +14,7 @@
 // limitations under the License.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -38,24 +37,32 @@ const run = (args, input) =>
     input,
     encoding: "utf8",
     cwd: "/tmp",
-    env: { ...process.env, SEATA_AI_STATE_DIR: mkdtempSync(resolve(tmpdir(), "seata-protocol-")) },
     timeout: 10000,
   });
 
 test("public invoke schema accepts every registered target and rejects delegation to itself", () => {
   const result = run(["schema", "system.invoke"]);
   assert.equal(result.status, 0, result.stderr);
-  const schema = JSON.parse(result.stdout).data.invocation_schema.properties.input;
+  const schema = JSON.parse(result.stdout).data.invocation_schema;
   const accepts = ajv.compile(schema);
   const targets = registry.filter(spec => spec.id !== "system.invoke");
-  assert.deepEqual(schema.properties.invocation.oneOf.map(s => s.properties.command.const),
+  assert.deepEqual(schema.oneOf.map(s => s.properties.command.const),
     targets.map(spec => spec.id));
   for (const spec of targets) {
     const example = json("test/contract/r11/examples/invocations/" + spec.id + ".json");
-    assert.equal(accepts({ invocation: example }), true, spec.id);
+    assert.equal(accepts(example), true, spec.id);
+    const child = run(["invoke"], JSON.stringify(example));
+    assert.equal(child.status, 0, child.stderr);
+    const envelope = JSON.parse(child.stdout);
+    assert.equal(envelope.command, spec.id);
+    assert.equal(envelope.meta.invoked_via, "system.invoke");
   }
   const example = json("test/contract/r11/examples/invocations/system.version.json");
-  assert.equal(accepts({ invocation: { ...example, command: "system.invoke" } }), false);
+  const wrapper = { ...example, command: "system.invoke", input: { invocation: example } };
+  assert.equal(accepts(wrapper), false);
+  const child = run(["invoke"], JSON.stringify(wrapper));
+  assert.equal(child.status, 2);
+  assert.equal(JSON.parse(child.stderr).error.subtype, "recursive_invoke");
 });
 
 test("registered command IDs, flags and independent invocation fixtures agree", () => {
@@ -74,13 +81,8 @@ test("registered command IDs, flags and independent invocation fixtures agree", 
     const flags = [];
     for (const group of ["context", "input", "options"])
       for (const [key, value] of Object.entries(example[group])) {
-        flags.push(
-          "--" +
-            (key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-")),
-        );
-        if (typeof value !== "boolean")
-          flags.push(typeof value === "string" ? value : JSON.stringify(value));
-        else if (value === false) flags.pop();
+        flags.push("--" + key.replaceAll("_", "-"),
+          typeof value === "string" ? value : JSON.stringify(value));
       }
     const parsed = parseArgs([...spec.path, ...flags]);
     assert.equal(parsed.kind, "typed");
@@ -102,6 +104,7 @@ test("capabilities lists the five executable framework commands", () => {
     "system.capabilities", "system.help", "system.invoke", "system.schema", "system.version",
   ]);
   assert.ok(data.commands.every(command => command.status === "available"));
+  assert.ok(data.commands.every(command => command.backends === "local"));
   assert.equal(data.runtime.management_reachable, "not_evaluated");
   assert.equal(data.runtime.storage_safe, "unavailable");
   assert.equal(data.runtime.server_mutations, "disabled");
@@ -171,6 +174,37 @@ test("help budgets and framework/domain counts", () => {
     assert.ok(renderHelp([domain]).split("\n").length <= 80);
   for (const spec of registry)
     assert.ok(renderHelp(spec.path).split("\n").length <= 140);
+});
+test("invoke help describes its file option and field help requires a command", () => {
+  const child = run(["invoke", "--help"]);
+  assert.equal(child.status, 0, child.stderr);
+  assert.match(child.stdout, /--file <path>/);
+  assert.doesNotMatch(child.stdout, /--invocation|--profile|--timeout-ms/);
+  const invalid = run(["help", "--field", "command_id"]);
+  assert.equal(invalid.status, 2);
+  assert.match(JSON.parse(invalid.stderr).error.message, /leaf command/);
+});
+test("options with missing values do not consume following flags", () => {
+  const invalid = run(["version", "--profile", "--namespace=public"]);
+  assert.equal(invalid.status, 2);
+  assert.match(JSON.parse(invalid.stderr).error.message, /requires a value/);
+  const explicit = run(["version", "--profile=--namespace=public"]);
+  assert.equal(explicit.status, 0, explicit.stderr);
+  assert.equal(JSON.parse(explicit.stdout).context.profile, "--namespace=public");
+});
+test("validated typed and JSON invocations return the caller's request ID", () => {
+  const id = "ABCDEF01-1234-4234-9234-ABCDEF123456";
+  const example = json("test/contract/r11/examples/invocations/system.version.json");
+  for (const [child, status, stream] of [
+    [run(["version", "--client-request-id", id]), 0, "stdout"],
+    [run(["invoke"], JSON.stringify({ ...example, options: { client_request_id: id } })), 0, "stdout"],
+    [run(["schema", "missing", "--client-request-id", id]), 2, "stderr"],
+  ]) {
+    assert.equal(child.status, status);
+    const envelope = JSON.parse(child[stream]);
+    assert.equal(validateEnvelope(envelope), true);
+    assert.equal(envelope.meta.client_request_id, id.toLowerCase());
+  }
 });
 test("real process produces exactly one envelope on the required stream", () => {
   for (const [args, exit, stream] of [

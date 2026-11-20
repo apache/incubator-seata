@@ -40,7 +40,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-          cache-dependency-path: tools/seata-ai-cli/package-lock.json
+          cache-dependency-path: tools/seata-ai-cli/npm-shrinkwrap.json
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.11'

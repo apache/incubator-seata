@@ -32,7 +32,7 @@ export function envelope(
   data?: Obj,
   error?: unknown,
   invoked = false,
-  warnings: Obj[] = [],
+  clientRequestId?: string,
 ): Result {
   const failure = error === undefined ? undefined : safeError(error);
   const state =
@@ -50,8 +50,9 @@ export function envelope(
       duration_ms: Math.round(performance.now() - start),
       partial: state === "partial",
       ...(invoked ? { invoked_via: "system.invoke" } : {}),
+      ...(clientRequestId !== undefined ? { client_request_id: clientRequestId } : {}),
     },
-    warnings,
+    warnings: [],
   };
   if (data) result.data = data;
   if (failure)
@@ -87,13 +88,6 @@ export function wireResult(value: Obj): Result {
   for (const [key, exit] of Object.entries(exits))
     if (key === type) return { envelope: value, exit, stream: "stderr" };
   throw new CliError("internal", "contract_violation", "Unknown error type.");
-}
-export async function emit(
-  result: Result,
-  stdout: Writable,
-  stderr: Writable,
-): Promise<void> {
-  await write(result.stream === "stdout" ? stdout : stderr, serialize(result));
 }
 export function serialize(result: Result): string {
   const maximum = 16 * 1024 * 1024;

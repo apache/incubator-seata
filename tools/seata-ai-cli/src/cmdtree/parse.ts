@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { Command, Option } from "commander";
-import { registry, type Spec } from "../command/registry.js";
+import { matchCommand, type Spec } from "../command/registry.js";
 import {
   type Json,
   type Obj,
@@ -27,8 +27,6 @@ export type Parsed =
   | { kind: "help"; path: string[] }
   | { kind: "invoke"; file?: string }
   | { kind: "typed"; value: Obj };
-const flagName = (key: string) =>
-  key === "confirm_high_risk" ? "yes" : key.replaceAll("_", "-");
 function convert(value: string, schema: Obj): Json {
   if (schema.type === "string") return value;
   return parseJson(Buffer.from(value));
@@ -54,12 +52,10 @@ export function parseArgs(argv: string[]): Parsed {
     throw new CliError(
       "validation",
       "invalid_argument",
-      "invoke accepts stdin or --file only; do not mix typed flags.",
+      "invoke accepts only --file <path> as an option.",
     );
   }
-  const spec = [...registry]
-    .sort((a, b) => b.path.length - a.path.length)
-    .find((s) => s.path.every((p, i) => argv[i] === p));
+  const spec = matchCommand(argv);
   if (!spec)
     throw new CliError(
       "validation",
@@ -67,7 +63,6 @@ export function parseArgs(argv: string[]): Parsed {
       "Unknown command path. Use --help.",
     );
   const args = argv.slice(spec.path.length);
-  let value: Obj | undefined;
   const command = new Command(spec.path.join(" "));
   command
     .helpOption(false)
@@ -76,38 +71,23 @@ export function parseArgs(argv: string[]): Parsed {
     .exitOverride()
     .configureOutput({ writeOut: () => {}, writeErr: () => {} });
   const props = object(spec.invocation.properties);
-  const fields = new Map<string, { group: string; key: string; schema: Obj }>();
+  const fields = new Map<string, { group: string; key: string }>();
   for (const group of ["context", "input", "options"]) {
     for (const [key, schemaValue] of Object.entries(
       object(object(props[group]).properties),
     )) {
-      const schema = object(schemaValue),
-        flag = flagName(key);
+      const schema = object(schemaValue);
+      const flag = key.replaceAll("_", "-");
       if (fields.has(flag)) {
-        // Execution lookups bind --client-request-id to Input, not tracing Options.
-        if (
-          group === "options" &&
-          key === "client_request_id" &&
-          spec.id.startsWith("execution.")
-        )
-          continue;
         throw new CliError(
           "internal",
           "contract_violation",
           "Conflicting CLI binding.",
         );
       }
-      fields.set(flag, { group, key, schema });
-      const option = new Option(
-        "--" + flag + (schema.type === "boolean" ? "" : " <value>"),
-      );
-      if (schema.type !== "boolean")
-        option.argParser((v) => convert(v, schema));
-      command.addOption(option);
-      if (schema.type === "boolean") {
-        fields.set("no-" + flag, { group, key, schema });
-        command.addOption(new Option("--no-" + flag));
-      }
+      fields.set(flag, { group, key });
+      const option = new Option("--" + flag + " <value>");
+      command.addOption(option.argParser(v => convert(v, schema)));
     }
   }
   const positional = positionalFor(spec);
@@ -118,18 +98,21 @@ export function parseArgs(argv: string[]): Parsed {
   const seen = new Set<string>();
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (!arg?.startsWith("--") || arg === "--") continue;
+    if (arg === "--") break;
+    if (!arg?.startsWith("--")) continue;
     const flag = arg.slice(2).split("=")[0] ?? "";
-    const field = fields.get(flag);
-    const binding = field ? `${field.group}.${field.key}` : flag;
-    if (seen.has(binding))
+    if (seen.has(flag))
       throw new CliError(
         "validation",
         "duplicate_argument",
         "Repeated CLI flag.",
       );
-    seen.add(binding);
-    if (field && field.schema.type !== "boolean" && !arg.includes("=")) i++;
+    seen.add(flag);
+    if (fields.has(flag) && !arg.includes("=")) {
+      const next = args[++i];
+      if (next === undefined || next.startsWith("--"))
+        throw new CliError("validation", "invalid_argument", "Option requires a value.");
+    }
   }
   try {
     command.parse(args, { from: "user" });
@@ -155,7 +138,7 @@ export function parseArgs(argv: string[]): Parsed {
         : field.group === "context"
           ? context
           : options;
-    // Commander parser returns JSON-only values through convert, or a boolean flag.
+    // Round-trip through the strict parser to check Unicode in string flags as well.
     target[field.key] = parseJson(Buffer.from(JSON.stringify(v)));
   }
   if (positional && command.args.length) {
@@ -169,15 +152,17 @@ export function parseArgs(argv: string[]): Parsed {
       ? command.args
       : str(command.args[0]);
   }
-  value = {
-    protocol_version: "0.1",
-    contract_revision: "R9",
-    command: spec.id,
-    context,
-    input,
-    options,
+  return {
+    kind: "typed",
+    value: {
+      protocol_version: "0.1",
+      contract_revision: "R9",
+      command: spec.id,
+      context,
+      input,
+      options,
+    },
   };
-  return { kind: "typed", value };
 }
 function positionalFor(
   spec: Spec,
