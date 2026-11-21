@@ -1,0 +1,11 @@
+{
+  "authentication": "console_bearer",
+  "routing": "namingserver_managed",
+  "write_precondition": "client_fresh_read_plus_server_domain_validation",
+  "outcome_tracking": "local_transactional_journal",
+  "dedup_scope": "single_state_store",
+  "server_cas": false,
+  "server_idempotency": false,
+  "route_assurance": "selector_only",
+  "causality": "unproven"
+}

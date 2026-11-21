@@ -1,0 +1,13 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "profile.delete",
+  "context": {},
+  "input": {
+    "name": "prod",
+    "expected_revision": 1
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "ok": true,
+  "state": "completed",
+  "command": "transaction.get",
+  "request_id": "req_001",
+  "timestamp": "2026-09-05T00:00:00Z",
+  "context": {
+    "profile": "prod"
+  },
+  "data": {
+    "transaction": {
+      "xid": "10.0.0.1:8091:123"
+    }
+  },
+  "meta": {
+    "duration_ms": 31,
+    "partial": false
+  },
+  "warnings": []
+}

@@ -1,0 +1,7 @@
+{
+  "name": "prod",
+  "expected_revision": 1,
+  "patch": {
+    "name": "prod2"
+  }
+}
