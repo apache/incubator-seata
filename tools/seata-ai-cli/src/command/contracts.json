@@ -1,0 +1,124 @@
+[
+  {
+    "id": "system.version",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "output_contract": "versions、contract_revision、state_store_id（未初始化时 null）",
+    "notes": "",
+    "input_example": {},
+    "remote": false,
+    "path": "seata-ai version",
+    "risk": "read",
+    "confirmation": "none",
+    "backends": "local",
+    "skills": "—"
+  },
+  {
+    "id": "system.help",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "maxItems": 8
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "output_contract": "help_text、resolved_path、format",
+    "notes": "path 为 CLI path tokens，field 仅叶级帮助",
+    "input_example": {},
+    "remote": false,
+    "path": "seata-ai help",
+    "risk": "read",
+    "confirmation": "none",
+    "backends": "local",
+    "skills": "—"
+  },
+  {
+    "id": "system.capabilities",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "output_contract": "commands[]、runtime、assurance",
+    "notes": "查询静态、本地能力",
+    "input_example": {},
+    "remote": false,
+    "path": "seata-ai capabilities",
+    "risk": "read",
+    "confirmation": "none",
+    "backends": "local",
+    "skills": "—"
+  },
+  {
+    "id": "system.schema",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "command_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      },
+      "required": [
+        "command_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_contract": "command_id、schema_version、invocation_schema、output_schema",
+    "notes": "",
+    "input_example": {
+      "command_id": "system.version"
+    },
+    "remote": false,
+    "path": "seata-ai schema",
+    "risk": "read",
+    "confirmation": "none",
+    "backends": "local",
+    "skills": "—"
+  },
+  {
+    "id": "system.invoke",
+    "output_contract": "目标命令 Envelope",
+    "notes": "从标准输入或文件读取目标命令请求",
+    "input_example": {
+      "protocol_version": "0.1",
+      "contract_revision": "R9",
+      "command": "system.version",
+      "context": {},
+      "input": {},
+      "options": {}
+    },
+    "remote": false,
+    "path": "seata-ai invoke",
+    "risk": "delegated",
+    "confirmation": "delegated",
+    "backends": "local",
+    "skills": "—"
+  }
+]
