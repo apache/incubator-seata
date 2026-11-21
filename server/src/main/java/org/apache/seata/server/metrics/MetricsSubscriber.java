@@ -48,6 +48,7 @@ public class MetricsSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsSubscriber.class);
     private final Registry registry;
+    private boolean active = true;
 
     private final Map<String, Consumer<GlobalTransactionEvent>> consumers;
 
@@ -213,21 +214,32 @@ public class MetricsSubscriber {
         increaseTimer(MeterIdConstants.TIMER_FAILED, event);
     }
 
+    // Wait for an in-flight callback and prevent queued callbacks from writing after shutdown.
+    synchronized void deactivate() {
+        active = false;
+    }
+
     @Subscribe
-    public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
-        if (registry != null && consumers.containsKey(event.getStatus())) {
+    public synchronized void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
+        if (active && registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
     }
 
     @Subscribe
-    public void exceptionEventForMetrics(ExceptionEvent event) {
+    public synchronized void exceptionEventForMetrics(ExceptionEvent event) {
+        if (!active) {
+            return;
+        }
         registry.getSummary(MeterIdConstants.SUMMARY_EXP.withTag(APP_ID_KEY, event.getName()))
                 .increase(1);
     }
 
     @Subscribe
-    public void recordRateLimitEventForMetrics(RateLimitEvent event) {
+    public synchronized void recordRateLimitEventForMetrics(RateLimitEvent event) {
+        if (!active) {
+            return;
+        }
         registry.getSummary(MeterIdConstants.SUMMARY_RATE_LIMIT
                         .withTag(LIMIT_TYPE_KEY, event.getLimitType())
                         .withTag(APP_ID_KEY, event.getApplicationId())

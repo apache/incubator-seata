@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.metrics;
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.metrics.exporter.Exporter;
@@ -23,16 +24,21 @@ import org.apache.seata.metrics.exporter.ExporterFactory;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.event.EventBusManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
 
 /**
- * Metrics manager for init
+ * Manages the transaction coordinator's metrics resources.
  *
  */
 public class MetricsManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetricsManager.class);
+
     private static class SingletonHolder {
         private static MetricsManager INSTANCE = new MetricsManager();
     }
@@ -41,25 +47,78 @@ public class MetricsManager {
         return MetricsManager.SingletonHolder.INSTANCE;
     }
 
-    private Registry registry;
+    private volatile Registry registry;
+    private final Set<Exporter> exporters = new LinkedHashSet<>();
+    private MetricsSubscriber subscriber;
 
     public Registry getRegistry() {
         return registry;
     }
 
-    public void init() {
+    public synchronized void init() {
+        if (subscriber != null) {
+            return;
+        }
         boolean enabled = ConfigurationFactory.getInstance()
                 .getBoolean(
                         ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, DEFAULT_METRICS_ENABLED);
-        if (enabled) {
+        if (!enabled) {
+            return;
+        }
+        try {
             registry = RegistryFactory.getInstance();
-            if (registry != null) {
-                List<Exporter> exporters = ExporterFactory.getInstanceList();
-                // only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
-                if (exporters.size() != 0) {
-                    exporters.forEach(exporter -> exporter.setRegistry(registry));
-                    EventBusManager.get().register(new MetricsSubscriber(registry));
-                }
+            if (registry == null) {
+                return;
+            }
+            exporters.addAll(ExporterFactory.getInstanceList());
+            if (!exporters.isEmpty()) {
+                exporters.forEach(exporter -> exporter.setRegistry(registry));
+                subscriber = new MetricsSubscriber(registry);
+                EventBusManager.get().register(subscriber);
+            }
+        } catch (RuntimeException | Error failure) {
+            try {
+                destroy();
+            } catch (RuntimeException | Error cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+            throw failure;
+        }
+    }
+
+    public synchronized void destroy() {
+        if (subscriber != null) {
+            subscriber.deactivate();
+            try {
+                EventBusManager.get().unregister(subscriber);
+            } catch (RuntimeException e) {
+                LOGGER.warn("Failed to unregister metrics subscriber", e);
+            } finally {
+                subscriber = null;
+            }
+        }
+        for (Exporter exporter : exporters) {
+            try {
+                exporter.close();
+            } catch (Exception e) {
+                LOGGER.warn(
+                        "Failed to close metrics exporter {}",
+                        exporter.getClass().getName(),
+                        e);
+            }
+        }
+        if (!exporters.isEmpty()) {
+            exporters.clear();
+            // The next server start needs fresh SPI instances to reopen their listeners.
+            EnhancedServiceLoader.unload(Exporter.class);
+        }
+        if (registry != null) {
+            Registry previousRegistry = registry;
+            registry = null;
+            try {
+                previousRegistry.clearUp();
+            } catch (RuntimeException e) {
+                LOGGER.warn("Failed to clear metrics registry", e);
             }
         }
     }
