@@ -31,6 +31,8 @@ import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2ConnectionHandler;
 import io.netty.handler.codec.http2.Http2Headers;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.protocol.ProtocolConstants;
@@ -40,20 +42,34 @@ import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
 
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
+    static final String GRPC_SERVICE_PATH = "/org.apache.seata.protocol.protobuf.SeataService/sendRequest";
+
     private final Boolean server;
+    private final String authority;
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
 
     public GrpcEncoder() {
-        this.server = null;
+        this(null, null);
     }
 
     public GrpcEncoder(boolean server) {
+        this(Boolean.valueOf(server), null);
+    }
+
+    public GrpcEncoder(boolean server, InetSocketAddress remoteAddress) {
+        this(Boolean.valueOf(server), formatAuthority(remoteAddress));
+    }
+
+    private GrpcEncoder(Boolean server, String authority) {
         this.server = server;
+        this.authority = authority;
     }
 
     @Override
@@ -68,6 +84,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         Object body = rpcMessage.getBody();
         int id = rpcMessage.getId();
 
+        ChannelFuture headerFuture = null;
         if (headerSent.compareAndSet(false, true)) {
             Http2Headers headers = new DefaultHttp2Headers();
             if (isServer(ctx, messageType)) {
@@ -76,10 +93,14 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             } else {
                 headers.method(HttpMethod.POST.asciiName());
                 headers.scheme(HttpScheme.HTTP.name());
-                headers.path("/");
+                String resolvedAuthority = resolveAuthority(ctx);
+                if (resolvedAuthority != null) {
+                    headers.authority(resolvedAuthority);
+                }
+                headers.path(GRPC_SERVICE_PATH);
             }
             headers.add(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header, "application/grpc");
-            ChannelFuture headerFuture = ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
+            headerFuture = ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
             if (headerFuture != null && headerFuture.isDone() && !headerFuture.isSuccess()) {
                 promise.tryFailure(headerFuture.cause());
                 return;
@@ -117,7 +138,60 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
         // The remaining bytes are body
         System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
-        ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)), promise);
+        DefaultHttp2DataFrame dataFrame = new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix));
+        if (headerFuture != null && !headerFuture.isDone()) {
+            ChannelPromise dataPromise = ctx.newPromise();
+            combineWriteFutures(headerFuture, dataPromise, promise);
+            ctx.writeAndFlush(dataFrame, dataPromise);
+        } else {
+            ctx.writeAndFlush(dataFrame, promise);
+        }
+    }
+
+    private static void combineWriteFutures(
+            ChannelFuture headerFuture, ChannelFuture dataFuture, ChannelPromise promise) {
+        AtomicInteger remaining = new AtomicInteger(2);
+        GenericFutureListener<Future<? super Void>> listener = future -> {
+            if (!future.isSuccess()) {
+                promise.tryFailure(future.cause());
+            } else if (remaining.decrementAndGet() == 0) {
+                promise.trySuccess();
+            }
+        };
+        headerFuture.addListener(listener);
+        dataFuture.addListener(listener);
+    }
+
+    private String resolveAuthority(ChannelHandlerContext ctx) {
+        if (authority != null) {
+            return authority;
+        }
+        Channel channel = ctx.channel();
+        if (channel != null) {
+            if (channel.remoteAddress() instanceof InetSocketAddress) {
+                return formatAuthority((InetSocketAddress) channel.remoteAddress());
+            }
+            Channel parent = channel.parent();
+            if (parent != null && parent.remoteAddress() instanceof InetSocketAddress) {
+                return formatAuthority((InetSocketAddress) parent.remoteAddress());
+            }
+        }
+        return null;
+    }
+
+    static String formatAuthority(InetSocketAddress address) {
+        if (address == null) {
+            return null;
+        }
+        String host = address.getHostString();
+        int percentIndex = host.indexOf('%');
+        if (percentIndex >= 0) {
+            host = host.substring(0, percentIndex);
+        }
+        if (host.indexOf(':') >= 0 && !host.startsWith("[")) {
+            return "[" + host + "]:" + address.getPort();
+        }
+        return host + ":" + address.getPort();
     }
 
     private boolean isServer(ChannelHandlerContext ctx, byte messageType) {

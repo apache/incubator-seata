@@ -27,6 +27,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.DefaultChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -42,10 +43,12 @@ import io.netty.handler.codec.http2.Http2Connection;
 import io.netty.handler.codec.http2.Http2ConnectionHandler;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2Headers;
+import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2ResetFrame;
 import io.netty.handler.codec.http2.Http2StreamChannel;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
+import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
@@ -67,7 +70,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -121,7 +126,7 @@ public class GrpcEncoderTest {
     private void assertClientHeaders(Http2Headers headers) {
         assertEquals(HttpMethod.POST.asciiName().toString(), headers.method().toString());
         assertEquals(HttpScheme.HTTP.name().toString(), headers.scheme().toString());
-        assertEquals("/", headers.path().toString());
+        assertEquals(GrpcEncoder.GRPC_SERVICE_PATH, headers.path().toString());
         assertEquals(
                 "application/grpc",
                 headers.get(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header).toString());
@@ -203,6 +208,83 @@ public class GrpcEncoderTest {
     }
 
     @Test
+    public void testClientAuthorityFormattingAndFallback() throws Exception {
+        Http2Headers domainHeaders = encodeAndCaptureHeaders(
+                mock(ChannelHandlerContext.class),
+                new GrpcEncoder(false, InetSocketAddress.createUnresolved("seata.example.com", 8091)),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertClientHeaders(domainHeaders);
+        assertEquals("seata.example.com:8091", domainHeaders.authority().toString());
+
+        Http2Headers ipv6Headers = encodeAndCaptureHeaders(
+                mock(ChannelHandlerContext.class),
+                new GrpcEncoder(false, InetSocketAddress.createUnresolved("2001:db8::1", 8091)),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertEquals("[2001:db8::1]:8091", ipv6Headers.authority().toString());
+
+        Http2Headers scopedIpv6Headers = encodeAndCaptureHeaders(
+                mock(ChannelHandlerContext.class),
+                new GrpcEncoder(false, InetSocketAddress.createUnresolved("fe80::1%eth0", 8091)),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertEquals("[fe80::1]:8091", scopedIpv6Headers.authority().toString());
+
+        Http2Headers bracketedIpv6Headers = encodeAndCaptureHeaders(
+                mock(ChannelHandlerContext.class),
+                new GrpcEncoder(false, InetSocketAddress.createUnresolved("[2001:db8::1]", 8091)),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertEquals("[2001:db8::1]:8091", bracketedIpv6Headers.authority().toString());
+
+        Http2Headers nullAddressHeaders = encodeAndCaptureHeaders(
+                mock(ChannelHandlerContext.class),
+                new GrpcEncoder(false, null),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertClientHeaders(nullAddressHeaders);
+        assertNull(nullAddressHeaders.authority());
+
+        ChannelHandlerContext channelAddrCtx = mock(ChannelHandlerContext.class);
+        Channel channelWithAddr = mock(Channel.class);
+        when(channelAddrCtx.channel()).thenReturn(channelWithAddr);
+        when(channelWithAddr.remoteAddress()).thenReturn(InetSocketAddress.createUnresolved("127.0.0.1", 8091));
+        Http2Headers channelAddrHeaders = encodeAndCaptureHeaders(
+                channelAddrCtx,
+                new GrpcEncoder(false),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertEquals("127.0.0.1:8091", channelAddrHeaders.authority().toString());
+
+        ChannelHandlerContext parentAddrCtx = mock(ChannelHandlerContext.class);
+        Channel streamChannel = mock(Channel.class);
+        Channel parentChannel = mock(Channel.class);
+        when(parentAddrCtx.channel()).thenReturn(streamChannel);
+        when(streamChannel.remoteAddress()).thenReturn(null);
+        when(streamChannel.parent()).thenReturn(parentChannel);
+        when(parentChannel.remoteAddress()).thenReturn(InetSocketAddress.createUnresolved("::1", 8091));
+        Http2Headers parentAddrHeaders = encodeAndCaptureHeaders(
+                parentAddrCtx,
+                new GrpcEncoder(false),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertEquals("[::1]:8091", parentAddrHeaders.authority().toString());
+
+        ChannelHandlerContext noParentCtx = mock(ChannelHandlerContext.class);
+        Channel orphanChannel = mock(Channel.class);
+        when(noParentCtx.channel()).thenReturn(orphanChannel);
+        when(orphanChannel.remoteAddress()).thenReturn(null);
+        when(orphanChannel.parent()).thenReturn(null);
+        Http2Headers noParentHeaders = encodeAndCaptureHeaders(
+                noParentCtx,
+                new GrpcEncoder(false),
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                mock(ChannelPromise.class));
+        assertNull(noParentHeaders.authority());
+    }
+
+    @Test
     public void testHeaderWriteFailureFailsPromiseAndSkipsDataFrame() throws Exception {
         ChannelFuture headerFuture = mock(ChannelFuture.class);
         RuntimeException failure = new RuntimeException("header write failed");
@@ -223,18 +305,54 @@ public class GrpcEncoderTest {
 
     @Test
     public void testHeaderWritePendingSucceededAndSecondWriteSkipsHeaders() throws Exception {
-        ChannelFuture pendingFuture = mock(ChannelFuture.class);
-        when(pendingFuture.isDone()).thenReturn(false);
-        when(ctx.writeAndFlush(any(DefaultHttp2HeadersFrame.class))).thenReturn(pendingFuture);
+        Channel mockChannel = mock(Channel.class);
 
-        GrpcEncoder pendingEncoder = new GrpcEncoder(false);
-        pendingEncoder.write(
-                ctx,
+        ChannelHandlerContext failCtx = mock(ChannelHandlerContext.class);
+        ChannelPromise pendingFailHeaders = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        ChannelPromise dataPromiseForFail = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        ChannelPromise callerFailPromise = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        when(failCtx.writeAndFlush(any(DefaultHttp2HeadersFrame.class))).thenReturn(pendingFailHeaders);
+        when(failCtx.newPromise()).thenReturn(dataPromiseForFail);
+
+        GrpcEncoder pendingFailEncoder = new GrpcEncoder(false);
+        pendingFailEncoder.write(
+                failCtx,
                 createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
-                promise);
-        verify(ctx, times(1)).writeAndFlush(any(DefaultHttp2HeadersFrame.class));
-        verify(ctx, times(1)).writeAndFlush(any(DefaultHttp2DataFrame.class), eq(promise));
-        verify(promise, never()).tryFailure(any());
+                callerFailPromise);
+        verify(failCtx, times(1)).writeAndFlush(any(DefaultHttp2HeadersFrame.class));
+        verify(failCtx, times(1)).writeAndFlush(any(DefaultHttp2DataFrame.class), eq(dataPromiseForFail));
+        assertFalse(callerFailPromise.isDone());
+
+        dataPromiseForFail.setSuccess();
+        assertFalse(callerFailPromise.isDone());
+
+        RuntimeException asyncHeaderFailure = new RuntimeException("async header write failed");
+        pendingFailHeaders.setFailure(asyncHeaderFailure);
+        assertTrue(callerFailPromise.isDone());
+        assertFalse(callerFailPromise.isSuccess());
+        assertSame(asyncHeaderFailure, callerFailPromise.cause());
+
+        ChannelHandlerContext pendingSuccessCtx = mock(ChannelHandlerContext.class);
+        ChannelPromise pendingSuccessHeaders = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        ChannelPromise dataPromiseForSuccess = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        ChannelPromise callerSuccessPromise = new DefaultChannelPromise(mockChannel, ImmediateEventExecutor.INSTANCE);
+        when(pendingSuccessCtx.writeAndFlush(any(DefaultHttp2HeadersFrame.class)))
+                .thenReturn(pendingSuccessHeaders);
+        when(pendingSuccessCtx.newPromise()).thenReturn(dataPromiseForSuccess);
+
+        GrpcEncoder pendingSuccessEncoder = new GrpcEncoder(false);
+        pendingSuccessEncoder.write(
+                pendingSuccessCtx,
+                createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING),
+                callerSuccessPromise);
+        assertFalse(callerSuccessPromise.isDone());
+
+        pendingSuccessHeaders.setSuccess();
+        assertFalse(callerSuccessPromise.isDone());
+
+        dataPromiseForSuccess.setSuccess();
+        assertTrue(callerSuccessPromise.isDone());
+        assertTrue(callerSuccessPromise.isSuccess());
 
         ChannelHandlerContext localCtx = mock(ChannelHandlerContext.class);
         ChannelFuture succeededFuture = mock(ChannelFuture.class);
@@ -464,6 +582,148 @@ public class GrpcEncoderTest {
             assertEquals(1, response.getId());
             assertNull(resetFrameRef.get());
             assertTrue(streamChannel.isActive());
+        } finally {
+            if (streamChannel != null) {
+                streamChannel.close().awaitUninterruptibly(2, TimeUnit.SECONDS);
+            }
+            if (clientChannel != null) {
+                clientChannel.close().awaitUninterruptibly(2, TimeUnit.SECONDS);
+            }
+            if (serverChannel != null) {
+                serverChannel.close().awaitUninterruptibly(2, TimeUnit.SECONDS);
+            }
+            group.shutdownGracefully(0, 2, TimeUnit.SECONDS).awaitUninterruptibly(5, TimeUnit.SECONDS);
+        }
+    }
+
+    @Test
+    public void testUpdatedClientWithLegacyNoArgEncoderServerRoundTrip() throws Exception {
+        EventLoopGroup group = new NioEventLoopGroup(2);
+        Channel serverChannel = null;
+        Channel clientChannel = null;
+        Http2StreamChannel streamChannel = null;
+        try {
+            CompletableFuture<Http2Headers> receivedHeadersFuture = new CompletableFuture<>();
+            CompletableFuture<RpcMessage> responseFuture = new CompletableFuture<>();
+            AtomicReference<Http2ResetFrame> resetFrameRef = new AtomicReference<>();
+
+            ServerBootstrap serverBootstrap = new ServerBootstrap()
+                    .group(group)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) {
+                            ch.pipeline()
+                                    .addLast(Http2FrameCodecBuilder.forServer().build())
+                                    .addLast(new Http2MultiplexHandler(new ChannelInitializer<Http2StreamChannel>() {
+                                        @Override
+                                        protected void initChannel(Http2StreamChannel stream) {
+                                            stream.pipeline()
+                                                    .addLast(new ChannelInboundHandlerAdapter() {
+                                                        @Override
+                                                        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                                                            if (msg instanceof Http2HeadersFrame) {
+                                                                receivedHeadersFuture.complete(
+                                                                        ((Http2HeadersFrame) msg).headers());
+                                                            }
+                                                            ctx.fireChannelRead(msg);
+                                                        }
+                                                    })
+                                                    .addLast(new GrpcDecoder())
+                                                    .addLast(new GrpcEncoder())
+                                                    .addLast(new SimpleChannelInboundHandler<RpcMessage>() {
+                                                        @Override
+                                                        protected void channelRead0(
+                                                                ChannelHandlerContext ctx, RpcMessage msg) {
+                                                            RpcMessage response = createHeartbeatMessage(
+                                                                    ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE,
+                                                                    HeartbeatMessage.PONG);
+                                                            response.setId(msg.getId());
+                                                            ctx.writeAndFlush(response);
+                                                        }
+
+                                                        @Override
+                                                        public void exceptionCaught(
+                                                                ChannelHandlerContext ctx, Throwable cause) {
+                                                            responseFuture.completeExceptionally(cause);
+                                                        }
+                                                    });
+                                        }
+                                    }));
+                        }
+                    });
+            ChannelFuture bindFuture = serverBootstrap.bind("127.0.0.1", 0);
+            assertTrue(bindFuture.await(5, TimeUnit.SECONDS));
+            assertTrue(bindFuture.isSuccess());
+            serverChannel = bindFuture.channel();
+            int port = ((InetSocketAddress) serverChannel.localAddress()).getPort();
+            InetSocketAddress serverAddress = new InetSocketAddress("127.0.0.1", port);
+
+            Bootstrap clientBootstrap = new Bootstrap()
+                    .group(group)
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) {
+                            ch.pipeline()
+                                    .addLast(Http2FrameCodecBuilder.forClient().build())
+                                    .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
+                        }
+                    });
+            ChannelFuture connectFuture = clientBootstrap.connect(serverAddress);
+            assertTrue(connectFuture.await(5, TimeUnit.SECONDS));
+            assertTrue(connectFuture.isSuccess());
+            clientChannel = connectFuture.channel();
+
+            streamChannel = new Http2StreamChannelBootstrap(clientChannel)
+                    .handler(new ChannelInitializer<Http2StreamChannel>() {
+                        @Override
+                        protected void initChannel(Http2StreamChannel ch) {
+                            ch.pipeline()
+                                    .addLast(new GrpcDecoder())
+                                    .addLast(new GrpcEncoder(false, serverAddress))
+                                    .addLast(new ChannelInboundHandlerAdapter() {
+                                        @Override
+                                        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                                            if (msg instanceof RpcMessage) {
+                                                responseFuture.complete((RpcMessage) msg);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+                                            if (evt instanceof Http2ResetFrame) {
+                                                resetFrameRef.set((Http2ResetFrame) evt);
+                                                responseFuture.completeExceptionally(
+                                                        new AssertionError("Unexpected RST_STREAM with errorCode="
+                                                                + ((Http2ResetFrame) evt).errorCode()));
+                                            }
+                                        }
+
+                                        @Override
+                                        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+                                            responseFuture.completeExceptionally(cause);
+                                        }
+                                    });
+                        }
+                    })
+                    .open()
+                    .get(5, TimeUnit.SECONDS);
+
+            ChannelFuture writeFuture = streamChannel.writeAndFlush(
+                    createHeartbeatMessage(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, HeartbeatMessage.PING));
+            assertTrue(writeFuture.await(5, TimeUnit.SECONDS));
+            assertTrue(writeFuture.isSuccess());
+
+            Http2Headers receivedHeaders = receivedHeadersFuture.get(5, TimeUnit.SECONDS);
+            assertClientHeaders(receivedHeaders);
+            assertEquals("127.0.0.1:" + port, receivedHeaders.authority().toString());
+
+            RpcMessage response = responseFuture.get(5, TimeUnit.SECONDS);
+            assertEquals(ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE, response.getMessageType());
+            assertEquals(HeartbeatMessage.PONG, response.getBody());
+            assertEquals(1, response.getId());
+            assertNull(resetFrameRef.get());
         } finally {
             if (streamChannel != null) {
                 streamChannel.close().awaitUninterruptibly(2, TimeUnit.SECONDS);
