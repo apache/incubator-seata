@@ -226,6 +226,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -350,7 +351,7 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <!--resolve slf4j-simple conflicts-->
                             <includeScope>runtime</includeScope>
-                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql,com.mysql</excludeGroupIds>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql,com.mysql,com.dameng</excludeGroupIds>
                             <skip>${dependencies.copy.skip}</skip>
                         </configuration>
                     </execution>
