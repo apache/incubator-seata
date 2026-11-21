@@ -119,6 +119,33 @@ public class DataCompareUtils {
         }
     }
 
+    /**
+     * fastjson writes a Timestamp as "yyyy-MM-dd HH:mm:ss[.f]" and a LocalDateTime (what MySQL Connector/J 8 returns
+     * for DATETIME) as ISO "yyyy-MM-ddTHH:mm[:ss[.f]]". Accept either form. Match the type of the value it is compared
+     * with when that is a Timestamp or a LocalDateTime, otherwise keep the type the string was written from, so the
+     * converted value still matches the database value in the later comparisons of the same undo validation.
+     */
+    private static Object parseDateTime(String text, Object other) {
+        boolean iso = text.indexOf('T') > 0;
+        LocalDateTime dateTime =
+                iso ? LocalDateTime.parse(text) : Timestamp.valueOf(text).toLocalDateTime();
+        if (other instanceof LocalDateTime || (iso && !(other instanceof Timestamp))) {
+            return dateTime;
+        }
+        return Timestamp.valueOf(dateTime);
+    }
+
+    /**
+     * An earlier comparison of the same undo validation may already have turned the string into a Timestamp, for an
+     * undo log written while the driver still returned Timestamp. Compare it as a LocalDateTime when the other value
+     * is one.
+     */
+    private static void alignDateTime(Field field, Field other) {
+        if (field.getValue() instanceof Timestamp && other.getValue() instanceof LocalDateTime) {
+            field.setValue(((Timestamp) field.getValue()).toLocalDateTime());
+        }
+    }
+
     private static void convertType(Field f0, Field f1) {
         int f0Type = f0.getType();
         int f1Type = f1.getType();
@@ -137,14 +164,14 @@ public class DataCompareUtils {
             f1.setValue(Time.valueOf(f1.getValue().toString()));
         }
         if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
-            if (f1.getValue().getClass().equals(LocalDateTime.class)) {
-                f0.setValue(LocalDateTime.parse(f0.getValue().toString()));
-            } else {
-                f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
-            }
+            f0.setValue(parseDateTime(f0.getValue().toString(), f1.getValue()));
         }
         if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
-            f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
+            f1.setValue(parseDateTime(f1.getValue().toString(), f0.getValue()));
+        }
+        if (f0Type == Types.TIMESTAMP) {
+            alignDateTime(f0, f1);
+            alignDateTime(f1, f0);
         }
         if (f0Type == Types.DECIMAL && f0.getValue().getClass().equals(Integer.class)) {
             f0.setValue(new BigDecimal(f0.getValue().toString()));

@@ -174,7 +174,7 @@ This project exists thanks to all the people who contribute. [[Contributors](htt
 
 ## License
 
-Apache Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-seata/blob/master/LICENSE) file for details.
+Apache Seata is under the Apache 2.0 license. See the [LICENSE](./LICENSE) file for details.
 
 ## Who is using
 

@@ -471,4 +471,59 @@ class FileConfigurationTest {
         String path = fileConfig.getConfigFromSys("PATH");
         Assertions.assertNotNull(path);
     }
+
+    @Test
+    void shouldDelegateFileBackedReadsThroughConfigurationFactory() {
+        String groupListDataId = "service.default.grouplist";
+        String disableGlobalTransactionDataId = "service.disableGlobalTransaction";
+        String previousGroupList = System.getProperty(groupListDataId);
+        String previousDisableGlobalTransaction = System.getProperty(disableGlobalTransactionDataId);
+        try {
+            System.clearProperty(groupListDataId);
+            System.clearProperty(disableGlobalTransactionDataId);
+            ConfigurationFactory.reload();
+            Configuration fileConfig = ConfigurationFactory.getInstance();
+
+            // These values come from src/test/resources/file.conf.
+            Assertions.assertEquals("127.0.0.1:8091", fileConfig.getConfig(groupListDataId));
+            Assertions.assertFalse(fileConfig.getBoolean(disableGlobalTransactionDataId));
+        } finally {
+            restoreSystemProperty(groupListDataId, previousGroupList);
+            restoreSystemProperty(disableGlobalTransactionDataId, previousDisableGlobalTransaction);
+            ConfigurationFactory.reload();
+        }
+    }
+
+    @Test
+    void shouldReturnDefaultsForMissingConfigurationThroughConfigurationFactory() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+
+        Assertions.assertNull(fileConfig.getConfig("adopted.missing.key"));
+        Assertions.assertEquals("fallback", fileConfig.getLatestConfig("adopted.missing.key", "fallback", 1000L));
+        Assertions.assertEquals(39, fileConfig.getInt("adopted.missing.int", 39));
+        Assertions.assertEquals((short) 2, fileConfig.getShort("adopted.missing.short", (short) 2));
+    }
+
+    @Test
+    void shouldReportMutationOperationOutcomeThroughConfigurationFactory() {
+        Configuration fileConfig = ConfigurationFactory.getInstance();
+
+        // The current file-backed mutation branches acknowledge completion but do not rewrite the source file.
+        Assertions.assertTrue(fileConfig.putConfig("adopted.put.key", "value", 5000L));
+        Assertions.assertTrue(fileConfig.putConfigIfAbsent("adopted.put-if-absent.key", "value", 5000L));
+        Assertions.assertTrue(fileConfig.removeConfig("adopted.remove.key", 5000L));
+
+        // A negative timeout expires before the operation can be processed.
+        Assertions.assertFalse(fileConfig.putConfig("adopted.expired.put.key", "value", -1L));
+        Assertions.assertFalse(fileConfig.putConfigIfAbsent("adopted.expired.put-if-absent.key", "value", -1L));
+        Assertions.assertFalse(fileConfig.removeConfig("adopted.expired.remove.key", -1L));
+    }
+
+    private static void restoreSystemProperty(String dataId, String value) {
+        if (value == null) {
+            System.clearProperty(dataId);
+        } else {
+            System.setProperty(dataId, value);
+        }
+    }
 }
