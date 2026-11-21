@@ -19,6 +19,8 @@ package org.apache.seata.namingserver.config;
 import jakarta.servlet.Filter;
 import org.apache.seata.namingserver.filter.ConsoleRemotingFilter;
 import org.apache.seata.namingserver.manager.NamingManager;
+import org.apache.seata.namingserver.security.OutboundSigner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +37,9 @@ import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_WRIT
 @Configuration
 public class WebConfig {
 
+    @Autowired(required = false)
+    private OutboundSigner outboundSigner;
+
     @Bean
     public RestClient restClient(RestClient.Builder restClientBuilder) {
         HttpClient httpClient = HttpClient.newBuilder()
@@ -43,6 +48,9 @@ public class WebConfig {
                 .build();
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
         requestFactory.setReadTimeout(Duration.ofMillis(Math.max(DEFAULT_REQUEST_TIMEOUT, DEFAULT_WRITE_TIMEOUT)));
+        if (outboundSigner != null) {
+            restClientBuilder.requestInterceptor(outboundSigner::intercept);
+        }
         return restClientBuilder.requestFactory(requestFactory).build();
     }
 
