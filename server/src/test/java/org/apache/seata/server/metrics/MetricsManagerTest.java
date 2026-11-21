@@ -27,16 +27,20 @@ import org.apache.seata.core.event.RateLimitEvent;
 import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.exporter.Exporter;
+import org.apache.seata.metrics.exporter.ExporterFactory;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.ServerRunner;
 import org.apache.seata.server.event.EventBusManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
@@ -54,6 +58,7 @@ import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
@@ -66,6 +71,24 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class MetricsManagerTest {
+    private boolean installedEnvironment;
+
+    @BeforeEach
+    void provideConfigurationEnvironment() {
+        installedEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null;
+        if (installedEnvironment) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, new StandardEnvironment());
+        }
+    }
+
+    @AfterEach
+    void restoreConfigurationEnvironment() {
+        if (installedEnvironment) {
+            Map<?, ?> objects = (Map<?, ?>) ReflectionTestUtils.getField(ObjectHolder.class, "OBJECT_MAP");
+            objects.remove(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        }
+    }
+
     @Test
     @SuppressWarnings("unchecked")
     void retriesPrometheusAndReleasesItsPortOnServerShutdown() throws Exception {
@@ -77,11 +100,6 @@ class MetricsManagerTest {
         List<Disposable> previousDisposables = new ArrayList<>(disposables);
         Object previousExporterLoader = spiLoaders.remove(Exporter.class);
         disposables.clear();
-        Object previousEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        if (previousEnvironment == null) {
-            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, new StandardEnvironment());
-        }
-
         MetricsManager manager = new MetricsManager();
         ServerRunner runner = new ServerRunner();
         Configuration config = mock(Configuration.class);
@@ -125,10 +143,84 @@ class MetricsManagerTest {
             }
             disposables.clear();
             disposables.addAll(previousDisposables);
-            if (previousEnvironment == null) {
-                Map<?, ?> objects = (Map<?, ?>) ReflectionTestUtils.getField(ObjectHolder.class, "OBJECT_MAP");
-                objects.remove(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        }
+    }
+
+    @Test
+    void skipsExportersWhenMetricsAreDisabledOrRegistryIsMissing() {
+        MetricsManager manager = new MetricsManager();
+        Configuration config = mock(Configuration.class);
+        when(config.getBoolean(METRICS_PREFIX + METRICS_ENABLED, DEFAULT_METRICS_ENABLED))
+                .thenReturn(false, true);
+        try (MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
+                MockedStatic<RegistryFactory> registries = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> factories = mockStatic(ExporterFactory.class)) {
+            configurations.when(ConfigurationFactory::getInstance).thenReturn(config);
+            registries.when(RegistryFactory::getInstance).thenReturn(null);
+
+            manager.init();
+            registries.verifyNoInteractions();
+            factories.verifyNoInteractions();
+
+            manager.init();
+            registries.verify(RegistryFactory::getInstance);
+            factories.verifyNoInteractions();
+            assertNull(manager.getRegistry());
+        }
+    }
+
+    @Test
+    void retriesAfterRegistrationFailsEvenWhenRollbackEncountersErrors() throws IOException {
+        MetricsManager manager = new MetricsManager();
+        Configuration config = mock(Configuration.class);
+        Registry registry = mock(Registry.class);
+        EventBus eventBus = mock(EventBus.class);
+        Exporter failingExporter = mock(Exporter.class);
+        Exporter otherExporter = mock(Exporter.class);
+        Exporter replacementExporter = mock(Exporter.class);
+        IllegalStateException registrationFailure = new IllegalStateException("injected registration failure");
+
+        when(config.getBoolean(METRICS_PREFIX + METRICS_ENABLED, DEFAULT_METRICS_ENABLED))
+                .thenReturn(true);
+        doThrow(registrationFailure).doNothing().when(eventBus).register(any(MetricsSubscriber.class));
+        doThrow(new IOException("injected exporter close failure"))
+                .when(failingExporter)
+                .close();
+        doThrow(new IllegalStateException("injected registry cleanup failure"))
+                .doNothing()
+                .when(registry)
+                .clearUp();
+
+        try (MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
+                MockedStatic<RegistryFactory> registries = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> factories = mockStatic(ExporterFactory.class);
+                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class);
+                MockedStatic<EnhancedServiceLoader> loaders = mockStatic(EnhancedServiceLoader.class)) {
+            configurations.when(ConfigurationFactory::getInstance).thenReturn(config);
+            registries.when(RegistryFactory::getInstance).thenReturn(registry);
+            factories
+                    .when(ExporterFactory::getInstanceList)
+                    .thenReturn(List.of(failingExporter, otherExporter), List.of(replacementExporter));
+            eventBuses.when(EventBusManager::get).thenReturn(eventBus);
+
+            try {
+                assertSame(registrationFailure, assertThrows(IllegalStateException.class, manager::init));
+                ArgumentCaptor<MetricsSubscriber> subscriber = ArgumentCaptor.forClass(MetricsSubscriber.class);
+                verify(eventBus).register(subscriber.capture());
+                verify(eventBus).unregister(same(subscriber.getValue()));
+                verify(failingExporter).close();
+                verify(otherExporter).close();
+                loaders.verify(() -> EnhancedServiceLoader.unload(Exporter.class));
+                verify(registry).clearUp();
+                assertNull(manager.getRegistry());
+
+                manager.init();
+                verify(replacementExporter).setRegistry(same(registry));
+                assertSame(registry, manager.getRegistry());
+            } finally {
+                manager.destroy();
             }
+            verify(replacementExporter).close();
         }
     }
 
