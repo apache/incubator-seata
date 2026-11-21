@@ -18,6 +18,7 @@ package org.apache.seata.server;
 
 import jakarta.annotation.Resource;
 import org.apache.seata.core.rpc.Disposable;
+import org.apache.seata.server.metrics.MetricsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -82,14 +83,18 @@ public class ServerRunner implements CommandLineRunner, DisposableBean, Applicat
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destroyAll starting");
         }
-        for (Disposable disposable : DISPOSABLE_LIST) {
-            disposable.destroy();
+        try {
+            for (Disposable disposable : DISPOSABLE_LIST) {
+                disposable.destroy();
+            }
+        } finally {
+            DISPOSABLE_LIST.clear();
+            MetricsManager.get().destroy();
         }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destroyAll finish");
         }
-        DISPOSABLE_LIST.clear();
     }
 
     @Override
