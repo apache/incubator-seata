@@ -16,20 +16,31 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.Future;
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
+import org.apache.seata.discovery.registry.RegistryService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.SocketException;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 class NettyServerBootstrapTest {
 
@@ -99,13 +110,142 @@ class NettyServerBootstrapTest {
         }
     }
 
-    private EventLoopGroup getEventLoopGroup(NettyServerBootstrap bootstrap, String fieldName) {
+    @Test
+    void testStartClosesBoundChannelWhenRegistryFails() throws Exception {
+        String previousShutdownWait = System.getProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
+        ConfigurationCache.clear();
         try {
-            java.lang.reflect.Field field = NettyServerBootstrap.class.getDeclaredField(fieldName);
+            Exception[] failures = new Exception[] {
+                new SocketException("mock socket failure"), new IllegalStateException("mock registry failure")
+            };
+            for (Exception failure : failures) {
+                RegistryService<?> registryService = Mockito.mock(RegistryService.class);
+                Mockito.doThrow(failure).when(registryService).register(Mockito.any(Instance.class));
+
+                try (MockedStatic<MultiRegistryFactory> registryFactoryMock =
+                        Mockito.mockStatic(MultiRegistryFactory.class)) {
+                    registryFactoryMock
+                            .when(MultiRegistryFactory::getInstances)
+                            .thenReturn(Collections.singletonList(registryService));
+
+                    int port;
+                    try (ServerSocket socket = new ServerSocket(0)) {
+                        port = socket.getLocalPort();
+                    }
+
+                    NettyServerConfig config = new NettyServerConfig();
+                    config.setServerListenPort(port);
+                    NettyServerBootstrap bootstrap = new NettyServerBootstrap(config);
+                    try {
+                        RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, bootstrap::start);
+                        Assertions.assertSame(failure, thrown.getCause());
+
+                        @SuppressWarnings("unchecked")
+                        AtomicReference<Channel> serverChannel =
+                                (AtomicReference<Channel>) getField(bootstrap, "serverChannel");
+                        Assertions.assertNull(serverChannel.get());
+                    } finally {
+                        bootstrap.shutdown();
+                    }
+
+                    try (ServerSocket rebound = new ServerSocket()) {
+                        rebound.setReuseAddress(false);
+                        rebound.bind(new InetSocketAddress(port), 1);
+                        Assertions.assertEquals(port, rebound.getLocalPort());
+                    }
+                }
+            }
+        } finally {
+            if (previousShutdownWait == null) {
+                System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+            } else {
+                System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, previousShutdownWait);
+            }
+            ConfigurationCache.clear();
+        }
+    }
+
+    @Test
+    void testShutdownHandlesNullFieldsGracefully() {
+        NettyServerBootstrap bootstrap = Mockito.mock(NettyServerBootstrap.class, Mockito.CALLS_REAL_METHODS);
+        Mockito.doReturn(8091).when(bootstrap).getListenPort();
+        setField(bootstrap, "initialized", new AtomicBoolean(false));
+
+        Assertions.assertDoesNotThrow(bootstrap::shutdown);
+    }
+
+    @Test
+    void testShutdownInsideBossEventLoopAndChannelCloseFailure() {
+        NettyServerBootstrap bootstrap = Mockito.mock(NettyServerBootstrap.class, Mockito.CALLS_REAL_METHODS);
+        Mockito.doReturn(8091).when(bootstrap).getListenPort();
+
+        Channel mockChannel = Mockito.mock(Channel.class);
+        Mockito.when(mockChannel.close()).thenThrow(new RuntimeException("close failed"));
+
+        EventExecutor otherExecutor = Mockito.mock(EventExecutor.class);
+        Mockito.when(otherExecutor.inEventLoop()).thenReturn(false);
+        EventExecutor bossExecutor = Mockito.mock(EventExecutor.class);
+        Mockito.when(bossExecutor.inEventLoop()).thenReturn(true);
+
+        EventLoopGroup mockBossGroup = Mockito.mock(EventLoopGroup.class);
+        Mockito.when(mockBossGroup.iterator())
+                .thenReturn(Arrays.asList(otherExecutor, bossExecutor).iterator());
+        Future<?> bossFuture = Mockito.mock(Future.class);
+        Mockito.doReturn(bossFuture).when(mockBossGroup).shutdownGracefully(0L, 5L, TimeUnit.SECONDS);
+
+        EventLoopGroup mockWorkerGroup = Mockito.mock(EventLoopGroup.class);
+
+        setField(bootstrap, "initialized", new AtomicBoolean(false));
+        setField(bootstrap, "serverChannel", new AtomicReference<>(mockChannel));
+        setField(bootstrap, "eventLoopGroupBoss", mockBossGroup);
+        setField(bootstrap, "eventLoopGroupWorker", mockWorkerGroup);
+
+        Assertions.assertDoesNotThrow(bootstrap::shutdown);
+        Mockito.verify(mockBossGroup).shutdownGracefully(0L, 5L, TimeUnit.SECONDS);
+        Mockito.verify(bossFuture, Mockito.never()).awaitUninterruptibly(5L, TimeUnit.SECONDS);
+        Mockito.verify(mockWorkerGroup).shutdownGracefully();
+    }
+
+    @Test
+    void testShutdownHandlesBossEventLoopShutdownFailure() {
+        NettyServerBootstrap bootstrap = Mockito.mock(NettyServerBootstrap.class, Mockito.CALLS_REAL_METHODS);
+        Mockito.doReturn(8091).when(bootstrap).getListenPort();
+
+        EventLoopGroup mockBossGroup = Mockito.mock(EventLoopGroup.class);
+        Mockito.when(mockBossGroup.iterator()).thenThrow(new RuntimeException("boss shutdown failed"));
+        EventLoopGroup mockWorkerGroup = Mockito.mock(EventLoopGroup.class);
+
+        setField(bootstrap, "initialized", new AtomicBoolean(false));
+        setField(bootstrap, "serverChannel", new AtomicReference<>());
+        setField(bootstrap, "eventLoopGroupBoss", mockBossGroup);
+        setField(bootstrap, "eventLoopGroupWorker", mockWorkerGroup);
+
+        Assertions.assertDoesNotThrow(bootstrap::shutdown);
+        Mockito.verify(mockWorkerGroup).shutdownGracefully();
+    }
+
+    private EventLoopGroup getEventLoopGroup(NettyServerBootstrap bootstrap, String fieldName) {
+        return (EventLoopGroup) getField(bootstrap, fieldName);
+    }
+
+    private Object getField(NettyServerBootstrap bootstrap, String fieldName) {
+        try {
+            Field field = NettyServerBootstrap.class.getDeclaredField(fieldName);
             field.setAccessible(true);
-            return (EventLoopGroup) field.get(bootstrap);
+            return field.get(bootstrap);
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to access Netty server event loop group: " + fieldName, e);
+            throw new IllegalStateException("Failed to access Netty server field: " + fieldName, e);
+        }
+    }
+
+    private void setField(NettyServerBootstrap bootstrap, String fieldName, Object value) {
+        try {
+            Field field = NettyServerBootstrap.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(bootstrap, value);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to set Netty server field: " + fieldName, e);
         }
     }
 }
