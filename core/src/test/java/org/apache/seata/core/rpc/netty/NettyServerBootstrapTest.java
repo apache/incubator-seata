@@ -18,10 +18,18 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.util.Collections;
 
 class NettyServerBootstrapTest {
 
@@ -42,6 +50,52 @@ class NettyServerBootstrapTest {
         } finally {
             bossGroup.shutdownGracefully().syncUninterruptibly();
             workerGroup.shutdownGracefully().syncUninterruptibly();
+        }
+    }
+
+    @Test
+    void testShutdownClosesBoundServerChannel() throws IOException {
+        String previousShutdownWait = System.getProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+        System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, "0");
+        ConfigurationCache.clear();
+        try (MockedStatic<MultiRegistryFactory> registryFactoryMock = Mockito.mockStatic(MultiRegistryFactory.class)) {
+            registryFactoryMock.when(MultiRegistryFactory::getInstances).thenReturn(Collections.emptyList());
+
+            int port;
+            try (ServerSocket socket = new ServerSocket(0)) {
+                port = socket.getLocalPort();
+            }
+
+            NettyServerConfig config = new NettyServerConfig();
+            config.setServerListenPort(port);
+            NettyServerBootstrap bootstrap = new NettyServerBootstrap(config);
+            try {
+                bootstrap.start();
+                Assertions.assertThrows(IOException.class, () -> {
+                    try (ServerSocket probe = new ServerSocket()) {
+                        probe.setReuseAddress(false);
+                        probe.bind(new InetSocketAddress(port), 1);
+                    }
+                });
+
+                bootstrap.shutdown();
+                bootstrap.shutdown();
+
+                try (ServerSocket rebound = new ServerSocket()) {
+                    rebound.setReuseAddress(false);
+                    rebound.bind(new InetSocketAddress(port), 1);
+                    Assertions.assertEquals(port, rebound.getLocalPort());
+                }
+            } finally {
+                bootstrap.shutdown();
+            }
+        } finally {
+            if (previousShutdownWait == null) {
+                System.clearProperty(ConfigurationKeys.SHUTDOWN_WAIT);
+            } else {
+                System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, previousShutdownWait);
+            }
+            ConfigurationCache.clear();
         }
     }
 

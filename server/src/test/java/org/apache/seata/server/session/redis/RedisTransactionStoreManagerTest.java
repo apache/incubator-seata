@@ -64,7 +64,9 @@ public class RedisTransactionStoreManagerTest extends BaseSpringBootTest {
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
         EnhancedServiceLoader.unloadAll();
-        JedisPooledFactory.getJedisInstance().flushAll();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            jedis.flushAll();
+        }
         redisTransactionStoreManager = RedisTransactionStoreManager.getInstance();
         RedisSessionManager redisSessionManager = new RedisSessionManager();
         redisSessionManager.setTransactionStoreManager(redisTransactionStoreManager);
@@ -93,7 +95,9 @@ public class RedisTransactionStoreManagerTest extends BaseSpringBootTest {
         session2.setApplicationData("abc1=878s2");
         session2.setStatus(GlobalStatus.Begin);
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
-        JedisPooledFactory.getJedisInstance().flushAll();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            jedis.flushAll();
+        }
         sessionManager.addGlobalSession(session1);
         sessionManager.addGlobalSession(session2);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
@@ -123,8 +127,8 @@ public class RedisTransactionStoreManagerTest extends BaseSpringBootTest {
 
     @Test
     public void testInsertGlobalLockData() {
-        String GLOBAL_LOCK_KEY = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
-        String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
+        String globalLockKey = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
+        String rowLockKey = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
         Map<String, String> globallockMap = new HashMap<>();
         globallockMap.put(
                 "137621367686103001",
@@ -141,8 +145,12 @@ public class RedisTransactionStoreManagerTest extends BaseSpringBootTest {
         globalLockVO.setGmtCreate(System.currentTimeMillis());
         globalLockVO.setGmtModified(System.currentTimeMillis());
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            jedis.hmset(GLOBAL_LOCK_KEY, globallockMap);
-            jedis.hmset(ROW_LOCK_KEY, BeanUtils.objectToMap(globalLockVO));
+            try {
+                jedis.hmset(globalLockKey, globallockMap);
+                jedis.hmset(rowLockKey, BeanUtils.objectToMap(globalLockVO));
+            } finally {
+                jedis.del(globalLockKey, rowLockKey);
+            }
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
