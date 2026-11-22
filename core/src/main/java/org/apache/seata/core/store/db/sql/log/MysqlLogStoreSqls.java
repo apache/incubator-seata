@@ -56,6 +56,25 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
             + " limit ?";
 
     /**
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_MYSQL.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_MYSQL = "select " + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC
+            + " limit ?";
+
+    /**
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_MYSQL.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_MYSQL = "select " + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + CURSOR_PREDICATE
+            + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC
+            + " limit ?";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL = "select " + ALL_GLOBAL_COLUMNS
@@ -105,6 +124,20 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_MYSQL
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByStatusAfterCursor(String globalTable, String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_MYSQL
                 .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }

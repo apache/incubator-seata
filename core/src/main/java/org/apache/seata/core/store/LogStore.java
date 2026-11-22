@@ -16,6 +16,7 @@
  */
 package org.apache.seata.core.store;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,6 +49,24 @@ public interface LogStore {
      * @return the list
      */
     List<GlobalTransactionDO> queryGlobalTransactionDO(int[] status, int limit);
+
+    /**
+     * Query global transaction do list ordered by {@code (gmt_modified ASC, xid ASC)},
+     * optionally resuming strictly after the composite cursor {@code (cursorGmtModified, cursorXid)}.
+     *
+     * <p>Implementations that do not support composite keyset pagination fall back to
+     * {@link #queryGlobalTransactionDO(int[], int)}.
+     *
+     * @param statuses          the statuses
+     * @param cursorGmtModified the cursor gmt_modified (exclusive with {@code cursorXid}), or {@code null} for the first page
+     * @param cursorXid         the cursor xid tie-breaker, or {@code null} for the first page
+     * @param limit             the maximum number of rows to return
+     * @return the list of matching global transactions
+     */
+    default List<GlobalTransactionDO> queryGlobalTransactionDO(
+            int[] statuses, Date cursorGmtModified, String cursorXid, int limit) {
+        return queryGlobalTransactionDO(statuses, limit);
+    }
 
     /**
      * Insert global transaction do boolean.

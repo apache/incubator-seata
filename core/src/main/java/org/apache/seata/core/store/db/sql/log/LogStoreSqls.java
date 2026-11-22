@@ -97,6 +97,25 @@ public interface LogStoreSqls {
     String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
 
     /**
+     * Get query global transaction sql by status ordered by {@code (gmt_modified ASC, xid ASC)}.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder);
+
+    /**
+     * Get query global transaction sql by status strictly after the composite cursor
+     * {@code (gmt_modified, xid)}, ordered by {@code (gmt_modified ASC, xid ASC)}.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    String getQueryGlobalTransactionSQLByStatusAfterCursor(String globalTable, String paramsPlaceHolder);
+
+    /**
      * Get query global transaction for recovery sql string.
      *
      * @param globalTable the global table

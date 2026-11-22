@@ -27,6 +27,7 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.core.store.LogStore;
+import org.apache.seata.core.store.db.sql.log.LogStoreSqls;
 import org.apache.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
@@ -178,6 +181,58 @@ public class LogStoreDataBaseDAO implements LogStore {
             if ("sqlserver".equalsIgnoreCase(dbType)) {
                 ps.setInt(1, limit);
                 ps.setInt(statuses.length + 1, statuses[0]);
+            }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                ret.add(convertGlobalTransactionDO(rs));
+            }
+            return ret;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
+        }
+    }
+
+    @Override
+    public List<GlobalTransactionDO> queryGlobalTransactionDO(
+            int[] statuses, Date cursorGmtModified, String cursorXid, int limit) {
+        List<GlobalTransactionDO> ret = new ArrayList<>();
+        if (statuses == null || statuses.length == 0 || limit <= 0) {
+            return ret;
+        }
+        boolean hasCursor = cursorGmtModified != null && StringUtils.isNotBlank(cursorXid);
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+
+            String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", statuses.length);
+            LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+            String sql = hasCursor
+                    ? logStoreSqls.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, paramsPlaceHolder)
+                    : logStoreSqls.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, paramsPlaceHolder);
+            ps = conn.prepareStatement(sql);
+            boolean isSqlServer = "sqlserver".equalsIgnoreCase(dbType);
+            int idx = 1;
+            if (isSqlServer) {
+                ps.setInt(idx++, limit);
+            }
+            for (int status : statuses) {
+                ps.setInt(idx++, status);
+            }
+            if (hasCursor) {
+                Timestamp cursorTs = cursorGmtModified instanceof Timestamp
+                        ? (Timestamp) cursorGmtModified
+                        : new Timestamp(cursorGmtModified.getTime());
+                ps.setTimestamp(idx++, cursorTs);
+                ps.setTimestamp(idx++, cursorTs);
+                ps.setString(idx++, cursorXid);
+            }
+            if (!isSqlServer) {
+                ps.setInt(idx, limit);
             }
             rs = ps.executeQuery();
             while (rs.next()) {

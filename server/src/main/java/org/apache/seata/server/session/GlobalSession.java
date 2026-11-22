@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -105,6 +106,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private int timeout;
 
     private long beginTime;
+
+    private Date gmtModified;
 
     private String applicationData;
 
@@ -579,6 +582,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public void setBeginTime(long beginTime) {
         this.beginTime = beginTime;
+    }
+
+    /**
+     * Gets gmt modified.
+     *
+     * @return the gmt modified
+     */
+    public Date getGmtModified() {
+        return gmtModified;
+    }
+
+    /**
+     * Sets gmt modified.
+     *
+     * @param gmtModified the gmt modified
+     */
+    public void setGmtModified(Date gmtModified) {
+        this.gmtModified = gmtModified;
     }
 
     /**

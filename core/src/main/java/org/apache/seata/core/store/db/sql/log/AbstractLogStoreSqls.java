@@ -45,6 +45,21 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String WHERE_PLACEHOLD = " #where# ";
 
     /**
+     * Composite keyset pagination predicate: {@code (gmt_modified > ? or (gmt_modified = ? and xid > ?))}.
+     * Avoids tuple comparison syntax for portability across Oracle and SQL Server.
+     */
+    protected static final String CURSOR_PREDICATE = "("
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " > ? or ("
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = ? and "
+            + ServerTableColumnsName.GLOBAL_TABLE_XID + " > ?))";
+
+    /**
+     * Deterministic ordering clause for composite keyset pagination: {@code gmt_modified asc, xid asc}.
+     */
+    protected static final String ORDER_BY_GMT_MODIFIED_XID_ASC = ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " asc, " + ServerTableColumnsName.GLOBAL_TABLE_XID + " asc";
+
+    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
@@ -186,6 +201,13 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     @Override
     public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
+
+    @Override
+    public abstract String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder);
+
+    @Override
+    public abstract String getQueryGlobalTransactionSQLByStatusAfterCursor(
+            String globalTable, String paramsPlaceHolder);
 
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);
