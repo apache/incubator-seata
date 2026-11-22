@@ -194,14 +194,38 @@ public class LogStoreDataBaseDAO implements LogStore {
         }
     }
 
+    /**
+     * Query global transaction DOs ordered by {@code (gmt_modified ASC, xid ASC)},
+     * optionally resuming strictly after the composite cursor {@code (cursorGmtModified, cursorXid)}.
+     *
+     * <p>Both {@code cursorGmtModified} and {@code cursorXid} must be either provided together
+     * (non-null timestamp and non-blank XID) for subsequent pages, or both omitted (null/blank) for
+     * the first page. Providing only one of the two throws {@link IllegalArgumentException}. Rows
+     * with {@code gmt_modified IS NULL} are excluded so NULL timestamps cannot stall cursor
+     * advancement.
+     *
+     * @param statuses          the statuses
+     * @param cursorGmtModified the cursor gmt_modified, or {@code null} for the first page
+     * @param cursorXid         the cursor xid tie-breaker, or {@code null}/blank for the first page
+     * @param limit             the maximum number of rows to return
+     * @return the list of matching global transactions
+     * @throws IllegalArgumentException if only one of {@code cursorGmtModified} or {@code cursorXid} is provided
+     */
     @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(
             int[] statuses, Date cursorGmtModified, String cursorXid, int limit) {
+        boolean hasCursorTime = cursorGmtModified != null;
+        boolean hasCursorXid = StringUtils.isNotBlank(cursorXid);
+        if (hasCursorTime != hasCursorXid) {
+            throw new IllegalArgumentException(
+                    "Both cursorGmtModified and cursorXid must be provided together or both omitted, got "
+                            + "cursorGmtModified=" + cursorGmtModified + ", cursorXid=" + cursorXid);
+        }
         List<GlobalTransactionDO> ret = new ArrayList<>();
         if (statuses == null || statuses.length == 0 || limit <= 0) {
             return ret;
         }
-        boolean hasCursor = cursorGmtModified != null && StringUtils.isNotBlank(cursorXid);
+        boolean hasCursor = hasCursorTime;
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;

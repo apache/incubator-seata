@@ -45,6 +45,13 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String WHERE_PLACEHOLD = " #where# ";
 
     /**
+     * Non-null guard for {@code gmt_modified} in keyset pagination queries so rows with NULL
+     * {@code gmt_modified} cannot stall cursor advancement on dialects that sort NULLs first.
+     */
+    protected static final String GMT_MODIFIED_NOT_NULL =
+            ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " is not null";
+
+    /**
      * Composite keyset pagination predicate: {@code (gmt_modified > ? or (gmt_modified = ? and xid > ?))}.
      * Avoids tuple comparison syntax for portability across Oracle and SQL Server.
      */
@@ -201,13 +208,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
 
     @Override
     public abstract String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
-
-    @Override
-    public abstract String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder);
-
-    @Override
-    public abstract String getQueryGlobalTransactionSQLByStatusAfterCursor(
-            String globalTable, String paramsPlaceHolder);
 
     @Override
     public abstract String getQueryGlobalTransactionForRecoverySQL(String globalTable);

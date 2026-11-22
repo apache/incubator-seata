@@ -107,6 +107,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long beginTime;
 
+    /**
+     * Read-only storage snapshot of {@code gmt_modified} loaded from the persistence store
+     * (used to advance composite keyset cursors). Not included in {@link #encode()}/{@link #decode()}
+     * binary serialization (null in file/raft modes) and not refreshed after in-memory mutations,
+     * so callers must not treat it as a live freshness timestamp.
+     */
     private Date gmtModified;
 
     private String applicationData;
@@ -585,18 +591,24 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * Gets gmt modified.
+     * Gets the read-only storage snapshot of {@code gmt_modified}.
      *
-     * @return the gmt modified
+     * <p>Populated when loading from storage (DB/Redis); not encoded in {@link #encode()}/{@link #decode()}
+     * and may become stale after in-memory session updates.
+     *
+     * @return the gmt modified snapshot, or {@code null} if unavailable
      */
     public Date getGmtModified() {
         return gmtModified;
     }
 
     /**
-     * Sets gmt modified.
+     * Sets the read-only storage snapshot of {@code gmt_modified}.
      *
-     * @param gmtModified the gmt modified
+     * <p>Intended for storage converters when hydrating a {@link GlobalSession}; not serialized by
+     * {@link #encode()}/{@link #decode()}.
+     *
+     * @param gmtModified the gmt modified snapshot
      */
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;

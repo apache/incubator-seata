@@ -61,6 +61,7 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_MYSQL = "select " + ALL_GLOBAL_COLUMNS
             + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
             + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC
             + " limit ?";
 
@@ -70,6 +71,7 @@ public class MysqlLogStoreSqls extends AbstractLogStoreSqls {
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_MYSQL = "select " + ALL_GLOBAL_COLUMNS
             + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
             + "   and " + CURSOR_PREDICATE
             + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC
             + " limit ?";

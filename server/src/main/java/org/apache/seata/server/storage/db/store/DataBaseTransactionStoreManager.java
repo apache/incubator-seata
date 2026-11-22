@@ -209,10 +209,7 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
                 return globalSessions;
             }
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
-            boolean isPaged = sessionCondition.getCursorGmtModified() != null
-                    || StringUtils.isNotBlank(sessionCondition.getCursorXid())
-                    || sessionCondition.getPageSize() != null;
-            if (!isPaged) {
+            if (!sessionCondition.isDbPagedQuery()) {
                 return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
             }
             return readSessionPaged(sessionCondition);

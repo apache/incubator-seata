@@ -337,11 +337,76 @@ public class LogStoreSqlsFactoryTest {
         Assertions.assertEquals(6, countQuestionMarks(cursorSql), cursorSql);
     }
 
+    @Test
+    public void customLogStoreSqlsDefaultMethodsThrowUnsupportedOperationException() {
+        LogStoreSqls minimalCustomSpi = new AbstractLogStoreSqls() {
+            @Override
+            public String getInsertGlobalTransactionSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
+                return "";
+            }
+
+            @Override
+            public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getInsertBranchTransactionSQL(String branchTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusSQL(String branchTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusAppDataSQL(String branchTable) {
+                return "";
+            }
+        };
+
+        UnsupportedOperationException orderedEx = Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> minimalCustomSpi.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, "?"));
+        Assertions.assertTrue(
+                orderedEx.getMessage().contains("Keyset pagination SQL is not supported by "), orderedEx.getMessage());
+        Assertions.assertTrue(
+                orderedEx.getMessage().contains(minimalCustomSpi.getClass().getName()), orderedEx.getMessage());
+
+        UnsupportedOperationException cursorEx = Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> minimalCustomSpi.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, "?"));
+        Assertions.assertTrue(
+                cursorEx.getMessage().contains("Keyset pagination SQL is not supported by "), cursorEx.getMessage());
+        Assertions.assertTrue(
+                cursorEx.getMessage().contains(minimalCustomSpi.getClass().getName()), cursorEx.getMessage());
+    }
+
     private static void assertCommonOrderedSql(String sql) {
         Assertions.assertNotNull(sql);
         Assertions.assertTrue(sql.contains("from " + globalTable), sql);
         Assertions.assertTrue(sql.contains("status in (?,?)"), sql);
+        Assertions.assertTrue(sql.contains("gmt_modified is not null"), sql);
         Assertions.assertTrue(sql.contains("order by gmt_modified asc, xid asc"), sql);
+        Assertions.assertTrue(sql.indexOf("status in (?,?)") < sql.indexOf("gmt_modified is not null"), sql);
+        Assertions.assertTrue(
+                sql.indexOf("gmt_modified is not null") < sql.indexOf("order by gmt_modified asc, xid asc"), sql);
         Assertions.assertFalse(sql.contains("gmt_modified > ?"), sql);
     }
 
@@ -349,11 +414,14 @@ public class LogStoreSqlsFactoryTest {
         Assertions.assertNotNull(sql);
         Assertions.assertTrue(sql.contains("from " + globalTable), sql);
         Assertions.assertTrue(sql.contains("status in (?,?)"), sql);
+        Assertions.assertTrue(sql.contains("gmt_modified is not null"), sql);
         Assertions.assertTrue(sql.contains("(gmt_modified > ? or (gmt_modified = ? and xid > ?))"), sql);
         Assertions.assertFalse(sql.contains("(gmt_modified, xid)"), sql);
         Assertions.assertTrue(sql.contains("order by gmt_modified asc, xid asc"), sql);
+        Assertions.assertTrue(sql.indexOf("status in (?,?)") < sql.indexOf("gmt_modified is not null"), sql);
         Assertions.assertTrue(
-                sql.indexOf("status in (?,?)") < sql.indexOf("(gmt_modified > ? or (gmt_modified = ? and xid > ?))"),
+                sql.indexOf("gmt_modified is not null")
+                        < sql.indexOf("(gmt_modified > ? or (gmt_modified = ? and xid > ?))"),
                 sql);
         Assertions.assertTrue(
                 sql.indexOf("(gmt_modified > ? or (gmt_modified = ? and xid > ?))")

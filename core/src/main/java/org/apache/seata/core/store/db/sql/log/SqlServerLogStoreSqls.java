@@ -67,6 +67,7 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
             + ALL_GLOBAL_COLUMNS
             + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
             + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC;
 
     /**
@@ -76,6 +77,7 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
             + ALL_GLOBAL_COLUMNS
             + "  from " + GLOBAL_TABLE_PLACEHOLD
             + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
             + "   and " + CURSOR_PREDICATE
             + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC;
 

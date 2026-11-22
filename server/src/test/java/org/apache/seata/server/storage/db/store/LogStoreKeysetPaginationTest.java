@@ -55,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -169,7 +170,7 @@ public class LogStoreKeysetPaginationTest extends BaseSpringBootTest {
             ps.setString(5, "tx-group");
             ps.setString(6, "tx-name");
             ps.setInt(7, 60000);
-            ps.setLong(8, gmtModified.getTime());
+            ps.setLong(8, gmtModified != null ? gmtModified.getTime() : 1_700_000_000_000L);
             ps.setString(9, "data");
             ps.setTimestamp(10, gmtModified);
             ps.setTimestamp(11, gmtModified);
@@ -500,7 +501,50 @@ public class LogStoreKeysetPaginationTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void daoGuardsInvalidInputsAndPartialCursor() throws Exception {
+    public void nullGmtModifiedRowsAreSkippedWithoutStallingPagination() throws SQLException {
+        Timestamp t1 = Timestamp.valueOf("2026-01-01 11:00:00");
+        Timestamp t2 = Timestamp.valueOf("2026-01-01 11:00:05");
+
+        insertGlobalRow("xid-null-gmt", 700L, GlobalStatus.Committing, null);
+        insertGlobalRow("xid-valid-01", 701L, GlobalStatus.Committing, t1);
+        insertGlobalRow("xid-valid-02", 702L, GlobalStatus.Committing, t1);
+        insertGlobalRow("xid-valid-03", 703L, GlobalStatus.Committing, t2);
+        insertGlobalRow("xid-valid-04", 704L, GlobalStatus.Committing, t2);
+        insertGlobalRow("xid-valid-05", 705L, GlobalStatus.Committing, t2);
+
+        List<String> visited = new ArrayList<>();
+        Date cursorTime = null;
+        String cursorXid = null;
+        int iterations = 0;
+
+        while (true) {
+            iterations++;
+            assertTrue(iterations <= 10, "Pagination must not loop indefinitely when NULL gmt_modified rows exist");
+            SessionCondition condition = new SessionCondition(GlobalStatus.Committing);
+            condition.setPageSize(2);
+            condition.setLazyLoadBranch(true);
+            condition.setCursorGmtModified(cursorTime);
+            condition.setCursorXid(cursorXid);
+
+            List<GlobalSession> page = storeManager.readSession(condition);
+            if (page.isEmpty()) {
+                break;
+            }
+            for (GlobalSession session : page) {
+                assertNotNull(session.getGmtModified());
+                visited.add(session.getXid());
+            }
+            GlobalSession last = page.get(page.size() - 1);
+            cursorTime = last.getGmtModified();
+            cursorXid = last.getXid();
+        }
+
+        assertEquals(
+                Arrays.asList("xid-valid-01", "xid-valid-02", "xid-valid-03", "xid-valid-04", "xid-valid-05"), visited);
+    }
+
+    @Test
+    public void daoGuardsInvalidInputsAndRejectsPartialCursor() throws Exception {
         DataSource mockDs = mock(DataSource.class);
         Connection conn = mock(Connection.class);
         PreparedStatement ps = mock(PreparedStatement.class);
@@ -523,11 +567,35 @@ public class LogStoreKeysetPaginationTest extends BaseSpringBootTest {
         assertTrue(dao.queryGlobalTransactionDO(new int[] {1}, null, null, -5).isEmpty());
         verify(mockDs, never()).getConnection();
 
-        // Partial cursor (only gmtModified, blank xid) -> falls back to ordered first-page SQL
-        dao.queryGlobalTransactionDO(new int[] {2}, new Date(), "   ", 10);
-        verify(conn).prepareStatement(contains("order by gmt_modified asc, xid asc limit ?"));
-        verify(ps, never()).setTimestamp(anyInt(), any(Timestamp.class));
-        verify(ps, never()).setString(anyInt(), anyString());
+        // Partial cursors must fail fast with IllegalArgumentException without hitting the DB
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dao.queryGlobalTransactionDO(new int[] {2}, new Date(), null, 10));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dao.queryGlobalTransactionDO(new int[] {2}, new Date(), "   ", 10));
+        assertThrows(
+                IllegalArgumentException.class, () -> dao.queryGlobalTransactionDO(new int[] {2}, null, "xid-1", 10));
+        verify(mockDs, never()).getConnection();
+
+        // DataBaseTransactionStoreManager routes partial cursor to DAO (fail-fast) rather than legacy path
+        DataBaseTransactionStoreManager manager = mock(DataBaseTransactionStoreManager.class, CALLS_REAL_METHODS);
+        manager.setLogStore(dao);
+        manager.setLogQueryLimit(10);
+        SessionCondition partial = new SessionCondition(GlobalStatus.Committing);
+        partial.setCursorXid("xid-only");
+        assertTrue(partial.isDbPagedQuery());
+        assertTrue(partial.hasPartialCursor());
+        assertFalse(partial.hasCursor());
+        assertFalse(partial.isRedisPagedQuery());
+        assertThrows(IllegalArgumentException.class, () -> manager.readSession(partial));
+
+        // Offset-only condition is Redis-only, so DB takes legacy path
+        SessionCondition offsetOnly = new SessionCondition(GlobalStatus.Committing);
+        offsetOnly.setOffset(5);
+        assertFalse(offsetOnly.isDbPagedQuery());
+        assertTrue(offsetOnly.isRedisPagedQuery());
+        assertTrue(offsetOnly.isPagedQuery());
     }
 
     @Test

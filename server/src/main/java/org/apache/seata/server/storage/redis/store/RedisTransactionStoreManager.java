@@ -545,7 +545,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     /**
-     * read the global session list by different condition
+     * Read the global session list by different condition.
+     *
+     * <p>When {@link SessionCondition#isRedisPagedQuery()} is {@code true} (and the query is not the
+     * single-{@link GlobalStatus#Begin} sorted-set timeout path), reads a page from the status lists
+     * using best-effort {@code LRANGE} offset pagination; DB keyset cursor fields are ignored.
      *
      * @param sessionCondition the session condition
      * @return the global sessions
@@ -570,7 +574,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             if (sessionCondition.getStatuses().length == 1 && sessionCondition.getStatuses()[0] == GlobalStatus.Begin) {
                 return this.readSortByTimeoutBeginSessions(!sessionCondition.isLazyLoadBranch());
-            } else if (sessionCondition.getOffset() != null || sessionCondition.getPageSize() != null) {
+            } else if (sessionCondition.isRedisPagedQuery()) {
                 return readSessionByPage(sessionCondition);
             } else {
                 return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
@@ -579,6 +583,16 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return null;
     }
 
+    /**
+     * Reads a best-effort page of global sessions across the requested status lists starting at
+     * {@link SessionCondition#getOffset()} (default {@code 0}) up to
+     * {@link SessionCondition#getPageSize()} (falling back to {@link #logQueryLimit}).
+     *
+     * <p>Because status lists mutate concurrently via {@code LREM}/{@code RPUSH}, items may be skipped
+     * or duplicated across pages and deleted session hashes may shorten a returned page below
+     * {@code pageSize}. Callers MUST be idempotent and MUST terminate on an empty page rather than on
+     * a short page.
+     */
     private List<GlobalSession> readSessionByPage(SessionCondition sessionCondition) {
         List<GlobalSession> globalSessions = new ArrayList<>();
         Integer pageSize = sessionCondition.getPageSize();
@@ -603,6 +617,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         return globalSessions;
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> readXidsByPage(List<String> statusKeys, long offset, int limit) {
         List<String> xids = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
@@ -618,7 +633,7 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 for (String key : statusKeys) {
                     pipelined.llen(key);
                 }
-                counts = (List<Long>) (List) pipelined.syncAndReturnAll();
+                counts = (List<Long>) (List<?>) pipelined.syncAndReturnAll();
             }
             long remainingSkip = offset;
             long remainingTake = limit;

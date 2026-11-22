@@ -430,4 +430,79 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         zeroLimit.setOffset(0);
         assertTrue(reader.readSession(zeroLimit).isEmpty());
     }
+
+    @Test
+    void pagedReadSessionUnderConcurrentListMutationAndDeletedHashIsBestEffort() {
+        List<String> mutableList = new ArrayList<>(Arrays.asList("x1", "x2", "x3", "x4", "x5", "x6"));
+        Set<String> deletedHashes = new HashSet<>();
+        String statusKey = "SEATA_STATUS_" + GlobalStatus.Committing.getCode();
+        when(jedis.lrange(eq(statusKey), anyLong(), anyLong())).thenAnswer(invocation -> {
+            long start = invocation.getArgument(1);
+            long end = invocation.getArgument(2);
+            if (start >= mutableList.size()) {
+                return Collections.emptyList();
+            }
+            int from = (int) Math.max(start, 0);
+            int to = (int) Math.min(end + 1, mutableList.size());
+            return new ArrayList<>(mutableList.subList(from, to));
+        });
+
+        RedisTransactionStoreManager reader = spy(store);
+        doAnswer(invocation -> {
+                    String xid = invocation.getArgument(0);
+                    if (deletedHashes.contains(xid)) {
+                        return null;
+                    }
+                    GlobalSession s = new GlobalSession("app", "group", "order", 1000, true);
+                    s.setXid(xid);
+                    return s;
+                })
+                .when(reader)
+                .readSession(anyString(), anyBoolean());
+
+        // Page 1 (offset=0, pageSize=2) -> [x1, x2]
+        SessionCondition page1Cond = new SessionCondition(GlobalStatus.Committing);
+        page1Cond.setOffset(0);
+        page1Cond.setPageSize(2);
+        page1Cond.setLazyLoadBranch(true);
+        assertTrue(page1Cond.isRedisPagedQuery());
+        List<GlobalSession> page1 = reader.readSession(page1Cond);
+        assertEquals(
+                Arrays.asList("x1", "x2"),
+                Arrays.asList(page1.get(0).getXid(), page1.get(1).getXid()));
+
+        // Concurrent mutations between page 1 and page 2:
+        // - x1 removed from head (lrem), shifting list to [x2, x3, x4, x5, x6]
+        // - x4 hash deleted while xid still present in list
+        mutableList.remove("x1");
+        deletedHashes.add("x4");
+
+        // Page 2 (offset=2, pageSize=2) -> lrange(2, 3) returns [x4, x5]; x4 hash is null -> short page [x5]
+        // (x3 was shifted ahead of offset=2; callers rely on next tick for eventual consistency)
+        SessionCondition page2Cond = new SessionCondition(GlobalStatus.Committing);
+        page2Cond.setOffset(2);
+        page2Cond.setPageSize(2);
+        page2Cond.setLazyLoadBranch(true);
+        List<GlobalSession> page2 = reader.readSession(page2Cond);
+        assertEquals(
+                Collections.singletonList("x5"),
+                Collections.singletonList(page2.get(0).getXid()));
+
+        // Caller MUST NOT stop on short page (size 1 < pageSize 2); continue until empty page
+        SessionCondition page3Cond = new SessionCondition(GlobalStatus.Committing);
+        page3Cond.setOffset(4);
+        page3Cond.setPageSize(2);
+        page3Cond.setLazyLoadBranch(true);
+        List<GlobalSession> page3 = reader.readSession(page3Cond);
+        assertEquals(
+                Collections.singletonList("x6"),
+                Collections.singletonList(page3.get(0).getXid()));
+
+        // Page 4 (offset=6, pageSize=2) -> empty page signals termination
+        SessionCondition page4Cond = new SessionCondition(GlobalStatus.Committing);
+        page4Cond.setOffset(6);
+        page4Cond.setPageSize(2);
+        page4Cond.setLazyLoadBranch(true);
+        assertTrue(reader.readSession(page4Cond).isEmpty());
+    }
 }
