@@ -43,8 +43,11 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_E
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class BatchGlobalSessionCleanerTest {
@@ -482,7 +485,7 @@ class BatchGlobalSessionCleanerTest {
     }
 
     @Test
-    void fromSessionManagerAdapterDeletesEachSession() throws Exception {
+    void fromSessionManagerAdapterDelegatesToBatchRemoveGlobalSessions() throws Exception {
         SessionManager sessionManager = mock(SessionManager.class);
         GlobalSession s1 = mockSession("xid-1");
         GlobalSession s2 = mockSession("xid-2");
@@ -492,9 +495,13 @@ class BatchGlobalSessionCleanerTest {
 
         BatchGlobalSessionCleaner.BatchDeleteHandler handler =
                 BatchGlobalSessionCleaner.BatchDeleteHandler.fromSessionManager(sessionManager);
+        handler.deleteBatch(null);
+        handler.deleteBatch(Collections.emptyList());
+        verifyNoInteractions(sessionManager);
+
         handler.deleteBatch(batch);
 
-        verify(sessionManager).removeGlobalSession(s1);
-        verify(sessionManager).removeGlobalSession(s2);
+        verify(sessionManager).removeGlobalSessions(batch);
+        verify(sessionManager, never()).removeGlobalSession(any());
     }
 }

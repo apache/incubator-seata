@@ -21,6 +21,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.coordinator.Core;
+import org.apache.seata.server.coordinator.DefaultCore;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.junit.jupiter.api.BeforeAll;
@@ -431,7 +432,7 @@ class PhaseTwoPipelineExecutorTest {
                 assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-slow-" + i, "rm-slow")));
             }
             for (int i = 0; i < fastTasks; i++) {
-                assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-fast-" + i, "rm-fast")));
+                assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-fast-" + i, "rm-fast-" + i)));
             }
 
             // Fast RM tasks MUST all complete promptly even though slow RM tasks outnumber rpcPoolSize
@@ -625,5 +626,25 @@ class PhaseTwoPipelineExecutorTest {
                 PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCore(core);
         assertFalse(handler.executePhaseTwo(session));
         verify(core).doGlobalCommit(session, true);
+    }
+
+    @Test
+    void fromCoreForPipelineAdapterDelegatesToDoGlobalCommitForPipeline() throws Exception {
+        DefaultCore core = mock(DefaultCore.class);
+        GlobalSession completed = mockSession("xid-done", "rm-1");
+        GlobalSession incomplete = mockSession("xid-retry", "rm-1");
+        when(core.doGlobalCommitForPipeline(completed)).thenReturn(true);
+        when(core.doGlobalCommitForPipeline(incomplete)).thenReturn(false);
+
+        assertThrows(
+                NullPointerException.class,
+                () -> PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCoreForPipeline(null));
+
+        PhaseTwoPipelineExecutor.PhaseTwoCommitHandler handler =
+                PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCoreForPipeline(core);
+        assertTrue(handler.executePhaseTwo(completed));
+        assertFalse(handler.executePhaseTwo(incomplete));
+        verify(core).doGlobalCommitForPipeline(completed);
+        verify(core).doGlobalCommitForPipeline(incomplete);
     }
 }

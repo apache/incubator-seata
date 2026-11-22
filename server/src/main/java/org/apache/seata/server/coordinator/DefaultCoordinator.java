@@ -55,6 +55,7 @@ import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
+import org.apache.seata.server.coordinator.pipeline.BatchGlobalSessionCleaner;
 import org.apache.seata.server.coordinator.pipeline.FallbackRecoveryScanner;
 import org.apache.seata.server.coordinator.pipeline.PhaseTwoPipelineExecutor;
 import org.apache.seata.server.coordinator.pipeline.PipelineComponents;
@@ -67,6 +68,7 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,6 +226,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final FallbackRecoveryScanner fallbackRecoveryScanner;
 
+    private final boolean pushPusherRegistered;
+
     private static volatile DefaultCoordinator instance;
 
     /**
@@ -264,11 +268,24 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             branchRemoveExecutor = null;
         }
         if (isPipelineSupported(pipelineConfig, sessionMode)) {
+            BatchGlobalSessionCleaner.BatchDeleteHandler deleteHandler = sessions -> {
+                SessionManager rootSessionManager = SessionHolder.getRootSessionManager();
+                if (rootSessionManager != null && sessions != null && !sessions.isEmpty()) {
+                    rootSessionManager.removeGlobalSessions(sessions);
+                }
+            };
             this.pipelineComponents = PipelineComponents.create(
                     pipelineConfig,
-                    PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCore(this.core),
-                    null,
+                    PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCoreForPipeline(this.core),
+                    deleteHandler,
                     PipelineMetrics.withGlobalRegistry());
+            if (pipelineConfig.isPushEnabled()) {
+                this.core.setAsyncCommitPusher(
+                        session -> this.pipelineComponents.getExecutor().tryOffer(session));
+                this.pushPusherRegistered = true;
+            } else {
+                this.pushPusherRegistered = false;
+            }
             int effectivePageSize = scanPageSize > 0 ? scanPageSize : resolveScanPageSize(sessionMode);
             long effectiveMaxTickDurationMs = maxTickDurationMs > 0L ? maxTickDurationMs : resolveMaxTickDurationMs();
             this.fallbackRecoveryScanner = new FallbackRecoveryScanner(
@@ -283,6 +300,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         } else {
             this.pipelineComponents = null;
             this.fallbackRecoveryScanner = null;
+            this.pushPusherRegistered = false;
         }
     }
 
@@ -304,6 +322,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         long distributedLockExpireTime = CONFIG.getLong(
                 ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
         return Math.max(1000L, distributedLockExpireTime / 2L);
+    }
+
+    DefaultCore getCore() {
+        return core;
     }
 
     PipelineComponents getPipelineComponents() {
@@ -912,6 +934,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         } catch (InterruptedException ignore) {
 
+        }
+        if (pushPusherRegistered) {
+            this.core.setAsyncCommitPusher(null);
         }
         if (pipelineComponents != null) {
             pipelineComponents.shutdown(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS);

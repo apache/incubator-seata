@@ -481,18 +481,15 @@ public class BatchGlobalSessionCleaner {
         void deleteBatch(List<GlobalSession> sessions) throws TransactionException;
 
         /**
-         * Adapts an existing {@link SessionManager} by invoking
-         * {@link SessionManager#removeGlobalSession(GlobalSession)} per item so Wave 1 compiles
-         * independently of batch storage APIs.
+         * Adapts an existing {@link SessionManager} by delegating directly to
+         * {@link SessionManager#removeGlobalSessions(List)} so global-row deletions execute as a
+         * single batch operation.
          *
-         * <p><b>Scope & Wave 2 note:</b> Intended strictly for {@code db} and {@code redis} store
-         * modes (must NOT be used with {@code file} or {@code raft} session managers). Wave 2
-         * (#8358) should wire the batch deletion API ({@code SessionManager#removeGlobalSessions}
-         * from #8354 / PR #8361) directly so deletions execute in a single batch statement and
-         * treat already-deleted rows idempotently.
+         * <p><b>Scope:</b> Intended strictly for {@code db} and {@code redis} store modes (must NOT
+         * be used with {@code file} or {@code raft} session managers).
          *
          * @param sessionManager target {@code db}/{@code redis} session manager
-         * @return batch delete handler delegating per session
+         * @return batch delete handler delegating to {@link SessionManager#removeGlobalSessions(List)}
          */
         static BatchDeleteHandler fromSessionManager(SessionManager sessionManager) {
             Objects.requireNonNull(sessionManager, "sessionManager must not be null");
@@ -500,9 +497,7 @@ public class BatchGlobalSessionCleaner {
                 if (sessions == null || sessions.isEmpty()) {
                     return;
                 }
-                for (GlobalSession session : sessions) {
-                    sessionManager.removeGlobalSession(session);
-                }
+                sessionManager.removeGlobalSessions(sessions);
             };
         }
     }

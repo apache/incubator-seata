@@ -21,6 +21,7 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.coordinator.Core;
+import org.apache.seata.server.coordinator.DefaultCore;
 import org.apache.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -495,9 +496,9 @@ public class PhaseTwoPipelineExecutor {
      * <p><b>Return value contract:</b>
      * <ul>
      *   <li>Return {@code true} ONLY when all phase-two branch commits have succeeded AND the
-     *       handler has already completed global status transition ({@code Committed}), global
-     *       lock cleanup, and completion metrics/events, leaving ONLY asynchronous deletion of
-     *       the global session row for {@link BatchGlobalSessionCleaner}.</li>
+     *       handler has already completed global lock cleanup and completion metrics/events,
+     *       leaving ONLY asynchronous batch deletion of the global session row for
+     *       {@link BatchGlobalSessionCleaner}.</li>
      *   <li>Return {@code false} if the session still requires retry OR if the handler has
      *       already removed the global session row inline (for example via
      *       {@link #fromCore(Core)}).</li>
@@ -524,8 +525,8 @@ public class PhaseTwoPipelineExecutor {
          * <p>Because {@code DefaultCore#doGlobalCommit(session, true)} currently finalizes and
          * deletes the global session inline via {@code SessionHelper.endCommitted(session, true)},
          * this adapter returns {@code false} so {@link BatchGlobalSessionCleaner} does not issue a
-         * duplicate delete. Wave 2 (#8358) may provide a specialized handler that defers global-row
-         * deletion to the cleaner and returns {@code true} once only row deletion remains.
+         * duplicate delete. Use {@link #fromCoreForPipeline(DefaultCore)} to defer global-row
+         * deletion to the batch cleaner.
          *
          * @param core transaction core
          * @return commit handler enforcing {@code retrying = true}
@@ -536,6 +537,21 @@ public class PhaseTwoPipelineExecutor {
                 core.doGlobalCommit(session, true);
                 return false;
             };
+        }
+
+        /**
+         * Pipeline-aware adapter delegating to
+         * {@link DefaultCore#doGlobalCommitForPipeline(GlobalSession)}, enforcing
+         * {@code retrying = true}, isolating Saga sessions, eliminating the redundant
+         * {@code Committed} status update, and deferring global-row deletion to
+         * {@link BatchGlobalSessionCleaner}.
+         *
+         * @param core transaction core
+         * @return commit handler returning {@code true} only when ready for batch deletion
+         */
+        static PhaseTwoCommitHandler fromCoreForPipeline(DefaultCore core) {
+            Objects.requireNonNull(core, "core must not be null");
+            return core::doGlobalCommitForPipeline;
         }
     }
 }

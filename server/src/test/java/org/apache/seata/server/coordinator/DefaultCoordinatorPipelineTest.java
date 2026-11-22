@@ -20,6 +20,7 @@ import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.server.coordinator.pipeline.PhaseTwoPipelineExecutor;
 import org.apache.seata.server.coordinator.pipeline.PipelineConfig;
@@ -37,6 +38,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,6 +47,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -55,8 +59,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -73,6 +80,7 @@ class DefaultCoordinatorPipelineTest {
         if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null) {
             ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, new MockEnvironment());
         }
+        ensureSessionHelperInitialized(mock(RemotingServer.class));
     }
 
     @AfterEach
@@ -114,7 +122,7 @@ class DefaultCoordinatorPipelineTest {
         try {
             DefaultCoordinator.getInstance();
         } catch (IllegalArgumentException notCreated) {
-            try (MockedStatic<StoreConfig> storeConfig = mockStatic(StoreConfig.class);
+            try (MockedStatic<StoreConfig> storeConfig = mockStatic(StoreConfig.class, CALLS_REAL_METHODS);
                     MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
                 storeConfig.when(StoreConfig::getSessionMode).thenReturn(SessionMode.FILE);
                 sessionHolder.when(SessionHolder::destroy).then(invocation -> null);
@@ -198,12 +206,34 @@ class DefaultCoordinatorPipelineTest {
         }
     }
 
+    private static AutoCloseable overrideRootSessionManager(SessionManager sessionManager) throws Exception {
+        Field rootField = SessionHolder.class.getDeclaredField("ROOT_SESSION_MANAGER");
+        rootField.setAccessible(true);
+        Field mapField = SessionHolder.class.getDeclaredField("SESSION_MANAGER_MAP");
+        mapField.setAccessible(true);
+        Field distLockerField = SessionHolder.class.getDeclaredField("DISTRIBUTED_LOCKER");
+        distLockerField.setAccessible(true);
+        Object oldRoot = rootField.get(null);
+        Object oldMap = mapField.get(null);
+        Object oldDistLocker = distLockerField.get(null);
+        DistributedLocker noOpLocker = mock(DistributedLocker.class);
+        when(noOpLocker.acquireLock(any())).thenReturn(false);
+        rootField.set(null, sessionManager);
+        mapField.set(null, null);
+        distLockerField.set(null, noOpLocker);
+        return () -> {
+            rootField.set(null, oldRoot);
+            mapField.set(null, oldMap);
+            distLockerField.set(null, oldDistLocker);
+        };
+    }
+
     @Test
     void dbModeLifecycleDrainsMultiplePagesWithRetryingTrueAndShutsDownCleanly() throws Exception {
         RemotingServer remotingServer = mock(RemotingServer.class);
         DefaultCore core = mock(DefaultCore.class);
         CountDownLatch commitLatch = new CountDownLatch(5);
-        when(core.doGlobalCommit(any(GlobalSession.class), anyBoolean())).thenAnswer(inv -> {
+        when(core.doGlobalCommitForPipeline(any(GlobalSession.class))).thenAnswer(inv -> {
             commitLatch.countDown();
             return true;
         });
@@ -212,6 +242,8 @@ class DefaultCoordinatorPipelineTest {
                 .enabled(true)
                 .rpcPoolSize(2)
                 .queueCapacity(16)
+                .cleanerBatchSize(10)
+                .cleanerFlushIntervalMs(5000L)
                 .scanQuietWindowMs(0L)
                 .scanMaxPagesPerTick(10)
                 .build();
@@ -220,14 +252,17 @@ class DefaultCoordinatorPipelineTest {
                 track(new DefaultCoordinator(remotingServer, core, SessionMode.DB, config, 2, 5000L));
         assertNotNull(coordinator.getPipelineComponents());
         assertNotNull(coordinator.getFallbackRecoveryScanner());
-        assertNull(coordinator.getPipelineComponents().getCleaner());
+        assertNotNull(coordinator.getPipelineComponents().getCleaner());
         assertTrue(hasPipelineMetricsRegistered());
+        verify(core, never()).setAsyncCommitPusher(any());
 
         PhaseTwoPipelineExecutor executor = coordinator.getPipelineComponents().getExecutor();
         assertFalse(executor.isRunning());
+        assertFalse(coordinator.getPipelineComponents().getCleaner().isRunning());
 
         coordinator.init();
         assertTrue(executor.isRunning());
+        assertTrue(coordinator.getPipelineComponents().getCleaner().isRunning());
 
         List<GlobalSession> rows = Arrays.asList(
                 asyncSession("10.0.0.1:8091:201", 1000L),
@@ -260,8 +295,19 @@ class DefaultCoordinatorPipelineTest {
             }
             return page;
         });
+        Set<String> deletedXids = ConcurrentHashMap.newKeySet();
+        doAnswer(invocation -> {
+                    List<GlobalSession> batch = invocation.getArgument(0);
+                    for (GlobalSession s : batch) {
+                        deletedXids.add(s.getXid());
+                    }
+                    return null;
+                })
+                .when(sessionManager)
+                .removeGlobalSessions(anyList());
 
-        try (MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
+        try (AutoCloseable ignored = overrideRootSessionManager(sessionManager);
+                MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
             sessionHolder.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
             sessionHolder.when(SessionHolder::destroy).then(invocation -> null);
 
@@ -269,11 +315,16 @@ class DefaultCoordinatorPipelineTest {
             assertTrue(commitLatch.await(3, TimeUnit.SECONDS));
 
             verify(sessionManager, times(3)).findGlobalSessions(any(SessionCondition.class));
-            verify(core, times(5)).doGlobalCommit(any(GlobalSession.class), eq(true));
+            verify(core, times(5)).doGlobalCommitForPipeline(any(GlobalSession.class));
             verify(core, never()).doGlobalCommit(any(GlobalSession.class), eq(false));
 
             coordinator.destroy();
             assertFalse(executor.isRunning());
+            assertFalse(coordinator.getPipelineComponents().getCleaner().isRunning());
+            assertEquals(
+                    0, coordinator.getPipelineComponents().getInFlightRegistry().size());
+            assertEquals(5, deletedXids.size());
+            verify(sessionManager, atLeastOnce()).removeGlobalSessions(anyList());
         }
     }
 
@@ -282,7 +333,7 @@ class DefaultCoordinatorPipelineTest {
         RemotingServer remotingServer = mock(RemotingServer.class);
         DefaultCore core = mock(DefaultCore.class);
         CountDownLatch commitLatch = new CountDownLatch(3);
-        when(core.doGlobalCommit(any(GlobalSession.class), anyBoolean())).thenAnswer(inv -> {
+        when(core.doGlobalCommitForPipeline(any(GlobalSession.class))).thenAnswer(inv -> {
             commitLatch.countDown();
             return true;
         });
@@ -291,12 +342,15 @@ class DefaultCoordinatorPipelineTest {
                 .enabled(true)
                 .rpcPoolSize(2)
                 .queueCapacity(16)
+                .cleanerBatchSize(10)
+                .cleanerFlushIntervalMs(5000L)
                 .scanQuietWindowMs(0L)
                 .scanMaxPagesPerTick(10)
                 .build();
 
         DefaultCoordinator coordinator =
                 track(new DefaultCoordinator(remotingServer, core, SessionMode.REDIS, config, 2, 5000L));
+        assertNotNull(coordinator.getPipelineComponents().getCleaner());
         coordinator.init();
 
         Map<Integer, List<GlobalSession>> pages = new HashMap<>();
@@ -309,8 +363,19 @@ class DefaultCoordinatorPipelineTest {
             SessionCondition cond = invocation.getArgument(0);
             return pages.getOrDefault(cond.getOffset(), Collections.emptyList());
         });
+        Set<String> deletedXids = ConcurrentHashMap.newKeySet();
+        doAnswer(invocation -> {
+                    List<GlobalSession> batch = invocation.getArgument(0);
+                    for (GlobalSession s : batch) {
+                        deletedXids.add(s.getXid());
+                    }
+                    return null;
+                })
+                .when(sessionManager)
+                .removeGlobalSessions(anyList());
 
-        try (MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
+        try (AutoCloseable ignored = overrideRootSessionManager(sessionManager);
+                MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
             sessionHolder.when(SessionHolder::getRootSessionManager).thenReturn(sessionManager);
             sessionHolder.when(SessionHolder::destroy).then(invocation -> null);
 
@@ -318,11 +383,15 @@ class DefaultCoordinatorPipelineTest {
             assertTrue(commitLatch.await(3, TimeUnit.SECONDS));
 
             verify(sessionManager, times(3)).findGlobalSessions(any(SessionCondition.class));
-            verify(core, times(3)).doGlobalCommit(any(GlobalSession.class), eq(true));
+            verify(core, times(3)).doGlobalCommitForPipeline(any(GlobalSession.class));
             verify(core, never()).doGlobalCommit(any(GlobalSession.class), eq(false));
 
             coordinator.destroy();
             assertFalse(coordinator.getPipelineComponents().getExecutor().isRunning());
+            assertFalse(coordinator.getPipelineComponents().getCleaner().isRunning());
+            assertEquals(
+                    0, coordinator.getPipelineComponents().getInFlightRegistry().size());
+            assertEquals(3, deletedXids.size());
         }
     }
 
@@ -330,8 +399,10 @@ class DefaultCoordinatorPipelineTest {
     void productionConstructorWiresPipelineUnderDbModeWhenEnabled() {
         RemotingServer remotingServer = mock(RemotingServer.class);
         PipelineConfig enabledConfig = PipelineConfig.builder().enabled(true).build();
+        PipelineConfig pushEnabledConfig =
+                PipelineConfig.builder().enabled(true).pushEnabled(true).build();
 
-        try (MockedStatic<StoreConfig> storeConfig = mockStatic(StoreConfig.class);
+        try (MockedStatic<StoreConfig> storeConfig = mockStatic(StoreConfig.class, CALLS_REAL_METHODS);
                 MockedStatic<PipelineConfig> pipelineConfigMock = mockStatic(PipelineConfig.class)) {
             storeConfig.when(StoreConfig::getSessionMode).thenReturn(SessionMode.DB);
             pipelineConfigMock.when(PipelineConfig::fromConfiguration).thenReturn(enabledConfig);
@@ -339,9 +410,21 @@ class DefaultCoordinatorPipelineTest {
             DefaultCoordinator coordinator = track(new DefaultCoordinator(remotingServer));
             assertNotNull(coordinator.getPipelineComponents());
             assertNotNull(coordinator.getFallbackRecoveryScanner());
-            assertNull(coordinator.getPipelineComponents().getCleaner());
+            assertNotNull(coordinator.getPipelineComponents().getCleaner());
+            assertNull(coordinator.getCore().getAsyncCommitPusher());
             assertEquals(
                     SessionMode.DB, coordinator.getFallbackRecoveryScanner().getSessionMode());
+
+            pipelineConfigMock.when(PipelineConfig::fromConfiguration).thenReturn(pushEnabledConfig);
+            DefaultCoordinator pushCoordinator = track(new DefaultCoordinator(remotingServer));
+            assertNotNull(pushCoordinator.getPipelineComponents());
+            assertNotNull(pushCoordinator.getPipelineComponents().getCleaner());
+            assertNotNull(pushCoordinator.getCore().getAsyncCommitPusher());
+            try (MockedStatic<SessionHolder> sessionHolder = mockStatic(SessionHolder.class)) {
+                sessionHolder.when(SessionHolder::destroy).then(invocation -> null);
+                pushCoordinator.destroy();
+            }
+            assertNull(pushCoordinator.getCore().getAsyncCommitPusher());
         }
     }
 }
