@@ -20,6 +20,7 @@ import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.coordinator.Core;
 import org.apache.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,23 +29,27 @@ import org.slf4j.MDC;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Bounded, decoupled two-phase cleanup execution engine.
  *
  * <p>Separates concurrency-oriented phase-two RM RPCs (handled by a dedicated {@code recovery-rpc}
- * worker pool with per-RM concurrency limits) from batch-oriented global session row deletion
- * (handed off to {@link BatchGlobalSessionCleaner}).
+ * worker pool with non-blocking per-RM concurrency limits) from batch-oriented global session row
+ * deletion (handed off to {@link BatchGlobalSessionCleaner}).
  *
- * <p>Submissions via {@link #offer(GlobalSession)} are strictly non-blocking: duplicate in-flight
- * XIDs are deduplicated via {@link InFlightSessionRegistry}, and queue overflow immediately
- * releases the lease, increments the drop metric, and returns {@code false} so fallback recovery
- * scanning handles overflow safely without ever blocking foreground Netty threads.
+ * <p>Lifecycle is explicit: callers must invoke {@link #start()} before calling
+ * {@link #tryOffer(GlobalSession)} or {@link #offer(GlobalSession)}. Submissions are strictly
+ * non-blocking and never spawn threads on foreground Netty threads: duplicate in-flight XIDs
+ * return {@link OfferResult#DUPLICATE}, queue overflow immediately releases the acquired lease and
+ * returns {@link OfferResult#QUEUE_FULL} (enabling scanner backpressure), and per-RM throttling
+ * releases the lease without blocking worker threads so healthy RMs are never starved.
  */
 public class PhaseTwoPipelineExecutor {
 
@@ -53,30 +58,44 @@ public class PhaseTwoPipelineExecutor {
     private static final String WORKER_THREAD_PREFIX = "recovery-rpc";
     private static final long WORKER_POLL_INTERVAL_MS = 50L;
 
-    private final GlobalSession shutdownSentinel = new GlobalSession();
+    private enum State {
+        NEW,
+        RUNNING,
+        STOPPED
+    }
 
     private final PipelineConfig config;
     private final PhaseTwoCommitHandler commitHandler;
     private final BatchGlobalSessionCleaner cleaner;
+    private final BackgroundDbResourceGuard dbResourceGuard;
     private final InFlightSessionRegistry inFlightRegistry;
     private final RmConcurrencyLimiter rmConcurrencyLimiter;
     private final PipelineMetrics metrics;
-    private final BlockingQueue<GlobalSession> taskQueue;
+    private final BlockingQueue<QueuedSession> taskQueue;
+    private final AtomicInteger queuedCount = new AtomicInteger(0);
     private final ThreadPoolExecutor workerExecutor;
 
-    private final AtomicBoolean running = new AtomicBoolean(true);
-    private final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicReference<State> state = new AtomicReference<>(State.NEW);
     private final Object lifecycleLock = new Object();
 
     /**
-     * Creates a {@link PhaseTwoPipelineExecutor}.
+     * Creates a {@link PhaseTwoPipelineExecutor}. Call {@link #start()} before submitting tasks.
+     *
+     * <p>When {@code cleaner} is non-null, {@code cleaner} MUST have a non-null
+     * {@link InFlightSessionRegistry}, and if {@code inFlightRegistry} is also passed, both MUST
+     * reference the exact same {@link InFlightSessionRegistry} instance (otherwise
+     * {@link IllegalArgumentException} is thrown) so handoff lease ownership cannot diverge.
      *
      * @param config           pipeline configuration
      * @param commitHandler    phase-two commit SPI (must use {@code retrying = true} when delegating to
-     *                         {@code DefaultCore#doGlobalCommit})
+     *                         {@code Core#doGlobalCommit}; see {@link PhaseTwoCommitHandler#fromCore(Core)})
      * @param cleaner          optional batch cleaner to hand completed sessions to; may be {@code null}
-     * @param inFlightRegistry optional in-flight lease registry; a default registry is created if {@code null}
+     * @param inFlightRegistry optional in-flight lease registry; if {@code null} and {@code cleaner}
+     *                         is present, reuses {@code cleaner.getInFlightRegistry()}; otherwise a
+     *                         new registry is created
      * @param metrics          optional metrics collector; a local collector is created if {@code null}
+     * @throws IllegalArgumentException if {@code cleaner} has a null or mismatched
+     *                                  {@link InFlightSessionRegistry}
      */
     public PhaseTwoPipelineExecutor(
             PipelineConfig config,
@@ -84,11 +103,53 @@ public class PhaseTwoPipelineExecutor {
             BatchGlobalSessionCleaner cleaner,
             InFlightSessionRegistry inFlightRegistry,
             PipelineMetrics metrics) {
+        this(config, commitHandler, cleaner, inFlightRegistry, null, metrics);
+    }
+
+    /**
+     * Creates a {@link PhaseTwoPipelineExecutor} with an explicitly shared
+     * {@link BackgroundDbResourceGuard} (useful when {@code cleaner} is {@code null} and Wave 2
+     * scanners want to obtain the guard via {@link #getDbResourceGuard()}).
+     *
+     * @param config           pipeline configuration
+     * @param commitHandler    phase-two commit SPI
+     * @param cleaner          optional batch cleaner
+     * @param inFlightRegistry optional shared in-flight registry
+     * @param dbResourceGuard  optional shared background DB guard
+     * @param metrics          optional metrics collector
+     */
+    public PhaseTwoPipelineExecutor(
+            PipelineConfig config,
+            PhaseTwoCommitHandler commitHandler,
+            BatchGlobalSessionCleaner cleaner,
+            InFlightSessionRegistry inFlightRegistry,
+            BackgroundDbResourceGuard dbResourceGuard,
+            PipelineMetrics metrics) {
         this.config = Objects.requireNonNull(config, "config must not be null");
         this.commitHandler = Objects.requireNonNull(commitHandler, "commitHandler must not be null");
         this.cleaner = cleaner;
-        this.inFlightRegistry =
-                inFlightRegistry != null ? inFlightRegistry : new InFlightSessionRegistry(config.getInFlightLeaseMs());
+        if (cleaner != null) {
+            InFlightSessionRegistry cleanerRegistry = cleaner.getInFlightRegistry();
+            if (cleanerRegistry == null) {
+                throw new IllegalArgumentException(
+                        "cleaner must be configured with a non-null InFlightSessionRegistry shared with the executor");
+            }
+            if (inFlightRegistry != null && cleanerRegistry != inFlightRegistry) {
+                throw new IllegalArgumentException(
+                        "cleaner and PhaseTwoPipelineExecutor must share the exact same InFlightSessionRegistry instance");
+            }
+            if (dbResourceGuard != null && cleaner.getDbResourceGuard() != dbResourceGuard) {
+                throw new IllegalArgumentException(
+                        "cleaner and PhaseTwoPipelineExecutor must share the exact same BackgroundDbResourceGuard instance");
+            }
+            this.inFlightRegistry = cleanerRegistry;
+            this.dbResourceGuard = cleaner.getDbResourceGuard();
+        } else {
+            this.inFlightRegistry = inFlightRegistry != null
+                    ? inFlightRegistry
+                    : new InFlightSessionRegistry(config.getInFlightLeaseMs());
+            this.dbResourceGuard = dbResourceGuard;
+        }
         this.rmConcurrencyLimiter = new RmConcurrencyLimiter(config.getMaxConcurrentPerRm());
         this.metrics = metrics != null ? metrics : new PipelineMetrics();
         this.taskQueue = new ArrayBlockingQueue<>(config.getQueueCapacity());
@@ -106,24 +167,21 @@ public class PhaseTwoPipelineExecutor {
     }
 
     /**
-     * Starts the {@code recovery-rpc} worker pool and underlying batch cleaner (if configured).
-     * Idempotent when called multiple times.
+     * Explicitly starts the {@code recovery-rpc} worker pool and underlying batch cleaner
+     * (if configured). Idempotent when already running; no-op if already shut down.
      */
     public void start() {
-        ensureStarted();
-    }
-
-    private void ensureStarted() {
-        if (started.get() || !running.get()) {
+        if (state.get() != State.NEW) {
             return;
         }
         synchronized (lifecycleLock) {
-            if (!running.get() || !started.compareAndSet(false, true)) {
+            if (state.get() != State.NEW) {
                 return;
             }
             if (cleaner != null) {
                 cleaner.start();
             }
+            state.set(State.RUNNING);
             int poolSize = config.getRpcPoolSize();
             for (int i = 0; i < poolSize; i++) {
                 workerExecutor.execute(this::workerLoop);
@@ -132,101 +190,141 @@ public class PhaseTwoPipelineExecutor {
     }
 
     /**
-     * Non-blocking submission of a {@link GlobalSession} into the phase-two pipeline.
+     * Non-blocking submission returning a detailed {@link OfferResult} suitable for caller
+     * backpressure decisions.
      *
-     * <p>Rejects {@code null}/blank-XID sessions and submissions after shutdown. Deduplicates via
-     * {@link InFlightSessionRegistry#tryAcquire(String)} before attempting a non-blocking offer
-     * into the bounded task queue; on queue overflow, immediately releases the in-flight lease
-     * and increments the dropped counter.
+     * <p>Note: returning {@link OfferResult#ACCEPTED} confirms the session was placed into the
+     * bounded queue, but does not guarantee execution if {@link #shutdown(long)} runs concurrently
+     * before a worker dequeues it (in which case shutdown releases its lease for fallback recovery).
      *
      * @param session global session to process
-     * @return {@code true} if accepted into the bounded queue; {@code false} if rejected,
-     *         deduplicated, or dropped due to queue overflow
+     * @return explicit {@link OfferResult}
      */
-    public boolean offer(GlobalSession session) {
-        if (session == null || !running.get()) {
-            return false;
+    public OfferResult tryOffer(GlobalSession session) {
+        if (session == null) {
+            return OfferResult.INVALID;
         }
         String xid = session.getXid();
         if (xid == null || xid.isEmpty()) {
-            return false;
+            return OfferResult.INVALID;
         }
-        if (!inFlightRegistry.tryAcquire(xid)) {
+        if (state.get() != State.RUNNING) {
+            return OfferResult.NOT_RUNNING;
+        }
+        long leaseToken = inFlightRegistry.tryAcquireQueued(xid);
+        if (leaseToken == InFlightSessionRegistry.INVALID_TOKEN) {
             metrics.recordDedupSkipped();
-            return false;
+            return OfferResult.DUPLICATE;
         }
-        ensureStarted();
-        if (!running.get()) {
-            inFlightRegistry.release(xid);
-            return false;
+        if (state.get() != State.RUNNING) {
+            inFlightRegistry.release(xid, leaseToken);
+            return OfferResult.NOT_RUNNING;
         }
-        if (!taskQueue.offer(session)) {
-            inFlightRegistry.release(xid);
+        QueuedSession envelope = QueuedSession.of(session, leaseToken);
+        if (!taskQueue.offer(envelope)) {
+            inFlightRegistry.release(xid, leaseToken);
             metrics.recordDropped();
-            return false;
+            return OfferResult.QUEUE_FULL;
         }
-        if (!running.get() && taskQueue.remove(session)) {
-            inFlightRegistry.release(xid);
-            return false;
+        queuedCount.incrementAndGet();
+        if (state.get() != State.RUNNING && taskQueue.remove(envelope)) {
+            queuedCount.decrementAndGet();
+            inFlightRegistry.release(xid, leaseToken);
+            return OfferResult.NOT_RUNNING;
         }
         metrics.recordEnqueued();
-        return true;
+        return OfferResult.ACCEPTED;
+    }
+
+    /**
+     * Convenience wrapper over {@link #tryOffer(GlobalSession)} returning {@code true} iff
+     * the result is {@link OfferResult#ACCEPTED}.
+     *
+     * <p>Returning {@code true} confirms queue acceptance but does not guarantee execution if
+     * {@link #shutdown(long)} occurs concurrently before dequeue.
+     *
+     * @param session global session to process
+     * @return {@code true} if accepted into the bounded queue; {@code false} otherwise
+     */
+    public boolean offer(GlobalSession session) {
+        return tryOffer(session) == OfferResult.ACCEPTED;
     }
 
     private void workerLoop() {
-        while (running.get() || !taskQueue.isEmpty()) {
-            GlobalSession session;
+        while (state.get() == State.RUNNING) {
+            QueuedSession envelope;
             try {
-                if (running.get()) {
-                    session = taskQueue.poll(WORKER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
-                } else {
-                    session = taskQueue.poll();
-                }
+                envelope = taskQueue.poll(WORKER_POLL_INTERVAL_MS, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
-                if (!running.get()) {
-                    session = taskQueue.poll();
-                } else {
-                    Thread.currentThread().interrupt();
-                    break;
+                if (state.get() == State.RUNNING) {
+                    LOGGER.warn("Phase-two pipeline worker interrupted while polling; continuing loop");
+                    continue;
                 }
+                break;
             }
 
-            if (session == null) {
-                if (!running.get()) {
-                    break;
-                }
+            if (envelope == null) {
+                inFlightRegistry.maybeEvictExpired();
                 continue;
             }
-            if (session == shutdownSentinel) {
+            if (envelope.isSentinel()) {
                 continue;
             }
-            processSession(session);
+            queuedCount.decrementAndGet();
+            if (state.get() != State.RUNNING) {
+                releaseEnvelopeLease(envelope);
+                break;
+            }
+            processSession(envelope);
+            inFlightRegistry.maybeEvictExpired();
         }
     }
 
-    private void processSession(GlobalSession session) {
+    private void processSession(QueuedSession envelope) {
+        GlobalSession session = envelope.getSession();
         String xid = session.getXid();
+        long leaseToken = envelope.getLeaseToken();
+
+        // Activate execution TTL upon dequeue so queue wait time does not consume execution lease.
+        if (!inFlightRegistry.renew(xid, leaseToken)) {
+            LOGGER.warn(
+                    "Skipping phase-two execution for xid={} because lease token={} is no longer valid",
+                    xid,
+                    leaseToken);
+            return;
+        }
+
         boolean handedOffToCleaner = false;
         String previousGroup = SeataClusterContext.getGroup();
         String previousMdcXid = MDC.get(RootContext.MDC_KEY_XID);
         RmConcurrencyLimiter.Permit rmPermit = null;
         long startNanos = System.nanoTime();
         try {
+            Optional<RmConcurrencyLimiter.Permit> permitOpt = rmConcurrencyLimiter.tryAcquire(session);
+            if (!permitOpt.isPresent()) {
+                metrics.recordRmThrottled();
+                return;
+            }
+            rmPermit = permitOpt.get();
+
             SeataClusterContext.bindGroup();
             if (xid != null) {
                 MDC.put(RootContext.MDC_KEY_XID, xid);
             }
-            rmPermit = rmConcurrencyLimiter.acquire(session);
             startNanos = System.nanoTime();
             boolean completed = commitHandler.executePhaseTwo(session);
-            metrics.recordRpcSuccess(System.nanoTime() - startNanos);
-            if (completed && cleaner != null) {
-                handedOffToCleaner = cleaner.offer(session);
+            long elapsedNanos = System.nanoTime() - startNanos;
+            if (completed) {
+                metrics.recordRpcCompleted(elapsedNanos);
+                if (cleaner != null) {
+                    // Refresh lease TTL before cleaner handoff so batching window has full lease budget.
+                    if (inFlightRegistry.renew(xid, leaseToken)) {
+                        handedOffToCleaner = cleaner.offer(session, leaseToken);
+                    }
+                }
+            } else {
+                metrics.recordRpcRetryNeeded(elapsedNanos);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            metrics.recordRpcFailure(System.nanoTime() - startNanos);
-            LOGGER.warn("Phase-two pipeline worker interrupted while processing xid={}", xid, e);
         } catch (Throwable t) {
             metrics.recordRpcFailure(System.nanoTime() - startNanos);
             LOGGER.error("Phase-two pipeline worker failed to process xid={}", xid, t);
@@ -235,9 +333,18 @@ public class PhaseTwoPipelineExecutor {
                 rmPermit.close();
             }
             if (!handedOffToCleaner) {
-                inFlightRegistry.release(xid);
+                inFlightRegistry.release(xid, leaseToken);
             }
             restoreContext(previousGroup, previousMdcXid);
+            if (state.get() == State.RUNNING && Thread.interrupted()) {
+                LOGGER.warn("Cleared stray interrupt flag on worker thread after processing xid={}", xid);
+            }
+        }
+    }
+
+    private void releaseEnvelopeLease(QueuedSession envelope) {
+        if (envelope != null && !envelope.isSentinel() && envelope.getSession() != null) {
+            inFlightRegistry.release(envelope.getSession().getXid(), envelope.getLeaseToken());
         }
     }
 
@@ -255,9 +362,16 @@ public class PhaseTwoPipelineExecutor {
     }
 
     /**
-     * Gracefully shuts down the executor: rejects new submissions, drains in-flight workers within
-     * {@code timeoutMs}, and then shuts down the {@link BatchGlobalSessionCleaner} so completed
-     * sessions are flushed before returning.
+     * Gracefully shuts down the executor:
+     * <ol>
+     *   <li>Stops accepting new submissions.</li>
+     *   <li>Immediately drains and releases leases for queued (not-yet-started) sessions so they
+     *       return to fallback recovery without consuming shutdown budget.</li>
+     *   <li>Waits for currently executing in-flight workers to complete (reserving at least 20% of
+     *       positive timeout budget for the batch cleaner when configured).</li>
+     *   <li>Shuts down {@link BatchGlobalSessionCleaner} with the remaining budget so completed
+     *       sessions are flushed before returning.</li>
+     * </ol>
      *
      * @param timeoutMs total maximum shutdown wait budget in milliseconds
      * @return {@code true} if both workers and cleaner terminated cleanly within the timeout
@@ -265,21 +379,26 @@ public class PhaseTwoPipelineExecutor {
     public boolean shutdown(long timeoutMs) {
         long effectiveTimeoutMs = Math.max(0L, timeoutMs);
         long deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(effectiveTimeoutMs);
-        boolean wasStarted;
+        boolean wasRunning;
         synchronized (lifecycleLock) {
-            running.set(false);
-            wasStarted = started.get();
+            wasRunning = state.getAndSet(State.STOPPED) == State.RUNNING;
         }
 
+        // Release not-yet-started queued sessions immediately so workers only finish in-flight RPCs.
+        releaseRemainingQueuedSessions();
+
         boolean workersTerminated = true;
-        if (wasStarted) {
+        if (wasRunning) {
             for (int i = 0; i < config.getRpcPoolSize(); i++) {
-                taskQueue.offer(shutdownSentinel);
+                taskQueue.offer(QueuedSession.SHUTDOWN_SENTINEL);
             }
             workerExecutor.shutdown();
-            long remainingNanos = Math.max(0L, deadlineNanos - System.nanoTime());
+            long remainingTotalNanos = Math.max(0L, deadlineNanos - System.nanoTime());
+            long workerWaitNanos = cleaner != null && remainingTotalNanos > 0L
+                    ? Math.max(1L, (remainingTotalNanos * 4L) / 5L)
+                    : remainingTotalNanos;
             try {
-                workersTerminated = workerExecutor.awaitTermination(remainingNanos, TimeUnit.NANOSECONDS);
+                workersTerminated = workerExecutor.awaitTermination(workerWaitNanos, TimeUnit.NANOSECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 workersTerminated = false;
@@ -302,12 +421,17 @@ public class PhaseTwoPipelineExecutor {
     }
 
     private void releaseRemainingQueuedSessions() {
-        List<GlobalSession> remaining = new ArrayList<>();
+        List<QueuedSession> remaining = new ArrayList<>();
         taskQueue.drainTo(remaining);
-        for (GlobalSession session : remaining) {
-            if (session != null && session != shutdownSentinel) {
-                inFlightRegistry.release(session.getXid());
+        int removedReal = 0;
+        for (QueuedSession envelope : remaining) {
+            if (!envelope.isSentinel()) {
+                removedReal++;
+                releaseEnvelopeLease(envelope);
             }
+        }
+        if (removedReal > 0) {
+            queuedCount.addAndGet(-removedReal);
         }
     }
 
@@ -323,6 +447,10 @@ public class PhaseTwoPipelineExecutor {
         return inFlightRegistry;
     }
 
+    public BackgroundDbResourceGuard getDbResourceGuard() {
+        return dbResourceGuard;
+    }
+
     public BatchGlobalSessionCleaner getCleaner() {
         return cleaner;
     }
@@ -331,12 +459,27 @@ public class PhaseTwoPipelineExecutor {
         return rmConcurrencyLimiter;
     }
 
+    /**
+     * Returns the current number of real queued sessions awaiting worker pickup (including during
+     * shutdown draining).
+     *
+     * @return queued session count
+     */
     public int getQueueSize() {
-        return running.get() ? taskQueue.size() : 0;
+        return Math.max(0, queuedCount.get());
+    }
+
+    /**
+     * Returns the remaining free slots in the bounded task queue, useful for scanner backpressure.
+     *
+     * @return remaining queue capacity
+     */
+    public int remainingCapacity() {
+        return taskQueue.remainingCapacity();
     }
 
     public boolean isRunning() {
-        return running.get();
+        return state.get() == State.RUNNING;
     }
 
     /**
@@ -344,9 +487,21 @@ public class PhaseTwoPipelineExecutor {
      * branch commits for a {@link GlobalSession}.
      *
      * <p><b>IMPORTANT (Discussion #8211 Section 7.1):</b> Any implementation delegating to
-     * {@code DefaultCore#doGlobalCommit(GlobalSession, boolean)} MUST always pass
-     * {@code retrying = true}. Passing {@code retrying = false} silently skips branches where
-     * {@code canBeCommittedAsync()} returns {@code true}.
+     * {@code Core#doGlobalCommit(GlobalSession, boolean)} MUST always pass {@code retrying = true}.
+     * Passing {@code retrying = false} silently skips branches where {@code canBeCommittedAsync()}
+     * returns {@code true}. Use {@link #fromCore(Core)} for the standard {@code retrying = true}
+     * delegation.
+     *
+     * <p><b>Return value contract:</b>
+     * <ul>
+     *   <li>Return {@code true} ONLY when all phase-two branch commits have succeeded AND the
+     *       handler has already completed global status transition ({@code Committed}), global
+     *       lock cleanup, and completion metrics/events, leaving ONLY asynchronous deletion of
+     *       the global session row for {@link BatchGlobalSessionCleaner}.</li>
+     *   <li>Return {@code false} if the session still requires retry OR if the handler has
+     *       already removed the global session row inline (for example via
+     *       {@link #fromCore(Core)}).</li>
+     * </ul>
      */
     @FunctionalInterface
     public interface PhaseTwoCommitHandler {
@@ -355,11 +510,32 @@ public class PhaseTwoPipelineExecutor {
          * Executes phase-two commit logic for the supplied global session.
          *
          * @param session global session to commit
-         * @return {@code true} if phase-two branch commits completed and the session should be
-         *         handed off to {@link BatchGlobalSessionCleaner} for asynchronous deletion;
+         * @return {@code true} if the session is ready to be handed off to
+         *         {@link BatchGlobalSessionCleaner} for asynchronous global-row deletion;
          *         {@code false} if retry is still needed or the handler already finalized deletion
          * @throws TransactionException if phase-two execution fails
          */
         boolean executePhaseTwo(GlobalSession session) throws TransactionException;
+
+        /**
+         * Official adapter delegating to {@link Core#doGlobalCommit(GlobalSession, boolean)}
+         * with {@code retrying = true} enforced (Discussion #8211 Section 7.1).
+         *
+         * <p>Because {@code DefaultCore#doGlobalCommit(session, true)} currently finalizes and
+         * deletes the global session inline via {@code SessionHelper.endCommitted(session, true)},
+         * this adapter returns {@code false} so {@link BatchGlobalSessionCleaner} does not issue a
+         * duplicate delete. Wave 2 (#8358) may provide a specialized handler that defers global-row
+         * deletion to the cleaner and returns {@code true} once only row deletion remains.
+         *
+         * @param core transaction core
+         * @return commit handler enforcing {@code retrying = true}
+         */
+        static PhaseTwoCommitHandler fromCore(Core core) {
+            Objects.requireNonNull(core, "core must not be null");
+            return session -> {
+                core.doGlobalCommit(session, true);
+                return false;
+            };
+        }
     }
 }

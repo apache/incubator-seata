@@ -20,6 +20,7 @@ import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.coordinator.Core;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,17 +33,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class PhaseTwoPipelineExecutorTest {
@@ -67,8 +75,60 @@ class PhaseTwoPipelineExecutorTest {
         return session;
     }
 
+    private static void awaitCondition(BooleanSupplier condition, long timeoutMs) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs);
+        while (!condition.getAsBoolean() && System.nanoTime() < deadline) {
+            Thread.sleep(5L);
+        }
+        assertTrue(condition.getAsBoolean(), "Condition not satisfied within " + timeoutMs + "ms");
+    }
+
     @Test
-    void endToEndHappyPathExecutesRpcBatchesCleanupAndReleasesLeases() throws Exception {
+    void enforcesSharedInFlightRegistryWithCleaner() {
+        PipelineConfig config = PipelineConfig.builder().rpcPoolSize(2).build();
+        PipelineMetrics metrics = new PipelineMetrics();
+        BackgroundDbResourceGuard dbGuard = new BackgroundDbResourceGuard(2, metrics);
+
+        // Cleaner with null registry must be rejected
+        BatchGlobalSessionCleaner cleanerWithoutRegistry =
+                new BatchGlobalSessionCleaner(config, batch -> {}, dbGuard, null, metrics);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new PhaseTwoPipelineExecutor(config, s -> false, cleanerWithoutRegistry, null, metrics));
+
+        // Cleaner with a different registry instance must be rejected
+        InFlightSessionRegistry regA = new InFlightSessionRegistry(5000L);
+        InFlightSessionRegistry regB = new InFlightSessionRegistry(5000L);
+        BatchGlobalSessionCleaner cleanerWithRegA =
+                new BatchGlobalSessionCleaner(config, batch -> {}, dbGuard, regA, metrics);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new PhaseTwoPipelineExecutor(config, s -> false, cleanerWithRegA, regB, metrics));
+
+        // Passing null registry reuses cleaner's registry
+        PhaseTwoPipelineExecutor executor =
+                new PhaseTwoPipelineExecutor(config, s -> false, cleanerWithRegA, null, metrics);
+        assertSame(regA, executor.getInFlightRegistry());
+        assertSame(dbGuard, executor.getDbResourceGuard());
+        assertTrue(executor.shutdown(1000L));
+    }
+
+    @Test
+    void requiresExplicitStartAndReturnsExplicitOfferResults() {
+        PipelineConfig config =
+                PipelineConfig.builder().queueCapacity(4).rpcPoolSize(1).build();
+        PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(config, s -> false, null, null, null);
+
+        assertEquals(OfferResult.INVALID, executor.tryOffer(null));
+        assertEquals(OfferResult.INVALID, executor.tryOffer(mockSession("")));
+        assertEquals(OfferResult.NOT_RUNNING, executor.tryOffer(mockSession("xid-1", "rm-1")));
+        assertFalse(executor.offer(mockSession("xid-1", "rm-1")));
+        assertEquals(0, executor.getInFlightRegistry().size());
+        assertTrue(executor.shutdown(1000L));
+    }
+
+    @Test
+    void endToEndHappyPathViaPipelineComponentsExecutesRpcBatchesCleanupAndReleasesLeases() throws Exception {
         int totalSessions = 20;
         PipelineConfig config = PipelineConfig.builder()
                 .queueCapacity(64)
@@ -79,63 +139,56 @@ class PhaseTwoPipelineExecutorTest {
                 .cleanerBufferCapacity(64)
                 .dbMaxConcurrency(4)
                 .build();
-        PipelineMetrics metrics = new PipelineMetrics();
-        InFlightSessionRegistry registry = new InFlightSessionRegistry(30_000L);
-        BackgroundDbResourceGuard dbGuard = new BackgroundDbResourceGuard(4, metrics);
 
         Set<String> committed = ConcurrentHashMap.newKeySet();
         Set<String> deleted = ConcurrentHashMap.newKeySet();
         CountDownLatch allDeleted = new CountDownLatch(totalSessions);
 
-        BatchGlobalSessionCleaner cleaner = new BatchGlobalSessionCleaner(
+        PipelineComponents components = PipelineComponents.create(
                 config,
+                session -> {
+                    committed.add(session.getXid());
+                    return true;
+                },
                 batch -> {
                     for (GlobalSession s : batch) {
                         deleted.add(s.getXid());
                         allDeleted.countDown();
                     }
                 },
-                dbGuard,
-                registry,
-                metrics);
+                new PipelineMetrics());
 
-        PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(
-                config,
-                session -> {
-                    committed.add(session.getXid());
-                    return true;
-                },
-                cleaner,
-                registry,
-                metrics);
+        assertSame(components.getInFlightRegistry(), components.getCleaner().getInFlightRegistry());
+        assertSame(components.getInFlightRegistry(), components.getExecutor().getInFlightRegistry());
+        assertSame(components.getDbResourceGuard(), components.getExecutor().getDbResourceGuard());
 
         try {
+            components.start();
             for (int i = 0; i < totalSessions; i++) {
-                assertTrue(executor.offer(mockSession("xid-e2e-" + i, "rm-" + (i % 3))));
+                assertEquals(
+                        OfferResult.ACCEPTED,
+                        components.getExecutor().tryOffer(mockSession("xid-e2e-" + i, "rm-" + (i % 3))));
             }
             assertTrue(allDeleted.await(5, TimeUnit.SECONDS));
-
-            // Wait for lease release right after deleteBatch returns
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
-            while (registry.size() > 0 && System.nanoTime() < deadline) {
-                Thread.sleep(5L);
-            }
+            awaitCondition(() -> components.getInFlightRegistry().size() == 0, 3000L);
         } finally {
-            assertTrue(executor.shutdown(5000L));
+            assertTrue(components.shutdown(5000L));
         }
 
+        PipelineMetrics metrics = components.getMetrics();
         assertEquals(totalSessions, committed.size());
         assertEquals(totalSessions, deleted.size());
-        assertEquals(0, registry.size());
+        assertEquals(0, components.getInFlightRegistry().size());
         assertEquals(totalSessions, metrics.getEnqueuedCount());
-        assertEquals(totalSessions, metrics.getRpcSuccessCount());
+        assertEquals(totalSessions, metrics.getRpcCompletedCount());
+        assertEquals(0L, metrics.getRpcRetryNeededCount());
         assertEquals(0L, metrics.getRpcFailureCount());
         assertEquals(totalSessions, metrics.getCleanerDeletedSessionsCount());
         assertEquals(0L, metrics.getDroppedCount());
     }
 
     @Test
-    void nonBlockingDropOnFullQueueReleasesLeaseAndIncrementsDropMetric() throws Exception {
+    void nonBlockingDropOnFullQueueReturnsQueueFullReleasesLeaseAndIncrementsMetric() throws Exception {
         PipelineConfig config = PipelineConfig.builder()
                 .queueCapacity(2)
                 .rpcPoolSize(1)
@@ -162,59 +215,63 @@ class PhaseTwoPipelineExecutorTest {
                 registry,
                 metrics);
 
+        ExecutorService callerPool = Executors.newSingleThreadExecutor();
         try {
-            assertTrue(executor.offer(mockSession("xid-active", "rm-1")));
+            executor.start();
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-active", "rm-1")));
             assertTrue(firstStarted.await(3, TimeUnit.SECONDS));
 
-            // Fill bounded queue (capacity 2)
-            assertTrue(executor.offer(mockSession("xid-q1", "rm-1")));
-            assertTrue(executor.offer(mockSession("xid-q2", "rm-1")));
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-q1", "rm-1")));
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-q2", "rm-1")));
+            assertEquals(0, executor.remainingCapacity());
 
-            // Next offer must drop immediately without blocking and release its in-flight lease
-            long startNanos = System.nanoTime();
-            assertFalse(executor.offer(mockSession("xid-dropped", "rm-1")));
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-            assertTrue(elapsedMs < 500L);
+            Future<OfferResult> overflow =
+                    callerPool.submit(() -> executor.tryOffer(mockSession("xid-dropped", "rm-1")));
+            assertEquals(OfferResult.QUEUE_FULL, overflow.get(2, TimeUnit.SECONDS));
 
             assertFalse(registry.isInFlight("xid-dropped"));
             assertEquals(1L, metrics.getDroppedCount());
             assertEquals(3L, metrics.getEnqueuedCount());
             assertEquals(2, metrics.getCurrentQueueDepth());
         } finally {
+            callerPool.shutdownNow();
             releaseWorker.countDown();
             assertTrue(executor.shutdown(5000L));
         }
     }
 
     @Test
-    void inFlightDedupRejectsDuplicateAndAcceptsAfterCompletionOrExpiry() throws Exception {
-        AtomicLong clock = new AtomicLong(1000L);
-        InFlightSessionRegistry registry = new InFlightSessionRegistry(5000L, clock::get);
+    void queuedSessionWaitingLongerThanLeaseTtlIsNotDuplicatedAndRenewsOnDequeue() throws Exception {
+        AtomicLong clock = new AtomicLong(1_000L);
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(500L, clock::get);
         PipelineConfig config = PipelineConfig.builder()
-                .queueCapacity(16)
-                .rpcPoolSize(2)
-                .inFlightLeaseMs(5000L)
+                .queueCapacity(8)
+                .rpcPoolSize(1)
+                .maxConcurrentPerRm(0)
+                .inFlightLeaseMs(500L)
                 .build();
         PipelineMetrics metrics = new PipelineMetrics();
 
-        CountDownLatch entered = new CountDownLatch(1);
-        CountDownLatch allowFinish = new CountDownLatch(1);
-        CountDownLatch secondDone = new CountDownLatch(1);
-        AtomicInteger executions = new AtomicInteger(0);
+        CountDownLatch blockerEntered = new CountDownLatch(1);
+        CountDownLatch releaseBlocker = new CountDownLatch(1);
+        CountDownLatch queuedProcessed = new CountDownLatch(1);
+        AtomicInteger queuedExecutions = new AtomicInteger(0);
 
         PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(
                 config,
                 session -> {
-                    int call = executions.incrementAndGet();
-                    if (call == 1) {
-                        entered.countDown();
+                    if ("xid-blocker".equals(session.getXid())) {
+                        blockerEntered.countDown();
                         try {
-                            allowFinish.await(5, TimeUnit.SECONDS);
+                            releaseBlocker.await(5, TimeUnit.SECONDS);
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                         }
-                    } else if (call == 2) {
-                        secondDone.countDown();
+                    } else if ("xid-waiting".equals(session.getXid())) {
+                        queuedExecutions.incrementAndGet();
+                        // Verify lease was renewed upon dequeue (not expired even after 10x clock jump)
+                        assertTrue(registry.isInFlight("xid-waiting"));
+                        queuedProcessed.countDown();
                     }
                     return false;
                 },
@@ -223,42 +280,120 @@ class PhaseTwoPipelineExecutorTest {
                 metrics);
 
         try {
-            assertTrue(executor.offer(mockSession("xid-dup", "rm-1")));
-            assertTrue(entered.await(3, TimeUnit.SECONDS));
+            executor.start();
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-blocker", "rm-1")));
+            assertTrue(blockerEntered.await(3, TimeUnit.SECONDS));
 
-            // Duplicate offer while in-flight is rejected
-            assertFalse(executor.offer(mockSession("xid-dup", "rm-1")));
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-waiting", "rm-1")));
+
+            // Advance clock 10x past inFlightLeaseMs while xid-waiting sits in the queue
+            clock.addAndGet(5_000L);
+
+            // Must still be deduplicated and NOT duplicated into the queue
+            assertEquals(OfferResult.DUPLICATE, executor.tryOffer(mockSession("xid-waiting", "rm-1")));
             assertEquals(1L, metrics.getDedupSkippedCount());
 
-            // Advance clock past lease expiry -> allowed to re-enqueue even while first is finishing
-            clock.addAndGet(5000L);
-            assertTrue(executor.offer(mockSession("xid-dup", "rm-1")));
-            assertTrue(secondDone.await(3, TimeUnit.SECONDS));
-
-            allowFinish.countDown();
+            releaseBlocker.countDown();
+            assertTrue(queuedProcessed.await(3, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(executor.shutdown(5000L));
         }
 
-        assertEquals(2, executions.get());
+        assertEquals(1, queuedExecutions.get());
         assertEquals(0, registry.size());
     }
 
     @Test
-    void perRmConcurrencyLimitIsolatesSlowRmWithoutStarvingFastRm() throws Exception {
+    void expiredWorkerReleaseDoesNotEvictSubsequentOwnerLease() throws Exception {
+        AtomicLong clock = new AtomicLong(1_000L);
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(500L, clock::get);
         PipelineConfig config = PipelineConfig.builder()
-                .queueCapacity(32)
-                .rpcPoolSize(4)
-                .maxConcurrentPerRm(1)
+                .queueCapacity(16)
+                .rpcPoolSize(2)
+                .maxConcurrentPerRm(0)
+                .inFlightLeaseMs(500L)
                 .build();
         PipelineMetrics metrics = new PipelineMetrics();
 
+        CountDownLatch workerAEntered = new CountDownLatch(1);
+        CountDownLatch releaseWorkerA = new CountDownLatch(1);
+        CountDownLatch workerBEntered = new CountDownLatch(1);
+        CountDownLatch releaseWorkerB = new CountDownLatch(1);
+        AtomicInteger calls = new AtomicInteger(0);
+
+        PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(
+                config,
+                session -> {
+                    int call = calls.incrementAndGet();
+                    if (call == 1) {
+                        workerAEntered.countDown();
+                        try {
+                            releaseWorkerA.await(5, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    } else if (call == 2) {
+                        workerBEntered.countDown();
+                        try {
+                            releaseWorkerB.await(5, TimeUnit.SECONDS);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    return false;
+                },
+                null,
+                registry,
+                metrics);
+
+        try {
+            executor.start();
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-race", "rm-1")));
+            assertTrue(workerAEntered.await(3, TimeUnit.SECONDS));
+
+            // Worker A's execution lease expires -> Worker B acquires a fresh token
+            clock.addAndGet(500L);
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-race", "rm-1")));
+            assertTrue(workerBEntered.await(3, TimeUnit.SECONDS));
+
+            // Worker A finishes and attempts token-checked release -> must NOT evict Worker B's active lease
+            releaseWorkerA.countDown();
+            awaitCondition(() -> metrics.getRpcRetryNeededCount() >= 1L, 3000L);
+
+            assertTrue(registry.isInFlight("xid-race"));
+            assertEquals(OfferResult.DUPLICATE, executor.tryOffer(mockSession("xid-race", "rm-1")));
+
+            // Once Worker B finishes, its lease is released cleanly
+            releaseWorkerB.countDown();
+            awaitCondition(() -> registry.size() == 0, 3000L);
+        } finally {
+            assertTrue(executor.shutdown(5000L));
+        }
+
+        assertEquals(2, calls.get());
+        assertEquals(0, registry.size());
+    }
+
+    @Test
+    void slowRmExceedingPoolSizeNeverStarvesFastRmBecauseLimitingIsNonBlocking() throws Exception {
+        int poolSize = 4;
+        int slowTasks = poolSize + 4;
+        int fastTasks = 4;
+        PipelineConfig config = PipelineConfig.builder()
+                .queueCapacity(64)
+                .rpcPoolSize(poolSize)
+                .maxConcurrentPerRm(1)
+                .build();
+        PipelineMetrics metrics = new PipelineMetrics();
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(30_000L);
+
         AtomicInteger activeSlowRm = new AtomicInteger(0);
         AtomicInteger maxSlowRm = new AtomicInteger(0);
-        CountDownLatch firstSlowEntered = new CountDownLatch(1);
+        CountDownLatch slowEntered = new CountDownLatch(1);
         CountDownLatch releaseSlow = new CountDownLatch(1);
-        CountDownLatch allFastDone = new CountDownLatch(3);
-        CountDownLatch allSlowDone = new CountDownLatch(2);
+        CountDownLatch allFastDone = new CountDownLatch(fastTasks);
+        CountDownLatch slowDone = new CountDownLatch(1);
 
         PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(
                 config,
@@ -268,13 +403,13 @@ class PhaseTwoPipelineExecutorTest {
                         int active = activeSlowRm.incrementAndGet();
                         maxSlowRm.accumulateAndGet(active, Math::max);
                         try {
-                            firstSlowEntered.countDown();
+                            slowEntered.countDown();
                             assertTrue(releaseSlow.await(5, TimeUnit.SECONDS));
                         } catch (InterruptedException e) {
                             Thread.currentThread().interrupt();
                         } finally {
                             activeSlowRm.decrementAndGet();
-                            allSlowDone.countDown();
+                            slowDone.countDown();
                         }
                     } else {
                         allFastDone.countDown();
@@ -282,49 +417,56 @@ class PhaseTwoPipelineExecutorTest {
                     return false;
                 },
                 null,
-                null,
+                registry,
                 metrics);
 
         try {
-            // Submit 2 tasks for rm-slow (limit=1)
-            assertTrue(executor.offer(mockSession("xid-slow-1", "rm-slow")));
-            assertTrue(firstSlowEntered.await(3, TimeUnit.SECONDS));
-            assertTrue(executor.offer(mockSession("xid-slow-2", "rm-slow")));
+            executor.start();
+            // Submit first slow task and wait until it holds the sole rm-slow permit
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-slow-0", "rm-slow")));
+            assertTrue(slowEntered.await(3, TimeUnit.SECONDS));
 
-            // Submit 3 tasks for rm-fast: must complete concurrently while rm-slow is blocked
-            assertTrue(executor.offer(mockSession("xid-fast-1", "rm-fast")));
-            assertTrue(executor.offer(mockSession("xid-fast-2", "rm-fast")));
-            assertTrue(executor.offer(mockSession("xid-fast-3", "rm-fast")));
+            // Submit >= rpcPoolSize additional slow RM tasks followed by fast RM tasks
+            for (int i = 1; i < slowTasks; i++) {
+                assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-slow-" + i, "rm-slow")));
+            }
+            for (int i = 0; i < fastTasks; i++) {
+                assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-fast-" + i, "rm-fast")));
+            }
 
-            assertTrue(allFastDone.await(3, TimeUnit.SECONDS), "Fast RM was starved by slow RM");
-            assertEquals(1, activeSlowRm.get(), "Second slow RM task must not bypass per-RM cap");
+            // Fast RM tasks MUST all complete promptly even though slow RM tasks outnumber rpcPoolSize
+            assertTrue(allFastDone.await(3, TimeUnit.SECONDS), "Fast RM was starved by slow RM tasks");
+            assertEquals(1, activeSlowRm.get());
+            assertTrue(metrics.getRmThrottledCount() >= slowTasks - 1L);
 
             releaseSlow.countDown();
-            assertTrue(allSlowDone.await(3, TimeUnit.SECONDS));
+            assertTrue(slowDone.await(3, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(executor.shutdown(5000L));
         }
 
         assertEquals(1, maxSlowRm.get());
-        assertEquals(5L, metrics.getRpcSuccessCount());
+        assertEquals(0, registry.size());
     }
 
     @Test
-    void multiRmSortedPermitAcquisitionDoesNotDeadlockUnderReversedOrdering() throws Exception {
+    void workerSurvivesStrayInterruptFlagSetByCommitHandler() throws Exception {
+        int poolSize = 2;
+        int totalTasks = 10;
         PipelineConfig config = PipelineConfig.builder()
-                .queueCapacity(128)
-                .rpcPoolSize(8)
-                .maxConcurrentPerRm(1)
+                .queueCapacity(32)
+                .rpcPoolSize(poolSize)
+                .maxConcurrentPerRm(0)
                 .build();
         PipelineMetrics metrics = new PipelineMetrics();
-        int total = 40;
-        CountDownLatch allDone = new CountDownLatch(total);
+        CountDownLatch allDone = new CountDownLatch(totalTasks);
 
         PhaseTwoPipelineExecutor executor = new PhaseTwoPipelineExecutor(
                 config,
                 session -> {
-                    // Brief work while holding all multi-RM permits
-                    Thread.yield();
+                    // Simulate downstream RPC/JDBC code leaving the thread interrupted
+                    Thread.currentThread().interrupt();
                     allDone.countDown();
                     return false;
                 },
@@ -333,20 +475,16 @@ class PhaseTwoPipelineExecutorTest {
                 metrics);
 
         try {
-            for (int i = 0; i < total; i++) {
-                if (i % 2 == 0) {
-                    assertTrue(executor.offer(mockSession("xid-fwd-" + i, "rm-a", "rm-b", "rm-c")));
-                } else {
-                    assertTrue(executor.offer(mockSession("xid-rev-" + i, "rm-c", "rm-b", "rm-a")));
-                }
+            executor.start();
+            for (int i = 0; i < totalTasks; i++) {
+                assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-int-" + i, "rm-1")));
             }
-            assertTrue(allDone.await(5, TimeUnit.SECONDS), "Multi-RM sorted permit acquisition deadlocked");
+            assertTrue(allDone.await(5, TimeUnit.SECONDS), "Workers exited after handler left interrupt flag set");
         } finally {
             assertTrue(executor.shutdown(5000L));
         }
 
-        assertEquals(total, metrics.getRpcSuccessCount());
-        assertEquals(0L, metrics.getRpcFailureCount());
+        assertEquals(totalTasks, metrics.getRpcRetryNeededCount());
     }
 
     @Test
@@ -379,34 +517,31 @@ class PhaseTwoPipelineExecutorTest {
                 metrics);
 
         try {
-            assertTrue(executor.offer(mockSession("xid-err", "rm-only")));
+            executor.start();
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-err", "rm-only")));
             assertTrue(firstFailed.await(3, TimeUnit.SECONDS));
 
-            // Wait for lease release after exception
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
-            while (registry.isInFlight("xid-err") && System.nanoTime() < deadline) {
-                Thread.sleep(5L);
-            }
-            assertFalse(registry.isInFlight("xid-err"));
+            awaitCondition(() -> !registry.isInFlight("xid-err"), 3000L);
 
-            // Re-submit same XID & RM: proves both in-flight lease and per-RM permit were released
-            assertTrue(executor.offer(mockSession("xid-err", "rm-only")));
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-err", "rm-only")));
             assertTrue(retrySucceeded.await(3, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(executor.shutdown(5000L));
         }
 
         assertEquals(1L, metrics.getRpcFailureCount());
-        assertEquals(1L, metrics.getRpcSuccessCount());
+        assertEquals(1L, metrics.getRpcRetryNeededCount());
+        assertEquals(0, executor.getRmConcurrencyLimiter().trackedResourceCount());
     }
 
     @Test
-    void setsMdcAndClusterContextDuringExecutionAndGracefullyDrainsOnShutdown() throws Exception {
+    void shutdownReleasesQueuedTasksImmediatelyAndFlushesInFlightCompletionsInCleaner() throws Exception {
         PipelineConfig config = PipelineConfig.builder()
                 .queueCapacity(32)
-                .rpcPoolSize(2)
+                .rpcPoolSize(1)
                 .cleanerBatchSize(100)
-                .cleanerFlushIntervalMs(10_000L)
+                .cleanerFlushIntervalMs(30_000L)
                 .cleanerBufferCapacity(32)
                 .dbMaxConcurrency(2)
                 .build();
@@ -416,6 +551,8 @@ class PhaseTwoPipelineExecutorTest {
 
         AtomicReference<String> observedMdcXid = new AtomicReference<>();
         AtomicReference<String> observedGroup = new AtomicReference<>();
+        CountDownLatch inFlightStarted = new CountDownLatch(1);
+        CountDownLatch releaseInFlight = new CountDownLatch(1);
         Set<String> flushed = ConcurrentHashMap.newKeySet();
 
         BatchGlobalSessionCleaner cleaner = new BatchGlobalSessionCleaner(
@@ -434,26 +571,59 @@ class PhaseTwoPipelineExecutorTest {
                 session -> {
                     observedMdcXid.compareAndSet(null, MDC.get(RootContext.MDC_KEY_XID));
                     observedGroup.compareAndSet(null, SeataClusterContext.getGroup());
+                    inFlightStarted.countDown();
+                    try {
+                        releaseInFlight.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                     return true;
                 },
                 cleaner,
                 registry,
                 metrics);
 
-        for (int i = 0; i < 6; i++) {
-            assertTrue(executor.offer(mockSession("xid-drain-" + i, "rm-1")));
+        executor.start();
+        assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-inflight", "rm-1")));
+        assertTrue(inFlightStarted.await(3, TimeUnit.SECONDS));
+
+        // Enqueue 4 additional sessions that will sit queued behind the sole active worker
+        for (int i = 0; i < 4; i++) {
+            assertEquals(OfferResult.ACCEPTED, executor.tryOffer(mockSession("xid-queued-" + i, "rm-1")));
         }
 
-        // Shutdown drains workers and then flushes cleaner despite 10s flush interval
-        assertTrue(executor.shutdown(5000L));
+        // Release in-flight worker slightly after shutdown begins
+        ExecutorService shutdownPool = Executors.newSingleThreadExecutor();
+        try {
+            Future<Boolean> shutdownResult = shutdownPool.submit(() -> executor.shutdown(5000L));
+            // Queued tasks must have their leases released immediately on shutdown without waiting for worker
+            awaitCondition(() -> !registry.isInFlight("xid-queued-0"), 3000L);
+            releaseInFlight.countDown();
+            assertTrue(shutdownResult.get(5, TimeUnit.SECONDS));
+        } finally {
+            shutdownPool.shutdownNow();
+        }
+
         assertFalse(executor.isRunning());
         assertFalse(cleaner.isRunning());
-        assertFalse(executor.offer(mockSession("xid-post-shutdown", "rm-1")));
-
-        assertNotNull(observedMdcXid.get());
-        assertTrue(observedMdcXid.get().startsWith("xid-drain-"));
+        assertEquals(OfferResult.NOT_RUNNING, executor.tryOffer(mockSession("xid-post-shutdown", "rm-1")));
+        assertEquals("xid-inflight", observedMdcXid.get());
         assertNotNull(observedGroup.get());
-        assertEquals(6, flushed.size());
+        // Only the already-in-flight session executed and flushed via cleaner; queued sessions returned to fallback
+        assertEquals(1, flushed.size());
+        assertTrue(flushed.contains("xid-inflight"));
         assertEquals(0, registry.size());
+    }
+
+    @Test
+    void fromCoreAdapterAlwaysDelegatesWithRetryingTrueAndReturnsFalse() throws Exception {
+        Core core = mock(Core.class);
+        GlobalSession session = mockSession("xid-core", "rm-1");
+        when(core.doGlobalCommit(session, true)).thenReturn(true);
+
+        PhaseTwoPipelineExecutor.PhaseTwoCommitHandler handler =
+                PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCore(core);
+        assertFalse(handler.executePhaseTwo(session));
+        verify(core).doGlobalCommit(session, true);
     }
 }

@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 class BackgroundDbResourceGuardTest {
 
@@ -76,7 +80,6 @@ class BackgroundDbResourceGuardTest {
 
             startGate.countDown();
             assertTrue(allSaturated.await(5, TimeUnit.SECONDS));
-            // Give queued threads a moment to enter semaphore wait
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
             while (guard.getWaitingCount() == 0 && System.nanoTime() < deadline) {
                 Thread.yield();
@@ -130,32 +133,50 @@ class BackgroundDbResourceGuardTest {
     }
 
     @Test
-    void tryAcquireRespectsTimeoutAndRelease() throws Exception {
+    void tryAcquireReturnsIdempotentAutoCloseablePermit() throws Exception {
         PipelineMetrics metrics = new PipelineMetrics();
         BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(1, metrics);
 
-        assertTrue(guard.tryAcquire(50L));
+        Optional<BackgroundDbResourceGuard.Permit> first = guard.tryAcquire(50L);
+        assertTrue(first.isPresent());
         assertEquals(0, guard.availablePermits());
         assertEquals(1, guard.getActiveCount());
 
-        assertFalse(guard.tryAcquire(20L));
+        assertFalse(guard.tryAcquire(20L).isPresent());
         assertEquals(1, guard.getActiveCount());
 
-        guard.release();
+        // Closing the same permit multiple times must never inflate permits beyond maxConcurrency
+        first.get().close();
+        first.get().close();
         assertEquals(1, guard.availablePermits());
         assertEquals(0, guard.getActiveCount());
 
-        assertTrue(guard.tryAcquire(50L, TimeUnit.MILLISECONDS));
-        guard.release();
+        try (BackgroundDbResourceGuard.Permit second =
+                guard.tryAcquire(50L, TimeUnit.MILLISECONDS).orElseThrow(AssertionError::new)) {
+            assertEquals(0, guard.availablePermits());
+            assertEquals(1, guard.getActiveCount());
+        }
         assertEquals(1, guard.availablePermits());
+        assertEquals(0, guard.getActiveCount());
         assertEquals(3L, metrics.getDbGuardWaitCount());
+    }
+
+    @Test
+    void releasesPermitWhenMetricsThrowsDuringAcquire() {
+        PipelineMetrics faultyMetrics = spy(new PipelineMetrics());
+        doThrow(new RuntimeException("metrics failure")).when(faultyMetrics).recordDbGuardWait(anyLong());
+        BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(1, faultyMetrics);
+
+        assertThrows(RuntimeException.class, () -> guard.run(() -> {}));
+        assertEquals(1, guard.availablePermits());
     }
 
     @Test
     void interruptedWaitDoesNotLeakPermitOrCounts() throws Exception {
         PipelineMetrics metrics = new PipelineMetrics();
         BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(1, metrics);
-        assertTrue(guard.tryAcquire(50L));
+        Optional<BackgroundDbResourceGuard.Permit> held = guard.tryAcquire(50L);
+        assertTrue(held.isPresent());
 
         CountDownLatch entered = new CountDownLatch(1);
         CountDownLatch interruptedObserved = new CountDownLatch(1);
@@ -167,21 +188,23 @@ class BackgroundDbResourceGuardTest {
                 interruptedObserved.countDown();
             }
         });
-        waiter.start();
-        assertTrue(entered.await(2, TimeUnit.SECONDS));
+        try {
+            waiter.start();
+            assertTrue(entered.await(2, TimeUnit.SECONDS));
 
-        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
-        while (guard.getWaitingCount() == 0 && System.nanoTime() < deadline) {
-            Thread.yield();
+            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+            while (guard.getWaitingCount() == 0 && System.nanoTime() < deadline) {
+                Thread.yield();
+            }
+            waiter.interrupt();
+            assertTrue(interruptedObserved.await(2, TimeUnit.SECONDS));
+            waiter.join(2000L);
+
+            assertEquals(1, guard.getActiveCount());
+            assertEquals(0, guard.getWaitingCount());
+        } finally {
+            held.get().close();
         }
-        waiter.interrupt();
-        assertTrue(interruptedObserved.await(2, TimeUnit.SECONDS));
-        waiter.join(2000L);
-
-        assertEquals(1, guard.getActiveCount());
-        assertEquals(0, guard.getWaitingCount());
-
-        guard.release();
         assertEquals(1, guard.availablePermits());
         assertEquals(0, guard.getActiveCount());
     }

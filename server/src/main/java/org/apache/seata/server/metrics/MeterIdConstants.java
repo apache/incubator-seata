@@ -144,15 +144,25 @@ public interface MeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.NAME_KEY, "dedupSkipped");
 
-    Id COUNTER_PIPELINE_RPC_SUCCESS = new Id(SEATA_RECOVERY_PIPELINE)
+    Id COUNTER_PIPELINE_RPC_COMPLETED = new Id(SEATA_RECOVERY_PIPELINE)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
-            .withTag(IdConstants.NAME_KEY, "rpcSuccess");
+            .withTag(IdConstants.NAME_KEY, "rpcCompleted");
+
+    Id COUNTER_PIPELINE_RPC_RETRY_NEEDED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "rpcRetryNeeded");
 
     Id COUNTER_PIPELINE_RPC_FAILURE = new Id(SEATA_RECOVERY_PIPELINE)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
             .withTag(IdConstants.NAME_KEY, "rpcFailure");
+
+    Id COUNTER_PIPELINE_RM_THROTTLED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "rmThrottled");
 
     Id TIMER_PIPELINE_RPC_LATENCY = new Id(SEATA_RECOVERY_PIPELINE)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)

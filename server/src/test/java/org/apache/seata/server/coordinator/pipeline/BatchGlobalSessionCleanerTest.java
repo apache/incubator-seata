@@ -31,8 +31,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BooleanSupplier;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,12 +62,36 @@ class BatchGlobalSessionCleanerTest {
         return session;
     }
 
+    private static void awaitCondition(BooleanSupplier condition, long timeoutMs) throws InterruptedException {
+        long deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(timeoutMs);
+        while (!condition.getAsBoolean() && System.nanoTime() < deadline) {
+            Thread.sleep(5L);
+        }
+        assertTrue(condition.getAsBoolean(), "Condition not satisfied within " + timeoutMs + "ms");
+    }
+
+    @Test
+    void rejectsOfferBeforeExplicitStart() {
+        PipelineConfig config = PipelineConfig.builder()
+                .cleanerBatchSize(10)
+                .cleanerFlushIntervalMs(50L)
+                .cleanerBufferCapacity(16)
+                .build();
+        PipelineMetrics metrics = new PipelineMetrics();
+        BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(2, metrics);
+        BatchGlobalSessionCleaner cleaner = new BatchGlobalSessionCleaner(config, sessions -> {}, guard, null, metrics);
+
+        assertFalse(cleaner.isRunning());
+        assertFalse(cleaner.offer(mockSession("xid-pre-start")));
+        assertTrue(cleaner.shutdown(1000L));
+    }
+
     @Test
     void flushesImmediatelyWhenBatchSizeIsReachedWithoutWaitingForFlushInterval() throws Exception {
         int batchSize = 100;
         PipelineConfig config = PipelineConfig.builder()
                 .cleanerBatchSize(batchSize)
-                .cleanerFlushIntervalMs(5000L)
+                .cleanerFlushIntervalMs(30_000L)
                 .cleanerBufferCapacity(256)
                 .dbMaxConcurrency(4)
                 .build();
@@ -85,20 +114,18 @@ class BatchGlobalSessionCleanerTest {
                 registry,
                 metrics);
 
-        long startNanos = System.nanoTime();
         try {
-            // Enqueue all 100 sessions before the single-writer wakes up, or fast enough to trigger batch-size flush
+            cleaner.start();
             for (int i = 0; i < batchSize; i++) {
                 String xid = "xid-batch-" + i;
-                assertTrue(registry.tryAcquire(xid));
-                assertTrue(cleaner.offer(mockSession(xid)));
+                long token = registry.tryAcquire(xid);
+                assertTrue(token > 0L);
+                assertTrue(cleaner.offer(mockSession(xid), token));
             }
 
-            assertTrue(allDeleted.await(2, TimeUnit.SECONDS));
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-            assertTrue(
-                    elapsedMs < 2000L,
-                    "Expected batch-size trigger well before 5000ms flush interval, took " + elapsedMs + "ms");
+            // Flush interval is 30s; completing within 5s proves batch-size trigger fired without waiting
+            assertTrue(allDeleted.await(5, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(cleaner.shutdown(3000L));
         }
@@ -138,11 +165,13 @@ class BatchGlobalSessionCleanerTest {
             cleaner.start();
             for (int i = 0; i < 7; i++) {
                 String xid = "xid-partial-" + i;
-                assertTrue(registry.tryAcquire(xid));
-                assertTrue(cleaner.offer(mockSession(xid)));
+                long token = registry.tryAcquire(xid);
+                assertTrue(token > 0L);
+                assertTrue(cleaner.offer(mockSession(xid), token));
             }
 
             assertTrue(flushed.await(3, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(cleaner.shutdown(3000L));
         }
@@ -236,25 +265,22 @@ class BatchGlobalSessionCleanerTest {
                 metrics);
 
         try {
+            cleaner.start();
             String[] firstWave = {"ok-1", "poison", "ok-2", "ok-3"};
             for (String xid : firstWave) {
-                assertTrue(registry.tryAcquire(xid));
-                assertTrue(cleaner.offer(mockSession(xid)));
+                long token = registry.tryAcquire(xid);
+                assertTrue(token > 0L);
+                assertTrue(cleaner.offer(mockSession(xid), token));
             }
 
-            // Wait until first wave leases are all released (including the failed poison session)
-            long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
-            while (registry.size() > 0 && System.nanoTime() < deadline) {
-                Thread.sleep(10L);
-            }
-            assertEquals(0, registry.size());
+            awaitCondition(() -> registry.size() == 0, 5000L);
 
-            // Submit a second healthy batch to verify the cleaner thread survived
-            assertTrue(registry.tryAcquire("after-1"));
-            assertTrue(registry.tryAcquire("after-2"));
-            assertTrue(cleaner.offer(mockSession("after-1")));
-            assertTrue(cleaner.offer(mockSession("after-2")));
+            long t1 = registry.tryAcquire("after-1");
+            long t2 = registry.tryAcquire("after-2");
+            assertTrue(cleaner.offer(mockSession("after-1"), t1));
+            assertTrue(cleaner.offer(mockSession("after-2"), t2));
             assertTrue(secondBatchDone.await(5, TimeUnit.SECONDS));
+            awaitCondition(() -> registry.size() == 0, 3000L);
         } finally {
             assertTrue(cleaner.shutdown(3000L));
         }
@@ -268,6 +294,46 @@ class BatchGlobalSessionCleanerTest {
         assertTrue(deletedXids.contains("after-2"));
         assertEquals(5L, metrics.getCleanerDeletedSessionsCount());
         assertEquals(0, registry.size());
+    }
+
+    @Test
+    void survivesStrayInterruptFlagSetByDeleteHandler() throws Exception {
+        PipelineConfig config = PipelineConfig.builder()
+                .cleanerBatchSize(1)
+                .cleanerFlushIntervalMs(20L)
+                .cleanerBufferCapacity(16)
+                .dbMaxConcurrency(2)
+                .build();
+        PipelineMetrics metrics = new PipelineMetrics();
+        BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(2, metrics);
+
+        AtomicBoolean firstInterruptInjected = new AtomicBoolean(false);
+        CountDownLatch secondProcessed = new CountDownLatch(1);
+
+        BatchGlobalSessionCleaner cleaner = new BatchGlobalSessionCleaner(
+                config,
+                sessions -> {
+                    if (firstInterruptInjected.compareAndSet(false, true)) {
+                        // Simulate JDBC/Netty handler leaving the interrupt bit set
+                        Thread.currentThread().interrupt();
+                    } else {
+                        secondProcessed.countDown();
+                    }
+                },
+                guard,
+                null,
+                metrics);
+
+        try {
+            cleaner.start();
+            assertTrue(cleaner.offer(mockSession("xid-int-1")));
+            assertTrue(cleaner.offer(mockSession("xid-int-2")));
+            assertTrue(secondProcessed.await(5, TimeUnit.SECONDS));
+        } finally {
+            assertTrue(cleaner.shutdown(3000L));
+        }
+
+        assertEquals(2L, metrics.getCleanerDeletedSessionsCount());
     }
 
     @Test
@@ -298,33 +364,32 @@ class BatchGlobalSessionCleanerTest {
                 null,
                 metrics);
 
+        ExecutorService callerPool = Executors.newSingleThreadExecutor();
         try {
             cleaner.start();
             assertTrue(cleaner.offer(mockSession("xid-0")));
             assertTrue(firstInFlight.await(3, TimeUnit.SECONDS));
 
-            // Fill bounded capacity of 2
             assertTrue(cleaner.offer(mockSession("xid-1")));
             assertTrue(cleaner.offer(mockSession("xid-2")));
 
-            // Overflow must return false immediately without blocking
-            long startNanos = System.nanoTime();
-            assertFalse(cleaner.offer(mockSession("xid-overflow")));
-            long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-            assertTrue(elapsedMs < 500L);
+            // Verify overflow returns false promptly without blocking the caller
+            Future<Boolean> overflowOffer = callerPool.submit(() -> cleaner.offer(mockSession("xid-overflow")));
+            assertFalse(overflowOffer.get(2, TimeUnit.SECONDS));
             assertEquals(1L, metrics.getCleanerDroppedCount());
             assertEquals(2, metrics.getCurrentCleanerBufferDepth());
         } finally {
+            callerPool.shutdownNow();
             releaseDelete.countDown();
             assertTrue(cleaner.shutdown(3000L));
         }
     }
 
     @Test
-    void gracefulShutdownFlushesRemainingBufferedSessions() throws Exception {
+    void gracefulShutdownFlushesRemainingBufferedSessionsWithoutWaitingForFlushInterval() throws Exception {
         PipelineConfig config = PipelineConfig.builder()
                 .cleanerBatchSize(100)
-                .cleanerFlushIntervalMs(10_000L)
+                .cleanerFlushIntervalMs(30_000L)
                 .cleanerBufferCapacity(64)
                 .dbMaxConcurrency(2)
                 .build();
@@ -348,20 +413,72 @@ class BatchGlobalSessionCleanerTest {
         cleaner.start();
         for (int i = 0; i < 5; i++) {
             String xid = "xid-shutdown-" + i;
-            assertTrue(registry.tryAcquire(xid));
-            assertTrue(cleaner.offer(mockSession(xid)));
+            long token = registry.tryAcquire(xid);
+            assertTrue(token > 0L);
+            assertTrue(cleaner.offer(mockSession(xid), token));
         }
 
-        // Shutdown immediately without waiting for the 10-second flush interval
-        long startNanos = System.nanoTime();
+        // Shutdown finishes promptly despite 30s flush interval
         assertTrue(cleaner.shutdown(3000L));
-        long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-        assertTrue(elapsedMs < 2000L, "Graceful shutdown took too long: " + elapsedMs + "ms");
-
         assertEquals(5, flushedXids.size());
         assertEquals(0, registry.size());
+        assertEquals(0, cleaner.getBufferSize());
         assertFalse(cleaner.isRunning());
         assertFalse(cleaner.offer(mockSession("after-shutdown")));
+    }
+
+    @Test
+    void shutdownTimeoutStopsIssuingNewDbCallsAndReleasesLeases() throws Exception {
+        PipelineConfig config = PipelineConfig.builder()
+                .cleanerBatchSize(1)
+                .cleanerFlushIntervalMs(50L)
+                .cleanerBufferCapacity(16)
+                .dbMaxConcurrency(1)
+                .build();
+        PipelineMetrics metrics = new PipelineMetrics();
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(30_000L);
+        BackgroundDbResourceGuard guard = new BackgroundDbResourceGuard(1, metrics);
+
+        CountDownLatch stuckInFirstFlush = new CountDownLatch(1);
+        CountDownLatch releaseStuckFlush = new CountDownLatch(1);
+        AtomicInteger deleteCalls = new AtomicInteger(0);
+
+        BatchGlobalSessionCleaner cleaner = new BatchGlobalSessionCleaner(
+                config,
+                sessions -> {
+                    deleteCalls.incrementAndGet();
+                    stuckInFirstFlush.countDown();
+                    try {
+                        releaseStuckFlush.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                },
+                guard,
+                registry,
+                metrics);
+
+        try {
+            cleaner.start();
+            long t1 = registry.tryAcquire("xid-stuck");
+            long t2 = registry.tryAcquire("xid-buffered-1");
+            long t3 = registry.tryAcquire("xid-buffered-2");
+            assertTrue(cleaner.offer(mockSession("xid-stuck"), t1));
+            assertTrue(stuckInFirstFlush.await(3, TimeUnit.SECONDS));
+            assertTrue(cleaner.offer(mockSession("xid-buffered-1"), t2));
+            assertTrue(cleaner.offer(mockSession("xid-buffered-2"), t3));
+
+            assertEquals(2, cleaner.getBufferSize());
+
+            // Timeout expires while first flush is stuck -> returns false and releases remaining buffered leases
+            assertFalse(cleaner.shutdown(30L));
+            assertFalse(registry.isInFlight("xid-buffered-1"));
+            assertFalse(registry.isInFlight("xid-buffered-2"));
+        } finally {
+            releaseStuckFlush.countDown();
+        }
+        awaitCondition(() -> registry.size() == 0, 3000L);
+        assertEquals(1, deleteCalls.get());
     }
 
     @Test

@@ -17,14 +17,18 @@
 package org.apache.seata.server.coordinator.pipeline;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Concurrency guard bounding background database operations (batch cleaner and fallback scanner)
  * so they cannot exhaust the shared DB connection pool or starve foreground Netty requests.
  *
- * <p>Foreground transaction paths must never acquire permits from this guard.
+ * <p>Foreground transaction paths must never acquire permits from this guard. Permits obtained
+ * via {@link #tryAcquire(long)} or {@link #tryAcquire(long, TimeUnit)} are returned as idempotent
+ * {@link AutoCloseable} {@link Permit} handles to prevent double-release permit inflation.
  */
 public class BackgroundDbResourceGuard {
 
@@ -70,11 +74,8 @@ public class BackgroundDbResourceGuard {
      */
     public <T, E extends Throwable> T execute(ThrowingSupplier<T, E> action) throws E, InterruptedException {
         Objects.requireNonNull(action, "action must not be null");
-        acquire();
-        try {
+        try (Permit ignored = acquirePermit()) {
             return action.get();
-        } finally {
-            release();
         }
     }
 
@@ -96,52 +97,39 @@ public class BackgroundDbResourceGuard {
 
     /**
      * Attempts to acquire a permit within the specified millisecond timeout.
-     * Callers MUST invoke {@link #release()} in a {@code finally} block whenever this returns {@code true}.
      *
      * @param timeoutMs maximum wait duration in milliseconds
-     * @return {@code true} if a permit was acquired before the timeout elapsed
+     * @return an {@link Optional} containing an idempotent {@link Permit} handle if acquired,
+     *         or {@link Optional#empty()} if the timeout elapsed
      * @throws InterruptedException if interrupted while waiting
      */
-    public boolean tryAcquire(long timeoutMs) throws InterruptedException {
+    public Optional<Permit> tryAcquire(long timeoutMs) throws InterruptedException {
         return tryAcquire(timeoutMs, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Attempts to acquire a permit within the specified timeout.
-     * Callers MUST invoke {@link #release()} in a {@code finally} block whenever this returns {@code true}.
      *
      * @param timeout maximum wait duration
      * @param unit    time unit of {@code timeout}
-     * @return {@code true} if a permit was acquired before the timeout elapsed
+     * @return an {@link Optional} containing an idempotent {@link Permit} handle if acquired,
+     *         or {@link Optional#empty()} if the timeout elapsed
      * @throws InterruptedException if interrupted while waiting
      */
-    public boolean tryAcquire(long timeout, TimeUnit unit) throws InterruptedException {
+    public Optional<Permit> tryAcquire(long timeout, TimeUnit unit) throws InterruptedException {
         Objects.requireNonNull(unit, "unit must not be null");
         metrics.incrementDbGuardWaiting();
         long startNanos = System.nanoTime();
         boolean acquired = false;
         try {
             acquired = semaphore.tryAcquire(Math.max(0L, timeout), unit);
-            return acquired;
         } finally {
-            metrics.decrementDbGuardWaiting();
-            metrics.recordDbGuardWait(System.nanoTime() - startNanos);
-            if (acquired) {
-                metrics.incrementDbGuardActive();
-            }
+            recordPostAcquireMetrics(System.nanoTime() - startNanos, acquired);
         }
+        return acquired ? Optional.of(new Permit(this)) : Optional.empty();
     }
 
-    /**
-     * Releases a permit previously obtained via {@link #tryAcquire(long)} or
-     * {@link #tryAcquire(long, TimeUnit)}.
-     */
-    public void release() {
-        metrics.decrementDbGuardActive();
-        semaphore.release();
-    }
-
-    private void acquire() throws InterruptedException {
+    private Permit acquirePermit() throws InterruptedException {
         metrics.incrementDbGuardWaiting();
         long startNanos = System.nanoTime();
         boolean acquired = false;
@@ -149,11 +137,31 @@ public class BackgroundDbResourceGuard {
             semaphore.acquire();
             acquired = true;
         } finally {
+            recordPostAcquireMetrics(System.nanoTime() - startNanos, acquired);
+        }
+        return new Permit(this);
+    }
+
+    private void recordPostAcquireMetrics(long waitNanos, boolean acquired) {
+        try {
             metrics.decrementDbGuardWaiting();
-            metrics.recordDbGuardWait(System.nanoTime() - startNanos);
+            metrics.recordDbGuardWait(waitNanos);
             if (acquired) {
                 metrics.incrementDbGuardActive();
             }
+        } catch (Throwable metricsError) {
+            if (acquired) {
+                semaphore.release();
+            }
+            throw metricsError;
+        }
+    }
+
+    private void releasePermit() {
+        try {
+            metrics.decrementDbGuardActive();
+        } finally {
+            semaphore.release();
         }
     }
 
@@ -171,6 +179,26 @@ public class BackgroundDbResourceGuard {
 
     public int getWaitingCount() {
         return metrics.getDbGuardWaitingCount();
+    }
+
+    /**
+     * Idempotent {@link AutoCloseable} handle releasing a single guard permit upon {@link #close()}.
+     */
+    public static final class Permit implements AutoCloseable {
+
+        private final BackgroundDbResourceGuard guard;
+        private final AtomicBoolean released = new AtomicBoolean(false);
+
+        private Permit(BackgroundDbResourceGuard guard) {
+            this.guard = guard;
+        }
+
+        @Override
+        public void close() {
+            if (released.compareAndSet(false, true)) {
+                guard.releasePermit();
+            }
+        }
     }
 
     /**

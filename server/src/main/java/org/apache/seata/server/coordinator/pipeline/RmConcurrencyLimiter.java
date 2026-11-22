@@ -23,11 +23,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Per-RM ({@code resourceId}) concurrency limiter for phase-two RPC execution.
@@ -37,13 +39,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>For multi-RM global transactions, permits are always acquired in deterministic lexicographical
  * order of distinct {@code resourceId}s, guaranteeing deadlock freedom across concurrent workers.
+ * Prefer {@link #tryAcquire(GlobalSession)} on worker threads so a throttled RM never blocks
+ * shared worker threads needed by healthy RMs.
+ *
+ * <p>Idle per-resource entries are automatically evicted once all active holders and waiters for
+ * that {@code resourceId} have released, bounding memory usage even under dynamic/multi-tenant
+ * resource IDs.
  */
 public class RmConcurrencyLimiter {
 
-    private static final Permit NOOP_PERMIT = new Permit(Collections.emptyList());
+    private static final Permit NOOP_PERMIT = new Permit(null, Collections.emptyList());
 
     private final int maxConcurrentPerRm;
-    private final ConcurrentHashMap<String, Semaphore> semaphores = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ResourceSlot> slots = new ConcurrentHashMap<>();
 
     /**
      * Creates a per-RM concurrency limiter.
@@ -69,8 +77,63 @@ public class RmConcurrencyLimiter {
     }
 
     /**
-     * Acquires one permit for each distinct {@code resourceId} present in {@code session}'s branch
-     * sessions in sorted lexicographical order.
+     * Non-blockingly attempts to acquire one permit for each distinct {@code resourceId} present
+     * in {@code session}'s branch sessions in sorted lexicographical order.
+     *
+     * <p>If any resource is currently at capacity, all previously acquired permits in this call
+     * are immediately rolled back and {@link Optional#empty()} is returned.
+     *
+     * @param session global session whose branches determine the target resource IDs
+     * @return an {@link Optional} containing a permit handle if all resources had capacity, or
+     *         {@link Optional#empty()} if any target RM is throttled
+     */
+    public Optional<Permit> tryAcquire(GlobalSession session) {
+        if (!isEnabled() || session == null) {
+            return Optional.of(NOOP_PERMIT);
+        }
+        return tryAcquire(extractSortedResourceIds(session));
+    }
+
+    /**
+     * Non-blockingly attempts to acquire one permit for each distinct non-blank {@code resourceId}
+     * in {@code resourceIds} in sorted lexicographical order.
+     *
+     * <p>If any resource is currently at capacity, all previously acquired permits in this call
+     * are immediately rolled back and {@link Optional#empty()} is returned.
+     *
+     * @param resourceIds collection of resource IDs
+     * @return an {@link Optional} containing a permit handle if all resources had capacity, or
+     *         {@link Optional#empty()} if any target RM is throttled
+     */
+    public Optional<Permit> tryAcquire(Collection<String> resourceIds) {
+        if (!isEnabled() || resourceIds == null || resourceIds.isEmpty()) {
+            return Optional.of(NOOP_PERMIT);
+        }
+        List<String> sortedIds = normalizeAndSort(resourceIds);
+        if (sortedIds.isEmpty()) {
+            return Optional.of(NOOP_PERMIT);
+        }
+        List<AcquiredSlot> acquired = new ArrayList<>(sortedIds.size());
+        try {
+            for (String resourceId : sortedIds) {
+                ResourceSlot slot = retainSlot(resourceId);
+                if (!slot.semaphore.tryAcquire()) {
+                    releaseSlotReference(resourceId, slot);
+                    releaseAll(acquired);
+                    return Optional.empty();
+                }
+                acquired.add(new AcquiredSlot(resourceId, slot));
+            }
+            return Optional.of(new Permit(this, acquired));
+        } catch (Throwable t) {
+            releaseAll(acquired);
+            throw t;
+        }
+    }
+
+    /**
+     * Blockingly acquires one permit for each distinct {@code resourceId} present in
+     * {@code session}'s branch sessions in sorted lexicographical order.
      *
      * @param session global session whose branches determine the target resource IDs
      * @return an {@link AutoCloseable} permit handle releasing all acquired permits on close
@@ -85,8 +148,8 @@ public class RmConcurrencyLimiter {
     }
 
     /**
-     * Acquires one permit for each distinct non-blank {@code resourceId} in {@code resourceIds}
-     * in sorted lexicographical order.
+     * Blockingly acquires one permit for each distinct non-blank {@code resourceId} in
+     * {@code resourceIds} in sorted lexicographical order.
      *
      * @param resourceIds collection of resource IDs
      * @return an {@link AutoCloseable} permit handle releasing all acquired permits on close
@@ -101,21 +164,50 @@ public class RmConcurrencyLimiter {
         if (sortedIds.isEmpty()) {
             return NOOP_PERMIT;
         }
-        List<Semaphore> acquired = new ArrayList<>(sortedIds.size());
+        List<AcquiredSlot> acquired = new ArrayList<>(sortedIds.size());
         try {
             for (String resourceId : sortedIds) {
-                Semaphore semaphore =
-                        semaphores.computeIfAbsent(resourceId, key -> new Semaphore(maxConcurrentPerRm, true));
-                semaphore.acquire();
-                acquired.add(semaphore);
+                ResourceSlot slot = retainSlot(resourceId);
+                try {
+                    slot.semaphore.acquire();
+                } catch (InterruptedException | Error | RuntimeException ex) {
+                    releaseSlotReference(resourceId, slot);
+                    throw ex;
+                }
+                acquired.add(new AcquiredSlot(resourceId, slot));
             }
-            return new Permit(acquired);
+            return new Permit(this, acquired);
         } catch (InterruptedException e) {
             releaseAll(acquired);
             throw e;
         } catch (Throwable t) {
             releaseAll(acquired);
             throw t;
+        }
+    }
+
+    private ResourceSlot retainSlot(String resourceId) {
+        return slots.compute(resourceId, (key, existing) -> {
+            ResourceSlot slot = existing != null ? existing : new ResourceSlot(maxConcurrentPerRm);
+            slot.inUse.incrementAndGet();
+            return slot;
+        });
+    }
+
+    private void releaseSlotReference(String resourceId, ResourceSlot target) {
+        slots.computeIfPresent(resourceId, (key, existing) -> {
+            if (existing == target && target.inUse.decrementAndGet() == 0) {
+                return null;
+            }
+            return existing;
+        });
+    }
+
+    private void releaseAll(List<AcquiredSlot> acquired) {
+        for (int i = acquired.size() - 1; i >= 0; i--) {
+            AcquiredSlot entry = acquired.get(i);
+            entry.slot.semaphore.release();
+            releaseSlotReference(entry.resourceId, entry.slot);
         }
     }
 
@@ -155,19 +247,32 @@ public class RmConcurrencyLimiter {
         return sorted.isEmpty() ? Collections.emptyList() : new ArrayList<>(sorted);
     }
 
-    private static void releaseAll(List<Semaphore> acquired) {
-        for (int i = acquired.size() - 1; i >= 0; i--) {
-            acquired.get(i).release();
+    /**
+     * Returns the number of distinct resource IDs currently active or waited on in this limiter.
+     *
+     * @return active tracked resource count
+     */
+    public int trackedResourceCount() {
+        return slots.size();
+    }
+
+    private static final class ResourceSlot {
+        private final Semaphore semaphore;
+        private final AtomicInteger inUse = new AtomicInteger(0);
+
+        private ResourceSlot(int maxPermits) {
+            this.semaphore = new Semaphore(maxPermits, true);
         }
     }
 
-    /**
-     * Returns the number of distinct resource IDs currently tracked by this limiter.
-     *
-     * @return tracked resource count
-     */
-    public int trackedResourceCount() {
-        return semaphores.size();
+    private static final class AcquiredSlot {
+        private final String resourceId;
+        private final ResourceSlot slot;
+
+        private AcquiredSlot(String resourceId, ResourceSlot slot) {
+            this.resourceId = resourceId;
+            this.slot = slot;
+        }
     }
 
     /**
@@ -175,17 +280,19 @@ public class RmConcurrencyLimiter {
      */
     public static final class Permit implements AutoCloseable {
 
-        private final List<Semaphore> semaphores;
+        private final RmConcurrencyLimiter limiter;
+        private final List<AcquiredSlot> acquiredSlots;
         private final AtomicBoolean released = new AtomicBoolean(false);
 
-        private Permit(List<Semaphore> semaphores) {
-            this.semaphores = semaphores;
+        private Permit(RmConcurrencyLimiter limiter, List<AcquiredSlot> acquiredSlots) {
+            this.limiter = limiter;
+            this.acquiredSlots = acquiredSlots;
         }
 
         @Override
         public void close() {
-            if (!semaphores.isEmpty() && released.compareAndSet(false, true)) {
-                releaseAll(semaphores);
+            if (limiter != null && !acquiredSlots.isEmpty() && released.compareAndSet(false, true)) {
+                limiter.releaseAll(acquiredSlots);
             }
         }
     }

@@ -48,8 +48,10 @@ class PipelineMetricsTest {
         metrics.recordEnqueued();
         metrics.recordDropped();
         metrics.recordDedupSkipped();
-        metrics.recordRpcSuccess(TimeUnit.MILLISECONDS.toNanos(4));
+        metrics.recordRpcCompleted(TimeUnit.MILLISECONDS.toNanos(4));
+        metrics.recordRpcRetryNeeded(TimeUnit.MILLISECONDS.toNanos(3));
         metrics.recordRpcFailure(TimeUnit.MILLISECONDS.toNanos(9));
+        metrics.recordRmThrottled();
         metrics.recordCleanerBatch(25, TimeUnit.MILLISECONDS.toNanos(6));
         metrics.recordCleanerDeletedSessions(3);
         metrics.recordCleanerBatchFailure();
@@ -62,9 +64,12 @@ class PipelineMetricsTest {
         assertEquals(2L, snap.getEnqueued());
         assertEquals(1L, snap.getDropped());
         assertEquals(1L, snap.getDedupSkipped());
-        assertEquals(1L, snap.getRpcSuccess());
+        assertEquals(1L, snap.getRpcCompleted());
+        assertEquals(1L, snap.getRpcRetryNeeded());
+        assertEquals(2L, snap.getRpcSuccess());
         assertEquals(1L, snap.getRpcFailure());
-        assertEquals(TimeUnit.MILLISECONDS.toNanos(13), snap.getRpcLatencyTotalNanos());
+        assertEquals(1L, snap.getRmThrottled());
+        assertEquals(TimeUnit.MILLISECONDS.toNanos(16), snap.getRpcLatencyTotalNanos());
         assertEquals(TimeUnit.MILLISECONDS.toNanos(9), snap.getRpcLatencyMaxNanos());
         assertEquals(1L, snap.getCleanerBatches());
         assertEquals(28L, snap.getCleanerDeletedSessions());
@@ -81,6 +86,7 @@ class PipelineMetricsTest {
         assertEquals(7, snap.getCurrentCleanerBufferDepth());
         assertEquals(19, snap.getCurrentInFlightCount());
         assertTrue(snap.toString().contains("enqueued=2"));
+        assertTrue(snap.toString().contains("rmThrottled=1"));
 
         metrics.decrementDbGuardActive();
         metrics.decrementDbGuardWaiting();
@@ -102,8 +108,10 @@ class PipelineMetricsTest {
         metrics.recordEnqueued();
         metrics.recordDropped();
         metrics.recordDedupSkipped();
-        metrics.recordRpcSuccess(TimeUnit.MILLISECONDS.toNanos(5));
+        metrics.recordRpcCompleted(TimeUnit.MILLISECONDS.toNanos(5));
+        metrics.recordRpcRetryNeeded(TimeUnit.MILLISECONDS.toNanos(2));
         metrics.recordRpcFailure(TimeUnit.MILLISECONDS.toNanos(10));
+        metrics.recordRmThrottled();
         metrics.recordCleanerBatch(10, TimeUnit.MILLISECONDS.toNanos(3));
         metrics.recordCleanerBatchFailure();
         metrics.recordCleanerDropped();
@@ -135,13 +143,25 @@ class PipelineMetricsTest {
         assertEquals(
                 1.0,
                 measurements
-                        .get(MeterIdConstants.COUNTER_PIPELINE_RPC_SUCCESS.toString())
+                        .get(MeterIdConstants.COUNTER_PIPELINE_RPC_COMPLETED.toString())
+                        .getValue(),
+                0.001);
+        assertEquals(
+                1.0,
+                measurements
+                        .get(MeterIdConstants.COUNTER_PIPELINE_RPC_RETRY_NEEDED.toString())
                         .getValue(),
                 0.001);
         assertEquals(
                 1.0,
                 measurements
                         .get(MeterIdConstants.COUNTER_PIPELINE_RPC_FAILURE.toString())
+                        .getValue(),
+                0.001);
+        assertEquals(
+                1.0,
+                measurements
+                        .get(MeterIdConstants.COUNTER_PIPELINE_RM_THROTTLED.toString())
                         .getValue(),
                 0.001);
         assertEquals(

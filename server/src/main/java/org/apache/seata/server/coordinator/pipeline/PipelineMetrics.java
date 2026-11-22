@@ -32,6 +32,12 @@ import java.util.function.IntSupplier;
  * <p>Maintains low-overhead local atomic counters/timers/gauges for direct inspection and
  * optionally forwards updates to a Seata metrics {@link Registry} (such as the one managed
  * by {@link MetricsManager}) when supplied.
+ *
+ * <p><b>Single-registration note:</b> Seata's {@code CompactRegistry#getGauge} uses
+ * {@code computeIfAbsent} semantics, so at most one {@link PipelineMetrics} instance should
+ * be registered per {@link Registry} instance (unless {@link Registry#clearUp()} is called
+ * between registrations); subsequent instances sharing the same registry will not overwrite
+ * already-bound gauge suppliers.
  */
 public class PipelineMetrics {
 
@@ -42,8 +48,10 @@ public class PipelineMetrics {
     private final LongAdder enqueued = new LongAdder();
     private final LongAdder dropped = new LongAdder();
     private final LongAdder dedupSkipped = new LongAdder();
-    private final LongAdder rpcSuccess = new LongAdder();
+    private final LongAdder rpcCompleted = new LongAdder();
+    private final LongAdder rpcRetryNeeded = new LongAdder();
     private final LongAdder rpcFailure = new LongAdder();
+    private final LongAdder rmThrottled = new LongAdder();
     private final LongAdder rpcLatencyTotalNanos = new LongAdder();
     private final LongAdder rpcLatencyCount = new LongAdder();
     private final AtomicLong rpcLatencyMaxNanos = new AtomicLong(0L);
@@ -75,6 +83,9 @@ public class PipelineMetrics {
     /**
      * Creates a {@link PipelineMetrics} instance backed by the given Seata {@link Registry}.
      *
+     * <p>Only one {@link PipelineMetrics} should be bound to a given {@link Registry} because
+     * gauge suppliers are registered once per meter key.
+     *
      * @param registry optional metrics registry; may be {@code null} when metrics export is disabled
      */
     public PipelineMetrics(Registry registry) {
@@ -91,6 +102,7 @@ public class PipelineMetrics {
 
     /**
      * Creates a {@link PipelineMetrics} instance attached to the global {@link MetricsManager} registry.
+     * Callers should construct this once per coordinator lifecycle.
      *
      * @return metrics instance bound to {@link MetricsManager#get()}
      */
@@ -131,19 +143,56 @@ public class PipelineMetrics {
         }
     }
 
-    public void recordRpcSuccess(long durationNanos) {
-        rpcSuccess.increment();
+    /**
+     * Records a phase-two invocation that completed and indicated readiness for asynchronous
+     * global-session cleanup ({@code PhaseTwoCommitHandler#executePhaseTwo} returned {@code true}).
+     *
+     * @param durationNanos handler execution duration in nanoseconds
+     */
+    public void recordRpcCompleted(long durationNanos) {
+        rpcCompleted.increment();
         recordRpcLatency(durationNanos);
         if (registry != null) {
-            registry.getCounter(MeterIdConstants.COUNTER_PIPELINE_RPC_SUCCESS).increase(1L);
+            registry.getCounter(MeterIdConstants.COUNTER_PIPELINE_RPC_COMPLETED).increase(1L);
         }
     }
 
+    /**
+     * Records a phase-two invocation that returned {@code false} (indicating retry is still needed
+     * or the handler already finalized deletion inline).
+     *
+     * @param durationNanos handler execution duration in nanoseconds
+     */
+    public void recordRpcRetryNeeded(long durationNanos) {
+        rpcRetryNeeded.increment();
+        recordRpcLatency(durationNanos);
+        if (registry != null) {
+            registry.getCounter(MeterIdConstants.COUNTER_PIPELINE_RPC_RETRY_NEEDED)
+                    .increase(1L);
+        }
+    }
+
+    /**
+     * Records a phase-two invocation that terminated with an exception or interrupt.
+     *
+     * @param durationNanos handler execution duration in nanoseconds
+     */
     public void recordRpcFailure(long durationNanos) {
         rpcFailure.increment();
         recordRpcLatency(durationNanos);
         if (registry != null) {
             registry.getCounter(MeterIdConstants.COUNTER_PIPELINE_RPC_FAILURE).increase(1L);
+        }
+    }
+
+    /**
+     * Records a session skipped without blocking because one of its target RMs reached
+     * {@code maxConcurrentPerRm}.
+     */
+    public void recordRmThrottled() {
+        rmThrottled.increment();
+        if (registry != null) {
+            registry.getCounter(MeterIdConstants.COUNTER_PIPELINE_RM_THROTTLED).increase(1L);
         }
     }
 
@@ -242,12 +291,30 @@ public class PipelineMetrics {
         return dedupSkipped.sum();
     }
 
+    public long getRpcCompletedCount() {
+        return rpcCompleted.sum();
+    }
+
+    public long getRpcRetryNeededCount() {
+        return rpcRetryNeeded.sum();
+    }
+
+    /**
+     * Returns the total number of phase-two invocations that returned without throwing
+     * ({@code rpcCompleted + rpcRetryNeeded}).
+     *
+     * @return non-throwing RPC invocation count
+     */
     public long getRpcSuccessCount() {
-        return rpcSuccess.sum();
+        return rpcCompleted.sum() + rpcRetryNeeded.sum();
     }
 
     public long getRpcFailureCount() {
         return rpcFailure.sum();
+    }
+
+    public long getRmThrottledCount() {
+        return rmThrottled.sum();
     }
 
     public long getRpcLatencyCount() {
@@ -332,8 +399,10 @@ public class PipelineMetrics {
                 getEnqueuedCount(),
                 getDroppedCount(),
                 getDedupSkippedCount(),
-                getRpcSuccessCount(),
+                getRpcCompletedCount(),
+                getRpcRetryNeededCount(),
                 getRpcFailureCount(),
+                getRmThrottledCount(),
                 getRpcLatencyTotalNanos(),
                 getRpcLatencyMaxNanos(),
                 getCleanerBatchesCount(),
@@ -359,8 +428,10 @@ public class PipelineMetrics {
         private final long enqueued;
         private final long dropped;
         private final long dedupSkipped;
-        private final long rpcSuccess;
+        private final long rpcCompleted;
+        private final long rpcRetryNeeded;
         private final long rpcFailure;
+        private final long rmThrottled;
         private final long rpcLatencyTotalNanos;
         private final long rpcLatencyMaxNanos;
         private final long cleanerBatches;
@@ -382,8 +453,10 @@ public class PipelineMetrics {
                 long enqueued,
                 long dropped,
                 long dedupSkipped,
-                long rpcSuccess,
+                long rpcCompleted,
+                long rpcRetryNeeded,
                 long rpcFailure,
+                long rmThrottled,
                 long rpcLatencyTotalNanos,
                 long rpcLatencyMaxNanos,
                 long cleanerBatches,
@@ -403,8 +476,10 @@ public class PipelineMetrics {
             this.enqueued = enqueued;
             this.dropped = dropped;
             this.dedupSkipped = dedupSkipped;
-            this.rpcSuccess = rpcSuccess;
+            this.rpcCompleted = rpcCompleted;
+            this.rpcRetryNeeded = rpcRetryNeeded;
             this.rpcFailure = rpcFailure;
+            this.rmThrottled = rmThrottled;
             this.rpcLatencyTotalNanos = rpcLatencyTotalNanos;
             this.rpcLatencyMaxNanos = rpcLatencyMaxNanos;
             this.cleanerBatches = cleanerBatches;
@@ -435,12 +510,24 @@ public class PipelineMetrics {
             return dedupSkipped;
         }
 
+        public long getRpcCompleted() {
+            return rpcCompleted;
+        }
+
+        public long getRpcRetryNeeded() {
+            return rpcRetryNeeded;
+        }
+
         public long getRpcSuccess() {
-            return rpcSuccess;
+            return rpcCompleted + rpcRetryNeeded;
         }
 
         public long getRpcFailure() {
             return rpcFailure;
+        }
+
+        public long getRmThrottled() {
+            return rmThrottled;
         }
 
         public long getRpcLatencyTotalNanos() {
@@ -513,8 +600,10 @@ public class PipelineMetrics {
                     + "enqueued=" + enqueued
                     + ", dropped=" + dropped
                     + ", dedupSkipped=" + dedupSkipped
-                    + ", rpcSuccess=" + rpcSuccess
+                    + ", rpcCompleted=" + rpcCompleted
+                    + ", rpcRetryNeeded=" + rpcRetryNeeded
                     + ", rpcFailure=" + rpcFailure
+                    + ", rmThrottled=" + rmThrottled
                     + ", cleanerBatches=" + cleanerBatches
                     + ", cleanerDeletedSessions=" + cleanerDeletedSessions
                     + ", cleanerBatchFailures=" + cleanerBatchFailures

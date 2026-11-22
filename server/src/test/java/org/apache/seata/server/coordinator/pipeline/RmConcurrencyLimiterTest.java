@@ -23,10 +23,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.env.MockEnvironment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -74,13 +79,69 @@ class RmConcurrencyLimiterTest {
         try (RmConcurrencyLimiter.Permit permit = limiter.acquire(Arrays.asList("rm-1", "rm-2"))) {
             assertEquals(0, limiter.trackedResourceCount());
         }
+        Optional<RmConcurrencyLimiter.Permit> nonBlocking = limiter.tryAcquire(Arrays.asList("rm-1", "rm-2"));
+        assertTrue(nonBlocking.isPresent());
+        nonBlocking.get().close();
+        assertEquals(0, limiter.trackedResourceCount());
+    }
+
+    @Test
+    void nonBlockingTryAcquireRollsBackPartialPermitsAndEvictsIdleSlots() {
+        RmConcurrencyLimiter limiter = new RmConcurrencyLimiter(1);
+
+        // Hold rm-b
+        Optional<RmConcurrencyLimiter.Permit> rmBHolder = limiter.tryAcquire(Collections.singletonList("rm-b"));
+        assertTrue(rmBHolder.isPresent());
+        assertEquals(1, limiter.trackedResourceCount());
+
+        // Attempting [rm-b, rm-a] acquires rm-a first (sorted), fails on rm-b, and rolls back rm-a immediately
+        assertFalse(limiter.tryAcquire(Arrays.asList("rm-b", "rm-a")).isPresent());
+        assertEquals(1, limiter.trackedResourceCount());
+
+        // Prove rm-a was rolled back and is immediately acquirable
+        Optional<RmConcurrencyLimiter.Permit> rmAHolder = limiter.tryAcquire(Collections.singletonList("rm-a"));
+        assertTrue(rmAHolder.isPresent());
+        assertEquals(2, limiter.trackedResourceCount());
+
+        rmAHolder.get().close();
+        rmBHolder.get().close();
+        // Idle entries are automatically evicted once all permits are released
+        assertEquals(0, limiter.trackedResourceCount());
+    }
+
+    @Test
+    void blockingAcquireDoesNotDeadlockUnderReversedMultiRmOrdering() throws Exception {
+        RmConcurrencyLimiter limiter = new RmConcurrencyLimiter(1);
+        int totalTasks = 40;
+        ExecutorService pool = Executors.newFixedThreadPool(8);
+        try {
+            List<Future<?>> futures = new ArrayList<>(totalTasks);
+            for (int i = 0; i < totalTasks; i++) {
+                final boolean forward = (i % 2 == 0);
+                futures.add(pool.submit(() -> {
+                    List<String> resources =
+                            forward ? Arrays.asList("rm-a", "rm-b", "rm-c") : Arrays.asList("rm-c", "rm-b", "rm-a");
+                    try (RmConcurrencyLimiter.Permit ignored = limiter.acquire(resources)) {
+                        Thread.yield();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException(e);
+                    }
+                }));
+            }
+            for (Future<?> future : futures) {
+                future.get(5, TimeUnit.SECONDS);
+            }
+        } finally {
+            pool.shutdownNow();
+        }
+        assertEquals(0, limiter.trackedResourceCount());
     }
 
     @Test
     void releasesPartiallyAcquiredPermitsWhenInterrupted() throws Exception {
         RmConcurrencyLimiter limiter = new RmConcurrencyLimiter(1);
 
-        // Hold rm-b so a worker acquiring [rm-a, rm-b] acquires rm-a first and blocks on rm-b
         RmConcurrencyLimiter.Permit rmBHolder = limiter.acquire(Collections.singletonList("rm-b"));
         CountDownLatch interrupted = new CountDownLatch(1);
         AtomicBoolean started = new AtomicBoolean(false);
@@ -94,24 +155,21 @@ class RmConcurrencyLimiterTest {
         });
         try {
             waiter.start();
-            // Wait until waiter has acquired rm-a and parked on rm-b
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(3);
             while ((!started.get() || limiter.trackedResourceCount() < 2) && System.nanoTime() < deadline) {
                 Thread.yield();
             }
-            // Give waiter a tiny moment to block on rm-b
-            Thread.sleep(30L);
             waiter.interrupt();
             assertTrue(interrupted.await(3, TimeUnit.SECONDS));
             waiter.join(2000L);
 
             // rm-a must have been released on rollback, so acquiring rm-a succeeds immediately
             try (RmConcurrencyLimiter.Permit rmAPermit = limiter.acquire(Collections.singletonList("rm-a"))) {
-                // Closing twice must be idempotent and not over-release
                 rmAPermit.close();
             }
         } finally {
             rmBHolder.close();
         }
+        assertEquals(0, limiter.trackedResourceCount());
     }
 }

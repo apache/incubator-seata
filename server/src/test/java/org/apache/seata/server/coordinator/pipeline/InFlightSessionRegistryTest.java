@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,76 +44,131 @@ class InFlightSessionRegistryTest {
     }
 
     @Test
+    void defaultMonotonicClockConstructorWorks() {
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(5000L);
+        long token = registry.tryAcquire("xid-mono");
+        assertTrue(token > InFlightSessionRegistry.INVALID_TOKEN);
+        assertTrue(registry.isInFlight("xid-mono"));
+        assertTrue(registry.release("xid-mono", token));
+        assertFalse(registry.isInFlight("xid-mono"));
+    }
+
+    @Test
     void acquireRejectReleaseAndReacquireWorkDeterministically() {
         AtomicLong clock = new AtomicLong(1000L);
         InFlightSessionRegistry registry = new InFlightSessionRegistry(5000L, clock::get);
 
-        assertFalse(registry.tryAcquire(null));
-        assertFalse(registry.tryAcquire(""));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquire(null));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquire(""));
         assertFalse(registry.isInFlight(null));
         assertFalse(registry.isInFlight("xid-1"));
 
-        assertTrue(registry.tryAcquire("xid-1"));
+        long token1 = registry.tryAcquire("xid-1");
+        assertTrue(token1 > InFlightSessionRegistry.INVALID_TOKEN);
         assertTrue(registry.isInFlight("xid-1"));
         assertEquals(1, registry.size());
 
         // Duplicate acquire rejected while unexpired
-        assertFalse(registry.tryAcquire("xid-1"));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquire("xid-1"));
 
-        // Release allows immediate re-acquire
-        registry.release("xid-1");
+        // Release with wrong token is ignored
+        assertFalse(registry.release("xid-1", token1 + 99L));
+        assertTrue(registry.isInFlight("xid-1"));
+
+        // Release with matching token allows immediate re-acquire with a new token
+        assertTrue(registry.release("xid-1", token1));
         assertFalse(registry.isInFlight("xid-1"));
         assertEquals(0, registry.size());
-        assertTrue(registry.tryAcquire("xid-1"));
+
+        long token2 = registry.tryAcquire("xid-1");
+        assertTrue(token2 > InFlightSessionRegistry.INVALID_TOKEN);
+        assertNotEquals(token1, token2);
     }
 
     @Test
-    void expiredLeaseAllowsReacquireAndLazyCleanup() {
+    void expiredOwnerCannotReleaseOrRenewLeaseAcquiredByNewOwner() {
         AtomicLong clock = new AtomicLong(10_000L);
         InFlightSessionRegistry registry = new InFlightSessionRegistry(1_000L, clock::get);
 
-        assertTrue(registry.tryAcquire("xid-a"));
+        long tokenA = registry.tryAcquire("xid-contested");
+        assertTrue(tokenA > InFlightSessionRegistry.INVALID_TOKEN);
 
-        // Just before expiration
-        clock.set(10_999L);
-        assertTrue(registry.isInFlight("xid-a"));
-        assertFalse(registry.tryAcquire("xid-a"));
-
-        // Exactly at expiration boundary -> expired
+        // Lease expires and worker B acquires a new token
         clock.set(11_000L);
-        assertFalse(registry.isInFlight("xid-a"));
-        assertEquals(0, registry.size());
+        long tokenB = registry.tryAcquire("xid-contested");
+        assertTrue(tokenB > InFlightSessionRegistry.INVALID_TOKEN);
+        assertNotEquals(tokenA, tokenB);
 
-        // Re-acquires cleanly with fresh TTL
-        assertTrue(registry.tryAcquire("xid-a"));
-        clock.set(11_999L);
-        assertTrue(registry.isInFlight("xid-a"));
+        // Stale worker A attempts release and renew -> both MUST fail and keep B's lease active
+        assertFalse(registry.release("xid-contested", tokenA));
+        assertFalse(registry.renew("xid-contested", tokenA));
+        assertTrue(registry.isInFlight("xid-contested"));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquire("xid-contested"));
 
-        // Direct tryAcquire after expiry without calling isInFlight first
-        clock.set(12_000L);
-        assertTrue(registry.tryAcquire("xid-a"));
-        assertEquals(1, registry.size());
+        // Worker B can renew and release its own lease cleanly
+        clock.set(11_500L);
+        assertTrue(registry.renew("xid-contested", tokenB));
+        clock.set(12_499L);
+        assertTrue(registry.isInFlight("xid-contested"));
+        assertTrue(registry.release("xid-contested", tokenB));
+        assertFalse(registry.isInFlight("xid-contested"));
     }
 
     @Test
-    void evictExpiredRemovesOnlyExpiredEntries() {
+    void queuedLeaseDoesNotExpireUnderBacklogUntilActivatedViaRenew() {
+        AtomicLong clock = new AtomicLong(1_000L);
+        InFlightSessionRegistry registry = new InFlightSessionRegistry(500L, clock::get);
+
+        long token = registry.tryAcquireQueued("xid-queued");
+        assertTrue(token > InFlightSessionRegistry.INVALID_TOKEN);
+
+        // Advance clock far beyond leaseMs (10x) while still queued
+        clock.set(6_000L);
+        assertTrue(registry.isInFlight("xid-queued"));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquireQueued("xid-queued"));
+        assertEquals(InFlightSessionRegistry.INVALID_TOKEN, registry.tryAcquire("xid-queued"));
+        assertEquals(0, registry.evictExpired());
+
+        // Worker dequeues and activates execution TTL via renew
+        assertTrue(registry.renew("xid-queued", token));
+        clock.set(6_499L);
+        assertTrue(registry.isInFlight("xid-queued"));
+
+        // Now expires once execution TTL elapses
+        clock.set(6_500L);
+        assertFalse(registry.isInFlight("xid-queued"));
+        assertEquals(0, registry.size());
+    }
+
+    @Test
+    void evictExpiredAndThrottledAutoEvictReclaimOnlyExpiredActiveEntries() {
         AtomicLong clock = new AtomicLong(0L);
         InFlightSessionRegistry registry = new InFlightSessionRegistry(100L, clock::get);
 
-        assertTrue(registry.tryAcquire("xid-1"));
-        assertTrue(registry.tryAcquire("xid-2"));
+        assertTrue(registry.tryAcquire("xid-1") > 0L);
+        assertTrue(registry.tryAcquire("xid-2") > 0L);
+        assertTrue(registry.tryAcquireQueued("xid-queued") > 0L);
 
         clock.set(60L);
-        assertTrue(registry.tryAcquire("xid-3"));
-        assertEquals(3, registry.size());
+        assertTrue(registry.tryAcquire("xid-3") > 0L);
+        assertEquals(4, registry.size());
 
-        clock.set(100L);
-        int evicted = registry.evictExpired();
-        assertEquals(2, evicted);
-        assertEquals(1, registry.size());
+        // Advance past xid-1 and xid-2 expiry; throttled eviction on next acquire reclaims them
+        clock.set(120L);
+        assertTrue(registry.tryAcquire("xid-4") > 0L);
         assertFalse(registry.isInFlight("xid-1"));
         assertFalse(registry.isInFlight("xid-2"));
+        assertTrue(registry.isInFlight("xid-queued"));
         assertTrue(registry.isInFlight("xid-3"));
+        assertTrue(registry.isInFlight("xid-4"));
+        assertEquals(3, registry.size());
+
+        // Explicit evictExpired removes xid-3 once it expires too, leaving queued + xid-4
+        clock.set(160L);
+        assertEquals(1, registry.evictExpired());
+        assertEquals(2, registry.size());
+        assertTrue(registry.isInFlight("xid-queued"));
+        assertTrue(registry.isInFlight("xid-4"));
     }
 
     @Test
@@ -137,7 +193,7 @@ class InFlightSessionRegistryTest {
                         Thread.currentThread().interrupt();
                         return;
                     }
-                    if (registry.tryAcquire("shared-xid")) {
+                    if (registry.tryAcquire("shared-xid") != InFlightSessionRegistry.INVALID_TOKEN) {
                         winners.incrementAndGet();
                     }
                 }));
