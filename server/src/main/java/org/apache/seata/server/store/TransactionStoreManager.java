@@ -38,6 +38,36 @@ public interface TransactionStoreManager {
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
     /**
+     * Batch remove global sessions from the underlying store.
+     *
+     * <p>Precondition: this storage-level operation deletes global session records only and does
+     * <strong>not</strong> delete branch sessions or release locks (it is not a lifecycle
+     * {@code end()}). Callers must have already cleaned up all branches and locks.
+     *
+     * <p>Non-atomicity and idempotency: chunked implementations commit each chunk independently
+     * (e.g. {@code autoCommit=true} in DB mode or per-chunk pipelines in Redis mode), so a failure on
+     * a later chunk may leave earlier chunks already deleted. Because deletion is idempotent, callers
+     * may safely retry the full batch.
+     *
+     * @param sessions the global sessions
+     * @return the boolean
+     */
+    default boolean removeGlobalSessions(List<GlobalSession> sessions) {
+        if (sessions == null || sessions.isEmpty()) {
+            return true;
+        }
+        for (GlobalSession session : sessions) {
+            if (session == null) {
+                continue;
+            }
+            if (!writeSession(LogOperation.GLOBAL_REMOVE, session)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Read global session global session.
      *
      * @param xid the xid

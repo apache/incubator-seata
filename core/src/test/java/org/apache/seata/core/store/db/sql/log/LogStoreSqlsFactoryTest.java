@@ -438,4 +438,131 @@ public class LogStoreSqlsFactoryTest {
         }
         return count;
     }
+
+    @Test
+    public void deleteGlobalTransactionsSqlAllDialectsTest() {
+        String[] dbTypes = {
+            "mysql",
+            "postgresql",
+            "oracle",
+            "sqlserver",
+            "h2",
+            "dm",
+            "mariadb",
+            "oceanbase",
+            "polardb-x",
+            "kingbase",
+            "oscar"
+        };
+        String expected = "delete from global_table where xid in (?,?,?)";
+        for (String dbType : dbTypes) {
+            LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+            Assertions.assertNotNull(logStoreSqls, "LogStoreSqls should not be null for " + dbType);
+            String sql = logStoreSqls.getDeleteGlobalTransactionsSQL(globalTable, "?,?,?");
+            Assertions.assertEquals(expected, sql, "Unexpected batch delete SQL for dialect " + dbType);
+        }
+    }
+
+    @Test
+    public void deleteGlobalTransactionsSqlDefaultInterfaceMethodTest() {
+        LogStoreSqls customSqls = new LogStoreSqls() {
+            @Override
+            public String getAllGlobalSessionSql(String globalTable, String whereCondition) {
+                return null;
+            }
+
+            @Override
+            public String getAllBranchSessionSQL(String branchTable, String whereCondition) {
+                return null;
+            }
+
+            @Override
+            public String getInsertGlobalTransactionSQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getDeleteGlobalTransactionSQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryGlobalTransactionSQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryGlobalTransactionSQLByTransactionId(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
+                return null;
+            }
+
+            @Override
+            public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getInsertBranchTransactionSQL(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusSQL(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusAppDataSQL(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getDeleteBranchTransactionByBranchIdSQL(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getDeleteBranchTransactionByXId(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryBranchTransaction(String branchTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryBranchTransaction(String branchTable, String paramsPlaceHolder) {
+                return null;
+            }
+
+            @Override
+            public String getQueryGlobalMax(String globalTable) {
+                return null;
+            }
+
+            @Override
+            public String getQueryBranchMax(String branchTable) {
+                return null;
+            }
+        };
+        Assertions.assertEquals(
+                "delete from custom_global where xid in (?,?)",
+                customSqls.getDeleteGlobalTransactionsSQL("custom_global", "?,?"));
+    }
 }

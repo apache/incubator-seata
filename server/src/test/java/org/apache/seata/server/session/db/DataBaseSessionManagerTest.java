@@ -44,7 +44,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -575,6 +578,47 @@ public class DataBaseSessionManagerTest extends BaseSpringBootTest {
                 conn.close();
             }
         }
+    }
+
+    @Test
+    public void test_removeGlobalSessions() throws Exception {
+        GlobalSession keeper = createTestSession("batch-sm-keep", 146758000L, GlobalStatus.Begin);
+        sessionManager.addGlobalSession(keeper);
+
+        List<GlobalSession> targets = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            GlobalSession session = createTestSession("batch-sm-del-" + i, 146758100L + i, GlobalStatus.Committed);
+            sessionManager.addGlobalSession(session);
+            targets.add(session);
+        }
+
+        try {
+            // null and empty should be no-op
+            sessionManager.removeGlobalSessions(null);
+            sessionManager.removeGlobalSessions(Collections.emptyList());
+
+            // batch delete targets plus an already-absent session
+            List<GlobalSession> batch = new ArrayList<>(targets);
+            batch.add(createTestSession("batch-sm-absent", 146758999L, GlobalStatus.Committed));
+            sessionManager.removeGlobalSessions(batch);
+
+            for (GlobalSession target : targets) {
+                Assertions.assertNull(sessionManager.findGlobalSession(target.getXid(), false));
+            }
+            Assertions.assertNotNull(sessionManager.findGlobalSession(keeper.getXid(), false));
+        } finally {
+            sessionManager.removeGlobalSessions(Arrays.asList(keeper));
+        }
+    }
+
+    private GlobalSession createTestSession(String xid, long transactionId, GlobalStatus status) {
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
+        session.setXid(xid);
+        session.setTransactionId(transactionId);
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(status);
+        return session;
     }
 
     @AfterAll

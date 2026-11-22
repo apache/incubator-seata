@@ -110,6 +110,35 @@ public interface LogStore {
     boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
 
     /**
+     * Batch delete global transaction dos.
+     *
+     * <p>Precondition: this storage-level operation deletes global transaction records only and does
+     * <strong>not</strong> delete branch transaction records or release locks. Callers must ensure
+     * all associated branches and locks have already been cleaned up.
+     *
+     * <p>Non-atomicity and idempotency: implementations may execute chunked statements with
+     * {@code autoCommit=true}, so a failure on a later chunk can leave earlier chunks already
+     * deleted. Because deletion is idempotent, callers may safely retry the entire batch on failure.
+     *
+     * @param globalTransactionDOs the global transaction dos
+     * @return the boolean
+     */
+    default boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (globalTransactionDOs == null || globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO == null) {
+                continue;
+            }
+            if (!deleteGlobalTransactionDO(globalTransactionDO)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Query branch transaction do list.
      *
      * @param xid the xid

@@ -100,6 +100,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             "delete from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
+     * The constant DELETE_GLOBAL_TRANSACTIONS.
+     */
+    public static final String DELETE_GLOBAL_TRANSACTIONS = "delete from " + GLOBAL_TABLE_PLACEHOLD + " where "
+            + ServerTableColumnsName.GLOBAL_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
     public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS
