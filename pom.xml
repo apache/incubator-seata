@@ -323,6 +323,36 @@
             </build>
         </profile>
 
+        <!-- A complete distribution includes the JDK 25 Console and Naming Server. -->
+        <profile>
+            <id>release-seata</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>require-distribution-jdk</id>
+                                <inherited>false</inherited>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[25,)</version>
+                                            <message>The complete Seata distribution requires JDK 25 or later. Use the default build for client-only development. See BUILDING.md.</message>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- profile: source-release -->
         <profile>
             <id>source-release</id>
