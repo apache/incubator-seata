@@ -90,7 +90,6 @@ class AuthenticationBehaviorTest {
     void modificationKeyHasUserExpiryAndModifyClaim() {
         JwtTokenUtils tokens = tokens(60000);
         ModifyConfirmServiceImpl service = new ModifyConfirmServiceImpl(tokens);
-        ReflectionTestUtils.setField(service, "secretKey", SECRET);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("alice", ""));
         long before = System.currentTimeMillis();
         String key = service.confirmAndGetKey().get("modify_key");
