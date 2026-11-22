@@ -99,10 +99,26 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Deletes global rows from the database in chunks (non-atomic across chunks, idempotent on
+     * retry). Does not delete branch rows or release locks.
+     */
     @Override
     public void removeGlobalSessions(List<GlobalSession> sessions) throws TransactionException {
         if (CollectionUtils.isEmpty(sessions)) {
             return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            GlobalSession first = sessions.get(0);
+            GlobalSession last = sessions.get(sessions.size() - 1);
+            LOGGER.debug(
+                    "MANAGER[{}] batch remove {} global sessions (firstXid={}, lastXid={})",
+                    name,
+                    sessions.size(),
+                    first != null ? first.getXid() : null,
+                    last != null ? last.getXid() : null);
         }
         boolean ret = transactionStoreManager.removeGlobalSessions(sessions);
         if (!ret) {

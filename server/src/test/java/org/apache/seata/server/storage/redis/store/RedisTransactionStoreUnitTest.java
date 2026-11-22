@@ -350,4 +350,35 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         factory.when(JedisPooledFactory::getJedisInstance).thenThrow(new IllegalStateException("offline"));
         assertThrows(RedisException.class, () -> store.deleteGlobalTransactionDOs(Collections.singletonList(missing1)));
     }
+
+    @Test
+    void batchDeleteChunksLargeBatchesAcrossPipelines() {
+        int total = RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE + 20;
+        List<GlobalTransactionDO> items = new ArrayList<>(total);
+        List<Object> firstChunkXids = new ArrayList<>(RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE);
+        List<Object> secondChunkXids = new ArrayList<>(20);
+        for (int i = 0; i < total; i++) {
+            GlobalTransactionDO item = new GlobalTransactionDO();
+            String xid = "127.0.0.1:8091:" + (1000 + i);
+            item.setXid(xid);
+            item.setTransactionId(1000L + i);
+            item.setStatus(GlobalStatus.Committed.getCode());
+            items.add(item);
+            if (i < RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE) {
+                firstChunkXids.add(xid);
+            } else {
+                secondChunkXids.add(xid);
+            }
+        }
+        when(pipeline.syncAndReturnAll()).thenReturn(firstChunkXids, secondChunkXids);
+
+        assertTrue(store.deleteGlobalTransactionDOs(items));
+        // 2 chunks: each chunk checks out Jedis once and uses 2 pipelines (check + delete)
+        verify(jedis, times(2)).close();
+        verify(jedis, times(4)).pipelined();
+        verify(pipeline, times(2)).syncAndReturnAll();
+        verify(pipeline, times(2)).sync();
+        verify(pipeline, times(total)).hget(anyString(), eq("xid"));
+        verify(pipeline, times(total)).del(anyString());
+    }
 }

@@ -128,7 +128,7 @@ class LogStoreDaoUnitTest extends BaseSpringBootTest {
         assertTrue(dao.deleteGlobalTransactionDOs(Arrays.asList(null, new GlobalTransactionDO("  "))));
         verify(source, never()).getConnection();
 
-        int total = LogStoreDataBaseDAO.MAX_BATCH_DELETE_SIZE + 20;
+        int total = LogStoreDataBaseDAO.MAX_BATCH_DELETE_SIZE * 2 + 20;
         List<GlobalTransactionDO> items = new ArrayList<>(total + 1);
         for (int i = 0; i < total; i++) {
             items.add(new GlobalTransactionDO("xid-" + i));
@@ -139,10 +139,15 @@ class LogStoreDaoUnitTest extends BaseSpringBootTest {
         assertTrue(dao.deleteGlobalTransactionDOs(items));
         verify(source, times(1)).getConnection();
         verify(connection, times(1)).setAutoCommit(true);
-        verify(connection, times(2))
-                .prepareStatement(argThat(sql -> sql.startsWith("delete from ") && sql.contains(" in (")));
-        verify(statement, times(2)).executeUpdate();
-        verify(statement, times(2)).close();
+        org.mockito.ArgumentCaptor<String> sqlCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        verify(connection, times(3)).prepareStatement(sqlCaptor.capture());
+        List<String> executedSqls = sqlCaptor.getAllValues();
+        assertEquals(executedSqls.get(0), executedSqls.get(1));
+        assertTrue(executedSqls.get(0).startsWith("delete from ")
+                && executedSqls.get(0).contains(" in ("));
+        assertNotEquals(executedSqls.get(0), executedSqls.get(2));
+        verify(statement, times(3)).executeUpdate();
+        verify(statement, times(3)).close();
         verify(connection, times(1)).close();
     }
 }

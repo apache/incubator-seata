@@ -198,8 +198,21 @@ class RedisLuaStoreUnitTest extends BaseSpringBootTest {
                 .thenThrow(new JedisNoScriptException("evicted"))
                 .thenReturn("true");
         assertTrue(store.removeGlobalSessions(Arrays.asList(s1, s2)));
+        verify(jedis, times(1)).scriptLoad(anyString());
         verify(jedis, times(2)).evalsha(eq("sha"), anyList(), anyList());
         verify(jedis, times(2)).pipelined();
+
+        // Retry pipeline failure after NOSCRIPT recovery propagates as RedisException
+        clearInvocations(jedis, pipeline);
+        when(pipeline.syncAndReturnAll())
+                .thenReturn(
+                        Arrays.asList(new JedisNoScriptException("evicted"), new JedisNoScriptException("evicted")),
+                        Collections.singletonList(new JedisDataException("retry boom")));
+        when(jedis.evalsha(anyString(), anyList(), anyList()))
+                .thenThrow(new JedisNoScriptException("evicted"))
+                .thenReturn("true");
+        assertThrows(RedisException.class, () -> store.removeGlobalSessions(Arrays.asList(s1, s2)));
+        verify(jedis, times(1)).scriptLoad(anyString());
 
         // Non-NoScript error propagates as RedisException
         when(pipeline.syncAndReturnAll()).thenReturn(Collections.singletonList(new JedisDataException("boom")));
@@ -214,5 +227,35 @@ class RedisLuaStoreUnitTest extends BaseSpringBootTest {
         verify(pipeline).del("SEATA_GLOBAL_42");
         verify(pipeline).zrem("SEATA_BEGIN_TRANSACTIONS", "SEATA_GLOBAL_42");
         verify(pipeline).sync();
+    }
+
+    @Test
+    void batchDeleteLuaChunksLargeBatchesAcrossPipelines() {
+        int total = RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE + 20;
+        List<GlobalTransactionDO> items = new ArrayList<>(total);
+        List<Object> firstChunkResults = new ArrayList<>(RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE);
+        List<Object> secondChunkResults = new ArrayList<>(20);
+        for (int i = 0; i < total; i++) {
+            GlobalTransactionDO item = new GlobalTransactionDO();
+            item.setXid("host:8091:" + (2000 + i));
+            item.setTransactionId(2000L + i);
+            item.setStatus(GlobalStatus.Committed.getCode());
+            items.add(item);
+            if (i < RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE) {
+                firstChunkResults.add("true");
+            } else {
+                secondChunkResults.add("true");
+            }
+        }
+        Pipeline pipeline = mock(Pipeline.class);
+        when(jedis.pipelined()).thenReturn(pipeline);
+        when(pipeline.syncAndReturnAll()).thenReturn(firstChunkResults, secondChunkResults);
+
+        clearInvocations(jedis);
+        assertTrue(store.deleteGlobalTransactionDOs(items));
+        verify(jedis, times(2)).close();
+        verify(jedis, times(2)).pipelined();
+        verify(pipeline, times(2)).syncAndReturnAll();
+        verify(pipeline, times(total)).evalsha(eq("sha"), anyList(), anyList());
     }
 }

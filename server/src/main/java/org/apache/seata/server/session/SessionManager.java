@@ -75,6 +75,23 @@ public interface SessionManager extends Disposable {
     /**
      * Remove global sessions in batch.
      *
+     * <p>Precondition: this storage-level API removes global session records only and does
+     * <strong>not</strong> delete branch rows/keys or release locks (it is not a lifecycle
+     * {@link GlobalSession#end()}). Callers must have already removed all branch sessions and
+     * released all locks before invoking this method.
+     *
+     * <p>Non-atomicity and idempotent retry: chunked implementations (such as DB chunked
+     * {@code DELETE ... IN} with {@code autoCommit=true} or chunked Redis pipelines) execute each
+     * chunk independently, so partial deletion may occur if a later chunk fails. The operation is
+     * idempotent and callers may safely retry the full batch on failure.
+     *
+     * <p>Default implementation and store-mode caveat: the default implementation delegates
+     * sequentially to {@link #removeGlobalSession(GlobalSession)}. In Raft mode,
+     * {@code removeGlobalSession} applies locally to the state machine without Raft log replication
+     * (replication goes through {@link GlobalSession#end()} / {@link #onSuccessEnd(GlobalSession)});
+     * therefore batch cleanup callers should only enable this path for {@code db} and {@code redis}
+     * store modes (or continue using {@code end()} in Raft mode).
+     *
      * @param sessions the sessions
      * @throws TransactionException the transaction exception
      */

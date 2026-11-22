@@ -28,6 +28,7 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.core.store.LogStore;
+import org.apache.seata.core.store.db.sql.log.LogStoreSqls;
 import org.apache.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,9 +66,9 @@ public class LogStoreDataBaseDAO implements LogStore {
 
     /**
      * The maximum number of XIDs deleted per SQL IN clause, staying below Oracle's 1000-item IN limit
-     * and SQL Server's 2100-parameter limit.
+     * and SQL Server's 2100-parameter limit. Package-private for internal and unit-test use.
      */
-    public static final int MAX_BATCH_DELETE_SIZE = 500;
+    static final int MAX_BATCH_DELETE_SIZE = 500;
 
     /**
      * The constant CONFIG.
@@ -306,6 +307,8 @@ public class LogStoreDataBaseDAO implements LogStore {
             return true;
         }
         List<String> xids = new ArrayList<>(xidSet);
+        LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+        String fullChunkSql = null;
         Connection conn = null;
         try {
             conn = logStoreDataSource.getConnection();
@@ -313,9 +316,17 @@ public class LogStoreDataBaseDAO implements LogStore {
             for (int start = 0; start < xids.size(); start += MAX_BATCH_DELETE_SIZE) {
                 int end = Math.min(start + MAX_BATCH_DELETE_SIZE, xids.size());
                 int chunkSize = end - start;
-                String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", chunkSize);
-                String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType)
-                        .getDeleteGlobalTransactionsSQL(globalTable, paramsPlaceHolder);
+                String sql;
+                if (chunkSize == MAX_BATCH_DELETE_SIZE) {
+                    if (fullChunkSql == null) {
+                        String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", chunkSize);
+                        fullChunkSql = logStoreSqls.getDeleteGlobalTransactionsSQL(globalTable, paramsPlaceHolder);
+                    }
+                    sql = fullChunkSql;
+                } else {
+                    String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", chunkSize);
+                    sql = logStoreSqls.getDeleteGlobalTransactionsSQL(globalTable, paramsPlaceHolder);
+                }
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     for (int i = 0; i < chunkSize; i++) {
                         ps.setString(i + 1, xids.get(start + i));

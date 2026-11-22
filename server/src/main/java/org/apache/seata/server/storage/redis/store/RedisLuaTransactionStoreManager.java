@@ -309,10 +309,18 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
         if (luaSHA == null) {
             return super.deleteGlobalTransactionDOs(validDOs);
         }
+        for (int start = 0; start < validDOs.size(); start += MAX_BATCH_DELETE_SIZE) {
+            int end = Math.min(start + MAX_BATCH_DELETE_SIZE, validDOs.size());
+            deleteGlobalTransactionDOsLuaChunk(validDOs.subList(start, end), luaSHA);
+        }
+        return true;
+    }
+
+    private void deleteGlobalTransactionDOsLuaChunk(List<GlobalTransactionDO> chunk, String luaSHA) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             List<Object> results;
             try (Pipeline pipeline = jedis.pipelined()) {
-                for (GlobalTransactionDO globalTransactionDO : validDOs) {
+                for (GlobalTransactionDO globalTransactionDO : chunk) {
                     pipeline.evalsha(
                             luaSHA,
                             buildDeleteGlobalLuaKeys(globalTransactionDO),
@@ -322,10 +330,10 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
             }
             List<GlobalTransactionDO> noScriptRetries = new ArrayList<>();
             if (results != null) {
-                for (int i = 0; i < results.size() && i < validDOs.size(); i++) {
+                for (int i = 0; i < results.size() && i < chunk.size(); i++) {
                     Object result = results.get(i);
                     if (result instanceof JedisNoScriptException) {
-                        noScriptRetries.add(validDOs.get(i));
+                        noScriptRetries.add(chunk.get(i));
                     } else if (result instanceof Throwable) {
                         throw new RedisException((Throwable) result);
                     }
@@ -360,7 +368,6 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     }
                 }
             }
-            return true;
         } catch (RedisException ex) {
             throw ex;
         } catch (Exception ex) {

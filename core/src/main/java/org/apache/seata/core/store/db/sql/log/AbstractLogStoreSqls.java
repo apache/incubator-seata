@@ -181,13 +181,6 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     }
 
     @Override
-    public String getDeleteGlobalTransactionsSQL(String globalTable, String paramsPlaceHolder) {
-        return DELETE_GLOBAL_TRANSACTIONS
-                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
-                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
-    }
-
-    @Override
     public String getQueryGlobalTransactionSQL(String globalTable) {
         return QUERY_GLOBAL_TRANSACTION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
     }

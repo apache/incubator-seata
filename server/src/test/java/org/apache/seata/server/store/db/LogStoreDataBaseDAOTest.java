@@ -571,7 +571,8 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
 
     @Test
     public void deleteGlobalTransactionDOs_multiChunkBatch() {
-        int deleteCount = LogStoreDataBaseDAO.MAX_BATCH_DELETE_SIZE + 25;
+        // Exceed the single-chunk IN-clause limit (500) to exercise multi-chunk batch deletion
+        int deleteCount = 525;
         List<GlobalTransactionDO> targets = new ArrayList<>(deleteCount);
         for (int i = 0; i < deleteCount; i++) {
             GlobalTransactionDO item = buildGlobalTransactionDO("batch-chunk-" + i, 92000L + i);
