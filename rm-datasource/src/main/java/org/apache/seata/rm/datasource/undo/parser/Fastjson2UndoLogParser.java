@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson2.JSONB;
+import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.writer.ObjectWriter;
@@ -48,7 +49,7 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
      * Parser-local writer provider, so the Timestamp writer below doesn't change how fastjson2 writes
      * Timestamp anywhere else in the application (e.g. the RPC serializer).
      */
-    private final ObjectWriterProvider writerProvider = new ObjectWriterProvider();
+    private final ObjectWriterProvider writerProvider = new UndoLogWriterProvider();
 
     @Override
     public void init() {
@@ -72,10 +73,6 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
         };
-
-        // JSONB writes java.sql.Timestamp without its class name by default, so the value is decoded as LocalDateTime
-        // and no longer equals the Timestamp read from the database when the undo images are validated.
-        writerProvider.register(Timestamp.class, new TimestampWriter(), true);
 
         Fastjson2ObjectReaderWarmup.warmup(
                 Object.class,
@@ -115,6 +112,44 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
      * Writes the class name before the value, so fastjson2's built-in Timestamp reader decodes it back to a
      * Timestamp, nanos included. Undo logs written this way are still readable by clients without this writer.
      */
+    /**
+     * Uses {@link TimestampWriter} for Timestamp and the default provider for every other type, so writers and
+     * modules the application registered on the default provider keep working for undo logs.
+     * <p>
+     * JSONB writes java.sql.Timestamp without its class name by default, so the value is decoded as LocalDateTime
+     * and no longer equals the Timestamp read from the database when the undo images are validated.
+     */
+    static class UndoLogWriterProvider extends ObjectWriterProvider {
+
+        private static final ObjectWriter<Timestamp> TIMESTAMP_WRITER = new TimestampWriter();
+
+        @Override
+        public ObjectWriter getObjectWriterFromCache(Type objectType, Class objectClass, boolean fieldBased) {
+            if (objectClass == Timestamp.class) {
+                return TIMESTAMP_WRITER;
+            }
+            return JSONFactory.getDefaultObjectWriterProvider()
+                    .getObjectWriterFromCache(objectType, objectClass, fieldBased);
+        }
+
+        @Override
+        public ObjectWriter getObjectWriter(Type objectType, Class objectClass, boolean fieldBased) {
+            if (objectClass == Timestamp.class) {
+                return TIMESTAMP_WRITER;
+            }
+            return JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(objectType, objectClass, fieldBased);
+        }
+
+        @Override
+        public ObjectWriter getObjectWriter(Type objectType, Class objectClass, String format, boolean fieldBased) {
+            if (objectClass == Timestamp.class) {
+                return TIMESTAMP_WRITER;
+            }
+            return JSONFactory.getDefaultObjectWriterProvider()
+                    .getObjectWriter(objectType, objectClass, format, fieldBased);
+        }
+    }
+
     static class TimestampWriter implements ObjectWriter<Timestamp> {
 
         @Override

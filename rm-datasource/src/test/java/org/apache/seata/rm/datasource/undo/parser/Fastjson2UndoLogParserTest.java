@@ -19,6 +19,8 @@ package org.apache.seata.rm.datasource.undo.parser;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONFactory;
 import com.alibaba.fastjson2.JSONWriter;
+import com.alibaba.fastjson2.writer.ObjectWriter;
+import com.alibaba.fastjson2.writer.ObjectWriterProvider;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.sql.serial.SerialArray;
@@ -45,8 +47,17 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
+
+    static class CustomValue {
+        final String text;
+
+        CustomValue(String text) {
+            this.text = text;
+        }
+    }
 
     Fastjson2UndoLogParser parser =
             (Fastjson2UndoLogParser) EnhancedServiceLoader.load(UndoLogParser.class, Fastjson2UndoLogParser.NAME);
@@ -123,6 +134,53 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
         Assertions.assertFalse(
                 JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(Timestamp.class, Timestamp.class, true)
                         instanceof Fastjson2UndoLogParser.TimestampWriter);
+    }
+
+    @Test
+    public void testWritersRegisteredOnTheDefaultProviderAreStillUsed() {
+        AtomicInteger calls = new AtomicInteger();
+        ObjectWriter<CustomValue> customWriter = (jsonWriter, object, fieldName, fieldType, features) -> {
+            calls.incrementAndGet();
+            jsonWriter.writeString("custom:" + ((CustomValue) object).text);
+        };
+        ObjectWriterProvider defaultProvider = JSONFactory.getDefaultObjectWriterProvider();
+        defaultProvider.register(CustomValue.class, customWriter, true);
+        try {
+            Field field = new Field("payload", Types.OTHER, new CustomValue("a"));
+
+            Field decodedField = getFieldFromLog(getParser().decode(getParser().encode(createTestUndoLog(field))));
+
+            Assertions.assertEquals(1, calls.get());
+            Assertions.assertEquals("custom:a", decodedField.getValue());
+        } finally {
+            defaultProvider.unregister(CustomValue.class, customWriter, true);
+        }
+    }
+
+    @Test
+    public void testWriterProviderOnlyReplacesTheTimestampWriter() {
+        ObjectWriterProvider provider = new Fastjson2UndoLogParser.UndoLogWriterProvider();
+        ObjectWriterProvider defaultProvider = JSONFactory.getDefaultObjectWriterProvider();
+
+        Assertions.assertTrue(
+                provider.getObjectWriter(Timestamp.class, Timestamp.class, true)
+                        instanceof Fastjson2UndoLogParser.TimestampWriter);
+        Assertions.assertTrue(
+                provider.getObjectWriter(Timestamp.class, Timestamp.class, null, true)
+                        instanceof Fastjson2UndoLogParser.TimestampWriter);
+        Assertions.assertTrue(
+                provider.getObjectWriterFromCache(Timestamp.class, Timestamp.class, true)
+                        instanceof Fastjson2UndoLogParser.TimestampWriter);
+
+        Assertions.assertSame(
+                defaultProvider.getObjectWriter(String.class, String.class, true),
+                provider.getObjectWriter(String.class, String.class, true));
+        Assertions.assertSame(
+                defaultProvider.getObjectWriter(String.class, String.class, null, true),
+                provider.getObjectWriter(String.class, String.class, null, true));
+        Assertions.assertSame(
+                defaultProvider.getObjectWriterFromCache(String.class, String.class, true),
+                provider.getObjectWriterFromCache(String.class, String.class, true));
     }
 
     @Test
