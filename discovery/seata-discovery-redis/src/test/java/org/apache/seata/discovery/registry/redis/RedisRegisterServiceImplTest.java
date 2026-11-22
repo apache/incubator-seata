@@ -19,6 +19,8 @@ package org.apache.seata.discovery.registry.redis;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.discovery.registry.RegistryHeartBeats;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -51,6 +53,8 @@ public class RedisRegisterServiceImplTest {
 
     private static RedisRegistryServiceImpl redisRegistryService;
 
+    private static MockedStatic<RegistryHeartBeats> heartbeats;
+
     @BeforeAll
     public static void init() throws Exception {
         System.setProperty("config.type", "file");
@@ -59,19 +63,30 @@ public class RedisRegisterServiceImplTest {
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
         System.setProperty("registry.redis.serverAddr", "127.0.0.1:6379");
         System.setProperty("registry.redis.cluster", "default");
+        heartbeats = mockStatic(RegistryHeartBeats.class);
         redisRegistryService = RedisRegistryServiceImpl.getInstance();
-        // Control scheduling before lookup can start tasks that use the shared Jedis pool.
-        replaceExecutor("threadPoolExecutorForSubscribe");
-        replaceExecutor("threadPoolExecutorForUpdateMap");
+        // These tests exercise Redis commands synchronously. Prevent background tasks
+        // from surviving the fixture and using another test's static Jedis pool.
+        for (String name : new String[] {"threadPoolExecutorForSubscribe", "threadPoolExecutorForUpdateMap"}) {
+            Field field = RedisRegistryServiceImpl.class.getDeclaredField(name);
+            field.setAccessible(true);
+            ScheduledExecutorService executor = (ScheduledExecutorService) field.get(redisRegistryService);
+            executor.shutdownNow();
+            Assertions.assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
+            field.set(redisRegistryService, mock(ScheduledExecutorService.class));
+        }
     }
 
-    private static void replaceExecutor(String fieldName) throws Exception {
-        Field field = RedisRegistryServiceImpl.class.getDeclaredField(fieldName);
-        field.setAccessible(true);
-        ScheduledExecutorService original = (ScheduledExecutorService) field.get(redisRegistryService);
-        original.shutdownNow();
-        Assertions.assertTrue(original.awaitTermination(5, TimeUnit.SECONDS), fieldName + " did not terminate");
-        field.set(redisRegistryService, mock(ScheduledExecutorService.class));
+    @AfterAll
+    static void cleanUp() throws Exception {
+        try {
+            redisRegistryService.close();
+        } finally {
+            heartbeats.close();
+            Field instance = RedisRegistryServiceImpl.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(null, null);
+        }
     }
 
     @Test
@@ -127,19 +142,19 @@ public class RedisRegisterServiceImplTest {
     public void testClose() throws Exception {
         Field executorServiceField1 = RedisRegistryServiceImpl.class.getDeclaredField("threadPoolExecutorForSubscribe");
         executorServiceField1.setAccessible(true);
-        ScheduledExecutorService executorService1 =
-                (ScheduledExecutorService) executorServiceField1.get(redisRegistryService);
+        ScheduledExecutorService executorService1 = mock(ScheduledExecutorService.class);
         when(executorService1.isShutdown()).thenReturn(false);
         when(executorService1.awaitTermination(5, TimeUnit.SECONDS))
                 .thenThrow(new InterruptedException("Test interruption"));
+        executorServiceField1.set(redisRegistryService, executorService1);
 
         Field executorServiceField2 = RedisRegistryServiceImpl.class.getDeclaredField("threadPoolExecutorForUpdateMap");
         executorServiceField2.setAccessible(true);
-        ScheduledExecutorService executorService2 =
-                (ScheduledExecutorService) executorServiceField2.get(redisRegistryService);
+        ScheduledExecutorService executorService2 = mock(ScheduledExecutorService.class);
         when(executorService2.isShutdown()).thenReturn(false);
         when(executorService2.awaitTermination(5, TimeUnit.SECONDS))
                 .thenThrow(new InterruptedException("Test interruption"));
+        executorServiceField2.set(redisRegistryService, executorService2);
 
         redisRegistryService.close();
 

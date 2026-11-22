@@ -73,9 +73,9 @@ dependency:
     # BSD-3-Clause https://www.npmjs.com/package/universal-element
     - name: universal-element
       recursive: false
-    # remove later https://www.npmjs.com/package/@gcanvas/core
+    # Apache-2.0 https://www.npmjs.com/package/@gcanvas/core
     - name: "@gcanvas/core"
       recursive: true
-    # remove later https://www.npmjs.com/package/universal-env
+    # BSD-3-Clause https://www.npmjs.com/package/universal-env
     - name: universal-env
       recursive: true
