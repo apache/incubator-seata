@@ -500,6 +500,71 @@ public interface ConfigurationKeys {
     String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
 
     /**
+     * The constant RECOVERY_PIPELINE_PREFIX.
+     */
+    String RECOVERY_PIPELINE_PREFIX = RECOVERY_PREFIX + "pipeline.";
+
+    /**
+     * The constant RECOVERY_PIPELINE_ENABLE.
+     */
+    String RECOVERY_PIPELINE_ENABLE = RECOVERY_PIPELINE_PREFIX + "enable";
+
+    /**
+     * The constant RECOVERY_PIPELINE_PUSH_ENABLE.
+     */
+    String RECOVERY_PIPELINE_PUSH_ENABLE = RECOVERY_PIPELINE_PREFIX + "pushEnable";
+
+    /**
+     * The constant RECOVERY_PIPELINE_QUEUE_CAPACITY.
+     */
+    String RECOVERY_PIPELINE_QUEUE_CAPACITY = RECOVERY_PIPELINE_PREFIX + "queueCapacity";
+
+    /**
+     * The constant RECOVERY_PIPELINE_RPC_POOL_SIZE.
+     */
+    String RECOVERY_PIPELINE_RPC_POOL_SIZE = RECOVERY_PIPELINE_PREFIX + "rpcPoolSize";
+
+    /**
+     * The constant RECOVERY_PIPELINE_MAX_CONCURRENT_PER_RM.
+     */
+    String RECOVERY_PIPELINE_MAX_CONCURRENT_PER_RM = RECOVERY_PIPELINE_PREFIX + "maxConcurrentPerRm";
+
+    /**
+     * The constant RECOVERY_PIPELINE_CLEANER_BATCH_SIZE.
+     */
+    String RECOVERY_PIPELINE_CLEANER_BATCH_SIZE = RECOVERY_PIPELINE_PREFIX + "cleanerBatchSize";
+
+    /**
+     * The constant RECOVERY_PIPELINE_CLEANER_FLUSH_INTERVAL_MS.
+     */
+    String RECOVERY_PIPELINE_CLEANER_FLUSH_INTERVAL_MS = RECOVERY_PIPELINE_PREFIX + "cleanerFlushIntervalMs";
+
+    /**
+     * The constant RECOVERY_PIPELINE_CLEANER_BUFFER_CAPACITY.
+     */
+    String RECOVERY_PIPELINE_CLEANER_BUFFER_CAPACITY = RECOVERY_PIPELINE_PREFIX + "cleanerBufferCapacity";
+
+    /**
+     * The constant RECOVERY_PIPELINE_DB_MAX_CONCURRENCY.
+     */
+    String RECOVERY_PIPELINE_DB_MAX_CONCURRENCY = RECOVERY_PIPELINE_PREFIX + "dbMaxConcurrency";
+
+    /**
+     * The constant RECOVERY_PIPELINE_INFLIGHT_LEASE_MS.
+     */
+    String RECOVERY_PIPELINE_INFLIGHT_LEASE_MS = RECOVERY_PIPELINE_PREFIX + "inFlightLeaseMs";
+
+    /**
+     * The constant RECOVERY_PIPELINE_SCAN_QUIET_WINDOW_MS.
+     */
+    String RECOVERY_PIPELINE_SCAN_QUIET_WINDOW_MS = RECOVERY_PIPELINE_PREFIX + "scanQuietWindowMs";
+
+    /**
+     * The constant RECOVERY_PIPELINE_SCAN_MAX_PAGES_PER_TICK.
+     */
+    String RECOVERY_PIPELINE_SCAN_MAX_PAGES_PER_TICK = RECOVERY_PIPELINE_PREFIX + "scanMaxPagesPerTick";
+
+    /**
      * The constant CLIENT_UNDO_PREFIX.
      */
     String CLIENT_UNDO_PREFIX = "client.undo.";

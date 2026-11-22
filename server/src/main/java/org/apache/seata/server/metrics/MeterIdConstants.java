@@ -126,4 +126,91 @@ public interface MeterIdConstants {
     Id SUMMARY_RATE_LIMIT = new Id(IdConstants.SEATA_RATE_LIMIT)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
+
+    String SEATA_RECOVERY_PIPELINE = "seata.recovery.pipeline";
+
+    Id COUNTER_PIPELINE_ENQUEUED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "enqueued");
+
+    Id COUNTER_PIPELINE_DROPPED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "dropped");
+
+    Id COUNTER_PIPELINE_DEDUP_SKIPPED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "dedupSkipped");
+
+    Id COUNTER_PIPELINE_RPC_SUCCESS = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "rpcSuccess");
+
+    Id COUNTER_PIPELINE_RPC_FAILURE = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "rpcFailure");
+
+    Id TIMER_PIPELINE_RPC_LATENCY = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.NAME_KEY, "rpcLatency");
+
+    Id COUNTER_PIPELINE_CLEANER_BATCHES = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "cleanerBatches");
+
+    Id COUNTER_PIPELINE_CLEANER_DELETED_SESSIONS = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "cleanerDeletedSessions");
+
+    Id COUNTER_PIPELINE_CLEANER_BATCH_FAILURES = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "cleanerBatchFailures");
+
+    Id COUNTER_PIPELINE_CLEANER_DROPPED = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag(IdConstants.NAME_KEY, "cleanerDropped");
+
+    Id TIMER_PIPELINE_CLEANER_FLUSH_LATENCY = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.NAME_KEY, "cleanerFlushLatency");
+
+    Id TIMER_PIPELINE_DB_GUARD_WAIT = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag(IdConstants.NAME_KEY, "dbGuardWait");
+
+    Id GAUGE_PIPELINE_QUEUE_DEPTH = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_GAUGE)
+            .withTag(IdConstants.NAME_KEY, "queueDepth");
+
+    Id GAUGE_PIPELINE_CLEANER_BUFFER_DEPTH = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_GAUGE)
+            .withTag(IdConstants.NAME_KEY, "cleanerBufferDepth");
+
+    Id GAUGE_PIPELINE_INFLIGHT_COUNT = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_GAUGE)
+            .withTag(IdConstants.NAME_KEY, "inFlightCount");
+
+    Id GAUGE_PIPELINE_DB_GUARD_ACTIVE = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_GAUGE)
+            .withTag(IdConstants.NAME_KEY, "dbGuardActive");
+
+    Id GAUGE_PIPELINE_DB_GUARD_WAITING = new Id(SEATA_RECOVERY_PIPELINE)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_GAUGE)
+            .withTag(IdConstants.NAME_KEY, "dbGuardWaiting");
 }
