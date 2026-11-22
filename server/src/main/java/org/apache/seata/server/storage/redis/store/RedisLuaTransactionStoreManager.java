@@ -29,9 +29,12 @@ import org.apache.seata.server.storage.redis.LuaParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.exceptions.JedisNoScriptException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -270,34 +273,109 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
 
     @Override
     protected boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO) {
-        String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
-        String globalStatus = buildGlobalStatus(globalTransactionDO.getStatus());
         String luaSHA = LOCK_SHA_MAP.get(DELETE_TRANSACTION_DO_LUA_FILE_NAME);
         if (luaSHA == null) {
             return super.deleteGlobalTransactionDO(globalTransactionDO);
         }
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             // lua mode
-            List<String> keys = new ArrayList<String>() {
-                {
-                    add(globalKey);
-                    add(globalStatus);
-                    add(REDIS_KEY_GLOBAL_XID);
-                    add(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
-                }
-            };
-            List<String> args = new ArrayList<String>() {
-                {
-                    add("global");
-                    add(globalTransactionDO.getXid());
-                    add(String.valueOf(globalTransactionDO.getStatus()));
-                }
-            };
-            LuaParser.jedisEvalSha(jedis, luaSHA, DELETE_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
+            LuaParser.jedisEvalSha(
+                    jedis,
+                    luaSHA,
+                    DELETE_TRANSACTION_DO_LUA_FILE_NAME,
+                    buildDeleteGlobalLuaKeys(globalTransactionDO),
+                    buildDeleteGlobalLuaArgs(globalTransactionDO));
             return true;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
+    }
+
+    @Override
+    protected boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return true;
+        }
+        List<GlobalTransactionDO> validDOs = new ArrayList<>(globalTransactionDOs.size());
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO != null) {
+                validDOs.add(globalTransactionDO);
+            }
+        }
+        if (validDOs.isEmpty()) {
+            return true;
+        }
+        String luaSHA = LOCK_SHA_MAP.get(DELETE_TRANSACTION_DO_LUA_FILE_NAME);
+        if (luaSHA == null) {
+            return super.deleteGlobalTransactionDOs(validDOs);
+        }
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            List<Object> results;
+            try (Pipeline pipeline = jedis.pipelined()) {
+                for (GlobalTransactionDO globalTransactionDO : validDOs) {
+                    pipeline.evalsha(
+                            luaSHA,
+                            buildDeleteGlobalLuaKeys(globalTransactionDO),
+                            buildDeleteGlobalLuaArgs(globalTransactionDO));
+                }
+                results = pipeline.syncAndReturnAll();
+            }
+            List<GlobalTransactionDO> noScriptRetries = new ArrayList<>();
+            if (results != null) {
+                for (int i = 0; i < results.size() && i < validDOs.size(); i++) {
+                    Object result = results.get(i);
+                    if (result instanceof JedisNoScriptException) {
+                        noScriptRetries.add(validDOs.get(i));
+                    } else if (result instanceof Throwable) {
+                        throw new RedisException((Throwable) result);
+                    }
+                }
+            }
+            if (!noScriptRetries.isEmpty()) {
+                GlobalTransactionDO first = noScriptRetries.get(0);
+                LuaParser.jedisEvalSha(
+                        jedis,
+                        luaSHA,
+                        DELETE_TRANSACTION_DO_LUA_FILE_NAME,
+                        buildDeleteGlobalLuaKeys(first),
+                        buildDeleteGlobalLuaArgs(first));
+                if (noScriptRetries.size() > 1) {
+                    List<Object> retryResults;
+                    try (Pipeline retryPipeline = jedis.pipelined()) {
+                        for (int i = 1; i < noScriptRetries.size(); i++) {
+                            GlobalTransactionDO globalTransactionDO = noScriptRetries.get(i);
+                            retryPipeline.evalsha(
+                                    luaSHA,
+                                    buildDeleteGlobalLuaKeys(globalTransactionDO),
+                                    buildDeleteGlobalLuaArgs(globalTransactionDO));
+                        }
+                        retryResults = retryPipeline.syncAndReturnAll();
+                    }
+                    if (retryResults != null) {
+                        for (Object result : retryResults) {
+                            if (result instanceof Throwable) {
+                                throw new RedisException((Throwable) result);
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        } catch (RedisException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    private List<String> buildDeleteGlobalLuaKeys(GlobalTransactionDO globalTransactionDO) {
+        String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+        String globalStatus = buildGlobalStatus(globalTransactionDO.getStatus());
+        return Arrays.asList(globalKey, globalStatus, REDIS_KEY_GLOBAL_XID, REDIS_SEATA_BEGIN_TRANSACTIONS_KEY);
+    }
+
+    private List<String> buildDeleteGlobalLuaArgs(GlobalTransactionDO globalTransactionDO) {
+        return Arrays.asList("global", globalTransactionDO.getXid(), String.valueOf(globalTransactionDO.getStatus()));
     }
 
     @Override

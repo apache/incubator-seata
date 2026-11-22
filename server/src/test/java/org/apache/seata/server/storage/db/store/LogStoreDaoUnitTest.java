@@ -89,6 +89,9 @@ class LogStoreDaoUnitTest extends BaseSpringBootTest {
         assertThrows(StoreException.class, () -> dao.updateGlobalTransactionDO(global));
         assertThrows(StoreException.class, () -> dao.updateGlobalTransactionDO(global, 1));
         assertThrows(StoreException.class, () -> dao.deleteGlobalTransactionDO(global));
+        assertThrows(
+                StoreException.class,
+                () -> dao.deleteGlobalTransactionDOs(Collections.singletonList(new GlobalTransactionDO("xid-1"))));
         assertThrows(StoreException.class, () -> dao.insertBranchTransactionDO(branch));
         assertThrows(StoreException.class, () -> dao.updateBranchTransactionDO(branch));
         assertThrows(StoreException.class, () -> dao.deleteBranchTransactionDO(branch));
@@ -116,5 +119,30 @@ class LogStoreDaoUnitTest extends BaseSpringBootTest {
                 StoreException.class,
                 () -> org.springframework.test.util.ReflectionTestUtils.invokeMethod(dao, "getSchema", connection));
         verify(statement, times(2)).close();
+    }
+
+    @Test
+    void batchDeleteSkipsConnectionForEmptyInputAndChunksOnSingleConnection() throws Exception {
+        assertTrue(dao.deleteGlobalTransactionDOs(null));
+        assertTrue(dao.deleteGlobalTransactionDOs(Collections.emptyList()));
+        assertTrue(dao.deleteGlobalTransactionDOs(Arrays.asList(null, new GlobalTransactionDO("  "))));
+        verify(source, never()).getConnection();
+
+        int total = LogStoreDataBaseDAO.MAX_BATCH_DELETE_SIZE + 20;
+        List<GlobalTransactionDO> items = new ArrayList<>(total + 1);
+        for (int i = 0; i < total; i++) {
+            items.add(new GlobalTransactionDO("xid-" + i));
+        }
+        // duplicate XID should be deduplicated
+        items.add(new GlobalTransactionDO("xid-0"));
+
+        assertTrue(dao.deleteGlobalTransactionDOs(items));
+        verify(source, times(1)).getConnection();
+        verify(connection, times(1)).setAutoCommit(true);
+        verify(connection, times(2))
+                .prepareStatement(argThat(sql -> sql.startsWith("delete from ") && sql.contains(" in (")));
+        verify(statement, times(2)).executeUpdate();
+        verify(statement, times(2)).close();
+        verify(connection, times(1)).close();
     }
 }

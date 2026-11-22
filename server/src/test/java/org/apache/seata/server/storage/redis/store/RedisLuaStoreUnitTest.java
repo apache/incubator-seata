@@ -21,11 +21,13 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
 import org.springframework.test.util.ReflectionTestUtils;
 import redis.clients.jedis.*;
+import redis.clients.jedis.exceptions.JedisDataException;
 import redis.clients.jedis.exceptions.JedisNoScriptException;
 
 import java.util.*;
@@ -144,5 +146,73 @@ class RedisLuaStoreUnitTest extends BaseSpringBootTest {
         assertThrows(RedisException.class, () -> store.insertBranchTransactionDO(branch()));
         assertThrows(RedisException.class, () -> store.updateBranchTransactionDO(branch()));
         assertThrows(RedisException.class, () -> store.deleteBranchTransactionDO(branch()));
+        assertThrows(RedisException.class, () -> store.deleteGlobalTransactionDOs(Collections.singletonList(global())));
+    }
+
+    @Test
+    void batchDeleteExecutesPipelinedLuaAndHandlesNoScriptAndFallback() {
+        assertTrue(store.deleteGlobalTransactionDOs(null));
+        assertTrue(store.deleteGlobalTransactionDOs(Collections.emptyList()));
+        assertTrue(store.deleteGlobalTransactionDOs(Collections.singletonList(null)));
+
+        Pipeline pipeline = mock(Pipeline.class);
+        when(jedis.pipelined()).thenReturn(pipeline);
+        when(pipeline.syncAndReturnAll()).thenReturn(Arrays.asList("true", "true"));
+
+        GlobalSession s1 = new GlobalSession("app", "group", "tx1", 1000);
+        s1.setXid("host:8091:42");
+        s1.setTransactionId(42L);
+        s1.setStatus(GlobalStatus.Begin);
+        GlobalSession s2 = new GlobalSession("app", "group", "tx2", 1000);
+        s2.setXid("host:8091:43");
+        s2.setTransactionId(43L);
+        s2.setStatus(GlobalStatus.Committed);
+
+        assertTrue(store.removeGlobalSessions(Arrays.asList(s1, s2)));
+        verify(pipeline)
+                .evalsha(
+                        "sha",
+                        Arrays.asList(
+                                "SEATA_GLOBAL_42",
+                                "SEATA_STATUS_" + GlobalStatus.Begin.getCode(),
+                                "xid",
+                                "SEATA_BEGIN_TRANSACTIONS"),
+                        Arrays.asList("global", "host:8091:42", String.valueOf(GlobalStatus.Begin.getCode())));
+        verify(pipeline)
+                .evalsha(
+                        "sha",
+                        Arrays.asList(
+                                "SEATA_GLOBAL_43",
+                                "SEATA_STATUS_" + GlobalStatus.Committed.getCode(),
+                                "xid",
+                                "SEATA_BEGIN_TRANSACTIONS"),
+                        Arrays.asList("global", "host:8091:43", String.valueOf(GlobalStatus.Committed.getCode())));
+
+        // Evicted script triggers reload via LuaParser.jedisEvalSha and pipelined retry for remaining items
+        clearInvocations(jedis, pipeline);
+        when(pipeline.syncAndReturnAll())
+                .thenReturn(
+                        Arrays.asList(new JedisNoScriptException("evicted"), new JedisNoScriptException("evicted")),
+                        Collections.singletonList("true"));
+        when(jedis.evalsha(anyString(), anyList(), anyList()))
+                .thenThrow(new JedisNoScriptException("evicted"))
+                .thenReturn("true");
+        assertTrue(store.removeGlobalSessions(Arrays.asList(s1, s2)));
+        verify(jedis, times(2)).evalsha(eq("sha"), anyList(), anyList());
+        verify(jedis, times(2)).pipelined();
+
+        // Non-NoScript error propagates as RedisException
+        when(pipeline.syncAndReturnAll()).thenReturn(Collections.singletonList(new JedisDataException("boom")));
+        assertThrows(RedisException.class, () -> store.removeGlobalSessions(Collections.singletonList(s1)));
+
+        // When script SHA is absent, fall back to superclass pipeline deletion
+        scripts.clear();
+        clearInvocations(jedis, pipeline);
+        when(pipeline.syncAndReturnAll()).thenReturn(Collections.singletonList(s1.getXid()));
+        assertTrue(store.removeGlobalSessions(Collections.singletonList(s1)));
+        verify(pipeline).hget("SEATA_GLOBAL_42", "xid");
+        verify(pipeline).del("SEATA_GLOBAL_42");
+        verify(pipeline).zrem("SEATA_BEGIN_TRANSACTIONS", "SEATA_GLOBAL_42");
+        verify(pipeline).sync();
     }
 }

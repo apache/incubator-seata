@@ -72,6 +72,19 @@ public interface LogStoreSqls {
     String getDeleteGlobalTransactionSQL(String globalTable);
 
     /**
+     * Get delete global transactions sql string.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    default String getDeleteGlobalTransactionsSQL(String globalTable, String paramsPlaceHolder) {
+        return AbstractLogStoreSqls.DELETE_GLOBAL_TRANSACTIONS
+                .replace(AbstractLogStoreSqls.GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(AbstractLogStoreSqls.PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    /**
      * Get query global transaction sql string.
      *
      * @param globalTable the global table

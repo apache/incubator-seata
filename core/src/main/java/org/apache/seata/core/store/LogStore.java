@@ -83,6 +83,27 @@ public interface LogStore {
     boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
 
     /**
+     * Batch delete global transaction dos.
+     *
+     * @param globalTransactionDOs the global transaction dos
+     * @return the boolean
+     */
+    default boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (globalTransactionDOs == null || globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO == null) {
+                continue;
+            }
+            if (!deleteGlobalTransactionDO(globalTransactionDO)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Query branch transaction do list.
      *
      * @param xid the xid

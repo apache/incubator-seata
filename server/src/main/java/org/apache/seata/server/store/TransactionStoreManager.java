@@ -38,6 +38,27 @@ public interface TransactionStoreManager {
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
     /**
+     * Batch remove global sessions.
+     *
+     * @param sessions the global sessions
+     * @return the boolean
+     */
+    default boolean removeGlobalSessions(List<GlobalSession> sessions) {
+        if (sessions == null || sessions.isEmpty()) {
+            return true;
+        }
+        for (GlobalSession session : sessions) {
+            if (session == null) {
+                continue;
+            }
+            if (!writeSession(LogOperation.GLOBAL_REMOVE, session)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Read global session global session.
      *
      * @param xid the xid

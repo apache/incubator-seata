@@ -78,6 +78,12 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
             "delete from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
+     * The constant DELETE_GLOBAL_TRANSACTIONS.
+     */
+    public static final String DELETE_GLOBAL_TRANSACTIONS = "delete from " + GLOBAL_TABLE_PLACEHOLD + " where "
+            + ServerTableColumnsName.GLOBAL_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ")";
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
     public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS
@@ -172,6 +178,13 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     @Override
     public String getDeleteGlobalTransactionSQL(String globalTable) {
         return DELETE_GLOBAL_TRANSACTION.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    }
+
+    @Override
+    public String getDeleteGlobalTransactionsSQL(String globalTable, String paramsPlaceHolder) {
+        return DELETE_GLOBAL_TRANSACTIONS
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     @Override

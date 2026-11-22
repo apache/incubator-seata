@@ -73,6 +73,23 @@ public interface SessionManager extends Disposable {
     void removeGlobalSession(GlobalSession session) throws TransactionException;
 
     /**
+     * Remove global sessions in batch.
+     *
+     * @param sessions the sessions
+     * @throws TransactionException the transaction exception
+     */
+    default void removeGlobalSessions(List<GlobalSession> sessions) throws TransactionException {
+        if (sessions == null || sessions.isEmpty()) {
+            return;
+        }
+        for (GlobalSession session : sessions) {
+            if (session != null) {
+                removeGlobalSession(session);
+            }
+        }
+    }
+
+    /**
      * Add branch session.
      *
      * @param globalSession the global session

@@ -20,6 +20,7 @@ import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
@@ -95,6 +96,17 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
+        }
+    }
+
+    @Override
+    public void removeGlobalSessions(List<GlobalSession> sessions) throws TransactionException {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return;
+        }
+        boolean ret = transactionStoreManager.removeGlobalSessions(sessions);
+        if (!ret) {
+            throw new StoreException("removeGlobalSessions failed.");
         }
     }
 
