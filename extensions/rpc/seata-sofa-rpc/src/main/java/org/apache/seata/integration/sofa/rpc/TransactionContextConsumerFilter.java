@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.sofa.rpc;
 
-import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -24,100 +23,28 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.filter.AutoActive;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
-/**
- * TransactionContext on consumer side.
- *
- * @since 0.6.0
- */
+import java.util.Map;
+
 @Extension(value = "transactionContextConsumer")
 @AutoActive(consumerSide = true)
 public class TransactionContextConsumerFilter extends Filter {
 
-    /**
-     * Logger for this class
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionContextConsumerFilter.class);
-
     @Override
     public SofaResponse invoke(FilterInvoker filterInvoker, SofaRequest sofaRequest) throws SofaRpcException {
-        String xid = RootContext.getXID();
-        String rpcXid = getRpcXid();
-        BranchType branchType = RootContext.getBranchType();
-        String rpcBranchType = getBranchType();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                    "context in RootContext[{},{}], context in RpcContext[{},{}]",
-                    xid,
-                    branchType,
-                    rpcXid,
-                    rpcBranchType);
-        }
-        boolean bind = false;
-        if (xid != null) {
-            sofaRequest.addRequestProp(RootContext.KEY_XID, xid);
-            sofaRequest.addRequestProp(RootContext.KEY_BRANCH_TYPE, branchType.name());
-        } else {
-            if (rpcXid != null) {
-                RootContext.bind(rpcXid);
-                if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
-                    RootContext.bindBranchType(BranchType.TCC);
-                }
-                bind = true;
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
-                }
+        Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
+        if (!context.isEmpty()) {
+            for (Map.Entry<String, String> entry : context.entrySet()) {
+                sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
             }
         }
         try {
             return filterInvoker.invoke(sofaRequest);
         } finally {
-            if (bind) {
-                String unbindXid = RootContext.unbind();
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[{}] from RootContext", unbindXid);
-                }
-                BranchType previousBranchType = RootContext.getBranchType();
-                if (BranchType.TCC == previousBranchType) {
-                    RootContext.unbindBranchType();
-                }
-                if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("xid in change during RPC from [{}] to [{}]", rpcXid, unbindXid);
-                    }
-                    if (unbindXid != null) {
-                        RootContext.bind(unbindXid);
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("bind [{}] back to RootContext", unbindXid);
-                        }
-                        if (BranchType.TCC == previousBranchType) {
-                            RootContext.bindBranchType(BranchType.TCC);
-                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
-                        }
-                    }
-                }
+            for (String key : context.keySet()) {
+                sofaRequest.removeRequestProp(key);
             }
         }
-    }
-
-    /**
-     * get rpc xid
-     * @return
-     */
-    private String getRpcXid() {
-        String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID);
-        if (rpcXid == null) {
-            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_XID.toLowerCase());
-        }
-        return rpcXid;
-    }
-
-    private String getBranchType() {
-        return (String) RpcInternalContext.getContext().getAttachment(RootContext.HIDDEN_KEY_BRANCH_TYPE);
     }
 }

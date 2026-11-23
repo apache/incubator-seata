@@ -16,13 +16,12 @@
  */
 package org.apache.seata.saga.engine.serializer.impl;
 
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.saga.engine.serializer.Serializer;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 
 /**
- * Parameter serializer based on Fastjson
+ * Parameter serializer backed by the globally configured {@link JsonUtil} provider.
  *
  */
 public class ParamsSerializer implements Serializer<Object, String> {
@@ -32,11 +31,7 @@ public class ParamsSerializer implements Serializer<Object, String> {
     @Override
     public String serialize(Object params) {
         if (params != null) {
-            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
-            if (jsonSerializer == null) {
-                throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
-            }
-            return jsonSerializer.toJSONString(params, false);
+            return JsonUtil.toJSONString(params, false);
         }
         return null;
     }
@@ -44,19 +39,23 @@ public class ParamsSerializer implements Serializer<Object, String> {
     @Override
     public Object deserialize(String json) {
         if (json != null) {
-            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
-            if (jsonSerializer == null) {
-                throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
-            }
-            return jsonSerializer.parseObject(json, Object.class, false);
+            return JsonUtil.parseObject(json, Object.class, false);
         }
         return null;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public String getJsonParserName() {
         return jsonParserName;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public void setJsonParserName(String jsonParserName) {
         this.jsonParserName = jsonParserName;
     }

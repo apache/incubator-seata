@@ -35,7 +35,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-tm</artifactId>
+            <artifactId>seata-rpc-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -65,11 +65,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-testing</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
             <scope>provided</scope>
@@ -82,9 +77,9 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.25.4:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.55.1:exe:${os.detected.classifier}</pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
                 </configuration>
                 <executions>
                     <execution>
@@ -97,5 +92,5 @@
             </plugin>
         </plugins>
     </build>
-    
+
 </project>

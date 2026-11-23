@@ -27,8 +27,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import javax.sql.DataSource;
@@ -51,10 +51,10 @@ class GlobalSessionDBServiceImplTest extends BaseSpringBootTest {
     @Autowired
     private GlobalSessionDBServiceImpl globalSessionDBService;
 
-    @MockBean
+    @MockitoBean
     private DataSource dataSource;
 
-    @MockBean
+    @MockitoBean
     private BranchSessionService branchSessionService;
 
     private Connection connection;

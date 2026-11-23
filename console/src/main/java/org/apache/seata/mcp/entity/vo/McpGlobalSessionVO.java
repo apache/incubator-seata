@@ -18,9 +18,9 @@ package org.apache.seata.mcp.entity.vo;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
+import tools.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Set;
 

@@ -17,16 +17,12 @@
 package org.apache.seata.mcp.service.impl;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.service.ModifyConfirmService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,9 +34,6 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
     private static final long MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS = 180_000;
 
-    @Value("${seata.security.secretKey}")
-    private String secretKey;
-
     public ModifyConfirmServiceImpl(JwtTokenUtils jwtTokenUtils) {
         this.jwtTokenUtils = jwtTokenUtils;
     }
@@ -50,14 +43,10 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         long now = (new Date()).getTime();
         Date expirationDate = new Date(now + MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS);
-        SecretKeySpec secretKeySpec =
-                new SecretKeySpec(Decoders.BASE64.decode(secretKey), SignatureAlgorithm.HS256.getJcaName());
-        String key = Jwts.builder()
+        String key = jwtTokenUtils.signToken(Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("modify", "")
-                .setExpiration(expirationDate)
-                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
-                .compact();
+                .setExpiration(expirationDate));
         Map<String, String> map = new HashMap<>();
         map.put("modify_key", key);
         map.put(

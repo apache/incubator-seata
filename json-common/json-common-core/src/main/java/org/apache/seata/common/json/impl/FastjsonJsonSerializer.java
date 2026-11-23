@@ -61,9 +61,13 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     private static final Feature[] READER_FEATURES_IGNORE_AUTO_TYPE =
             new Feature[] {Feature.IgnoreAutoType, Feature.OrderedField};
 
+    private static final ParserConfig SAFE_PARSER_CONFIG = new ParserConfig();
+
     private static final ParserConfig ALLOWLIST_PARSER_CONFIG = new ParserConfig();
 
     static {
+        // Keep non-AutoType parsing independent of the application's global Fastjson configuration.
+        SAFE_PARSER_CONFIG.setSafeMode(true);
         ALLOWLIST_PARSER_CONFIG.setAutoTypeSupport(true);
         ALLOWLIST_PARSER_CONFIG.addAutoTypeCheckHandler((typeName, expectClass, features) -> {
             JsonAllowlistManager.getInstance().checkClass(typeName);
@@ -88,7 +92,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return JSON.parseObject(text, clazz);
+            return JSON.parseObject(text, clazz, SAFE_PARSER_CONFIG);
         } catch (Exception e) {
             throw new JsonParseException("FastJSON deserialize error", e);
         }
@@ -152,7 +156,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             }
 
             if (ignoreAutoType) {
-                return JSON.parseObject(text, type, READER_FEATURES_IGNORE_AUTO_TYPE);
+                return JSON.parseObject(text, type, SAFE_PARSER_CONFIG, READER_FEATURES_IGNORE_AUTO_TYPE);
             } else {
                 return JSON.parseObject(
                         text, type, ALLOWLIST_PARSER_CONFIG, Feature.SupportAutoType, Feature.OrderedField);

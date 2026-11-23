@@ -73,7 +73,10 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
@@ -90,23 +93,23 @@ import static org.mockito.Mockito.when;
 public class DefaultCoordinatorTest extends BaseSpringBootTest {
     private static DefaultCoordinator defaultCoordinator;
 
-    private static final String applicationId = "demo-child-app";
+    private static final String APPLICATION_ID = "demo-child-app";
 
-    private static final String txServiceGroup = "default_tx_group";
+    private static final String TX_SERVICE_GROUP = "default_tx_group";
 
-    private static final String txName = "tx-1";
+    private static final String TX_NAME = "tx-1";
 
-    private static final int timeout = 3000;
+    private static final int TIMEOUT = 3000;
 
-    private static final String resourceId = "tb_1";
+    private static final String RESOURCE_ID = "tb_1";
 
-    private static final String clientId = "c_1";
+    private static final String CLIENT_ID = "c_1";
 
-    private static final String lockKeys_1 = "tb_1:11";
+    private static final String LOCK_KEYS_1 = "tb_1:11";
 
-    private static final String lockKeys_2 = "tb_1:12";
+    private static final String LOCK_KEYS_2 = "tb_1:12";
 
-    private static final String applicationData = "{\"data\":\"test\"}";
+    private static final String APPLICATION_DATA = "{\"data\":\"test\"}";
 
     private static DefaultCore core;
 
@@ -140,8 +143,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         String xid = null;
         GlobalSession globalSession = null;
         try {
-            xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-            Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+            xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+            Long branchId =
+                    core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_1);
             globalSession = SessionHolder.findGlobalSession(xid);
             result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
@@ -170,8 +174,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleRetryRollbackingTest() throws TransactionException, InterruptedException {
 
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_2);
 
         Assertions.assertNotNull(branchId);
         Thread.sleep(100);
@@ -187,8 +191,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void handleRetryRollbackingTimeOutTest()
             throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -221,8 +225,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void handleRetryRollbackingTimeOut_unlockTest()
             throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
-        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_2);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -276,8 +280,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        Long branchId = core.branchRegister(BranchType.AT, RESOURCE_ID, CLIENT_ID, xid, APPLICATION_DATA, LOCK_KEYS_2);
         return Stream.of(Arguments.of(xid, branchId));
     }
 
@@ -308,7 +312,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
     @Test
     public void doBranchDeleteNullBranchTest() throws TransactionException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         Boolean result = defaultCoordinator.doBranchDelete(globalSession, null);
@@ -319,7 +323,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
     @Test
     public void timeoutCheckNoTimeoutTest() throws TransactionException {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 30000);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 30000);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -354,9 +358,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         request.setTimeout(3000);
 
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         AbstractResultMessage response = defaultCoordinator.onRequest(request, rpcContext);
         Assertions.assertNotNull(response);
@@ -375,9 +379,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchReportTest() throws TransactionException {
         // Create global transaction and branch (without lock to avoid conflicts)
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         Long branchId =
-                core.branchRegister(BranchType.AT, "resource_branch_report", clientId, xid, applicationData, null);
+                core.branchRegister(BranchType.AT, "resource_branch_report", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -389,13 +393,13 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         request.setBranchId(branchId);
         request.setBranchType(BranchType.AT);
         request.setStatus(BranchStatus.PhaseOne_Done);
-        request.setApplicationData(applicationData);
+        request.setApplicationData(APPLICATION_DATA);
 
         // Execute test
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         BranchReportResponse response = defaultCoordinator.handle(request, rpcContext);
 
@@ -413,9 +417,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         String testLockKey1 = "lock_check:1";
         String testLockKey2 = "lock_check:2";
 
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         Long branchId =
-                core.branchRegister(BranchType.AT, testResourceId, clientId, xid, applicationData, testLockKey1);
+                core.branchRegister(BranchType.AT, testResourceId, CLIENT_ID, xid, APPLICATION_DATA, testLockKey1);
 
         Assertions.assertNotNull(branchId);
 
@@ -427,9 +431,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         request1.setLockKey(testLockKey2);
 
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         GlobalLockQueryResponse response1 = defaultCoordinator.handle(request1, rpcContext);
 
@@ -467,7 +471,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void branchRemoveTaskConstructorWithNullBranchTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Test creating BranchRemoveTask with null branchSession should throw exception
@@ -482,9 +486,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void branchRemoveTaskRunWithSingleBranchTest() throws TransactionException, InterruptedException {
         // Create global session and branch (without lock to avoid conflicts)
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         Long branchId =
-                core.branchRegister(BranchType.AT, "resource_remove_single", clientId, xid, applicationData, null);
+                core.branchRegister(BranchType.AT, "resource_remove_single", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
@@ -508,9 +512,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void branchRemoveTaskRunWithAllBranchesTest() throws TransactionException, InterruptedException {
         // Create global session and multiple branches (without lock to avoid conflicts)
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_remove_all_1", clientId, xid, applicationData, null);
-        core.branchRegister(BranchType.AT, "resource_remove_all_2", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_remove_all_1", CLIENT_ID, xid, APPLICATION_DATA, null);
+        core.branchRegister(BranchType.AT, "resource_remove_all_2", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
@@ -543,8 +547,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleCommittingByScheduledWithSessionTest() throws TransactionException, InterruptedException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_committing_scheduled", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_committing_scheduled", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -571,8 +575,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleRollbackingByScheduledWithSessionTest() throws TransactionException, InterruptedException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_rollbacking_scheduled", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_rollbacking_scheduled", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -599,8 +603,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleEndStatesByScheduledWithCommittedSessionTest() throws TransactionException, InterruptedException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_end_committed", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_end_committed", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -626,8 +630,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     public void handleEndStatesByScheduledWithRollbackedSessionTest()
             throws TransactionException, InterruptedException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_end_rollbacked", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_end_rollbacked", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -652,7 +656,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteSagaTypeTest() throws TransactionException {
         // Create SAGA type global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create SAGA type branch session
@@ -661,7 +665,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.SAGA);
         branchSession.setResourceId("saga_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -678,7 +682,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteATSuccessTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create AT type branch session
@@ -687,7 +691,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setResourceId("at_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -710,7 +714,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteATFailureTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create AT type branch session
@@ -719,7 +723,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setResourceId("at_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -742,7 +746,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteTCCSuccessTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create TCC type branch session
@@ -751,7 +755,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.TCC);
         branchSession.setResourceId("tcc_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -774,7 +778,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteTCCFailureTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create TCC type branch session
@@ -783,7 +787,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.TCC);
         branchSession.setResourceId("tcc_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -806,7 +810,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteXASuccessTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create XA type branch session
@@ -815,7 +819,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.XA);
         branchSession.setResourceId("xa_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -841,7 +845,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     public void doBranchDeleteXAXaerNotaTimeoutTest()
             throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         // Create global session with short timeout (10ms)
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create XA type branch session
@@ -850,7 +854,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.XA);
         branchSession.setResourceId("xa_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -889,7 +893,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteXAXaerNotaNoTimeoutTest() throws TransactionException {
         // Create global session with long timeout
-        String xid = core.begin(applicationId, txServiceGroup, txName, 30000);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 30000);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create XA type branch session
@@ -898,7 +902,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.XA);
         branchSession.setResourceId("xa_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -921,7 +925,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteXAFailureTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create XA type branch session
@@ -930,7 +934,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.XA);
         branchSession.setResourceId("xa_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -953,7 +957,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteUnretryableTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create AT type branch session
@@ -962,7 +966,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setResourceId("at_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -985,7 +989,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchDeleteGeneralFailureTest() throws TransactionException {
         // Create global session
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
 
         // Create an unknown type branch session (using AT type but returns mismatched status)
@@ -994,7 +998,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         branchSession.setBranchId(1L);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setResourceId("at_resource");
-        branchSession.setApplicationData(applicationData);
+        branchSession.setApplicationData(APPLICATION_DATA);
 
         globalSession.addBranch(branchSession);
 
@@ -1017,7 +1021,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doGlobalStatusTest() throws TransactionException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -1027,9 +1031,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
         // Execute test
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         GlobalStatusResponse response = defaultCoordinator.handle(request, rpcContext);
 
@@ -1044,7 +1048,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doGlobalReportTest() throws TransactionException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -1058,9 +1062,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
         // Execute test
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         GlobalReportResponse response = defaultCoordinator.handle(request, rpcContext);
 
@@ -1078,7 +1082,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void doBranchRegisterTest() throws TransactionException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -1087,14 +1091,14 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
         request.setXid(xid);
         request.setBranchType(BranchType.AT);
         request.setResourceId("resource_branch_register");
-        request.setApplicationData(applicationData);
+        request.setApplicationData(APPLICATION_DATA);
         request.setLockKey("branch_register:1");
 
         // Execute test
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setApplicationId(applicationId);
-        rpcContext.setTransactionServiceGroup(txServiceGroup);
-        rpcContext.setClientId(clientId);
+        rpcContext.setApplicationId(APPLICATION_ID);
+        rpcContext.setTransactionServiceGroup(TX_SERVICE_GROUP);
+        rpcContext.setClientId(CLIENT_ID);
 
         BranchRegisterResponse response = defaultCoordinator.handle(request, rpcContext);
 
@@ -1115,7 +1119,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void timeoutCheckWithTimeoutTest() throws TransactionException, InterruptedException {
         // Create global transaction with very short timeout (10ms)
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         Assertions.assertEquals(GlobalStatus.Begin, globalSession.getStatus());
@@ -1140,9 +1144,9 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     public void handleRetryCommittingTimeoutTest()
             throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         // Create global transaction with short timeout
-        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, 10);
         Long branchId =
-                core.branchRegister(BranchType.AT, "resource_commit_retry", clientId, xid, applicationData, null);
+                core.branchRegister(BranchType.AT, "resource_commit_retry", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -1189,7 +1193,7 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleRetryCommittingWithEmptyBranchesTest() throws TransactionException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -1213,8 +1217,8 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     @Test
     public void handleAsyncCommittingSuccessTest() throws TransactionException, InterruptedException {
         // Create global transaction
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        core.branchRegister(BranchType.AT, "resource_async_commit", clientId, xid, applicationData, null);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        core.branchRegister(BranchType.AT, "resource_async_commit", CLIENT_ID, xid, APPLICATION_DATA, null);
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
@@ -1233,9 +1237,68 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
     }
 
     @Test
+    public void handleAsyncCommittingWaitsForGlobalSessionLockTest() throws Exception {
+        LockTrackingGlobalSession globalSession =
+                new LockTrackingGlobalSession(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+        globalSession.begin();
+        Long branchId = core.branchRegister(
+                BranchType.AT,
+                "resource_async_commit_lock",
+                CLIENT_ID,
+                globalSession.getXid(),
+                APPLICATION_DATA,
+                LOCK_KEYS_1);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<?> asyncCommitFuture = null;
+
+        try {
+            globalSession.lock();
+            try {
+                globalSession.changeGlobalStatus(GlobalStatus.AsyncCommitting);
+                globalSession.trackLockAttempt();
+                asyncCommitFuture = executor.submit(defaultCoordinator::handleAsyncCommitting);
+
+                Assertions.assertTrue(globalSession.awaitLockAttempt(5, TimeUnit.SECONDS));
+                Assertions.assertFalse(asyncCommitFuture.isDone());
+                Assertions.assertNotNull(globalSession.getBranch(branchId));
+
+                // Simulate the initial commit thread finishing global lock cleanup before releasing the session lock.
+                globalSession.clean();
+            } finally {
+                globalSession.unlock();
+            }
+
+            asyncCommitFuture.get(5, TimeUnit.SECONDS);
+            Assertions.assertNull(SessionHolder.findGlobalSession(globalSession.getXid()));
+
+            String nextXid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
+            GlobalSession nextGlobalSession = SessionHolder.findGlobalSession(nextXid);
+            try {
+                Assertions.assertNotNull(core.branchRegister(
+                        BranchType.AT,
+                        "resource_async_commit_lock",
+                        CLIENT_ID,
+                        nextXid,
+                        APPLICATION_DATA,
+                        LOCK_KEYS_1));
+            } finally {
+                nextGlobalSession.changeGlobalStatus(GlobalStatus.Committed);
+                nextGlobalSession.end();
+            }
+        } finally {
+            executor.shutdownNow();
+            GlobalSession remainingSession = SessionHolder.findGlobalSession(globalSession.getXid());
+            if (remainingSession != null) {
+                remainingSession.changeGlobalStatus(GlobalStatus.Committed);
+                remainingSession.end();
+            }
+        }
+    }
+
+    @Test
     public void undoLogDeleteWithActiveChannelsTest() throws TransactionException {
         // Create global transaction to ensure session manager is active
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        String xid = core.begin(APPLICATION_ID, TX_SERVICE_GROUP, TX_NAME, TIMEOUT);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
 
@@ -1304,5 +1367,33 @@ public class DefaultCoordinatorTest extends BaseSpringBootTest {
 
         @Override
         public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {}
+    }
+
+    private static class LockTrackingGlobalSession extends GlobalSession {
+
+        private final CountDownLatch lockAttempted = new CountDownLatch(1);
+
+        private volatile boolean trackLockAttempt;
+
+        private LockTrackingGlobalSession(
+                String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
+            super(applicationId, transactionServiceGroup, transactionName, timeout);
+        }
+
+        @Override
+        public void lock() throws TransactionException {
+            if (trackLockAttempt) {
+                lockAttempted.countDown();
+            }
+            super.lock();
+        }
+
+        private void trackLockAttempt() {
+            trackLockAttempt = true;
+        }
+
+        private boolean awaitLockAttempt(long timeout, TimeUnit unit) throws InterruptedException {
+            return lockAttempted.await(timeout, unit);
+        }
     }
 }

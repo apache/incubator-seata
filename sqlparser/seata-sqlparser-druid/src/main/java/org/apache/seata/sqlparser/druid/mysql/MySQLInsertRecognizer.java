@@ -28,6 +28,7 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
+import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.SQLType;
@@ -126,7 +127,17 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
-                    row.add(SqlMethodExpr.get());
+                    final int[] placeholderCount = {0};
+                    expr.accept(new SQLASTVisitorAdapter() {
+                        @Override
+                        public boolean visit(SQLVariantRefExpr x) {
+                            if ("?".equals(x.getName())) {
+                                placeholderCount[0]++;
+                            }
+                            return true;
+                        }
+                    });
+                    row.add(new SqlMethodExpr(placeholderCount[0]));
                 } else {
                     if (primaryKeyIndex.contains(i)) {
                         wrapSQLParsingException(expr);

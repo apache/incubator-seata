@@ -184,11 +184,11 @@ public class ConfigToolsTest {
     }
 
     @Test
-    public void testRoundTripEncryption() throws Exception {
+    public void testRoundTripEncryptionWithUnicodeContent() throws Exception {
         KeyPair keyPair = ConfigTools.getKeyPair();
         String publicKeyStr = ConfigTools.getPublicKey(keyPair);
         String privateKeyStr = ConfigTools.getPrivateKey(keyPair);
-        String content = "This is a test message for encryption round trip";
+        String content = "This is a test message for encryption round trip: \u4e2d\u6587";
 
         // Public encrypt, private decrypt
         String encrypted1 = ConfigTools.publicEncrypt(content, publicKeyStr);

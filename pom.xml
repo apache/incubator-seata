@@ -54,15 +54,13 @@
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
-        <module>seata-spring-boot-starter</module>
-        <module>seata-spring-autoconfigure</module>
         <module>compressor</module>
         <module>saga</module>
         <module>sqlparser</module>
-        <module>server</module>
+        <!--<module>server</module>-->
         <module>integration-tx-api</module>
 <!--        <module>namingserver</module>-->
-        <module>test-suite/test-new-version</module>
+        <!--<module>test-suite/test-new-version</module>-->
         <module>test-suite/test-old-version</module>
         <module>test-suite/seata-benchmark-cli</module>
         <module>json-common</module>
@@ -131,6 +129,17 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: onlyBuildOnJDK17+ -->
+        <profile>
+            <id>JDK17Plus</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <modules>
+                <module>server</module>
+                <module>test-suite/test-new-version</module>
+            </modules>
+        </profile>
         <!-- profile: onlyBuildOnJDK21+ -->
         <profile>
             <id>JDK21Plus</id>
@@ -194,8 +203,7 @@
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
                 <mysql.copy.skip>false</mysql.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
@@ -295,6 +303,12 @@
                                     <order>,javax|java,\#</order>
                                 </importOrder>
                             </java>
+                            <json>
+                                <includes>
+                                    <include>src/main/resources/META-INF/native-image/*.json</include>
+                                </includes>
+                                <jackson/>
+                            </json>
                         </configuration>
                         <executions>
                             <execution>
@@ -302,6 +316,36 @@
                                     <goal>apply</goal>
                                 </goals>
                                 <phase>process-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- A complete distribution includes the JDK 25 Console and Naming Server. -->
+        <profile>
+            <id>release-seata</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>require-distribution-jdk</id>
+                                <inherited>false</inherited>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[25,)</version>
+                                            <message>The complete Seata distribution requires JDK 25 or later. Use the default build for client-only development. See BUILDING.md.</message>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -331,8 +375,6 @@
                 <module>tm</module>
                 <module>metrics</module>
                 <module>serializer</module>
-                <module>seata-spring-boot-starter</module>
-                <module>seata-spring-autoconfigure</module>
                 <module>compressor</module>
                 <module>saga</module>
                 <module>sqlparser</module>
@@ -350,6 +392,7 @@
                                 <descriptor>distribution/source-release.xml</descriptor>
                             </descriptors>
                             <finalName>apache-seata-${project.version}-incubating-src</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <executions>
                             <execution>
@@ -376,9 +419,71 @@
             </activation>
             <modules>
                 <module>distribution</module>
-                <module>test-suite/test-new-version</module>
+                <!--<module>test-suite/test-new-version</module>-->
                 <module>test-suite/test-old-version</module>
             </modules>
+        </profile>
+
+        <!-- profile: native -->
+        <profile>
+            <id>test-native-namingserver</id>
+            <modules>
+                <module>test-suite/test-native-namingserver</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>test-native-metadata-merge</id>
+            <modules>
+                <module>test-suite/test-native-metadata-merge</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>native-linux-amd64</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>linux-amd64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-linux-aarch64</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>linux-arm64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-darwin-aarch64</id>
+            <activation>
+                <os>
+                    <name>mac os x</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>darwin-arm64</native.platform>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-windows-amd64</id>
+            <activation>
+                <os>
+                    <name>windows</name>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <properties>
+                <native.platform>windows-amd64</native.platform>
+            </properties>
         </profile>
     </profiles>
 
@@ -440,6 +545,9 @@
                 <configuration>
                     <excludes>
                         <exclude>**/test/**</exclude>
+                        <!-- Druid is copied into target/classes/lib for the SQL parser. Leave that jar out of
+                             every report so Codecov does not merge it into Seata sources with the same file name. -->
+                        <exclude>**/lib/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

@@ -247,7 +247,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                     registerTMResponse.getVersion(),
                     channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel, registerTMRequest.getVersion());
+        getClientChannelManager().registerChannel(serverAddress, channel, registerTMResponse.getVersion());
     }
 
     @Override

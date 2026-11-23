@@ -26,7 +26,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.TransactionManager;
@@ -61,8 +61,9 @@ public class SeataMQProducerSendTest {
 
     @BeforeAll
     public static void before() throws MQClientException {
-        ConfigurationTestHelper.putConfig(
+        System.setProperty(
                 ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
+        ConfigurationCache.clear();
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         // should start mq server here
@@ -71,7 +72,8 @@ public class SeataMQProducerSendTest {
     @AfterAll
     public static void after() {
         //  MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        ConfigurationCache.clear();
         producer.shutdown();
     }
 

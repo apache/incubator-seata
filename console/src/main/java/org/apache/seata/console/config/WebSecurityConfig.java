@@ -16,12 +16,14 @@
  */
 package org.apache.seata.console.config;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.MCPProperties;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -39,8 +41,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.util.AntPathMatcher;
 
 import java.util.Arrays;
 import java.util.List;
@@ -98,9 +100,9 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager() {
+    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
         return new ProviderManager(authenticationProvider);
     }
 
@@ -150,7 +152,20 @@ public class WebSecurityConfig {
                 .filter(StringUtils::isNotBlank)
                 // PathPatternParser using the new version of Security cannot directly achieve the same matching effect
                 // as the deprecated Ant style mode /**/*.css
-                .map(AntPathRequestMatcher::new)
+                .map(pattern -> new RequestMatcher() {
+                    private final AntPathMatcher matcher = new AntPathMatcher();
+
+                    @Override
+                    public boolean matches(@NonNull HttpServletRequest request) {
+                        String path = request.getServletPath();
+                        String pathInfo = request.getPathInfo();
+                        path = (path == null ? "" : path) + (pathInfo == null ? "" : pathInfo);
+                        if (path == null || path.isEmpty()) {
+                            path = "/";
+                        }
+                        return matcher.match(pattern, path);
+                    }
+                })
                 .toArray(RequestMatcher[]::new);
     }
 }

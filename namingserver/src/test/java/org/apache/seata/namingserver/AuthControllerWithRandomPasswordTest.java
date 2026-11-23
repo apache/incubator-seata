@@ -16,20 +16,21 @@
  */
 package org.apache.seata.namingserver;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.Code;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.security.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +42,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Add a unique, namespaced test property so Spring's test context cache treats this class as a distinct configuration.
+ * This prevents reuse of an already-started context (e.g. other @SpringBootTest + @AutoConfigureMockMvc tests),
+ * which would omit the startup log line "Use the auto-generated password: [...]" from {@link CapturedOutput}.
+ */
+@TestPropertySource(properties = "seata.test.context.cache.key=AuthControllerWithRandomPasswordTest")
 @SpringBootTest
 @ExtendWith(OutputCaptureExtension.class)
 @AutoConfigureMockMvc

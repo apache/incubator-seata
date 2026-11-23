@@ -16,8 +16,7 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.RecoverStrategy;
@@ -49,6 +48,10 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private final StateMachineValidator validator = new StateMachineValidator();
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public StateMachineParserImpl(String jsonParserName) {
         if (StringUtils.isNotBlank(jsonParserName)) {
             this.jsonParserName = jsonParserName;
@@ -58,15 +61,11 @@ public class StateMachineParserImpl implements StateMachineParser {
     @Override
     public StateMachine parse(String json) {
 
-        JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
-        if (jsonSerializer == null) {
-            throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
-        }
-        Map<String, Object> node = jsonSerializer.parseObject(json, Map.class, true);
+        Map<String, Object> node = JsonUtil.parseObject(json, Map.class, true);
         if (DesignerJsonTransformer.isDesignerJson(node)) {
             node = DesignerJsonTransformer.toStandardJson(node);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("===== Transformed standard state language:\n{}", jsonSerializer.toJSONString(node, true));
+                LOGGER.debug("===== Transformed standard state language:\n{}", JsonUtil.toJSONString(node, true));
             }
         }
 
@@ -134,10 +133,18 @@ public class StateMachineParserImpl implements StateMachineParser {
         return stateMachine;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public String getJsonParserName() {
         return jsonParserName;
     }
 
+    /**
+     * @deprecated JSON serialization is configured globally through {@code json.serializerType}.
+     */
+    @Deprecated
     public void setJsonParserName(String jsonParserName) {
         this.jsonParserName = jsonParserName;
     }

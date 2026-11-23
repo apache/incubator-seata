@@ -30,6 +30,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public abstract class AbstractUndoExecutor {
      * template of check sql
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s FOR UPDATE";
+    private static final String CHECK_SQL_TEMPLATE = "SELECT %s FROM %s WHERE %s FOR UPDATE";
 
     /**
      * Switch of undo data validation
@@ -204,7 +205,7 @@ public abstract class AbstractUndoExecutor {
                 undoPST.setObject(undoIndex, value);
             } else {
                 // JDBCType.REF, JDBCType.JAVA_OBJECT etc...
-                undoPST.setObject(undoIndex, value, type);
+                JdbcUtils.setObject(undoPST, undoIndex, value, type);
             }
         }
         // PK is always at last.
@@ -213,7 +214,7 @@ public abstract class AbstractUndoExecutor {
         // DELETE FROM a WHERE pk1 in (?) and pk2 in (?)
         for (Field pkField : pkValueList) {
             undoIndex++;
-            undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
+            JdbcUtils.setObject(undoPST, undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 
@@ -306,10 +307,15 @@ public abstract class AbstractUndoExecutor {
         int pkRowSize = pkRowValues.get(firstKey).size();
         List<SqlGenerateUtils.WhereSql> sqlConditions =
                 SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowSize, connectionProxy.getDbType());
+
+        String selectColumns = undoRecords.getRows().get(0).getFields().stream()
+                .map(field -> ColumnUtils.addEscape(field.getName(), connectionProxy.getDbType()))
+                .collect(Collectors.joining(", "));
+
         TableRecords currentRecords = new TableRecords(tableMeta);
         int totalRowIndex = 0;
         for (SqlGenerateUtils.WhereSql sqlCondition : sqlConditions) {
-            String checkSQL = buildCheckSql(sqlUndoLog.getTableName(), sqlCondition.getSql());
+            String checkSQL = buildCheckSql(sqlUndoLog.getTableName(), sqlCondition.getSql(), selectColumns);
             PreparedStatement statement = null;
             ResultSet checkSet = null;
             try {
@@ -320,7 +326,7 @@ public abstract class AbstractUndoExecutor {
                         List<Field> pkColumnValueList = pkRowValues.get(pkNameList.get(c));
                         Field field = pkColumnValueList.get(totalRowIndex + r);
                         int dataType = tableMeta.getColumnMeta(field.getName()).getDataType();
-                        statement.setObject(paramIndex, field.getValue(), dataType);
+                        JdbcUtils.setObject(statement, paramIndex, field.getValue(), dataType);
                         paramIndex++;
                     }
                 }
@@ -345,7 +351,19 @@ public abstract class AbstractUndoExecutor {
      * @return the check sql for query current records
      */
     protected String buildCheckSql(String tableName, String whereCondition) {
-        return String.format(CHECK_SQL_TEMPLATE, tableName, whereCondition);
+        return String.format(CHECK_SQL_TEMPLATE, "*", tableName, whereCondition);
+    }
+
+    /**
+     * build sql for query current records with explicit columns.
+     *
+     * @param tableName     the tableName to query
+     * @param whereCondition the where condition
+     * @param selectColumns the explicit columns to select
+     * @return the check sql for query current records
+     */
+    protected String buildCheckSql(String tableName, String whereCondition, String selectColumns) {
+        return String.format(CHECK_SQL_TEMPLATE, selectColumns, tableName, whereCondition);
     }
 
     protected List<Field> getOrderedPkList(TableRecords image, Row row, String dbType) {

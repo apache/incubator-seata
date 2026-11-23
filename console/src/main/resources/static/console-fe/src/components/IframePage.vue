@@ -21,6 +21,7 @@
       :title="title"
       class="iframe-content"
       frameborder="0"
+      sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-downloads"
       @load="onLoad"
     />
   </div>

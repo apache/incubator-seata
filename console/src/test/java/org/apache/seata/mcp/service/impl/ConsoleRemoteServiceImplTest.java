@@ -16,7 +16,6 @@
  */
 package org.apache.seata.mcp.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
@@ -32,6 +31,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.List;

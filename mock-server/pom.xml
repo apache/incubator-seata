@@ -58,10 +58,18 @@
         <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
         <spring-framework-for-server.version>5.3.39</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>9.0.115</tomcat-embed.version>
+        <tomcat-embed.version>9.0.121</tomcat-embed.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+            <!-- Keep Netty aligned with seata-dependencies before the Spring Boot BOM import. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>

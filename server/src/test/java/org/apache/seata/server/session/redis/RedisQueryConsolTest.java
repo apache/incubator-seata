@@ -17,6 +17,7 @@
 package org.apache.seata.server.session.redis;
 
 import com.alibaba.fastjson.JSON;
+import jakarta.annotation.Resource;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
@@ -27,8 +28,6 @@ import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-
-import javax.annotation.Resource;
 
 /**
  */

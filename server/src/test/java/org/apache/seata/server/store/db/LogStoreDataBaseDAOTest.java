@@ -19,17 +19,20 @@ package org.apache.seata.server.store.db;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.context.ApplicationContext;
 
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,20 +45,34 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
 
     static BasicDataSource dataSource = null;
 
+    @TempDir
+    static Path databaseDirectory;
+
     @BeforeAll
     public static void start(ApplicationContext context) {
         dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
-        dataSource.setUrl("jdbc:h2:./db_store/log");
+        dataSource.setUrl("jdbc:h2:" + databaseDirectory.resolve("log"));
         dataSource.setUsername("sa");
         dataSource.setPassword("");
 
-        logStoreDataBaseDAO = new LogStoreDataBaseDAO(dataSource);
-        logStoreDataBaseDAO.setDbType("h2");
+        prepareTable(dataSource);
+
+        String previousDbType = System.getProperty(ConfigurationKeys.STORE_DB_TYPE);
+        try {
+            System.setProperty(ConfigurationKeys.STORE_DB_TYPE, "h2");
+            ConfigurationCache.clear();
+            logStoreDataBaseDAO = new LogStoreDataBaseDAO(dataSource);
+        } finally {
+            if (previousDbType == null) {
+                System.clearProperty(ConfigurationKeys.STORE_DB_TYPE);
+            } else {
+                System.setProperty(ConfigurationKeys.STORE_DB_TYPE, previousDbType);
+            }
+            ConfigurationCache.clear();
+        }
         logStoreDataBaseDAO.setGlobalTable("global_table");
         logStoreDataBaseDAO.setBranchTable("branch_table");
-
-        prepareTable(dataSource);
     }
 
     private static void prepareTable(BasicDataSource dataSource) {
@@ -71,7 +88,7 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
             //            xid, transaction_id, status, application_id, transaction_service_group, transaction_name,
             // timeout, begin_time, application_data, gmt_create, gmt_modified
             s.execute(
-                    "CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+                    "CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(64) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table global_table success.");
 
             try {
@@ -84,10 +101,35 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
                     "CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long primary key, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,  status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table branch_table success.");
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            throw new IllegalStateException("Failed to prepare transaction tables", e);
         } finally {
             IOUtil.close(s, conn);
+        }
+    }
+
+    @Test
+    public void insertGlobalTransactionDO_truncates_transaction_name_to_schema_size() {
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
+        globalTransactionDO.setXid("abc-123:transaction-name-size");
+        globalTransactionDO.setTransactionId(987654321);
+        globalTransactionDO.setTransactionName(org.apache.commons.lang3.StringUtils.repeat("name", 20));
+        globalTransactionDO.setApplicationId("test");
+        globalTransactionDO.setTransactionServiceGroup("abc");
+        globalTransactionDO.setStatus(1);
+        globalTransactionDO.setTimeout(20);
+        globalTransactionDO.setBeginTime(System.currentTimeMillis());
+
+        try {
+            Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO));
+            GlobalTransactionDO globalTransactionFromDatabase =
+                    logStoreDataBaseDAO.queryGlobalTransactionDO(globalTransactionDO.getXid());
+            Assertions.assertNotNull(globalTransactionFromDatabase);
+            Assertions.assertEquals(
+                    globalTransactionDO.getTransactionName().substring(0, 64),
+                    globalTransactionFromDatabase.getTransactionName());
+        } finally {
+            logStoreDataBaseDAO.deleteGlobalTransactionDO(globalTransactionDO);
         }
     }
 
@@ -107,21 +149,27 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.queryGlobalTransactionDO("abc-123:978786");
-        Assertions.assertNotNull(globalTransactionDO_db);
+        GlobalTransactionDO globalTransactionFromDatabase =
+                logStoreDataBaseDAO.queryGlobalTransactionDO("abc-123:978786");
+        Assertions.assertNotNull(globalTransactionFromDatabase);
 
-        Assertions.assertEquals(globalTransactionDO_db.getBeginTime(), globalTransactionDO_db.getBeginTime());
+        Assertions.assertEquals(globalTransactionDO.getXid(), globalTransactionFromDatabase.getXid());
         Assertions.assertEquals(
-                globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionId(), globalTransactionDO_db.getTransactionId());
-        Assertions.assertEquals(globalTransactionDO_db.getStatus(), globalTransactionDO_db.getStatus());
-        Assertions.assertEquals(globalTransactionDO_db.getTimeout(), globalTransactionDO_db.getTimeout());
+                globalTransactionDO.getApplicationData(), globalTransactionFromDatabase.getApplicationData());
+        Assertions.assertEquals(globalTransactionDO.getBeginTime(), globalTransactionFromDatabase.getBeginTime());
         Assertions.assertEquals(
-                globalTransactionDO_db.getTransactionServiceGroup(),
-                globalTransactionDO_db.getTransactionServiceGroup());
-        Assertions.assertEquals(globalTransactionDO_db.getApplicationId(), globalTransactionDO_db.getApplicationId());
-        Assertions.assertNotNull(globalTransactionDO_db.getGmtCreate());
-        Assertions.assertNotNull(globalTransactionDO_db.getGmtModified());
+                globalTransactionDO.getTransactionName(), globalTransactionFromDatabase.getTransactionName());
+        Assertions.assertEquals(
+                globalTransactionDO.getTransactionId(), globalTransactionFromDatabase.getTransactionId());
+        Assertions.assertEquals(globalTransactionDO.getStatus(), globalTransactionFromDatabase.getStatus());
+        Assertions.assertEquals(globalTransactionDO.getTimeout(), globalTransactionFromDatabase.getTimeout());
+        Assertions.assertEquals(
+                globalTransactionDO.getTransactionServiceGroup(),
+                globalTransactionFromDatabase.getTransactionServiceGroup());
+        Assertions.assertEquals(
+                globalTransactionDO.getApplicationId(), globalTransactionFromDatabase.getApplicationId());
+        Assertions.assertNotNull(globalTransactionFromDatabase.getGmtCreate());
+        Assertions.assertNotNull(globalTransactionFromDatabase.getGmtModified());
 
         String delSql = "delete from global_table where xid= 'abc-123:978786'";
         Connection conn = null;
@@ -152,24 +200,28 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-        GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.queryGlobalTransactionDO(867978970L);
-        Assertions.assertNotNull(globalTransactionDO_db);
+        GlobalTransactionDO globalTransactionFromDatabase = logStoreDataBaseDAO.queryGlobalTransactionDO(867978970L);
+        Assertions.assertNotNull(globalTransactionFromDatabase);
 
-        Assertions.assertEquals(globalTransactionDO_db.getXid(), globalTransactionDO_db.getXid());
-        Assertions.assertEquals(globalTransactionDO_db.getBeginTime(), globalTransactionDO_db.getBeginTime());
+        Assertions.assertEquals(globalTransactionDO.getXid(), globalTransactionFromDatabase.getXid());
         Assertions.assertEquals(
-                globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionId(), globalTransactionDO_db.getTransactionId());
-        Assertions.assertEquals(globalTransactionDO_db.getStatus(), globalTransactionDO_db.getStatus());
-        Assertions.assertEquals(globalTransactionDO_db.getTimeout(), globalTransactionDO_db.getTimeout());
+                globalTransactionDO.getApplicationData(), globalTransactionFromDatabase.getApplicationData());
+        Assertions.assertEquals(globalTransactionDO.getBeginTime(), globalTransactionFromDatabase.getBeginTime());
         Assertions.assertEquals(
-                globalTransactionDO_db.getTransactionServiceGroup(),
-                globalTransactionDO_db.getTransactionServiceGroup());
-        Assertions.assertEquals(globalTransactionDO_db.getApplicationId(), globalTransactionDO_db.getApplicationId());
-        Assertions.assertNotNull(globalTransactionDO_db.getGmtCreate());
-        Assertions.assertNotNull(globalTransactionDO_db.getGmtModified());
+                globalTransactionDO.getTransactionName(), globalTransactionFromDatabase.getTransactionName());
+        Assertions.assertEquals(
+                globalTransactionDO.getTransactionId(), globalTransactionFromDatabase.getTransactionId());
+        Assertions.assertEquals(globalTransactionDO.getStatus(), globalTransactionFromDatabase.getStatus());
+        Assertions.assertEquals(globalTransactionDO.getTimeout(), globalTransactionFromDatabase.getTimeout());
+        Assertions.assertEquals(
+                globalTransactionDO.getTransactionServiceGroup(),
+                globalTransactionFromDatabase.getTransactionServiceGroup());
+        Assertions.assertEquals(
+                globalTransactionDO.getApplicationId(), globalTransactionFromDatabase.getApplicationId());
+        Assertions.assertNotNull(globalTransactionFromDatabase.getGmtCreate());
+        Assertions.assertNotNull(globalTransactionFromDatabase.getGmtModified());
 
-        String delSql = "delete from global_table where xid= 'abc-123:978786'";
+        String delSql = "delete from global_table where xid= 'abc-123:676787978'";
         Connection conn = null;
         Statement stmt = null;
         try {
@@ -709,6 +761,5 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
     @AfterAll
     public static void clearStoreDB() throws SQLException {
         dataSource.close();
-        FileUtils.deleteRecursive("db_store", true);
     }
 }

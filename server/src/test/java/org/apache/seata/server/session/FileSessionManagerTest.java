@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.session;
 
+import jakarta.annotation.Resource;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -43,7 +44,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.ApplicationContext;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

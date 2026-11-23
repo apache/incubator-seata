@@ -299,7 +299,8 @@ public class DefaultCore implements Core {
                         }
 
                         BranchStatus currentStatus = branchSession.getStatus();
-                        if (currentStatus == BranchStatus.PhaseOne_Failed) {
+                        if (currentStatus == BranchStatus.PhaseOne_Failed
+                                || currentStatus == BranchStatus.PhaseOne_PrepareFailed) {
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                             return CONTINUE;
                         }
@@ -433,7 +434,8 @@ public class DefaultCore implements Core {
                     branchSessions,
                     branchSession -> {
                         BranchStatus currentBranchStatus = branchSession.getStatus();
-                        if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
+                        if (currentBranchStatus == BranchStatus.PhaseOne_Failed
+                                || currentBranchStatus == BranchStatus.PhaseOne_PrepareFailed) {
                             SessionHelper.removeBranch(globalSession, branchSession, !retrying);
                             return CONTINUE;
                         }

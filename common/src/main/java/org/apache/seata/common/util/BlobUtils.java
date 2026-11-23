@@ -60,7 +60,11 @@ public class BlobUtils {
         }
 
         try {
-            return new String(blob.getBytes(1, (int) blob.length()), Constants.DEFAULT_CHARSET);
+            long length = blob.length();
+            if (length == 0) {
+                return "";
+            }
+            return new String(blob.getBytes(1, (int) length), Constants.DEFAULT_CHARSET);
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }
@@ -96,7 +100,11 @@ public class BlobUtils {
         }
 
         try {
-            return blob.getBytes(1, (int) blob.length());
+            long length = blob.length();
+            if (length == 0) {
+                return new byte[0];
+            }
+            return blob.getBytes(1, (int) length);
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }

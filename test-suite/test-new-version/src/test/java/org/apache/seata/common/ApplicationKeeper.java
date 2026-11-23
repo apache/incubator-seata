@@ -31,8 +31,8 @@ public class ApplicationKeeper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationKeeper.class);
 
-    private final ReentrantLock LOCK = new ReentrantLock();
-    private final Condition STOP = LOCK.newCondition();
+    private final ReentrantLock lock = new ReentrantLock();
+    private final Condition stop = lock.newCondition();
 
     /**
      * Instantiates a new Application keeper.
@@ -55,10 +55,10 @@ public class ApplicationKeeper {
                 }
 
                 try {
-                    LOCK.lock();
-                    STOP.signal();
+                    lock.lock();
+                    stop.signal();
                 } finally {
-                    LOCK.unlock();
+                    lock.unlock();
                 }
             }
         }));
@@ -68,14 +68,14 @@ public class ApplicationKeeper {
      * Keep.
      */
     public void keep() {
-        LOCK.lock();
+        lock.lock();
         try {
             LOGGER.info("Application is keep running ... ");
-            STOP.await();
+            stop.await();
         } catch (InterruptedException e) {
             LOGGER.error("interrupted error ", e);
         } finally {
-            LOCK.unlock();
+            lock.unlock();
         }
     }
 }

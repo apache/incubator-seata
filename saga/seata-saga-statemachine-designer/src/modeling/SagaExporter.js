@@ -42,7 +42,19 @@ SagaExporter.prototype.parseState = function (definitions, node) {
 SagaExporter.prototype.parseEdge = function (definitions, edge) {
   const { businessObject } = edge;
   const elementJson = businessObject.exportJson();
-  const { source, target } = elementJson.style;
+
+  let { source } = elementJson.style;
+  let { target } = elementJson.style;
+
+  if (edge.source && edge.source.businessObject && edge.source.businessObject.Name) {
+    source = edge.source.businessObject.Name;
+    elementJson.style.source = source;
+  }
+  if (edge.target && edge.target.businessObject && edge.target.businessObject.Name) {
+    target = edge.target.businessObject.Name;
+    elementJson.style.target = target;
+  }
+
   if (!source) {
     if (definitions.StartState) {
       throw new Error(`Two or more start states, ${target} and ${definitions.StartState}`);
@@ -55,6 +67,11 @@ SagaExporter.prototype.parseEdge = function (definitions, edge) {
     }
   } else {
     const stateRef = definitions.States[source];
+
+    if (!stateRef) {
+      throw new Error(`Export failed: Unable to resolve source state '${source}' for edge targeting '${target}'.`);
+    }
+
     switch (businessObject.Type) {
       case 'ChoiceEntry':
         if (!stateRef.Choices) {
@@ -70,6 +87,9 @@ SagaExporter.prototype.parseEdge = function (definitions, edge) {
         stateRef.edge = assign(stateRef.edge || {}, { [target]: elementJson });
         break;
       case 'ExceptionMatch':
+        if (!stateRef.Catch) {
+          stateRef.Catch = [];
+        }
         stateRef.Catch.push({
           Exceptions: businessObject.Exceptions,
           Next: target,

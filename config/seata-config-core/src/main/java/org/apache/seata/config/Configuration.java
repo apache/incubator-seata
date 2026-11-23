@@ -19,6 +19,7 @@ package org.apache.seata.config;
 import org.apache.seata.common.util.StringUtils;
 
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -303,7 +304,7 @@ public interface Configuration {
         if (null != content) {
             return content;
         }
-        String envDataId = dataId.toUpperCase().replace(".", "_");
+        String envDataId = dataId.toUpperCase(Locale.ROOT).replace(".", "_");
         content = ENV_MAP.get(envDataId);
         if (null != content) {
             return content;

@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.cluster.raft.context;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.ContextCore;
 import org.apache.seata.core.context.ContextCoreLoader;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
