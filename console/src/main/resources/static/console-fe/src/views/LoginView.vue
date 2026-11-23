@@ -47,12 +47,11 @@
             ref="formRef"
             :model="form"
             :rules="rules"
-            :label-col="{ span: 8 }"
-            :wrapper-col="{ span: 16 }"
+            label-width="100px"
             class="login-form"
             @submit.prevent="handleSubmit"
           >
-            <el-form-item :label="t('login.username')" prop="username" label-width="100px">
+            <el-form-item :label="t('login.username')" prop="username">
               <el-input
                 v-model="form.username"
                 :placeholder="t('login.usernamePlaceholder')"
@@ -60,7 +59,7 @@
               />
             </el-form-item>
 
-            <el-form-item :label="t('login.password')" prop="password" label-width="100px">
+            <el-form-item :label="t('login.password')" prop="password">
               <el-input
                 v-model="form.password"
                 type="password"
@@ -69,7 +68,7 @@
               />
             </el-form-item>
 
-            <el-form-item label-width="100px">
+            <el-form-item>
               <el-button
                 type="primary"
                 native-type="submit"

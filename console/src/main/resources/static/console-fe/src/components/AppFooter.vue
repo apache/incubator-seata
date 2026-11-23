@@ -27,7 +27,7 @@ const version = ref(import.meta.env.DEV ? 'dev' : '')
 
 onMounted(async () => {
   try {
-    const res = await fetch('/version.json')
+    const res = await fetch('./version.json')
     const data = await res.json()
     if (data.version) {
       version.value = data.version

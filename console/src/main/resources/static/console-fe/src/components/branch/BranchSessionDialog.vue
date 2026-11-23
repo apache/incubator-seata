@@ -17,7 +17,7 @@
 <template>
   <el-dialog
     :model-value="visible"
-    :title="t('branch.title') + ' - ' + xid"
+    :title="t('branch.title') + ' - ' + session.xid"
     width="80%"
     class="branch-dialog"
     @update:model-value="$emit('update:visible', $event)"
@@ -29,8 +29,8 @@
       <el-table-column prop="branchType" :label="t('branch.table.branchType')" min-width="100" />
       <el-table-column :label="t('branch.table.status')" min-width="140">
         <template #default="{ row }">
-          <el-button :type="getStatusButtonType(row.status)" size="small" plain>
-            {{ GlobalStatusMap[row.status] ?? row.status }}
+          <el-button :type="branchStatuses[row.status]?.type ?? 'info'" size="small" plain>
+            {{ branchStatuses[row.status]?.label ?? row.status }}
           </el-button>
         </template>
       </el-table-column>
@@ -57,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { GlobalStatusMap } from '@/api/globalSession'
+import type { ButtonType } from 'element-plus'
+import type { GlobalSessionOperationParams } from '@/api/globalSession'
 import TableActionColumn, { type RowAction } from '@/components/TableActionColumn.vue'
 import {
   deleteBranchSession,
@@ -70,10 +70,11 @@ import {
 
 const { t } = useI18n()
 
-defineProps<{
+const props = defineProps<{
   visible: boolean
-  xid: string
+  session: GlobalSessionOperationParams
   branchList: unknown[]
+  loading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -81,43 +82,24 @@ const emit = defineEmits<{
   refresh: []
 }>()
 
-const loading = ref(false)
-
-type StatusButtonType = '' | 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'text'
-
-const statusButtonTypeMap: Record<string, StatusButtonType> = {
-  // Phase 1
-  Begin: 'primary',
-  // Phase 2 - running
-  Committing: 'primary',
-  CommitRetrying: 'warning',
-  Rollbacking: 'warning',
-  RollbackRetrying: 'warning',
-  TimeoutRollbacking: 'danger',
-  TimeoutRollbackRetrying: 'danger',
-  AsyncCommitting: 'primary',
-  // Phase 2 - final: committed
-  Committed: 'success',
-  // Phase 2 - final: rollbacked
-  Rollbacked: 'warning',
-  TimeoutRollbacked: 'warning',
-  // Phase 2 - final: failed
-  CommitFailed: 'danger',
-  RollbackFailed: 'danger',
-  TimeoutRollbackFailed: 'danger',
-  CommitRetryTimeout: 'danger',
-  RollbackRetryTimeout: 'danger',
-  // Others
-  UnKnown: 'info',
-  Finished: 'info',
-  Deleting: 'info',
-  StopCommitOrCommitRetry: 'info',
-  StopRollbackOrRollbackRetry: 'info',
-}
-
-const getStatusButtonType = (status: number): StatusButtonType => {
-  const name = GlobalStatusMap[status] ?? ''
-  return statusButtonTypeMap[name] || 'info'
+// Codes and names are defined by org.apache.seata.core.model.BranchStatus.
+const branchStatuses: Record<number, { label: string; type: ButtonType }> = {
+  0: { label: 'Unknown', type: 'info' },
+  1: { label: 'Registered', type: 'primary' },
+  2: { label: 'PhaseOne_Done', type: 'success' },
+  3: { label: 'PhaseOne_Failed', type: 'danger' },
+  4: { label: 'PhaseOne_Timeout', type: 'danger' },
+  5: { label: 'PhaseTwo_Committed', type: 'success' },
+  6: { label: 'PhaseTwo_CommitFailed_Retryable', type: 'warning' },
+  7: { label: 'PhaseTwo_CommitFailed_Unretryable', type: 'danger' },
+  8: { label: 'PhaseTwo_Rollbacked', type: 'warning' },
+  9: { label: 'PhaseTwo_RollbackFailed_Retryable', type: 'warning' },
+  10: { label: 'PhaseTwo_RollbackFailed_Unretryable', type: 'danger' },
+  11: { label: 'PhaseTwo_CommitFailed_XAER_NOTA_Retryable', type: 'warning' },
+  12: { label: 'PhaseTwo_RollbackFailed_XAER_NOTA_Retryable', type: 'warning' },
+  13: { label: 'PhaseOne_RDONLY', type: 'success' },
+  14: { label: 'STOP_RETRY', type: 'info' },
+  15: { label: 'PhaseOne_PrepareFailed', type: 'danger' },
 }
 
 const confirmAction = async (labelKey: string): Promise<boolean> => {
@@ -139,13 +121,8 @@ const branchActions: RowAction[] = [
   { key: 'startRetry', labelKey: 'branch.actions.startRetry' },
 ]
 
-const buildParams = (row: Record<string, unknown>) => ({
-  xid: String(row.xid),
-  branchId: String(row.branchId),
-})
-
 const handleAction = async (key: string, row: unknown) => {
-  const r = row as Record<string, unknown>
+  const params = { ...props.session, branchId: (row as { branchId: string }).branchId }
   const labelMap: Record<string, string> = {
     delete: 'branch.actions.delete',
     forceDelete: 'branch.actions.forceDelete',
@@ -154,7 +131,6 @@ const handleAction = async (key: string, row: unknown) => {
   }
   const labelKey = labelMap[key]
   if (!labelKey || !await confirmAction(labelKey)) return
-  const params = buildParams(r)
   if (key === 'delete') await deleteBranchSession(params)
   else if (key === 'forceDelete') await forceDeleteBranchSession(params)
   else if (key === 'stopRetry') await stopBranchRetry(params)

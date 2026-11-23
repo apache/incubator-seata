@@ -29,9 +29,8 @@
         <el-form-item :label="t('transaction.filters.createTime')" class="filter-item-span-2">
           <el-date-picker
             v-model="formState.createTime"
-            type="daterange"
+            type="datetimerange"
             unlink-panels
-            value-format="YYYY-MM-DD"
             :range-separator="t('transaction.filters.to')"
             :start-placeholder="t('transaction.filters.startDate')"
             :end-placeholder="t('transaction.filters.endDate')"
@@ -71,7 +70,7 @@
         </el-form-item>
 
         <el-form-item :label="t('transaction.filters.includeBranch')">
-          <el-switch v-model="formState.includeBranch" />
+          <el-switch v-model="formState.includeBranch" @change="(checked) => checked && handleSearch()" />
         </el-form-item>
 
         <el-form-item class="filter-actions">
@@ -127,10 +126,12 @@
     </el-card>
 
     <BranchSessionDialog
+      v-if="selectedSession"
       v-model:visible="branchDialogVisible"
-      :xid="currentBranchXid"
+      :session="selectedSession"
       :branch-list="currentBranchList"
-      @refresh="handleSearch"
+      :loading="loading"
+      @refresh="refreshResults"
     />
   </div>
 </template>
@@ -152,12 +153,13 @@ import {
   GlobalStatusMap,
   type GlobalSessionRecord,
   type GlobalSessionOperationParams,
+  type GlobalSessionQueryParams,
 } from '@/api/globalSession'
 import { useNamespaceOptions } from '@/composables/useNamespace'
 import BranchSessionDialog from '@/components/branch/BranchSessionDialog.vue'
 
 interface QueryState {
-  createTime: [string, string] | []
+  createTime: [Date, Date] | null
   xid: string
   applicationId: string
   status: string
@@ -180,15 +182,16 @@ const {
   onClusterChange,
 } = useNamespaceOptions()
 
-/** Current page data (returned by API) */
-const tableData = ref<GlobalSessionRecord[]>([])
+type SessionRow = GlobalSessionRecord & { operationParams: GlobalSessionOperationParams }
+
+const tableData = ref<SessionRow[]>([])
 /** Total record count */
 const totalRecords = ref(0)
 /** Loading state */
 const loading = ref(false)
 
 const createDefaultState = (): QueryState => ({
-  createTime: [],
+  createTime: null,
   xid: '',
   applicationId: '',
   status: '',
@@ -240,8 +243,10 @@ watch(
 
 /** Branch session dialog state */
 const branchDialogVisible = ref(false)
-const currentBranchXid = ref('')
-const currentBranchList = ref<unknown[]>([])
+const selectedSession = ref<GlobalSessionOperationParams>()
+const currentBranchList = computed(() =>
+  tableData.value.find(row => row.xid === selectedSession.value?.xid)?.branchSessionVOs ?? [],
+)
 
 const rowActions: RowAction[] = [
   { key: 'detail', labelKey: 'transaction.actions.detail' },
@@ -311,45 +316,48 @@ const statusNameToCode = (name: string): number | undefined => {
   return entry ? Number(entry[0]) : undefined
 }
 
-/** Build GlobalSessionOperationParams from form state and row */
-const getOperationParams = (row: GlobalSessionRecord): GlobalSessionOperationParams => ({
-  xid: row.xid,
-  namespace: formState.value.namespace || undefined,
-  cluster: formState.value.cluster || undefined,
-  vgroup: formState.value.vgroup || undefined,
-})
+let submittedQuery: GlobalSessionQueryParams
+let latestRequest = 0
 
-const handleSearch = async () => {
+const handleSearch = () => {
   const f = formState.value
-  let timeStart: number | null = null
-  let timeEnd: number | null = null
-  if (f.createTime && f.createTime.length === 2) {
-    timeStart = new Date(f.createTime[0]).getTime()
-    timeEnd = new Date(f.createTime[1]).getTime() + 86400000 - 1
+  selectedSession.value = undefined
+  branchDialogVisible.value = false
+  submittedQuery = {
+    pageNum: currentPage.value,
+    pageSize: pageSize.value,
+    timeStart: f.createTime?.[0]?.getTime(),
+    timeEnd: f.createTime?.[1]?.getTime(),
+    xid: f.xid.trim() || undefined,
+    applicationId: f.applicationId.trim() || undefined,
+    status: statusNameToCode(f.status),
+    namespace: f.namespace || undefined,
+    cluster: f.cluster || undefined,
+    vgroup: f.vgroup || undefined,
+    withBranch: f.includeBranch || undefined,
   }
+  return refreshResults()
+}
 
+const refreshResults = async () => {
+  const query = submittedQuery
+  const requestId = ++latestRequest
   loading.value = true
   try {
-    const res = await queryGlobalSessions({
-      pageNum: currentPage.value,
-      pageSize: pageSize.value,
-      timeStart,
-      timeEnd,
-      xid: f.xid.trim() || undefined,
-      applicationId: f.applicationId.trim() || undefined,
-      status: statusNameToCode(f.status),
-      namespace: f.namespace || undefined,
-      cluster: f.cluster || undefined,
-      vgroup: f.vgroup || undefined,
-      withBranch: f.includeBranch || undefined,
-    })
-    tableData.value = res.data
+    const res = await queryGlobalSessions(query)
+    if (requestId !== latestRequest) return
+    const { namespace, cluster, vgroup } = query
+    tableData.value = res.data.map(row => ({
+      ...row,
+      operationParams: { xid: row.xid, namespace, cluster, vgroup },
+    }))
     totalRecords.value = res.total
   } catch {
+    if (requestId !== latestRequest) return
     tableData.value = []
     totalRecords.value = 0
   } finally {
-    loading.value = false
+    if (requestId === latestRequest) loading.value = false
   }
 }
 
@@ -379,56 +387,55 @@ const confirmAction = async (labelKey: string): Promise<boolean> => {
   }
 }
 
-const actionHandlerMap: Record<string, (row: GlobalSessionRecord) => Promise<void>> = {
+const actionHandlerMap: Record<string, (row: SessionRow) => Promise<void>> = {
   detail: async (row) => {
     ElMessage.info(`${t('transaction.actions.detail')}: ${row.xid}`)
   },
   viewBranch: async (row) => {
-    currentBranchXid.value = row.xid
-    currentBranchList.value = (row as unknown as Record<string, unknown>).branchSessionVOs as unknown[] ?? []
+    selectedSession.value = row.operationParams
     branchDialogVisible.value = true
   },
   deleteGlobal: async (row) => {
     if (!await confirmAction('transaction.actions.deleteGlobal')) return
-    await deleteGlobalSession(getOperationParams(row))
+    await deleteGlobalSession(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
   forceDeleteGlobal: async (row) => {
     if (!await confirmAction('transaction.actions.forceDeleteGlobal')) return
-    await forceDeleteGlobalSession(getOperationParams(row))
+    await forceDeleteGlobalSession(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
   stopRetry: async (row) => {
     if (!await confirmAction('transaction.actions.stopRetry')) return
-    await stopGlobalRetry(getOperationParams(row))
+    await stopGlobalRetry(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
   startRetry: async (row) => {
     if (!await confirmAction('transaction.actions.startRetry')) return
-    await startGlobalRetry(getOperationParams(row))
+    await startGlobalRetry(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
   submitRetryGlobal: async (row) => {
     if (!await confirmAction('transaction.actions.submitRetryGlobal')) return
-    await sendCommitOrRollback(getOperationParams(row))
+    await sendCommitOrRollback(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
   updateStatus: async (row) => {
     if (!await confirmAction('transaction.actions.updateStatus')) return
-    await changeGlobalStatus(getOperationParams(row))
+    await changeGlobalStatus(row.operationParams)
     ElMessage.success(t('common.success'))
-    await handleSearch()
+    await refreshResults()
   },
 }
 
 const handleAction = async (actionKey: string, row: unknown) => {
   try {
-    await actionHandlerMap[actionKey]?.(row as GlobalSessionRecord)
+    await actionHandlerMap[actionKey]?.(row as SessionRow)
   } catch {
     // Errors are handled in the request interceptor
   }

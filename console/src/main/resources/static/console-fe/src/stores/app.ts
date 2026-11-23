@@ -37,17 +37,14 @@ export const useAppStore = defineStore('app', () => {
     localStorage.setItem('username', name)
   }
 
-  function clearUsername() {
+  function clearAuth() {
     username.value = ''
     localStorage.removeItem('username')
+    localStorage.removeItem(TOKEN_STORAGE_KEY)
   }
 
   function setToken(value: string) {
     localStorage.setItem(TOKEN_STORAGE_KEY, value)
-  }
-
-  function clearToken() {
-    localStorage.removeItem(TOKEN_STORAGE_KEY)
   }
 
   function getToken() {
@@ -59,9 +56,8 @@ export const useAppStore = defineStore('app', () => {
     username,
     setLocale,
     setUsername,
-    clearUsername,
+    clearAuth,
     setToken,
-    clearToken,
     getToken,
   }
 })

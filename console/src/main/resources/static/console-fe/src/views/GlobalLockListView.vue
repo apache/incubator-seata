@@ -29,9 +29,8 @@
         <el-form-item :label="t('globalLock.filters.createTime')" class="filter-item-span-2">
           <el-date-picker
             v-model="formState.createTime"
-            type="daterange"
+            type="datetimerange"
             unlink-panels
-            value-format="YYYY-MM-DD"
             :range-separator="t('globalLock.filters.to')"
             :start-placeholder="t('globalLock.filters.startDate')"
             :end-placeholder="t('globalLock.filters.endDate')"
@@ -84,7 +83,7 @@
         </el-form-item>
       </el-form>
 
-      <el-table v-loading="loading" :data="tableData" border style="width: 100%">
+      <el-table v-loading="searching || deleting" :data="tableData" border style="width: 100%">
         <el-table-column prop="xid" label="xid" min-width="250" show-overflow-tooltip />
         <el-table-column prop="transactionId" label="transactionId" min-width="180" show-overflow-tooltip />
         <el-table-column prop="branchId" label="branchId" min-width="180" show-overflow-tooltip />
@@ -134,12 +133,13 @@ import {
   deleteGlobalLock,
   checkGlobalLock,
   type GlobalLockRecord,
+  type GlobalLockOperationParams,
 } from '@/api/globalLock'
 import { useNamespaceOptions } from '@/composables/useNamespace'
 import TableActionColumn, { type RowAction } from '@/components/TableActionColumn.vue'
 
 interface QueryState {
-  createTime: [string, string] | []
+  createTime: [Date, Date] | null
   xid: string
   tableName: string
   transactionId: string
@@ -161,14 +161,16 @@ const {
 } = useNamespaceOptions()
 
 /** Current page data (returned by API) */
-const tableData = ref<GlobalLockRecord[]>([])
+type LockRow = GlobalLockRecord & { operationParams: GlobalLockOperationParams }
+const tableData = ref<LockRow[]>([])
 /** Total record count */
 const totalRecords = ref(0)
-/** Loading state */
-const loading = ref(false)
+const searching = ref(false)
+const deleting = ref(false)
+let latestSearch = 0
 
 const createDefaultState = (): QueryState => ({
-  createTime: [],
+  createTime: null,
   xid: '',
   tableName: '',
   transactionId: '',
@@ -241,40 +243,43 @@ const lockActions: RowAction[] = [
 ]
 
 const handleLockAction = async (key: string, row: unknown) => {
-  if (key === 'delete') await handleDelete(row as GlobalLockRecord)
+  if (key === 'delete') await handleDelete((row as LockRow).operationParams)
 }
 
 const handleSearch = async () => {
+  const searchId = ++latestSearch
   const f = formState.value
-  let timeStart: number | null = null
-  let timeEnd: number | null = null
-  if (f.createTime && f.createTime.length === 2) {
-    timeStart = new Date(f.createTime[0]).getTime()
-    timeEnd = new Date(f.createTime[1]).getTime() + 86400000 - 1
-  }
+  const namespace = f.namespace || undefined
+  const cluster = f.cluster || undefined
+  const vgroup = f.vgroup || undefined
 
-  loading.value = true
+  searching.value = true
   try {
     const res = await queryGlobalLocks({
       pageNum: currentPage.value,
       pageSize: pageSize.value,
-      timeStart,
-      timeEnd,
+      timeStart: f.createTime?.[0]?.getTime(),
+      timeEnd: f.createTime?.[1]?.getTime(),
       xid: f.xid.trim() || undefined,
       tableName: f.tableName.trim() || undefined,
       transactionId: f.transactionId.trim() || undefined,
       branchId: f.branchId.trim() || undefined,
-      namespace: f.namespace || undefined,
-      cluster: f.cluster || undefined,
-      vgroup: f.vgroup || undefined,
+      namespace,
+      cluster,
+      vgroup,
     })
-    tableData.value = res.data
+    if (searchId !== latestSearch) return
+    tableData.value = res.data.map(row => ({
+      ...row,
+      operationParams: { xid: row.xid, branchId: row.branchId, namespace, cluster, vgroup: row.vgroup || vgroup },
+    }))
     totalRecords.value = res.total
   } catch {
+    if (searchId !== latestSearch) return
     tableData.value = []
     totalRecords.value = 0
   } finally {
-    loading.value = false
+    if (searchId === latestSearch) searching.value = false
   }
 }
 
@@ -292,18 +297,10 @@ const handlePageChange = () => {
   handleSearch()
 }
 
-const handleDelete = async (row: GlobalLockRecord) => {
+const handleDelete = async (operationParams: GlobalLockOperationParams) => {
   if (!await confirmAction('globalLock.actions.delete')) return
 
-  const operationParams = {
-    xid: row.xid,
-    branchId: row.branchId,
-    namespace: formState.value.namespace || undefined,
-    cluster: formState.value.cluster || undefined,
-    vgroup: formState.value.vgroup || undefined,
-  }
-
-  loading.value = true
+  deleting.value = true
   try {
     // Step 1: Check if the lock exists and whether it may affect branch transactions
     const checkRes = await checkGlobalLock(operationParams)
@@ -331,7 +328,7 @@ const handleDelete = async (row: GlobalLockRecord) => {
   } catch {
     // Errors are handled in the request interceptor
   } finally {
-    loading.value = false
+    deleting.value = false
   }
 }
 

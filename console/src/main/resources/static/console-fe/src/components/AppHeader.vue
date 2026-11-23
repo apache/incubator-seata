@@ -95,8 +95,7 @@ const avatarText = computed(() => displayUsername.value.trim().charAt(0).toUpper
 
 function handleUserCommand(command: string | number | object) {
   if (command !== 'logout') return
-  appStore.clearToken()
-  appStore.clearUsername()
+  appStore.clearAuth()
   router.push('/login')
 }
 

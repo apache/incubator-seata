@@ -18,10 +18,9 @@ import axios, {
   type AxiosError,
   type AxiosInstance,
   type AxiosResponse,
-  type InternalAxiosRequestConfig,
 } from 'axios'
 import { ElMessage } from 'element-plus'
-import 'element-plus/theme-chalk/el-message.css';
+import 'element-plus/theme-chalk/el-message.css'
 import i18n from '@/i18n'
 import router from '@/router'
 import { useAppStore } from '@/stores/app'
@@ -44,18 +43,6 @@ function getCurrentLocaleMessages(): LocaleMessages {
   return i18n.global.getLocaleMessage(locale) as LocaleMessages
 }
 
-function setAuthorizationHeader(config: InternalAxiosRequestConfig, token: string | null) {
-  if (config.headers && typeof config.headers.set === 'function') {
-    config.headers.set(AUTHORIZATION_HEADER, token ?? '')
-    return
-  }
-
-  config.headers = {
-    ...config.headers,
-    [AUTHORIZATION_HEADER]: token,
-  }
-}
-
 const createRequest = (
   baseURL: string,
   generalErrorMessage: string = DEFAULT_GENERAL_ERROR_MESSAGE,
@@ -67,8 +54,7 @@ const createRequest = (
 
   instance.interceptors.request.use((config) => {
     const appStore = useAppStore()
-    const authHeader = appStore.getToken()
-    setAuthorizationHeader(config, authHeader)
+    config.headers.set(AUTHORIZATION_HEADER, appStore.getToken())
     return config
   })
 
@@ -90,12 +76,17 @@ const createRequest = (
       ElMessage.error(errorText || `Request error ${code}: ${response.config.url ?? ''}`)
       return Promise.reject(response)
     },
-    (error: AxiosError<ResponseBody>) => {
+    async (error: AxiosError<ResponseBody>) => {
       if (error.response) {
         const { status } = error.response
 
         if (status === 403 || status === 401) {
-          window.location.replace('/login')
+          const appStore = useAppStore()
+          // A response from an earlier session can arrive after the user signs in again.
+          if (error.response.config.headers.get(AUTHORIZATION_HEADER) === appStore.getToken()) {
+            appStore.clearAuth()
+            await router.replace({ name: 'Login' })
+          }
           return Promise.reject(error)
         }
         ElMessage.error(`HTTP ERROR: ${status}`)
