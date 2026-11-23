@@ -75,9 +75,17 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private String transactionServiceGroup;
 
     private ScheduledExecutorService threadPoolExecutorForSubscribe =
-            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("RedisRegistryService-subscribe", 1);
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(
+                    "RedisRegistryService-subscribe",
+                    1,
+                    true,
+                    new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
     private ScheduledExecutorService threadPoolExecutorForUpdateMap =
-            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("RedisRegistryService-updateClusterAddrMap", 1);
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor(
+                    "RedisRegistryService-updateClusterAddrMap",
+                    1,
+                    true,
+                    new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
 
     private RedisRegistryServiceImpl() {
         Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;

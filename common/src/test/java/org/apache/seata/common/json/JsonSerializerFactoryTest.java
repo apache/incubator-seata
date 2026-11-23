@@ -84,7 +84,7 @@ public class JsonSerializerFactoryTest {
     }
 
     /**
-     * In json-common-core tests, the jackson3 SPI lives in the separate json-common-jackson3
+     * In seata-common tests, the jackson3 SPI lives in the separate seata-spi-jdk17
      * module which is NOT on the test classpath. The factory must catch the
      * EnhancedServiceNotFoundException for "jackson3" and fall back to the default "jackson"
      * serializer.
