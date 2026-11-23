@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -544,7 +545,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     /**
-     * read the global session list by different condition
+     * Read the global session list by different condition.
+     *
+     * <p>When {@link SessionCondition#isRedisPagedQuery()} is {@code true} (and the query is not the
+     * single-{@link GlobalStatus#Begin} sorted-set timeout path), reads a page from the status lists
+     * using best-effort {@code LRANGE} offset pagination; DB keyset cursor fields are ignored.
      *
      * @param sessionCondition the session condition
      * @return the global sessions
@@ -569,11 +574,92 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             if (sessionCondition.getStatuses().length == 1 && sessionCondition.getStatuses()[0] == GlobalStatus.Begin) {
                 return this.readSortByTimeoutBeginSessions(!sessionCondition.isLazyLoadBranch());
+            } else if (sessionCondition.isRedisPagedQuery()) {
+                return readSessionByPage(sessionCondition);
             } else {
                 return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
             }
         }
         return null;
+    }
+
+    /**
+     * Reads a best-effort page of global sessions across the requested status lists starting at
+     * {@link SessionCondition#getOffset()} (default {@code 0}) up to
+     * {@link SessionCondition#getPageSize()} (falling back to {@link #logQueryLimit}).
+     *
+     * <p>Because status lists mutate concurrently via {@code LREM}/{@code RPUSH}, items may be skipped
+     * or duplicated across pages and deleted session hashes may shorten a returned page below
+     * {@code pageSize}. Callers MUST be idempotent and MUST terminate on an empty page rather than on
+     * a short page.
+     */
+    private List<GlobalSession> readSessionByPage(SessionCondition sessionCondition) {
+        List<GlobalSession> globalSessions = new ArrayList<>();
+        Integer pageSize = sessionCondition.getPageSize();
+        int effectiveLimit = (pageSize != null && pageSize > 0) ? pageSize : logQueryLimit;
+        if (effectiveLimit <= 0) {
+            return globalSessions;
+        }
+        long startOffset = sessionCondition.getOffset() != null ? Math.max(sessionCondition.getOffset(), 0) : 0L;
+        List<String> statusKeys =
+                new ArrayList<>(new LinkedHashSet<>(convertStatusKeys(sessionCondition.getStatuses())));
+        if (statusKeys.isEmpty()) {
+            return globalSessions;
+        }
+        List<String> xids = readXidsByPage(statusKeys, startOffset, effectiveLimit);
+        boolean withBranchSessions = !sessionCondition.isLazyLoadBranch();
+        for (String xid : xids) {
+            GlobalSession globalSession = this.readSession(xid, withBranchSessions);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
+        }
+        return globalSessions;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> readXidsByPage(List<String> statusKeys, long offset, int limit) {
+        List<String> xids = new ArrayList<>();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            if (statusKeys.size() == 1) {
+                List<String> page = jedis.lrange(statusKeys.get(0), offset, offset + (long) limit - 1);
+                if (CollectionUtils.isNotEmpty(page)) {
+                    xids.addAll(page);
+                }
+                return xids;
+            }
+            List<Long> counts;
+            try (Pipeline pipelined = jedis.pipelined()) {
+                for (String key : statusKeys) {
+                    pipelined.llen(key);
+                }
+                counts = (List<Long>) (List<?>) pipelined.syncAndReturnAll();
+            }
+            long remainingSkip = offset;
+            long remainingTake = limit;
+            int countSize = counts == null ? 0 : counts.size();
+            for (int i = 0; i < statusKeys.size() && i < countSize && remainingTake > 0; i++) {
+                Long countObj = counts.get(i);
+                long len = countObj == null ? 0L : countObj;
+                if (len <= 0) {
+                    continue;
+                }
+                if (remainingSkip >= len) {
+                    remainingSkip -= len;
+                    continue;
+                }
+                long start = remainingSkip;
+                long take = Math.min(remainingTake, len - start);
+                long end = start + take - 1;
+                List<String> page = jedis.lrange(statusKeys.get(i), start, end);
+                remainingSkip = 0L;
+                if (CollectionUtils.isNotEmpty(page)) {
+                    xids.addAll(page);
+                    remainingTake -= page.size();
+                }
+            }
+        }
+        return xids;
     }
 
     /**
