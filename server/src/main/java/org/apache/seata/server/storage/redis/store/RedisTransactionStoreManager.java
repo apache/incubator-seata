@@ -98,6 +98,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     /**the key of global transaction status for begin*/
     protected static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
 
+    /**
+     * Maximum number of global transactions processed per pipelined batch deletion chunk so large
+     * batches do not build unbounded pipelines or hold a Jedis connection indefinitely.
+     * Package-private for Redis store subclasses and unit tests.
+     */
+    static final int MAX_BATCH_DELETE_SIZE = 500;
+
     private static volatile RedisTransactionStoreManager instance;
 
     private static final String OK = "OK";
@@ -185,6 +192,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
+    }
+
+    @Override
+    public boolean removeGlobalSessions(List<GlobalSession> sessions) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return true;
+        }
+        List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>(sessions.size());
+        for (GlobalSession session : sessions) {
+            if (session != null) {
+                globalTransactionDOs.add(SessionConverter.convertGlobalTransactionDO(session));
+            }
+        }
+        if (globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        return deleteGlobalTransactionDOs(globalTransactionDOs);
     }
 
     /**
@@ -322,6 +346,81 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 pipelined.sync();
             }
             return true;
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    /**
+     * Batch delete global transactions in chunked pipeline mode.
+     *
+     * @param globalTransactionDOs the global transaction dos
+     * @return the boolean
+     */
+    protected boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return true;
+        }
+        List<GlobalTransactionDO> validDOs = new ArrayList<>(globalTransactionDOs.size());
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO != null) {
+                validDOs.add(globalTransactionDO);
+            }
+        }
+        if (validDOs.isEmpty()) {
+            return true;
+        }
+        for (int start = 0; start < validDOs.size(); start += MAX_BATCH_DELETE_SIZE) {
+            int end = Math.min(start + MAX_BATCH_DELETE_SIZE, validDOs.size());
+            deleteGlobalTransactionDOsChunk(validDOs.subList(start, end));
+        }
+        return true;
+    }
+
+    private void deleteGlobalTransactionDOsChunk(List<GlobalTransactionDO> chunk) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            List<Object> existingXids;
+            try (Pipeline checkPipeline = jedis.pipelined()) {
+                for (GlobalTransactionDO globalTransactionDO : chunk) {
+                    String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+                    checkPipeline.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+                }
+                existingXids = checkPipeline.syncAndReturnAll();
+            }
+            List<GlobalTransactionDO> toDelete = new ArrayList<>(chunk.size());
+            for (int i = 0; i < chunk.size(); i++) {
+                GlobalTransactionDO globalTransactionDO = chunk.get(i);
+                Object existed = (existingXids != null && i < existingXids.size()) ? existingXids.get(i) : null;
+                if (existed instanceof Throwable) {
+                    throw new RedisException((Throwable) existed);
+                }
+                if (existed == null || StringUtils.isEmpty(String.valueOf(existed))) {
+                    LOGGER.warn(
+                            "Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
+                            globalTransactionDO.getXid());
+                } else {
+                    toDelete.add(globalTransactionDO);
+                }
+            }
+            if (toDelete.isEmpty()) {
+                return;
+            }
+            try (Pipeline deletePipeline = jedis.pipelined()) {
+                for (GlobalTransactionDO globalTransactionDO : toDelete) {
+                    String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+                    Integer status = globalTransactionDO.getStatus();
+                    String globalStatus = buildGlobalStatus(status);
+                    deletePipeline.lrem(globalStatus, 0, globalTransactionDO.getXid());
+                    deletePipeline.del(globalKey);
+                    if (status != null
+                            && (GlobalStatus.Begin.getCode() == status || GlobalStatus.UnKnown.getCode() == status)) {
+                        deletePipeline.zrem(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey);
+                    }
+                }
+                deletePipeline.sync();
+            }
+        } catch (RedisException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }

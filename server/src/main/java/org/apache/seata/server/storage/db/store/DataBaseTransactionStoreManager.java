@@ -121,6 +121,23 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
         }
     }
 
+    @Override
+    public boolean removeGlobalSessions(List<GlobalSession> sessions) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return true;
+        }
+        List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>(sessions.size());
+        for (GlobalSession session : sessions) {
+            if (session != null) {
+                globalTransactionDOs.add(SessionConverter.convertGlobalTransactionDO(session));
+            }
+        }
+        if (globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        return logStore.deleteGlobalTransactionDOs(globalTransactionDOs);
+    }
+
     /**
      * Read session global session.
      *

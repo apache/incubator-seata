@@ -18,6 +18,7 @@ package org.apache.seata.server.storage.db.store;
 
 import org.apache.seata.common.exception.DataAccessException;
 import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -27,6 +28,7 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.core.store.LogStore;
+import org.apache.seata.core.store.db.sql.log.LogStoreSqls;
 import org.apache.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +40,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_STORE_DB_BRANCH_TABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_STORE_DB_GLOBAL_TABLE;
@@ -59,6 +63,12 @@ public class LogStoreDataBaseDAO implements LogStore {
      * The transaction name default size is 128
      */
     private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
+
+    /**
+     * The maximum number of XIDs deleted per SQL IN clause, staying below Oracle's 1000-item IN limit
+     * and SQL Server's 2100-parameter limit. Package-private for internal and unit-test use.
+     */
+    static final int MAX_BATCH_DELETE_SIZE = 500;
 
     /**
      * The constant CONFIG.
@@ -280,6 +290,56 @@ public class LogStoreDataBaseDAO implements LogStore {
             IOUtil.close(ps, conn);
         }
         return true;
+    }
+
+    @Override
+    public boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return true;
+        }
+        Set<String> xidSet = new LinkedHashSet<>(globalTransactionDOs.size());
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO != null && StringUtils.isNotBlank(globalTransactionDO.getXid())) {
+                xidSet.add(globalTransactionDO.getXid());
+            }
+        }
+        if (xidSet.isEmpty()) {
+            return true;
+        }
+        List<String> xids = new ArrayList<>(xidSet);
+        LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+        String fullChunkSql = null;
+        Connection conn = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            for (int start = 0; start < xids.size(); start += MAX_BATCH_DELETE_SIZE) {
+                int end = Math.min(start + MAX_BATCH_DELETE_SIZE, xids.size());
+                int chunkSize = end - start;
+                String sql;
+                if (chunkSize == MAX_BATCH_DELETE_SIZE) {
+                    if (fullChunkSql == null) {
+                        String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", chunkSize);
+                        fullChunkSql = logStoreSqls.getDeleteGlobalTransactionsSQL(globalTable, paramsPlaceHolder);
+                    }
+                    sql = fullChunkSql;
+                } else {
+                    String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", chunkSize);
+                    sql = logStoreSqls.getDeleteGlobalTransactionsSQL(globalTable, paramsPlaceHolder);
+                }
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    for (int i = 0; i < chunkSize; i++) {
+                        ps.setString(i + 1, xids.get(start + i));
+                    }
+                    ps.executeUpdate();
+                }
+            }
+            return true;
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(conn);
+        }
     }
 
     @Override

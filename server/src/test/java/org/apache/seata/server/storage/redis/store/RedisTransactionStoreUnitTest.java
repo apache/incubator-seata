@@ -270,4 +270,115 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         verify(pipeline).hmset(eq("SEATA_GLOBAL_42"), anyMap());
         verify(pipeline).hmset(eq("SEATA_BRANCH_7"), anyMap());
     }
+
+    @Test
+    void batchDeleteGlobalSessionsUsesPipelinedCheckAndDelete() {
+        assertTrue(store.removeGlobalSessions(null));
+        assertTrue(store.removeGlobalSessions(Collections.emptyList()));
+        assertTrue(store.removeGlobalSessions(Collections.singletonList(null)));
+        assertTrue(store.deleteGlobalTransactionDOs(null));
+        assertTrue(store.deleteGlobalTransactionDOs(Collections.emptyList()));
+        assertTrue(store.deleteGlobalTransactionDOs(Collections.singletonList(null)));
+        factory.verify(JedisPooledFactory::getJedisInstance, never());
+
+        GlobalSession beginSession = new GlobalSession("app", "group", "tx1", 1000);
+        beginSession.setXid("127.0.0.1:8091:101");
+        beginSession.setTransactionId(101L);
+        beginSession.setStatus(GlobalStatus.Begin);
+
+        GlobalSession unknownSession = new GlobalSession("app", "group", "tx2", 1000);
+        unknownSession.setXid("127.0.0.1:8091:102");
+        unknownSession.setTransactionId(102L);
+        unknownSession.setStatus(GlobalStatus.UnKnown);
+
+        GlobalSession committedSession = new GlobalSession("app", "group", "tx3", 1000);
+        committedSession.setXid("127.0.0.1:8091:103");
+        committedSession.setTransactionId(103L);
+        committedSession.setStatus(GlobalStatus.Committed);
+
+        GlobalSession missingSession = new GlobalSession("app", "group", "tx4", 1000);
+        missingSession.setXid("127.0.0.1:8091:104");
+        missingSession.setTransactionId(104L);
+        missingSession.setStatus(GlobalStatus.Begin);
+
+        when(pipeline.syncAndReturnAll())
+                .thenReturn(
+                        Arrays.asList(beginSession.getXid(), unknownSession.getXid(), committedSession.getXid(), null));
+
+        assertTrue(store.removeGlobalSessions(
+                Arrays.asList(beginSession, unknownSession, committedSession, missingSession)));
+
+        verify(pipeline).hget("SEATA_GLOBAL_101", "xid");
+        verify(pipeline).hget("SEATA_GLOBAL_102", "xid");
+        verify(pipeline).hget("SEATA_GLOBAL_103", "xid");
+        verify(pipeline).hget("SEATA_GLOBAL_104", "xid");
+
+        verify(pipeline).lrem("SEATA_STATUS_" + GlobalStatus.Begin.getCode(), 0, beginSession.getXid());
+        verify(pipeline).del("SEATA_GLOBAL_101");
+        verify(pipeline).zrem("SEATA_BEGIN_TRANSACTIONS", "SEATA_GLOBAL_101");
+
+        verify(pipeline).lrem("SEATA_STATUS_" + GlobalStatus.UnKnown.getCode(), 0, unknownSession.getXid());
+        verify(pipeline).del("SEATA_GLOBAL_102");
+        verify(pipeline).zrem("SEATA_BEGIN_TRANSACTIONS", "SEATA_GLOBAL_102");
+
+        verify(pipeline).lrem("SEATA_STATUS_" + GlobalStatus.Committed.getCode(), 0, committedSession.getXid());
+        verify(pipeline).del("SEATA_GLOBAL_103");
+        verify(pipeline, never()).zrem("SEATA_BEGIN_TRANSACTIONS", "SEATA_GLOBAL_103");
+
+        verify(pipeline, never()).del("SEATA_GLOBAL_104");
+        verify(pipeline, times(1)).sync();
+        verify(jedis, times(2)).pipelined();
+        verify(jedis, times(1)).close();
+    }
+
+    @Test
+    void batchDeleteIsIdempotentWhenAllMissingAndWrapsErrors() {
+        GlobalTransactionDO missing1 = global();
+        GlobalTransactionDO missing2 = global();
+        missing2.setTransactionId(43L);
+        missing2.setXid("127.0.0.1:8091:43");
+
+        when(pipeline.syncAndReturnAll()).thenReturn(Arrays.asList(null, ""));
+        assertTrue(store.deleteGlobalTransactionDOs(Arrays.asList(missing1, missing2)));
+        verify(jedis, times(1)).pipelined();
+        verify(pipeline, never()).sync();
+        verify(pipeline, never()).del(anyString());
+
+        when(pipeline.syncAndReturnAll()).thenReturn(Collections.singletonList(new RuntimeException("redis err")));
+        assertThrows(RedisException.class, () -> store.deleteGlobalTransactionDOs(Collections.singletonList(missing1)));
+
+        factory.when(JedisPooledFactory::getJedisInstance).thenThrow(new IllegalStateException("offline"));
+        assertThrows(RedisException.class, () -> store.deleteGlobalTransactionDOs(Collections.singletonList(missing1)));
+    }
+
+    @Test
+    void batchDeleteChunksLargeBatchesAcrossPipelines() {
+        int total = RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE + 20;
+        List<GlobalTransactionDO> items = new ArrayList<>(total);
+        List<Object> firstChunkXids = new ArrayList<>(RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE);
+        List<Object> secondChunkXids = new ArrayList<>(20);
+        for (int i = 0; i < total; i++) {
+            GlobalTransactionDO item = new GlobalTransactionDO();
+            String xid = "127.0.0.1:8091:" + (1000 + i);
+            item.setXid(xid);
+            item.setTransactionId(1000L + i);
+            item.setStatus(GlobalStatus.Committed.getCode());
+            items.add(item);
+            if (i < RedisTransactionStoreManager.MAX_BATCH_DELETE_SIZE) {
+                firstChunkXids.add(xid);
+            } else {
+                secondChunkXids.add(xid);
+            }
+        }
+        when(pipeline.syncAndReturnAll()).thenReturn(firstChunkXids, secondChunkXids);
+
+        assertTrue(store.deleteGlobalTransactionDOs(items));
+        // 2 chunks: each chunk checks out Jedis once and uses 2 pipelines (check + delete)
+        verify(jedis, times(2)).close();
+        verify(jedis, times(4)).pipelined();
+        verify(pipeline, times(2)).syncAndReturnAll();
+        verify(pipeline, times(2)).sync();
+        verify(pipeline, times(total)).hget(anyString(), eq("xid"));
+        verify(pipeline, times(total)).del(anyString());
+    }
 }

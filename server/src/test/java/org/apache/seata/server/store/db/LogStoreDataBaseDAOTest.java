@@ -35,6 +35,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
@@ -517,6 +520,103 @@ public class LogStoreDataBaseDAOTest extends BaseSpringBootTest {
         } finally {
             IOUtil.close(stmt, conn);
         }
+    }
+
+    @Test
+    public void deleteGlobalTransactionDOs_nullEmptyAndIdempotent() {
+        GlobalTransactionDO keeper = buildGlobalTransactionDO("batch-keep-0", 90000L);
+        Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(keeper));
+        try {
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(null));
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(Collections.emptyList()));
+            GlobalTransactionDO blankXid = new GlobalTransactionDO("   ");
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(Arrays.asList(null, blankXid)));
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(
+                    Collections.singletonList(new GlobalTransactionDO("batch-non-existent:999"))));
+            Assertions.assertNotNull(logStoreDataBaseDAO.queryGlobalTransactionDO(keeper.getXid()));
+        } finally {
+            logStoreDataBaseDAO.deleteGlobalTransactionDO(keeper);
+        }
+    }
+
+    @Test
+    public void deleteGlobalTransactionDOs_singleAndNormalBatch() {
+        GlobalTransactionDO singleTarget = buildGlobalTransactionDO("batch-single-1", 91000L);
+        GlobalTransactionDO keeper = buildGlobalTransactionDO("batch-keep-1", 91001L);
+        List<GlobalTransactionDO> normalBatch = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            normalBatch.add(buildGlobalTransactionDO("batch-normal-" + i, 91100L + i));
+        }
+
+        Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(singleTarget));
+        Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(keeper));
+        for (GlobalTransactionDO item : normalBatch) {
+            Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(item));
+        }
+
+        try {
+            Assertions.assertTrue(
+                    logStoreDataBaseDAO.deleteGlobalTransactionDOs(Collections.singletonList(singleTarget)));
+            Assertions.assertNull(logStoreDataBaseDAO.queryGlobalTransactionDO(singleTarget.getXid()));
+
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(normalBatch));
+            for (GlobalTransactionDO item : normalBatch) {
+                Assertions.assertNull(logStoreDataBaseDAO.queryGlobalTransactionDO(item.getXid()));
+            }
+            Assertions.assertNotNull(logStoreDataBaseDAO.queryGlobalTransactionDO(keeper.getXid()));
+        } finally {
+            logStoreDataBaseDAO.deleteGlobalTransactionDO(keeper);
+        }
+    }
+
+    @Test
+    public void deleteGlobalTransactionDOs_multiChunkBatch() {
+        // Exceed the single-chunk IN-clause limit (500) to exercise multi-chunk batch deletion
+        int deleteCount = 525;
+        List<GlobalTransactionDO> targets = new ArrayList<>(deleteCount);
+        for (int i = 0; i < deleteCount; i++) {
+            GlobalTransactionDO item = buildGlobalTransactionDO("batch-chunk-" + i, 92000L + i);
+            Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(item));
+            targets.add(item);
+        }
+        List<GlobalTransactionDO> keepers = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            GlobalTransactionDO keeper = buildGlobalTransactionDO("batch-chunk-keep-" + i, 95000L + i);
+            Assertions.assertTrue(logStoreDataBaseDAO.insertGlobalTransactionDO(keeper));
+            keepers.add(keeper);
+        }
+
+        try {
+            List<GlobalTransactionDO> deleteInput = new ArrayList<>(targets);
+            // include a duplicate and an already-absent XID to verify deduplication and idempotency
+            deleteInput.add(targets.get(0));
+            deleteInput.add(new GlobalTransactionDO("batch-chunk-absent-1"));
+
+            Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDOs(deleteInput));
+
+            for (GlobalTransactionDO target : targets) {
+                Assertions.assertNull(logStoreDataBaseDAO.queryGlobalTransactionDO(target.getXid()));
+            }
+            for (GlobalTransactionDO keeper : keepers) {
+                Assertions.assertNotNull(logStoreDataBaseDAO.queryGlobalTransactionDO(keeper.getXid()));
+            }
+        } finally {
+            logStoreDataBaseDAO.deleteGlobalTransactionDOs(keepers);
+        }
+    }
+
+    private GlobalTransactionDO buildGlobalTransactionDO(String xid, long transactionId) {
+        GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
+        globalTransactionDO.setXid(xid);
+        globalTransactionDO.setApplicationData("abc=5454");
+        globalTransactionDO.setTransactionServiceGroup("abc");
+        globalTransactionDO.setTransactionName("test");
+        globalTransactionDO.setTransactionId(transactionId);
+        globalTransactionDO.setTimeout(20);
+        globalTransactionDO.setBeginTime(System.currentTimeMillis());
+        globalTransactionDO.setApplicationId("test");
+        globalTransactionDO.setStatus(1);
+        return globalTransactionDO;
     }
 
     @Test

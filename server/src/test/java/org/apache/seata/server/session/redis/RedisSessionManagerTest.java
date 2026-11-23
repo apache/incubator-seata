@@ -41,6 +41,7 @@ import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
@@ -357,5 +358,30 @@ public class RedisSessionManagerTest extends BaseSpringBootTest {
 
         sessionManager.removeBranchSession(session, branchSession);
         sessionManager.removeGlobalSession(session);
+    }
+
+    @Test
+    public void test_removeGlobalSessions() throws Exception {
+        GlobalSession session1 = GlobalSession.createGlobalSession("test", "test", "batch1", 100);
+        session1.setXid(XID.generateXID(session1.getTransactionId()));
+        session1.setBeginTime(System.currentTimeMillis());
+        session1.setStatus(GlobalStatus.Begin);
+
+        GlobalSession session2 = GlobalSession.createGlobalSession("test", "test", "batch2", 100);
+        session2.setXid(XID.generateXID(session2.getTransactionId()));
+        session2.setBeginTime(System.currentTimeMillis());
+        session2.setStatus(GlobalStatus.Committed);
+
+        GlobalSession absentSession = GlobalSession.createGlobalSession("test", "test", "absent", 100);
+        absentSession.setXid(XID.generateXID(absentSession.getTransactionId()));
+        absentSession.setBeginTime(System.currentTimeMillis());
+        absentSession.setStatus(GlobalStatus.Committed);
+
+        sessionManager.addGlobalSession(session1);
+        sessionManager.addGlobalSession(session2);
+
+        sessionManager.removeGlobalSessions(Arrays.asList(session1, session2, absentSession));
+        Assertions.assertNull(sessionManager.findGlobalSession(session1.getXid(), false));
+        Assertions.assertNull(sessionManager.findGlobalSession(session2.getXid(), false));
     }
 }
