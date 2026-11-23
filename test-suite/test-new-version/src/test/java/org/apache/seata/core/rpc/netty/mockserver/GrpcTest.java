@@ -17,26 +17,42 @@
 package org.apache.seata.core.rpc.netty.mockserver;
 
 import com.google.protobuf.Any;
+import io.grpc.Context;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.AbstractResultMessage;
+import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
+import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
+import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
+import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
+import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.grpc.GrpcHeaderEnum;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.mockserver.MockServer;
+import org.apache.seata.serializer.protobuf.GrpcSerializer;
 import org.apache.seata.serializer.protobuf.generated.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GrpcTest {
 
@@ -54,6 +70,7 @@ public class GrpcTest {
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
 
+        RmClientTest.getRm("mock-action");
         channel = ManagedChannelBuilder.forAddress("127.0.0.1", ProtocolTestConstants.MOCK_SERVER_PORT)
                 .usePlaintext()
                 .build();
@@ -61,7 +78,9 @@ public class GrpcTest {
     }
 
     @AfterAll
-    public static void after() {
+    public static void after() throws InterruptedException {
+        channel.shutdownNow();
+        assertTrue(channel.awaitTermination(5, TimeUnit.SECONDS));
         // MockServer.close();
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         ConfigurationCache.clear();
@@ -71,7 +90,9 @@ public class GrpcTest {
 
     private GrpcMessageProto getRegisterTMRequest() {
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
-                .setApplicationId("test-applicationId")
+                .setApplicationId(ProtocolTestConstants.APPLICATION_ID)
+                .setVersion(org.apache.seata.core.protocol.Version.getCurrent())
+                .setTransactionServiceGroup(ProtocolTestConstants.SERVICE_GROUP)
                 .build();
         RegisterTMRequestProto registerTMRequestProto = RegisterTMRequestProto.newBuilder()
                 .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
@@ -94,11 +115,11 @@ public class GrpcTest {
                 .build();
     }
 
-    private GrpcMessageProto getBranchRegisterRequest() {
+    private GrpcMessageProto getBranchRegisterRequest(String xid) {
         BranchRegisterRequestProto branchRegisterRequestProto = BranchRegisterRequestProto.newBuilder()
-                .setXid("1")
+                .setXid(xid)
                 .setLockKey("1")
-                .setResourceId("test-resource")
+                .setResourceId("mock-action")
                 .setBranchType(BranchTypeProto.TCC)
                 .setApplicationData("{\"mock\":\"mock\"}")
                 .build();
@@ -109,9 +130,9 @@ public class GrpcTest {
                 .build();
     }
 
-    private GrpcMessageProto getGlobalCommitRequest() {
+    private GrpcMessageProto getGlobalCommitRequest(String xid) {
         AbstractGlobalEndRequestProto globalEndRequestProto =
-                AbstractGlobalEndRequestProto.newBuilder().setXid("1").build();
+                AbstractGlobalEndRequestProto.newBuilder().setXid(xid).build();
         GlobalCommitRequestProto globalCommitRequestProto = GlobalCommitRequestProto.newBuilder()
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
@@ -122,9 +143,9 @@ public class GrpcTest {
                 .build();
     }
 
-    private GrpcMessageProto getGlobalRollbackRequest() {
+    private GrpcMessageProto getGlobalRollbackRequest(String xid) {
         AbstractGlobalEndRequestProto globalEndRequestProto =
-                AbstractGlobalEndRequestProto.newBuilder().setXid("1").build();
+                AbstractGlobalEndRequestProto.newBuilder().setXid(xid).build();
         GlobalRollbackRequestProto globalRollbackRequestProto = GlobalRollbackRequestProto.newBuilder()
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
@@ -136,62 +157,111 @@ public class GrpcTest {
     }
 
     @Test
-    public void testCommit() throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(4);
-        StreamObserver<GrpcMessageProto> streamObserver = new StreamObserver<GrpcMessageProto>() {
-            @Override
-            public void onNext(GrpcMessageProto grpcMessageProto) {
-                System.out.println("receive : " + grpcMessageProto.toString());
-                countDownLatch.countDown();
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-
-            @Override
-            public void onCompleted() {}
-        };
-
-        StreamObserver<GrpcMessageProto> response = seataServiceStub.sendRequest(streamObserver);
-        response.onNext(getRegisterTMRequest());
-        response.onNext(getGlobalBeginRequest());
-        response.onNext(getBranchRegisterRequest());
-        response.onNext(getGlobalCommitRequest());
-
-        response.onCompleted();
-
-        countDownLatch.await(10, TimeUnit.SECONDS);
+    public void testCommit() throws Exception {
+        assertTransactionCompletes(true);
     }
 
     @Test
-    public void testRollback() throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(4);
-        StreamObserver<GrpcMessageProto> streamObserver = new StreamObserver<GrpcMessageProto>() {
+    public void testRollback() throws Exception {
+        assertTransactionCompletes(false);
+    }
+
+    private void assertTransactionCompletes(boolean commit) throws Exception {
+        BlockingQueue<Object> responses = new LinkedBlockingQueue<>();
+        CompletableFuture<Void> termination = new CompletableFuture<>();
+        Context.CancellableContext callContext = Context.current().withCancellation();
+        GrpcSerializer serializer = new GrpcSerializer();
+        StreamObserver<GrpcMessageProto> observer = new StreamObserver<GrpcMessageProto>() {
             @Override
-            public void onNext(GrpcMessageProto grpcMessageProto) {
-                System.out.println("receive : " + grpcMessageProto.toString());
-                countDownLatch.countDown();
+            public void onNext(GrpcMessageProto message) {
+                try {
+                    Object response = serializer.deserialize(message.getBody().toByteArray());
+                    responses.add(response);
+                } catch (Throwable failure) {
+                    responses.add(failure);
+                }
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
+            public void onError(Throwable failure) {
+                responses.add(failure);
+                termination.completeExceptionally(failure);
             }
 
             @Override
-            public void onCompleted() {}
+            public void onCompleted() {
+                termination.complete(null);
+            }
         };
+        StreamObserver<GrpcMessageProto> requests = callContext.call(() -> seataServiceStub.sendRequest(observer));
+        boolean transactionVerified = false;
+        try {
+            RegisterTMResponse registration =
+                    exchange(requests, responses, getRegisterTMRequest(), RegisterTMResponse.class);
+            assertTrue(registration.isIdentified());
+            GlobalBeginResponse begin =
+                    exchange(requests, responses, getGlobalBeginRequest(), GlobalBeginResponse.class);
+            String xid = begin.getXid();
+            assertNotNull(xid);
+            assertFalse(xid.isEmpty());
+            BranchRegisterResponse branch =
+                    exchange(requests, responses, getBranchRegisterRequest(xid), BranchRegisterResponse.class);
+            assertTrue(branch.getBranchId() > 0);
+            if (commit) {
+                GlobalCommitResponse result =
+                        exchange(requests, responses, getGlobalCommitRequest(xid), GlobalCommitResponse.class);
+                assertEquals(GlobalStatus.Committed, result.getGlobalStatus());
+                assertEquals(1, Action1Impl.getCommitTimes(xid));
+                assertEquals(0, Action1Impl.getRollbackTimes(xid));
+            } else {
+                GlobalRollbackResponse result =
+                        exchange(requests, responses, getGlobalRollbackRequest(xid), GlobalRollbackResponse.class);
+                assertEquals(GlobalStatus.Rollbacked, result.getGlobalStatus());
+                assertEquals(1, Action1Impl.getRollbackTimes(xid));
+                assertEquals(0, Action1Impl.getCommitTimes(xid));
+            }
+            transactionVerified = true;
+        } finally {
+            requests.onCompleted();
+            // Seata's transport keeps the bidirectional stream open after a half-close.
+            // Explicitly cancel this test-owned stream and observe its terminal callback.
+            boolean alreadyTerminated = termination.isDone();
+            callContext.cancel(null);
+            if (transactionVerified) {
+                try {
+                    termination.get(5, TimeUnit.SECONDS);
+                } catch (ExecutionException failure) {
+                    if (alreadyTerminated
+                            || Status.fromThrowable(failure.getCause()).getCode() != Status.Code.CANCELLED) {
+                        throw new AssertionError("gRPC stream failed", failure.getCause());
+                    }
+                }
+                Object remaining;
+                while ((remaining = responses.poll()) != null) {
+                    if (!(remaining instanceof Throwable)
+                            || Status.fromThrowable((Throwable) remaining).getCode() != Status.Code.CANCELLED) {
+                        fail("Unexpected response after the final transaction result: " + remaining);
+                    }
+                }
+            }
+        }
+    }
 
-        StreamObserver<GrpcMessageProto> response = seataServiceStub.sendRequest(streamObserver);
-        response.onNext(getRegisterTMRequest());
-        response.onNext(getGlobalBeginRequest());
-        response.onNext(getBranchRegisterRequest());
-        response.onNext(getGlobalRollbackRequest());
-
-        response.onCompleted();
-
-        countDownLatch.await(10, TimeUnit.SECONDS);
+    private <T extends AbstractResultMessage> T exchange(
+            StreamObserver<GrpcMessageProto> requests,
+            BlockingQueue<Object> responses,
+            GrpcMessageProto request,
+            Class<T> type)
+            throws InterruptedException {
+        requests.onNext(request);
+        Object response = responses.poll(10, TimeUnit.SECONDS);
+        assertNotNull(response, "Timed out waiting for " + type.getSimpleName());
+        if (response instanceof Throwable) {
+            throw new AssertionError("gRPC request failed", (Throwable) response);
+        }
+        assertTrue(type.isInstance(response), "Unexpected response: " + response);
+        T result = type.cast(response);
+        assertEquals(ResultCode.Success, result.getResultCode(), result.toString());
+        return result;
     }
 }
