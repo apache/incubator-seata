@@ -32,7 +32,6 @@
     <description>console for Seata built with Maven</description>
 
     <properties>
-        <nodeVersion>v24.15.0</nodeVersion>
         <!-- required for java.net.http.HttpClient in RestClientConfig -->
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
