@@ -61,6 +61,27 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
             + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
 
     /**
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_SQLSERVER.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_SQLSERVER = "select top (?) "
+            + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
+            + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC;
+
+    /**
+     * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_SQLSERVER.
+     */
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_SQLSERVER = "select top (?) "
+            + ALL_GLOBAL_COLUMNS
+            + "  from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "   and " + GMT_MODIFIED_NOT_NULL
+            + "   and " + CURSOR_PREDICATE
+            + " order by " + ORDER_BY_GMT_MODIFIED_XID_ASC;
+
+    /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_SQLSERVER.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_SQLSERVER = "select top (?) " + ALL_GLOBAL_COLUMNS
@@ -116,6 +137,20 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
     @Override
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
         return QUERY_GLOBAL_TRANSACTION_BY_STATUS_SQLSERVER
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORDERED_SQLSERVER
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    @Override
+    public String getQueryGlobalTransactionSQLByStatusAfterCursor(String globalTable, String paramsPlaceHolder) {
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_AFTER_CURSOR_SQLSERVER
                 .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }

@@ -18,6 +18,8 @@ package org.apache.seata.core.store.db.sql.log;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class LogStoreSqlsFactoryTest {
 
@@ -280,5 +282,160 @@ public class LogStoreSqlsFactoryTest {
         Assertions.assertNotNull(sql);
         sql = oscarLog.getQueryBranchMax(branchTable);
         Assertions.assertNotNull(sql);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"mysql", "postgresql", "h2", "dm", "mariadb", "oceanbase", "polardb-x"})
+    public void limitDialectsKeysetPaginationSqlTest(String dbType) {
+        LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+        String orderedSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, "?,?");
+        assertCommonOrderedSql(orderedSql);
+        Assertions.assertTrue(orderedSql.endsWith("order by gmt_modified asc, xid asc limit ?"), orderedSql);
+        Assertions.assertEquals(3, countQuestionMarks(orderedSql), orderedSql);
+
+        String cursorSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, "?,?");
+        assertCommonCursorSql(cursorSql);
+        Assertions.assertTrue(cursorSql.endsWith("order by gmt_modified asc, xid asc limit ?"), cursorSql);
+        Assertions.assertEquals(6, countQuestionMarks(cursorSql), cursorSql);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"oracle", "kingbase", "oscar"})
+    public void oracleDialectsKeysetPaginationSqlTest(String dbType) {
+        LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls(dbType);
+        String orderedSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, "?,?");
+        assertCommonOrderedSql(orderedSql);
+        Assertions.assertTrue(orderedSql.contains("ROWNUM <= ?"), orderedSql);
+        Assertions.assertTrue(
+                orderedSql.indexOf("order by gmt_modified asc, xid asc") < orderedSql.indexOf("ROWNUM <= ?"),
+                orderedSql);
+        Assertions.assertEquals(3, countQuestionMarks(orderedSql), orderedSql);
+
+        String cursorSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, "?,?");
+        assertCommonCursorSql(cursorSql);
+        Assertions.assertTrue(cursorSql.contains("ROWNUM <= ?"), cursorSql);
+        Assertions.assertTrue(
+                cursorSql.indexOf("order by gmt_modified asc, xid asc") < cursorSql.indexOf("ROWNUM <= ?"), cursorSql);
+        Assertions.assertEquals(6, countQuestionMarks(cursorSql), cursorSql);
+    }
+
+    @Test
+    public void sqlServerDialectKeysetPaginationSqlTest() {
+        LogStoreSqls logStoreSqls = LogStoreSqlsFactory.getLogStoreSqls("sqlserver");
+        String orderedSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, "?,?");
+        assertCommonOrderedSql(orderedSql);
+        Assertions.assertTrue(orderedSql.startsWith("select top (?) "), orderedSql);
+        Assertions.assertTrue(orderedSql.indexOf("top (?)") < orderedSql.indexOf("status in (?,?)"), orderedSql);
+        Assertions.assertTrue(orderedSql.endsWith("order by gmt_modified asc, xid asc"), orderedSql);
+        Assertions.assertEquals(3, countQuestionMarks(orderedSql), orderedSql);
+
+        String cursorSql = logStoreSqls.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, "?,?");
+        assertCommonCursorSql(cursorSql);
+        Assertions.assertTrue(cursorSql.startsWith("select top (?) "), cursorSql);
+        Assertions.assertTrue(cursorSql.indexOf("top (?)") < cursorSql.indexOf("status in (?,?)"), cursorSql);
+        Assertions.assertTrue(cursorSql.endsWith("order by gmt_modified asc, xid asc"), cursorSql);
+        Assertions.assertEquals(6, countQuestionMarks(cursorSql), cursorSql);
+    }
+
+    @Test
+    public void customLogStoreSqlsDefaultMethodsThrowUnsupportedOperationException() {
+        LogStoreSqls minimalCustomSpi = new AbstractLogStoreSqls() {
+            @Override
+            public String getInsertGlobalTransactionSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateGlobalTransactionStatusByStatusSQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
+                return "";
+            }
+
+            @Override
+            public String getQueryGlobalTransactionForRecoverySQL(String globalTable) {
+                return "";
+            }
+
+            @Override
+            public String getInsertBranchTransactionSQL(String branchTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusSQL(String branchTable) {
+                return "";
+            }
+
+            @Override
+            public String getUpdateBranchTransactionStatusAppDataSQL(String branchTable) {
+                return "";
+            }
+        };
+
+        UnsupportedOperationException orderedEx = Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> minimalCustomSpi.getQueryGlobalTransactionSQLByStatusOrdered(globalTable, "?"));
+        Assertions.assertTrue(
+                orderedEx.getMessage().contains("Keyset pagination SQL is not supported by "), orderedEx.getMessage());
+        Assertions.assertTrue(
+                orderedEx.getMessage().contains(minimalCustomSpi.getClass().getName()), orderedEx.getMessage());
+
+        UnsupportedOperationException cursorEx = Assertions.assertThrows(
+                UnsupportedOperationException.class,
+                () -> minimalCustomSpi.getQueryGlobalTransactionSQLByStatusAfterCursor(globalTable, "?"));
+        Assertions.assertTrue(
+                cursorEx.getMessage().contains("Keyset pagination SQL is not supported by "), cursorEx.getMessage());
+        Assertions.assertTrue(
+                cursorEx.getMessage().contains(minimalCustomSpi.getClass().getName()), cursorEx.getMessage());
+    }
+
+    private static void assertCommonOrderedSql(String sql) {
+        Assertions.assertNotNull(sql);
+        Assertions.assertTrue(sql.contains("from " + globalTable), sql);
+        Assertions.assertTrue(sql.contains("status in (?,?)"), sql);
+        Assertions.assertTrue(sql.contains("gmt_modified is not null"), sql);
+        Assertions.assertTrue(sql.contains("order by gmt_modified asc, xid asc"), sql);
+        Assertions.assertTrue(sql.indexOf("status in (?,?)") < sql.indexOf("gmt_modified is not null"), sql);
+        Assertions.assertTrue(
+                sql.indexOf("gmt_modified is not null") < sql.indexOf("order by gmt_modified asc, xid asc"), sql);
+        Assertions.assertFalse(sql.contains("gmt_modified > ?"), sql);
+    }
+
+    private static void assertCommonCursorSql(String sql) {
+        Assertions.assertNotNull(sql);
+        Assertions.assertTrue(sql.contains("from " + globalTable), sql);
+        Assertions.assertTrue(sql.contains("status in (?,?)"), sql);
+        Assertions.assertTrue(sql.contains("gmt_modified is not null"), sql);
+        Assertions.assertTrue(sql.contains("(gmt_modified > ? or (gmt_modified = ? and xid > ?))"), sql);
+        Assertions.assertFalse(sql.contains("(gmt_modified, xid)"), sql);
+        Assertions.assertTrue(sql.contains("order by gmt_modified asc, xid asc"), sql);
+        Assertions.assertTrue(sql.indexOf("status in (?,?)") < sql.indexOf("gmt_modified is not null"), sql);
+        Assertions.assertTrue(
+                sql.indexOf("gmt_modified is not null")
+                        < sql.indexOf("(gmt_modified > ? or (gmt_modified = ? and xid > ?))"),
+                sql);
+        Assertions.assertTrue(
+                sql.indexOf("(gmt_modified > ? or (gmt_modified = ? and xid > ?))")
+                        < sql.indexOf("order by gmt_modified asc, xid asc"),
+                sql);
+    }
+
+    private static int countQuestionMarks(String sql) {
+        int count = 0;
+        for (int i = 0; i < sql.length(); i++) {
+            if (sql.charAt(i) == '?') {
+                count++;
+            }
+        }
+        return count;
     }
 }

@@ -45,6 +45,28 @@ public abstract class AbstractLogStoreSqls implements LogStoreSqls {
     public static final String WHERE_PLACEHOLD = " #where# ";
 
     /**
+     * Non-null guard for {@code gmt_modified} in keyset pagination queries so rows with NULL
+     * {@code gmt_modified} cannot stall cursor advancement on dialects that sort NULLs first.
+     */
+    protected static final String GMT_MODIFIED_NOT_NULL =
+            ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " is not null";
+
+    /**
+     * Composite keyset pagination predicate: {@code (gmt_modified > ? or (gmt_modified = ? and xid > ?))}.
+     * Avoids tuple comparison syntax for portability across Oracle and SQL Server.
+     */
+    protected static final String CURSOR_PREDICATE = "("
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " > ? or ("
+            + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = ? and "
+            + ServerTableColumnsName.GLOBAL_TABLE_XID + " > ?))";
+
+    /**
+     * Deterministic ordering clause for composite keyset pagination: {@code gmt_modified asc, xid asc}.
+     */
+    protected static final String ORDER_BY_GMT_MODIFIED_XID_ASC = ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED
+            + " asc, " + ServerTableColumnsName.GLOBAL_TABLE_XID + " asc";
+
+    /**
      * The constant ALL_GLOBAL_COLUMNS.
      * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
