@@ -17,7 +17,6 @@
 package org.apache.seata.spring.boot.autoconfigure.provider;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.ReflectionUtil;
@@ -120,8 +119,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         // Get the property class
         final Class<?> propertyClass = PROPERTY_BEAN_MAP.get(propertyPrefix);
         if (propertyClass == null) {
-            throw new ShouldNeverHappenException(
-                    "PropertyClass for prefix: [" + propertyPrefix + "] should not be null.");
+            // Optional modules may not register a property bean for this prefix.
+            // Continue to the original configuration when no bean default is available.
+            return null;
         }
 
         // Instantiate the property object
