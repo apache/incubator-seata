@@ -126,7 +126,7 @@ jobs:
           echo "CHANGED_FILES: $CHANGED_FILES"
           export CHECKSTYLE_INCLUDES=$(echo "$CHANGED_FILES" | grep '\.java$' | sed -e 's#.*src/main/java/##g' -e 's#.*src/test/java/##g' | tr '\n' ',')
           echo "CHECKSTYLE_INCLUDES: $CHECKSTYLE_INCLUDES"
-          mvn -T 4C -e -B clean checkstyle:check -Dcheckstyle.skip=false -Dcheckstyle.includes=$CHECKSTYLE_INCLUDES
+          ./mvnw -T 4C -e -B clean checkstyle:check -Dcheckstyle.skip=false -Dcheckstyle.includes=$CHECKSTYLE_INCLUDES
       # step 6.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         env:

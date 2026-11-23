@@ -392,6 +392,7 @@
                                 <descriptor>distribution/source-release.xml</descriptor>
                             </descriptors>
                             <finalName>apache-seata-${project.version}-incubating-src</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <executions>
                             <execution>
