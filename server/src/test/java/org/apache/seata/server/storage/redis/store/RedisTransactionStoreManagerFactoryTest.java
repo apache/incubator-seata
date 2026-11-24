@@ -17,11 +17,14 @@
 package org.apache.seata.server.storage.redis.store;
 
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@MockitoBean(types = ServerRunner.class)
 public class RedisTransactionStoreManagerFactoryTest extends BaseSpringBootTest {
 
     @Test

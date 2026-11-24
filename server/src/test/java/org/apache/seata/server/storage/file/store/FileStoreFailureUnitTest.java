@@ -18,10 +18,12 @@ package org.apache.seata.server.storage.file.store;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.apache.seata.server.session.*;
 import org.apache.seata.server.store.TransactionStoreManager.LogOperation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.*;
@@ -29,11 +31,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@MockitoBean(types = ServerRunner.class)
 class FileStoreFailureUnitTest extends BaseSpringBootTest {
     @TempDir
     Path directory;
@@ -104,36 +106,37 @@ class FileStoreFailureUnitTest extends BaseSpringBootTest {
     void workerDrainsFlushAndCloseRequestsOnStop() throws Exception {
         FileTransactionStoreManager store = mock(FileTransactionStoreManager.class, CALLS_REAL_METHODS);
         ReflectionTestUtils.setField(store, "stopping", true);
-        FileChannel channel = mock(FileChannel.class);
+        FileChannel syncChannel = mock(FileChannel.class);
+        FileChannel closeChannel = mock(FileChannel.class);
         RandomAccessFile file = mock(RandomAccessFile.class);
-        AtomicLong writes =
-                (AtomicLong) ReflectionTestUtils.getField(FileTransactionStoreManager.class, "FILE_TRX_NUM");
-        AtomicLong flushes =
-                (AtomicLong) ReflectionTestUtils.getField(FileTransactionStoreManager.class, "FILE_FLUSH_NUM");
-        long oldWrites = writes.get(), oldFlushes = flushes.get();
-        try {
-            writes.set(10);
-            flushes.set(0);
-            FileTransactionStoreManager.WriteDataFileRunnable worker = store.new WriteDataFileRunnable();
-            FileTransactionStoreManager.SyncFlushRequest sync = store.new SyncFlushRequest(10, channel);
-            worker.putRequest(sync);
-            worker.putRequest(store.new AsyncFlushRequest(10, channel));
-            FileTransactionStoreManager.CloseFileRequest close =
-                    new FileTransactionStoreManager.CloseFileRequest(channel, file);
-            worker.putRequest(close);
-            worker.run();
-            assertEquals(10, flushes.get());
-            verify(channel, atLeastOnce()).force(false);
-            verify(file).close();
-            sync.waitForFlush(1);
-            close.waitForClose(1);
-            doThrow(new IOException("force failed")).when(channel).force(false);
-            writes.set(11);
-            worker.putRequest(store.new SyncFlushRequest(11, channel));
-            assertDoesNotThrow(worker::run);
-        } finally {
-            writes.set(oldWrites);
-            flushes.set(oldFlushes);
-        }
+        FileTransactionStoreManager.WriteDataFileRunnable worker = store.new WriteDataFileRunnable();
+        // Keep the synchronization check independent of counts shared by other file stores.
+        FileTransactionStoreManager.SyncFlushRequest sync =
+                spy(store.new SyncFlushRequest(Long.MAX_VALUE, syncChannel));
+        FileTransactionStoreManager.AsyncFlushRequest async =
+                spy(store.new AsyncFlushRequest(0, mock(FileChannel.class)));
+        FileTransactionStoreManager.CloseFileRequest close =
+                spy(new FileTransactionStoreManager.CloseFileRequest(closeChannel, file));
+
+        worker.putRequest(sync);
+        worker.putRequest(async);
+        worker.putRequest(close);
+        worker.run();
+
+        verify(syncChannel).force(false);
+        verify(sync).wakeup();
+        verify(async).getCurFileChannel();
+        verify(closeChannel).force(false);
+        verify(file).close();
+        verify(close).wakeup();
+
+        FileChannel failingChannel = mock(FileChannel.class);
+        doThrow(new IOException("force failed")).when(failingChannel).force(false);
+        FileTransactionStoreManager.SyncFlushRequest failed =
+                spy(store.new SyncFlushRequest(Long.MAX_VALUE, failingChannel));
+        worker.putRequest(failed);
+        assertDoesNotThrow(worker::run);
+        verify(failingChannel).force(false);
+        verify(failed).wakeup();
     }
 }
