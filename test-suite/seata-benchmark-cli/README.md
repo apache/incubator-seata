@@ -44,6 +44,7 @@ A command-line benchmark tool for stress testing Seata transaction modes.
 - Maven 3.6+
 - Running Seata Server
 - Docker (required for real mode with Testcontainers)
+- MySQL JDBC driver (`mysql-connector-j`) JAR on the runtime classpath when running MySQL-backed modes (`AT` real mode, `XA` real mode, or `SAGA` with `--saga-workload db`)
 
 ## Build
 
@@ -102,9 +103,12 @@ java -jar seata-benchmark-cli.jar \
 
 ### Real Mode (with actual database operations)
 
+> **Note (MySQL JDBC Driver):** In compliance with the ASF 3rd Party License Policy, `com.mysql:mysql-connector-j` (GPLv2) is not bundled into `seata-benchmark-cli.jar`. When running MySQL-backed modes (`AT` with `--branches >= 1`, `XA` with `--branches >= 1`, or `SAGA` with `--saga-workload db`), supply `mysql-connector-j` externally via `-cp` and launch `org.apache.seata.benchmark.BenchmarkApplication` directly (use `;` instead of `:` on Windows, as `java -jar` ignores `-cp`).
+
 ```bash
 # AT mode with real MySQL transactions (via Testcontainers)
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
@@ -142,7 +146,8 @@ java -jar seata-benchmark-cli.jar \
   --saga-shape order
 
 # SAGA mode with DB-backed business actions (via Testcontainers MySQL)
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
@@ -188,7 +193,8 @@ java -jar seata-benchmark-cli.jar \
   --saga-timeout-ms 3000
 
 # XA mode with real MySQL XA branches (via Testcontainers)
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode XA \
   --tps 100 \
@@ -236,7 +242,8 @@ java -jar seata-benchmark-cli.jar \
 ### Advanced Options
 
 ```bash
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100000 \
@@ -445,8 +452,9 @@ java -jar seata-benchmark-cli.jar \
 ### Test AT Mode with Real Database Operations
 
 ```bash
-# Requires Docker for Testcontainers MySQL
-java -jar seata-benchmark-cli.jar \
+# Requires Docker for Testcontainers MySQL and external mysql-connector-j on classpath
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode AT \
   --tps 100 \
@@ -482,7 +490,8 @@ java -jar seata-benchmark-cli.jar \
 ### Test SAGA Mode with DB-Backed Business Actions
 
 ```bash
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 100 \
@@ -495,7 +504,8 @@ java -jar seata-benchmark-cli.jar \
 ### Test DB-Backed SAGA with Payment-Step Failure Injection
 
 ```bash
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode SAGA \
   --tps 10 \
@@ -552,7 +562,8 @@ java -jar seata-benchmark-cli.jar \
   --duration 60
 
 # Real mode: 3 XA branches per transaction
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode XA \
   --tps 100 \
@@ -561,7 +572,8 @@ java -jar seata-benchmark-cli.jar \
   --branches 3
 
 # Real mode with rollback injection
-java -jar seata-benchmark-cli.jar \
+java -cp "seata-benchmark-cli.jar:/path/to/mysql-connector-j.jar" \
+  org.apache.seata.benchmark.BenchmarkApplication \
   --server 127.0.0.1:8091 \
   --mode XA \
   --tps 100 \

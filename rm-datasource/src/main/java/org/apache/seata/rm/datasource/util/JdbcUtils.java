@@ -26,9 +26,12 @@ import org.apache.seata.sqlparser.util.DbTypeParser;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public final class JdbcUtils {
 
@@ -127,5 +130,88 @@ public final class JdbcUtils {
         } catch (IllegalAccessException | InstantiationException e) {
             throw new SQLException(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Set a parameter with the given JDBC type, widening the integer type when the value does not fit it.
+     * <p>
+     * MySQL reports unsigned integer columns as {@link Types#TINYINT}, {@link Types#SMALLINT},
+     * {@link Types#INTEGER} or {@link Types#BIGINT}. A value above that signed range is read as {@link Byte},
+     * {@link Short}, {@link Integer}, {@link Long} or {@link BigInteger}. Passing the column type to
+     * {@code setObject} makes the driver narrow it, so {@code 4294967295} is sent as {@code -1}. The type is
+     * widened to the narrowest of {@code SMALLINT}, {@code INTEGER}, {@code BIGINT} and {@code DECIMAL} that can
+     * hold the value.
+     *
+     * @param ps the prepared statement
+     * @param parameterIndex the parameter index
+     * @param value the parameter value
+     * @param targetSqlType the JDBC type of the column
+     * @throws SQLException if the parameter cannot be set
+     */
+    public static void setObject(PreparedStatement ps, int parameterIndex, Object value, int targetSqlType)
+            throws SQLException {
+        ps.setObject(parameterIndex, value, getTargetSqlType(value, targetSqlType));
+    }
+
+    static int getTargetSqlType(Object value, int targetSqlType) {
+        int signedBits = signedBits(targetSqlType);
+        if (signedBits < 0) {
+            return targetSqlType;
+        }
+        BigInteger number = toBigInteger(value);
+        if (number == null) {
+            return targetSqlType;
+        }
+        int bitLength = number.bitLength();
+        if (bitLength <= signedBits) {
+            return targetSqlType;
+        }
+        if (bitLength <= Short.SIZE - 1) {
+            return Types.SMALLINT;
+        }
+        if (bitLength <= Integer.SIZE - 1) {
+            return Types.INTEGER;
+        }
+        if (bitLength <= Long.SIZE - 1) {
+            return Types.BIGINT;
+        }
+        return Types.DECIMAL;
+    }
+
+    /**
+     * Signed magnitude of the JDBC integer type, excluding the sign bit. Negative when the type is not an integer.
+     */
+    private static int signedBits(int targetSqlType) {
+        switch (targetSqlType) {
+            case Types.TINYINT:
+                return Byte.SIZE - 1;
+            case Types.SMALLINT:
+                return Short.SIZE - 1;
+            case Types.INTEGER:
+                return Integer.SIZE - 1;
+            case Types.BIGINT:
+                return Long.SIZE - 1;
+            default:
+                return -1;
+        }
+    }
+
+    private static BigInteger toBigInteger(Object value) {
+        if (value instanceof BigInteger) {
+            return (BigInteger) value;
+        }
+        if (value instanceof Long) {
+            return BigInteger.valueOf((Long) value);
+        }
+        if (value instanceof Integer) {
+            return BigInteger.valueOf((Integer) value);
+        }
+        if (value instanceof Short) {
+            return BigInteger.valueOf((Short) value);
+        }
+        if (value instanceof Byte) {
+            return BigInteger.valueOf((Byte) value);
+        }
+        return null;
     }
 }
