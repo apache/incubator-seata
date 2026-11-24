@@ -15,7 +15,7 @@
       "Legal Entity" shall mean the union of the acting entity and all
       other entities that control, are controlled by, or are under common
       control with that entity. For the purposes of this definition,
-      "control" means (properties) the power, direct or indirect, to cause the
+      "control" means (i) the power, direct or indirect, to cause the
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
@@ -311,3 +311,13 @@
      console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.ttf
      console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.woff
      console/src/main/resources/static/console-fe/public/css/fonts/roboto-bold.woff2
+
+   Bootstrap v3.0.3 (https://github.com/twbs/bootstrap/tree/v3.0.3),
+   Copyright 2013 Twitter, Inc., is licensed under the Apache License 2.0.
+   Its bundled normalize.css v2.1.3 code is licensed under the MIT License.
+   See distribution/licenses/normalize.css-MIT for its copyright and license.
+
+   PathMap.js in saga/seata-saga-statemachine-designer/src/render/PathMap.js
+   contains helper functions copied and adjusted from Snap.svg
+   (https://github.com/adobe-webplatform/Snap.svg/blob/master/src/svg.js),
+   Copyright 2013-2017 Adobe Systems Incorporated, Apache License 2.0.

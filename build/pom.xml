@@ -90,6 +90,7 @@
         <kafka-clients.version>3.9.2</kafka-clients.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <bucket4j.version>8.1.0</bucket4j.version>
+        <groovy.version>4.0.32</groovy.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -380,6 +381,28 @@
             </properties>
             <build>
                 <plugins>
+                    <!-- Release staging must include JDK-gated modules. -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <version>${maven-enforcer-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>enforce-release-java</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[21,)</version>
+                                            <message>Release deployment requires JDK 21 or later so seata-threadpool-loom and json-common-jackson3 are included in Maven staging.</message>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <!-- Javadoc -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -448,14 +471,6 @@
 
                     -Dnet.bytebuddy.experimental=true
                 </maven.surefire.argLine>
-            </properties>
-        </profile>
-
-        <!-- profile: args-for-client-test -->
-        <profile>
-            <id>args-for-client-test</id>
-            <properties>
-                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
             </properties>
         </profile>
     </profiles>
