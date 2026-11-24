@@ -203,8 +203,7 @@
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
                 <mysql.copy.skip>false</mysql.copy.skip>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
@@ -324,6 +323,36 @@
             </build>
         </profile>
 
+        <!-- A complete distribution includes the JDK 25 Console and Naming Server. -->
+        <profile>
+            <id>release-seata</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>require-distribution-jdk</id>
+                                <inherited>false</inherited>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireJavaVersion>
+                                            <version>[25,)</version>
+                                            <message>The complete Seata distribution requires JDK 25 or later. Use the default build for client-only development. See BUILDING.md.</message>
+                                        </requireJavaVersion>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <!-- profile: source-release -->
         <profile>
             <id>source-release</id>
@@ -363,6 +392,7 @@
                                 <descriptor>distribution/source-release.xml</descriptor>
                             </descriptors>
                             <finalName>apache-seata-${project.version}-incubating-src</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                         <executions>
                             <execution>
@@ -515,6 +545,9 @@
                 <configuration>
                     <excludes>
                         <exclude>**/test/**</exclude>
+                        <!-- Druid is copied into target/classes/lib for the SQL parser. Leave that jar out of
+                             every report so Codecov does not merge it into Seata sources with the same file name. -->
+                        <exclude>**/lib/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>

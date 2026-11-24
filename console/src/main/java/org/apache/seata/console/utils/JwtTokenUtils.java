@@ -18,12 +18,14 @@ package org.apache.seata.console.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +37,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +57,7 @@ public class JwtTokenUtils {
     /**
      * secret key
      */
-    @Value("${seata.security.secretKey}")
+    @Value("${seata.security.secretKey:}")
     private String secretKey;
 
     /**
@@ -60,6 +65,31 @@ public class JwtTokenUtils {
      */
     @Value("${seata.security.tokenValidityInMilliseconds}")
     private long tokenValidityInMilliseconds;
+
+    @PostConstruct
+    public void validateSecretKey() {
+        if (secretKey == null || secretKey.isBlank()) {
+            byte[] generatedKey = new byte[32];
+            new SecureRandom().nextBytes(generatedKey);
+            secretKey = Base64.getEncoder().encodeToString(generatedKey);
+            LOGGER.warn("No JWT secret was configured. A temporary random key has been generated. "
+                    + "Tokens will become invalid after a restart. Configure SEATA_SECRET_KEY to retain "
+                    + "sessions across restarts and share the signing key across instances.");
+        }
+        String errorMessage = "seata.security.secretKey must be a unique Base64-encoded random key of at least "
+                + "32 decoded bytes, not the published default; set SEATA_SECRET_KEY (openssl rand -base64 32)";
+        byte[] decodedKey;
+        try {
+            decodedKey = Base64.getDecoder().decode(secretKey);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        if (decodedKey.length < 32
+                || Arrays.equals(
+                        decodedKey, Decoders.BASE64.decode("SeataSecretKey0c382ef121d778043159209298fd40bf3850a017"))) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
 
     /**
      * Create token
@@ -76,6 +106,14 @@ public class JwtTokenUtils {
          * Expiration date
          */
         Date expirationDate = new Date(now + tokenValidityInMilliseconds);
+        return signToken(Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, "")
+                .setExpiration(expirationDate));
+    }
+
+    /** Sign using the effective configured or generated console key. */
+    public String signToken(JwtBuilder builder) {
         /**
          * Key
          */
@@ -84,12 +122,7 @@ public class JwtTokenUtils {
         /**
          * create token
          */
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, "")
-                .setExpiration(expirationDate)
-                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
-                .compact();
+        return builder.signWith(secretKeySpec, SignatureAlgorithm.HS256).compact();
     }
 
     /**

@@ -67,6 +67,13 @@ public class Server {
         // Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
+        // fail fast when a host name is configured instead of an ip address literal,
+        // so the xid always carries an unambiguous address
+        // see https://github.com/apache/incubator-seata/issues/8158
+        if (StringUtils.isNotBlank(parameterParser.getHost())) {
+            requireIpLiteral(parameterParser.getHost());
+        }
+
         // initialize the metrics
         MetricsManager.get().init();
 
@@ -138,5 +145,22 @@ public class Server {
             }
         }
         return ConfigurationFactory.getInstance().getConfig(dataId);
+    }
+
+    /**
+     * Ensure the configured host is an ipv4/ipv6 address literal.
+     *
+     * <p>The xid generated from the configured host must stay stable and
+     * unambiguous, so host names are rejected at deploy time instead of
+     * being resolved to an ip at startup. See
+     * <a href="https://github.com/apache/incubator-seata/issues/8158">#8158</a>.
+     *
+     * @param host the host configured through --host or the SEATA_IP environment variable
+     */
+    static void requireIpLiteral(String host) {
+        if (!NetUtil.isValidIPv4(host) && !NetUtil.isValidIPv6(host)) {
+            throw new IllegalArgumentException("SEATA_IP must be an IP address literal; got \"" + host
+                    + "\". Resolve the host name at deploy time and pass the IP.");
+        }
     }
 }

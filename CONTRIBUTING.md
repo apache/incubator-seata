@@ -31,7 +31,7 @@ It is warmly welcomed if you have interest to hack on Apache Seata(incubating). 
 
 ## Reporting security issues
 
-Security issues are always treated seriously. As our usual principle, we discourage anyone to spread security issues publicly. If you find a security issue of Apache Seata(incubating), please do not discuss it in public and do not open a public issue. Instead, we encourage you to send us a private email to  [private@seata.apache.org](mailto:private@seata.apache.org) to report this.
+Security issues are always treated seriously. As our usual principle, we discourage anyone from disclosing security issues publicly. If you find a security vulnerability in Apache Seata(incubating), please do not discuss it in public and do not open a public issue. Instead, please refer to our [Security Policy](./SECURITY.md) and follow the [ASF vulnerability reporting process](https://apache.org/security/#reporting-a-vulnerability) by sending a private email to [security@apache.org](mailto:security@apache.org) or [private@seata.apache.org](mailto:private@seata.apache.org).
 
 ## Reporting general issues
 
@@ -83,6 +83,9 @@ Since you are ready to improve Seata with a PR, we suggest you could take a look
 * [PR Description](#pr-description)
 
 ### Workspace Preparation
+
+See [Building Seata](./BUILDING.md) for the JDK/module matrix, development
+commands and complete-distribution build requirements.
 
 To put forward a PR, we assume you have a registered GitHub account. Then you could finish the preparation in the following steps:
 
