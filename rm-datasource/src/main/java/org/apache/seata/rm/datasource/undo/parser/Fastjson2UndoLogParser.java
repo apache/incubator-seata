@@ -109,15 +109,16 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
     }
 
     /**
-     * Writes the class name before the value, so fastjson2's built-in Timestamp reader decodes it back to a
-     * Timestamp, nanos included. Undo logs written this way are still readable by clients without this writer.
-     */
-    /**
-     * Uses {@link TimestampWriter} for Timestamp and the default provider for every other type, so writers and
-     * modules the application registered on the default provider keep working for undo logs.
+     * Uses {@link TimestampWriter} for Timestamp, its own writers for the undo log classes, and the default
+     * provider for every other type, so writers and modules the application registered on the default provider
+     * keep working for undo logs.
      * <p>
      * JSONB writes java.sql.Timestamp without its class name by default, so the value is decoded as LocalDateTime
      * and no longer equals the Timestamp read from the database when the undo images are validated.
+     * <p>
+     * The undo log classes need their own writers because a generated writer remembers the value writer it used
+     * first for an Object field such as {@link Field}'s value. Sharing those writers with the default provider
+     * would let whichever side serializes a Timestamp first decide how the other side writes it.
      */
     static class UndoLogWriterProvider extends ObjectWriterProvider {
 
@@ -128,6 +129,9 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             if (objectClass == Timestamp.class) {
                 return TIMESTAMP_WRITER;
             }
+            if (isUndoLogClass(objectClass)) {
+                return super.getObjectWriterFromCache(objectType, objectClass, fieldBased);
+            }
             return JSONFactory.getDefaultObjectWriterProvider()
                     .getObjectWriterFromCache(objectType, objectClass, fieldBased);
         }
@@ -137,6 +141,9 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             if (objectClass == Timestamp.class) {
                 return TIMESTAMP_WRITER;
             }
+            if (isUndoLogClass(objectClass)) {
+                return super.getObjectWriter(objectType, objectClass, fieldBased);
+            }
             return JSONFactory.getDefaultObjectWriterProvider().getObjectWriter(objectType, objectClass, fieldBased);
         }
 
@@ -145,11 +152,26 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             if (objectClass == Timestamp.class) {
                 return TIMESTAMP_WRITER;
             }
+            if (isUndoLogClass(objectClass)) {
+                return super.getObjectWriter(objectType, objectClass, format, fieldBased);
+            }
             return JSONFactory.getDefaultObjectWriterProvider()
                     .getObjectWriter(objectType, objectClass, format, fieldBased);
         }
+
+        private static boolean isUndoLogClass(Class<?> objectClass) {
+            return objectClass == Field.class
+                    || objectClass == Row.class
+                    || objectClass == SQLUndoLog.class
+                    || objectClass == BranchUndoLog.class
+                    || (objectClass != null && TableRecords.class.isAssignableFrom(objectClass));
+        }
     }
 
+    /**
+     * Writes the class name before the value, so fastjson2's built-in Timestamp reader decodes it back to a
+     * Timestamp, nanos included. Undo logs written this way are still readable by clients without this writer.
+     */
     static class TimestampWriter implements ObjectWriter<Timestamp> {
 
         @Override

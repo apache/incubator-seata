@@ -158,7 +158,7 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
     }
 
     @Test
-    public void testWriterProviderOnlyReplacesTheTimestampWriter() {
+    public void testWriterProviderUsesTheDefaultProviderForOtherTypes() {
         ObjectWriterProvider provider = new Fastjson2UndoLogParser.UndoLogWriterProvider();
         ObjectWriterProvider defaultProvider = JSONFactory.getDefaultObjectWriterProvider();
 
@@ -181,6 +181,56 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
         Assertions.assertSame(
                 defaultProvider.getObjectWriterFromCache(String.class, String.class, true),
                 provider.getObjectWriterFromCache(String.class, String.class, true));
+    }
+
+    @Test
+    public void testWriterProviderKeepsItsOwnWritersForUndoLogClasses() {
+        ObjectWriterProvider provider = new Fastjson2UndoLogParser.UndoLogWriterProvider();
+        ObjectWriterProvider defaultProvider = JSONFactory.getDefaultObjectWriterProvider();
+
+        for (Class<?> undoLogClass : new Class<?>[] {
+            BranchUndoLog.class,
+            SQLUndoLog.class,
+            TableRecords.class,
+            TableRecords.EmptyTableRecords.class,
+            Row.class,
+            Field.class
+        }) {
+            ObjectWriter<?> writer = provider.getObjectWriter(undoLogClass, undoLogClass, true);
+
+            Assertions.assertNotSame(defaultProvider.getObjectWriter(undoLogClass, undoLogClass, true), writer);
+            Assertions.assertSame(writer, provider.getObjectWriter(undoLogClass, undoLogClass, null, true));
+            Assertions.assertSame(writer, provider.getObjectWriterFromCache(undoLogClass, undoLogClass, true));
+        }
+    }
+
+    @Test
+    public void testTimestampKeepsTypeAfterUndoLogClassesWereSerializedWithTheDefaultProvider() {
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, Timestamp.valueOf("2024-03-02 12:34:56.123456789"));
+        cleanupDefaultProviderWriters();
+        Fastjson2UndoLogParser freshParser = newParser();
+
+        JSONB.toBytes(createTestUndoLog(field), UNDO_LOG_WRITER_FEATURES);
+        Field decodedField = getFieldFromLog(freshParser.decode(freshParser.encode(createTestUndoLog(field))));
+
+        Assertions.assertEquals(field.getValue(), decodedField.getValue());
+    }
+
+    @Test
+    public void testTimestampWriterDoesNotLeakIntoTheDefaultProviderAfterEncodingAnUndoLog() {
+        Timestamp timestamp = Timestamp.valueOf("2024-03-02 12:34:56.123456789");
+        Field field = new Field("gmt_modified", Types.TIMESTAMP, timestamp);
+        cleanupDefaultProviderWriters();
+        Fastjson2UndoLogParser freshParser = newParser();
+
+        Field decodedField = getFieldFromLog(freshParser.decode(freshParser.encode(createTestUndoLog(field))));
+        byte[] defaultBytes = JSONB.toBytes(createTestUndoLog(field), UNDO_LOG_WRITER_FEATURES);
+
+        Assertions.assertEquals(timestamp, decodedField.getValue());
+        // the default provider still writes a Timestamp without its class name
+        Assertions.assertEquals(
+                timestamp.toLocalDateTime(),
+                getFieldFromLog(freshParser.decode(defaultBytes)).getValue());
     }
 
     @Test
@@ -236,6 +286,36 @@ public class Fastjson2UndoLogParserTest extends BaseUndoLogParserTest {
         Assertions.assertEquals(1L, elements[0]);
         Assertions.assertNull(elements[1]);
         Assertions.assertEquals(3L, elements[2]);
+    }
+
+    private static final JSONWriter.Feature[] UNDO_LOG_WRITER_FEATURES = {
+        JSONWriter.Feature.WriteClassName,
+        JSONWriter.Feature.FieldBased,
+        JSONWriter.Feature.ReferenceDetection,
+        JSONWriter.Feature.WriteNulls,
+        JSONWriter.Feature.NotWriteDefaultValue,
+        JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+        JSONWriter.Feature.WriteNameAsSymbol
+    };
+
+    private static Fastjson2UndoLogParser newParser() {
+        Fastjson2UndoLogParser newParser = new Fastjson2UndoLogParser();
+        newParser.init();
+        return newParser;
+    }
+
+    /**
+     * Drops the writers the default provider generated for the undo log classes, so a test starts with
+     * field writers that have not cached a value writer yet.
+     */
+    private static void cleanupDefaultProviderWriters() {
+        ObjectWriterProvider defaultProvider = JSONFactory.getDefaultObjectWriterProvider();
+        defaultProvider.cleanup(BranchUndoLog.class);
+        defaultProvider.cleanup(SQLUndoLog.class);
+        defaultProvider.cleanup(TableRecords.class);
+        defaultProvider.cleanup(TableRecords.EmptyTableRecords.class);
+        defaultProvider.cleanup(Row.class);
+        defaultProvider.cleanup(Field.class);
     }
 
     private BranchUndoLog createTestUndoLog(Field field) {
