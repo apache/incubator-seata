@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -206,6 +207,46 @@ public class NetUtilTest {
     }
 
     @Test
+    public void testIgnoredInterfacesAreAppliedAfterDefaultAddressIsCached() {
+        // populate the default cache first, then a lookup ignoring every interface
+        // must still evaluate its filter instead of returning the cached default (#8169)
+        assertThat(NetUtil.getLocalAddress()).isNotNull();
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"}))
+                .isNull();
+    }
+
+    @Test
+    public void testFilteredLookupDoesNotOverwriteDefaultCache() {
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+
+        // a filtered lookup that matches nothing must not clear or replace the default cache
+        NetUtil.getIgnoredInterfacesLocalAddress(new String[] {".*"});
+        assertThat(NetUtil.getLocalAddress()).isEqualTo(defaultAddress);
+    }
+
+    @Test
+    public void testBlankPatternsStillUseDefaultCache() {
+        // an empty config value split into [""] applies no filtering, so the lookup
+        // behaves exactly like the unfiltered default lookup and shares its cache
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(new String[] {""})).isEqualTo(defaultAddress);
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(null, "")).isEqualTo(defaultAddress);
+    }
+
+    @Test
+    public void testPreferredNetworksLookupResolvesAfterDefaultAddressIsCached() {
+        InetAddress defaultAddress = NetUtil.getLocalAddress();
+        assertThat(defaultAddress).isNotNull();
+
+        // a preferred-network lookup runs the interface scan (falling back to the first
+        // valid ip when nothing matches) and leaves the default cache untouched
+        assertThat(NetUtil.getLocalAddress("240.0.0.")).isNotNull();
+        assertThat(NetUtil.getLocalAddress()).isEqualTo(defaultAddress);
+    }
+
+    @Test
     public void testIsValidIp() {
         String localIp = "127.0.0.1";
         String someIp = "8.210.212.91";
@@ -275,5 +316,144 @@ public class NetUtilTest {
     public void testLocalIP() {
         String localIP = NetUtil.localIP();
         assertThat(localIP).isIn("127.0.0.1", "0:0:0:0:0:0:0:1");
+    }
+
+    /**
+     * Test ignore interface with null ignored interfaces.
+     */
+    @Test
+    public void testIgnoreInterface_withNullIgnoredInterfaces() {
+        // When ignoredInterfaces is null, should not ignore any interface
+        assertThat(NetUtil.ignoreInterface(null, "eth0")).isFalse();
+        assertThat(NetUtil.ignoreInterface(null, "VMware Virtual Ethernet Adapter"))
+                .isFalse();
+        assertThat(NetUtil.ignoreInterface(null, "docker0")).isFalse();
+    }
+
+    /**
+     * Test ignore interface with empty ignored interfaces.
+     */
+    @Test
+    public void testIgnoreInterface_withEmptyIgnoredInterfaces() {
+        // When ignoredInterfaces is empty array, should not ignore any interface
+        String[] emptyIgnored = new String[0];
+        assertThat(NetUtil.ignoreInterface(emptyIgnored, "eth0")).isFalse();
+        assertThat(NetUtil.ignoreInterface(emptyIgnored, "VMware Virtual Ethernet Adapter"))
+                .isFalse();
+    }
+
+    /**
+     * Test ignore interface with exact match.
+     */
+    @Test
+    public void testIgnoreInterface_withExactMatch() {
+        String[] ignoredInterfaces = new String[] {"docker0", "veth.*", "VMware.*"};
+
+        // Exact match
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "docker0")).isTrue();
+
+        // Should not match
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "eth0")).isFalse();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "en0")).isFalse();
+    }
+
+    /**
+     * Test ignore interface with regex pattern.
+     */
+    @Test
+    public void testIgnoreInterface_withRegexPattern() {
+        String[] ignoredInterfaces = new String[] {"VMware.*", "VirtualBox.*", "docker.*", "veth.*", "br-.*"};
+
+        // VMware interfaces
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "VMware Virtual Ethernet Adapter"))
+                .isTrue();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "VMware Network Adapter"))
+                .isTrue();
+
+        // VirtualBox interfaces
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "VirtualBox Host-Only Network"))
+                .isTrue();
+
+        // Docker interfaces
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "docker0")).isTrue();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "docker1")).isTrue();
+
+        // veth interfaces (Docker container interfaces)
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "veth1234567")).isTrue();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "vethab12cd")).isTrue();
+
+        // bridge interfaces
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "br-1234567890ab"))
+                .isTrue();
+
+        // Should not match normal interfaces
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "eth0")).isFalse();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "en0")).isFalse();
+        assertThat(NetUtil.ignoreInterface(ignoredInterfaces, "wlan0")).isFalse();
+    }
+
+    /**
+     * Test get ignored interfaces local ip with null ignored interfaces.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalIp_withNullIgnoredInterfaces() {
+        // Should work the same as getLocalIp when ignoredInterfaces is null
+        String ip = NetUtil.getIgnoredInterfacesLocalIp(null);
+        assertThat(ip).isNotNull();
+        assertThat(ip).isNotEmpty();
+    }
+
+    /**
+     * Test get ignored interfaces local ip with ignored interfaces.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalIp_withIgnoredInterfaces() {
+        // Test with common virtual interface patterns
+        String[] ignoredInterfaces = new String[] {"VMware.*", "VirtualBox.*", "docker.*", "veth.*"};
+        String ip = NetUtil.getIgnoredInterfacesLocalIp(ignoredInterfaces);
+        assertThat(ip).isNotNull();
+        assertThat(ip).isNotEmpty();
+    }
+
+    /**
+     * Test get ignored interfaces local ip with preferred networks.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalIp_withPreferredNetworks() {
+        String[] ignoredInterfaces = new String[] {"VMware.*", "VirtualBox.*"};
+        String[] preferredNetworks = new String[] {"192.168.*", "10.*"};
+        String ip = NetUtil.getIgnoredInterfacesLocalIp(ignoredInterfaces, preferredNetworks);
+        assertThat(ip).isNotNull();
+        assertThat(ip).isNotEmpty();
+    }
+
+    /**
+     * Test get ignored interfaces local address with null ignored interfaces.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalAddress_withNullIgnoredInterfaces() {
+        // Should work the same as getLocalAddress when ignoredInterfaces is null
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(null)).isNotNull();
+    }
+
+    /**
+     * Test get ignored interfaces local address with ignored interfaces.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalAddress_withIgnoredInterfaces() {
+        // Test with common virtual interface patterns
+        String[] ignoredInterfaces = new String[] {"VMware.*", "VirtualBox.*", "docker.*", "veth.*", "br-.*"};
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(ignoredInterfaces)).isNotNull();
+    }
+
+    /**
+     * Test get ignored interfaces local address with preferred networks.
+     */
+    @Test
+    public void testGetIgnoredInterfacesLocalAddress_withPreferredNetworks() {
+        String[] ignoredInterfaces = new String[] {"VMware.*", "VirtualBox.*"};
+        String[] preferredNetworks = new String[] {"192.168.*", "10.*"};
+        assertThat(NetUtil.getIgnoredInterfacesLocalAddress(ignoredInterfaces, preferredNetworks))
+                .isNotNull();
     }
 }

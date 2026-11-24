@@ -37,7 +37,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 
     private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
 
-    private final ResourceLock CONTEXT_LOCK = new ResourceLock();
+    private final ResourceLock contextLock = new ResourceLock();
 
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
@@ -52,7 +52,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         boolean isFirstEvent = false;
         Stack<ProcessContext> currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
         if (currentStack == null) {
-            try (ResourceLock ignored = CONTEXT_LOCK.obtain()) {
+            try (ResourceLock ignored = contextLock.obtain()) {
                 currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
                     currentStack = new Stack<>();

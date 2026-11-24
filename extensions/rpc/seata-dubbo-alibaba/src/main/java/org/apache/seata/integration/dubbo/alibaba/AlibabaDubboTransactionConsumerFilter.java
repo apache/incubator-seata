@@ -24,58 +24,32 @@ import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
 import org.apache.seata.core.constants.DubboConstants;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.integration.rpc.core.TransactionPropagationHandler;
 
-/**
- * The type Alibaba dubbo transaction consumer filter.
- */
+import java.util.Map;
+
 @Activate(
         group = {DubboConstants.CONSUMER},
         order = 100)
 public class AlibabaDubboTransactionConsumerFilter implements Filter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AlibabaDubboTransactionConsumerFilter.class);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         if (!DubboConstants.ALIBABADUBBO) {
             return invoker.invoke(invocation);
         }
-        return doInvoke(invoker, invocation);
-    }
-
-    private Result doInvoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        String xid = RootContext.getXID();
-        BranchType branchType = RootContext.getBranchType();
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("consumer xid in RootContext[{}], branchType in RootContext[{}]", xid, branchType);
-        }
-        try {
-            propagateTransactionContext(xid, branchType);
-            return invoker.invoke(invocation);
-        } finally {
-            clearTransactionContext();
-        }
-    }
-
-    private void propagateTransactionContext(String xid, BranchType branchType) {
-        if (xid != null) {
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("transaction context propagated: xid={}, branchType={}", xid, branchType);
+        Map<String, String> context = TransactionPropagationHandler.getTransactionPropagationContext();
+        if (!context.isEmpty()) {
+            for (Map.Entry<String, String> entry : context.entrySet()) {
+                RpcContext.getContext().setAttachment(entry.getKey(), entry.getValue());
             }
         }
-    }
-
-    private void clearTransactionContext() {
-        RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
-        RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("transaction context cleared");
+        try {
+            return invoker.invoke(invocation);
+        } finally {
+            for (String key : context.keySet()) {
+                RpcContext.getContext().removeAttachment(key);
+            }
         }
     }
 }

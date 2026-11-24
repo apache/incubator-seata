@@ -23,7 +23,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
  * Base Test for recognizer of Oscar
  *
  **/
-public class AbstractOscarRecognizerTest extends AbstractRecognizerTest {
+public abstract class AbstractOscarRecognizerTest extends AbstractRecognizerTest {
     @Override
     public String getDbType() {
         return JdbcConstants.OSCAR;

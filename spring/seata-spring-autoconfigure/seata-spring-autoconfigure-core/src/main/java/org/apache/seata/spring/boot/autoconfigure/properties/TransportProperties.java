@@ -1,0 +1,389 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.seata.spring.boot.autoconfigure.properties;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME;
+import static org.apache.seata.common.DefaultValues.DEFAULT_KEEP_ALIVE_TIME;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_HTTP_POOL_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_SERVER_POOL_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_TASK_QUEUE_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MIN_HTTP_POOL_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MIN_SERVER_POOL_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_CHANNEL_MAX_IDLE_TIME_SECONDS;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_SOCKET_RESV_BUF_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SO_BACK_LOG_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_THREADPOOL;
+import static org.apache.seata.common.DefaultValues.DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK;
+import static org.apache.seata.common.DefaultValues.DEFAULT_WRITE_BUFFER_LOW_WATER_MARK;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+
+@Component
+@ConfigurationProperties(prefix = TRANSPORT_PREFIX)
+public class TransportProperties {
+    /**
+     * tcp, unix-domain-socket
+     */
+    private String type = "TCP";
+    /**
+     * NIO, NATIVE
+     */
+    private String server = "NIO";
+    /**
+     * enable heartbeat
+     */
+    private boolean heartbeat = DEFAULT_TRANSPORT_HEARTBEAT;
+    /**
+     * serialization
+     */
+    private String serialization = "seata";
+    /**
+     * compressor
+     */
+    private String compressor = "none";
+
+    private String protocol = DEFAULT_PROTOCOL;
+
+    private String threadpool = DEFAULT_TRANSPORT_THREADPOOL;
+
+    /**
+     * enable client batch send request
+     */
+    private boolean enableClientBatchSendRequest = DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TM client batch send request
+     */
+    private boolean enableTmClientBatchSendRequest = DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable RM client batch send request
+     */
+    private boolean enableRmClientBatchSendRequest = DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
+
+    /**
+     * enable TC server batch send response
+     */
+    private boolean enableTcServerBatchSendResponse = DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+
+    /**
+     * rpcRmRequestTimeout
+     */
+    private long rpcRmRequestTimeout = DEFAULT_RPC_RM_REQUEST_TIMEOUT;
+
+    /**
+     * rpcRmRequestTimeout
+     */
+    private long rpcTmRequestTimeout = DEFAULT_RPC_TM_REQUEST_TIMEOUT;
+
+    /**
+     * rpcTcRequestTimeout
+     */
+    private long rpcTcRequestTimeout = DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+
+    /**
+     * use shared event loop group
+     */
+    private boolean enableClientSharedEventLoop = DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
+
+    /**
+     * minimum HTTP pool size
+     */
+    private int minHttpPoolSize = DEFAULT_MIN_HTTP_POOL_SIZE;
+
+    /**
+     * maximum HTTP pool size
+     */
+    private int maxHttpPoolSize = DEFAULT_MAX_HTTP_POOL_SIZE;
+
+    /**
+     * maximum HTTP task queue size
+     */
+    private int maxHttpTaskQueueSize = DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE;
+
+    /**
+     * HTTP pool keep alive time
+     */
+    private int httpPoolKeepAliveTime = DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME;
+
+    private int serverSocketSendBufSize = DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE;
+    private int serverSocketResvBufSize = DEFAULT_SERVER_SOCKET_RESV_BUF_SIZE;
+    private int writeBufferHighWaterMark = DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK;
+    private int writeBufferLowWaterMark = DEFAULT_WRITE_BUFFER_LOW_WATER_MARK;
+
+    private int soBackLogSize = DEFAULT_SO_BACK_LOG_SIZE;
+    private int serverChannelMaxIdleTimeSeconds = DEFAULT_SERVER_CHANNEL_MAX_IDLE_TIME_SECONDS;
+
+    private int minServerPoolSize = DEFAULT_MIN_SERVER_POOL_SIZE;
+    private int maxServerPoolSize = DEFAULT_MAX_SERVER_POOL_SIZE;
+    private int maxTaskQueueSize = DEFAULT_MAX_TASK_QUEUE_SIZE;
+    private int keepAliveTime = DEFAULT_KEEP_ALIVE_TIME;
+
+    public String getType() {
+        return type;
+    }
+
+    public TransportProperties setType(String type) {
+        this.type = type;
+        return this;
+    }
+
+    public String getServer() {
+        return server;
+    }
+
+    public TransportProperties setServer(String server) {
+        this.server = server;
+        return this;
+    }
+
+    public boolean isHeartbeat() {
+        return heartbeat;
+    }
+
+    public TransportProperties setHeartbeat(boolean heartbeat) {
+        this.heartbeat = heartbeat;
+        return this;
+    }
+
+    public String getSerialization() {
+        return serialization;
+    }
+
+    public TransportProperties setSerialization(String serialization) {
+        this.serialization = serialization;
+        return this;
+    }
+
+    public String getCompressor() {
+        return compressor;
+    }
+
+    public TransportProperties setCompressor(String compressor) {
+        this.compressor = compressor;
+        return this;
+    }
+
+    public boolean isEnableClientBatchSendRequest() {
+        return enableClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
+        this.enableClientBatchSendRequest = enableClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableTmClientBatchSendRequest() {
+        return enableTmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableTmClientBatchSendRequest(boolean enableTmClientBatchSendRequest) {
+        this.enableTmClientBatchSendRequest = enableTmClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableRmClientBatchSendRequest() {
+        return enableRmClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableRmClientBatchSendRequest(boolean enableRmClientBatchSendRequest) {
+        this.enableRmClientBatchSendRequest = enableRmClientBatchSendRequest;
+        return this;
+    }
+
+    public boolean isEnableTcServerBatchSendResponse() {
+        return enableTcServerBatchSendResponse;
+    }
+
+    public void setEnableTcServerBatchSendResponse(boolean enableTcServerBatchSendResponse) {
+        this.enableTcServerBatchSendResponse = enableTcServerBatchSendResponse;
+    }
+
+    public long getRpcRmRequestTimeout() {
+        return rpcRmRequestTimeout;
+    }
+
+    public void setRpcRmRequestTimeout(long rpcRmRequestTimeout) {
+        this.rpcRmRequestTimeout = rpcRmRequestTimeout;
+    }
+
+    public long getRpcTmRequestTimeout() {
+        return rpcTmRequestTimeout;
+    }
+
+    public void setRpcTmRequestTimeout(long rpcTmRequestTimeout) {
+        this.rpcTmRequestTimeout = rpcTmRequestTimeout;
+    }
+
+    public long getRpcTcRequestTimeout() {
+        return rpcTcRequestTimeout;
+    }
+
+    public boolean isEnableClientSharedEventLoop() {
+        return enableClientSharedEventLoop;
+    }
+
+    public void setRpcTcRequestTimeout(long rpcTcRequestTimeout) {
+        this.rpcTcRequestTimeout = rpcTcRequestTimeout;
+    }
+
+    public void setEnableClientSharedEventLoop(boolean useSharedEventLoop) {
+        this.enableClientSharedEventLoop = useSharedEventLoop;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getThreadpool() {
+        return threadpool;
+    }
+
+    public void setThreadpool(String threadpool) {
+        this.threadpool = threadpool;
+    }
+
+    public int getMinHttpPoolSize() {
+        return minHttpPoolSize;
+    }
+
+    public void setMinHttpPoolSize(int minHttpPoolSize) {
+        this.minHttpPoolSize = minHttpPoolSize;
+    }
+
+    public int getMaxHttpPoolSize() {
+        return maxHttpPoolSize;
+    }
+
+    public void setMaxHttpPoolSize(int maxHttpPoolSize) {
+        this.maxHttpPoolSize = maxHttpPoolSize;
+    }
+
+    public int getMaxHttpTaskQueueSize() {
+        return maxHttpTaskQueueSize;
+    }
+
+    public void setMaxHttpTaskQueueSize(int maxHttpTaskQueueSize) {
+        this.maxHttpTaskQueueSize = maxHttpTaskQueueSize;
+    }
+
+    public int getHttpPoolKeepAliveTime() {
+        return httpPoolKeepAliveTime;
+    }
+
+    public void setHttpPoolKeepAliveTime(int httpPoolKeepAliveTime) {
+        this.httpPoolKeepAliveTime = httpPoolKeepAliveTime;
+    }
+
+    public int getServerSocketSendBufSize() {
+        return serverSocketSendBufSize;
+    }
+
+    public void setServerSocketSendBufSize(int serverSocketSendBufSize) {
+        this.serverSocketSendBufSize = serverSocketSendBufSize;
+    }
+
+    public int getServerSocketResvBufSize() {
+        return serverSocketResvBufSize;
+    }
+
+    public void setServerSocketResvBufSize(int serverSocketResvBufSize) {
+        this.serverSocketResvBufSize = serverSocketResvBufSize;
+    }
+
+    public int getWriteBufferHighWaterMark() {
+        return writeBufferHighWaterMark;
+    }
+
+    public void setWriteBufferHighWaterMark(int writeBufferHighWaterMark) {
+        this.writeBufferHighWaterMark = writeBufferHighWaterMark;
+    }
+
+    public int getWriteBufferLowWaterMark() {
+        return writeBufferLowWaterMark;
+    }
+
+    public void setWriteBufferLowWaterMark(int writeBufferLowWaterMark) {
+        this.writeBufferLowWaterMark = writeBufferLowWaterMark;
+    }
+
+    public int getSoBackLogSize() {
+        return soBackLogSize;
+    }
+
+    public void setSoBackLogSize(int soBackLogSize) {
+        this.soBackLogSize = soBackLogSize;
+    }
+
+    public int getServerChannelMaxIdleTimeSeconds() {
+        return serverChannelMaxIdleTimeSeconds;
+    }
+
+    public void setServerChannelMaxIdleTimeSeconds(int serverChannelMaxIdleTimeSeconds) {
+        this.serverChannelMaxIdleTimeSeconds = serverChannelMaxIdleTimeSeconds;
+    }
+
+    public int getMinServerPoolSize() {
+        return minServerPoolSize;
+    }
+
+    public void setMinServerPoolSize(int minServerPoolSize) {
+        this.minServerPoolSize = minServerPoolSize;
+    }
+
+    public int getMaxServerPoolSize() {
+        return maxServerPoolSize;
+    }
+
+    public void setMaxServerPoolSize(int maxServerPoolSize) {
+        this.maxServerPoolSize = maxServerPoolSize;
+    }
+
+    public int getMaxTaskQueueSize() {
+        return maxTaskQueueSize;
+    }
+
+    public void setMaxTaskQueueSize(int maxTaskQueueSize) {
+        this.maxTaskQueueSize = maxTaskQueueSize;
+    }
+
+    public int getKeepAliveTime() {
+        return keepAliveTime;
+    }
+
+    public void setKeepAliveTime(int keepAliveTime) {
+        this.keepAliveTime = keepAliveTime;
+    }
+}

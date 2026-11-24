@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class ZstdUtilTest {
 
-    private final int MAX_COMPRESSED_SIZE = 4 * 1024 * 1024; // 4MB
+    private static final int MAX_COMPRESSED_SIZE = 4 * 1024 * 1024; // 4MB
 
     @Test
     public void testCompress() {

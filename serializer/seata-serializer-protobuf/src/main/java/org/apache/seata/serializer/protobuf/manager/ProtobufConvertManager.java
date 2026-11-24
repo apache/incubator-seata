@@ -24,6 +24,8 @@ import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.UnregisterRMRequest;
+import org.apache.seata.core.protocol.UnregisterRMResponse;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -75,6 +77,8 @@ import org.apache.seata.serializer.protobuf.convertor.RegisterRMResponseConverto
 import org.apache.seata.serializer.protobuf.convertor.RegisterTMRequestConvertor;
 import org.apache.seata.serializer.protobuf.convertor.RegisterTMResponseConvertor;
 import org.apache.seata.serializer.protobuf.convertor.UndoLogDeleteRequestConvertor;
+import org.apache.seata.serializer.protobuf.convertor.UnregisterRMRequestConvertor;
+import org.apache.seata.serializer.protobuf.convertor.UnregisterRMResponseConvertor;
 import org.apache.seata.serializer.protobuf.generated.BatchResultMessageProto;
 import org.apache.seata.serializer.protobuf.generated.BranchCommitRequestProto;
 import org.apache.seata.serializer.protobuf.generated.BranchCommitResponseProto;
@@ -104,6 +108,8 @@ import org.apache.seata.serializer.protobuf.generated.RegisterRMResponseProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterTMResponseProto;
 import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
+import org.apache.seata.serializer.protobuf.generated.UnregisterRMRequestProto;
+import org.apache.seata.serializer.protobuf.generated.UnregisterRMResponseProto;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -174,6 +180,10 @@ public class ProtobufConvertManager {
             protobufConvertManager.convertorMap.put(
                     RegisterRMResponse.class.getName(), new RegisterRMResponseConvertor());
             protobufConvertManager.convertorMap.put(
+                    UnregisterRMRequest.class.getName(), new UnregisterRMRequestConvertor());
+            protobufConvertManager.convertorMap.put(
+                    UnregisterRMResponse.class.getName(), new UnregisterRMResponseConvertor());
+            protobufConvertManager.convertorMap.put(
                     RegisterTMRequest.class.getName(), new RegisterTMRequestConvertor());
             protobufConvertManager.convertorMap.put(
                     RegisterTMResponse.class.getName(), new RegisterTMResponseConvertor());
@@ -234,6 +244,10 @@ public class ProtobufConvertManager {
             protobufConvertManager.protoClazzMap.put(
                     RegisterRMResponseProto.getDescriptor().getFullName(), RegisterRMResponseProto.class);
             protobufConvertManager.protoClazzMap.put(
+                    UnregisterRMRequestProto.getDescriptor().getFullName(), UnregisterRMRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(
+                    UnregisterRMResponseProto.getDescriptor().getFullName(), UnregisterRMResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(
                     RegisterTMRequestProto.getDescriptor().getFullName(), RegisterTMRequestProto.class);
             protobufConvertManager.protoClazzMap.put(
                     RegisterTMResponseProto.getDescriptor().getFullName(), RegisterTMResponseProto.class);
@@ -293,6 +307,10 @@ public class ProtobufConvertManager {
                     RegisterRMRequestProto.class.getName(), new RegisterRMRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(
                     RegisterRMResponseProto.class.getName(), new RegisterRMResponseConvertor());
+            protobufConvertManager.reverseConvertorMap.put(
+                    UnregisterRMRequestProto.class.getName(), new UnregisterRMRequestConvertor());
+            protobufConvertManager.reverseConvertorMap.put(
+                    UnregisterRMResponseProto.class.getName(), new UnregisterRMResponseConvertor());
             protobufConvertManager.reverseConvertorMap.put(
                     RegisterTMRequestProto.class.getName(), new RegisterTMRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(

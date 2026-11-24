@@ -21,7 +21,7 @@ import io.netty.channel.ChannelFuture;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
@@ -36,6 +36,7 @@ import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.ServerVersionHolder;
 import org.apache.seata.core.protocol.UnregisterRMRequest;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
@@ -166,15 +167,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             synchronized (RmNettyRemotingClient.class) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
-                    final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
+                    final ThreadPoolExecutor messageExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                            nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads(),
                             nettyClientConfig.getClientWorkerThreads(),
                             KEEP_ALIVE_TIME,
                             TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(
-                                    nettyClientConfig.getRmDispatchThreadPrefix(),
-                                    nettyClientConfig.getClientWorkerThreads()),
                             new ThreadPoolExecutor.CallerRunsPolicy());
                     instance = new RmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
@@ -222,8 +221,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                     registerRMResponse.getVersion(),
                     channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel, registerRMRequest.getVersion());
-        getClientChannelManager().putServerVersion(serverAddress, registerRMResponse.getVersion());
+        getClientChannelManager().registerChannel(serverAddress, channel, registerRMResponse.getVersion());
         String dbKey = getMergedResourceKeys();
         if (registerRMRequest.getResourceIds() != null) {
             if (!registerRMRequest.getResourceIds().equals(dbKey)) {
@@ -319,12 +317,13 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (!channel.isActive()) {
                     continue;
                 }
-                String serverVersion = getClientChannelManager().getServerVersion(serverAddress);
-                if (serverVersion == null || !Version.isAboveOrEqualVersion260(serverVersion)) {
+                // check the version of the TC this very channel is connected to
+                if (!ServerVersionHolder.isServerAboveOrEqualVersion(channel, Version.VERSION_2_6_0)) {
                     LOGGER.warn(
-                            "Server {} does not support UnregisterRMRequest (version: {})",
+                            "Server {} does not support UnregisterRMRequest (version: {}), channel: {}",
                             serverAddress,
-                            serverVersion);
+                            ServerVersionHolder.getServerVersion(channel),
+                            channel);
                     continue;
                 }
                 UnregisterRMRequest message = new UnregisterRMRequest(applicationId, transactionServiceGroup);
@@ -392,7 +391,6 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                 }
             }
         }
-        getClientChannelManager().clearServerVersions();
         super.destroy();
         initialized.getAndSet(false);
         instance = null;

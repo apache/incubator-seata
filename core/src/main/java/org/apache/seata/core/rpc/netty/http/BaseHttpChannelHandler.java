@@ -18,7 +18,7 @@ package org.apache.seata.core.rpc.netty.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.SimpleChannelInboundHandler;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 
 import java.util.concurrent.ExecutorService;
@@ -32,16 +32,18 @@ public abstract class BaseHttpChannelHandler<T> extends SimpleChannelInboundHand
     /**
      * HTTP request processing thread pool, independent of Netty IO threads, to avoid blocking network processing.
      */
-    protected static final ExecutorService HTTP_HANDLER_THREADS = new ThreadPoolExecutor(
+    protected static final ExecutorService HTTP_HANDLER_THREADS = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+            "HTTPHandlerThread",
             NettyServerConfig.getMinHttpPoolSize(),
             NettyServerConfig.getMaxHttpPoolSize(),
             NettyServerConfig.getHttpKeepAliveTime(),
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(NettyServerConfig.getMaxHttpTaskQueueSize()),
-            new NamedThreadFactory("HTTPHandlerThread", NettyServerConfig.getMaxHttpPoolSize()),
             new ThreadPoolExecutor.AbortPolicy());
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(HTTP_HANDLER_THREADS::shutdown));
+        Runtime.getRuntime()
+                .addShutdownHook(ThreadPoolExecutorFactory.newThreadFactory("http-handler-shutdown", 1, false)
+                        .newThread(HTTP_HANDLER_THREADS::shutdown));
     }
 }

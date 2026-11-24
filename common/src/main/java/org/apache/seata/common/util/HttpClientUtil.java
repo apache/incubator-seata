@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -26,6 +24,9 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.json.JsonCodecFactory;
+import org.apache.seata.common.thread.NamedThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +45,6 @@ public class HttpClientUtil {
     private static final Map<Integer /*timeout*/, OkHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final Map<Integer /*readTimeoutSeconds*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
 
@@ -66,50 +65,62 @@ public class HttpClientUtil {
     private static final int HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT = 300;
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
-                try {
-                    // Delay 3 seconds to ensure unregister HTTP requests are sent successfully
-                    Thread.sleep(3000);
-                    client.dispatcher().executorService().shutdown();
-                    // Wait for up to 3 seconds for in-flight requests to complete
-                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
-                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
-                    }
-                    client.connectionPool().evictAll();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-            });
+        Runtime.getRuntime()
+                .addShutdownHook(new NamedThreadFactory("http-client-shutdown", 1, false)
+                        .newThread(HttpClientUtil::shutdownHttpClients));
+    }
 
-            HTTP2_CLIENT_MAP.values().parallelStream().forEach(client -> {
-                try {
-                    client.dispatcher().executorService().shutdown();
-                    // Wait for up to 3 seconds for in-flight requests to complete
-                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
-                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
-                    }
-                    client.connectionPool().evictAll();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
-            });
-        }));
+    private static void shutdownHttpClients() {
+        delayBeforeHttp1ClientShutdown();
+        for (OkHttpClient client : HTTP_CLIENT_MAP.values()) {
+            shutdownHttpClient(client);
+        }
+        for (OkHttpClient client : HTTP2_CLIENT_MAP.values()) {
+            shutdownHttpClient(client);
+        }
+    }
+
+    private static void delayBeforeHttp1ClientShutdown() {
+        if (HTTP_CLIENT_MAP.isEmpty()) {
+            return;
+        }
+        try {
+            // Delay 3 seconds to ensure unregister HTTP requests are sent successfully.
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Interrupted while waiting before OkHttp executor service shutdown.", e);
+        }
+    }
+
+    private static void shutdownHttpClient(OkHttpClient client) {
+        try {
+            client.dispatcher().executorService().shutdown();
+            // Wait for up to 3 seconds for in-flight requests to complete
+            if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
+                LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
+            }
+            client.connectionPool().evictAll();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
     }
 
     public static Response doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
             throws IOException {
-        String contentType = header != null ? header.get("Content-Type") : "";
-        RequestBody requestBody = createRequestBody(params, contentType);
-        Request request = buildRequest(url, header, requestBody, "POST");
-        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        return client.newCall(request).execute();
+        try {
+            String contentType = header != null ? header.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            Request request = buildRequest(url, header, requestBody, "POST");
+            OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+            return client.newCall(request).execute();
+        } catch (JsonParseException e) {
+            LOGGER.error("Failed to create request body", e);
+            throw new IOException("Failed to create request body", e);
+        }
     }
 
     public static Response doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
@@ -144,8 +155,7 @@ public class HttpClientUtil {
         return client.newCall(request).execute();
     }
 
-    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
-            throws JsonProcessingException {
+    private static RequestBody createRequestBody(Map<String, String> params, String contentType) {
         if (params == null || params.isEmpty()) {
             return RequestBody.create(new byte[0]);
         }
@@ -157,7 +167,7 @@ public class HttpClientUtil {
             params.forEach(formBuilder::add);
             return formBuilder.build();
         } else {
-            String json = OBJECT_MAPPER.writeValueAsString(params);
+            String json = JsonCodecFactory.getCodec().toJSONString(params);
             return RequestBody.create(json, MEDIA_TYPE_JSON);
         }
     }
@@ -297,7 +307,7 @@ public class HttpClientUtil {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
             return watch(url, headers, requestBody, "POST", eventType, HTTP2_WATCH_READ_TIMEOUT_SECONDS_DEFAULT);
-        } catch (JsonProcessingException e) {
+        } catch (JsonParseException e) {
             LOGGER.error("Failed to create request body", e);
             throw new IOException("Failed to create request body", e);
         }
@@ -314,7 +324,7 @@ public class HttpClientUtil {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
             return watch(url, headers, requestBody, "POST", eventType, readTimeoutSeconds);
-        } catch (JsonProcessingException e) {
+        } catch (JsonParseException e) {
             LOGGER.error("Failed to create request body", e);
             throw new IOException("Failed to create request body", e);
         }

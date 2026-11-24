@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * This tests client auto-downgrade - V2 client connecting to V1 server.
  */
-public class ServerV1ToClientV2Test extends MultiVersionCompatibilityTest {
+public class ServerV1ToClientV2Test extends AbstractMultiVersionCompatibilityTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerV1ToClientV2Test.class);
 

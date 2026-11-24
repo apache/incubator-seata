@@ -21,7 +21,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import jakarta.annotation.PostConstruct;
-import okhttp3.Response;
 import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -30,7 +29,6 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.entity.bo.ClusterBO;
 import org.apache.seata.namingserver.entity.bo.NamespaceBO;
@@ -50,15 +48,19 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -93,6 +95,9 @@ public class NamingManager {
 
     @Autowired
     private NamingServerMetricsManager metricsManager;
+
+    @Autowired
+    private RestClient restClient;
 
     public NamingManager() {
         this.instanceLiveTable = new ConcurrentHashMap<>();
@@ -221,21 +226,17 @@ public class NamingManager {
             HashMap<String, String> params = new HashMap<>();
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, actualUnitName);
-            Map<String, String> header = new HashMap<>();
-            header.put("Content-Type", "application/x-www-form-urlencoded");
-
-            try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (httpResponse == null || httpResponse.code() != 200) {
-                    return new Result<>(
-                            String.valueOf(httpResponse != null ? httpResponse.code() : 500),
-                            "add vGroup in new cluster failed");
+            try {
+                int statusCode = executeControlRequest(httpUrl, params);
+                if (statusCode != 200) {
+                    return new Result<>(String.valueOf(statusCode), "add vGroup in new cluster failed");
                 }
                 LOGGER.info(
                         "namespace: {} add vGroup: {} in new cluster: {} successfully!",
                         namespace,
                         vGroup,
                         clusterName);
-            } catch (IOException e) {
+            } catch (RestClientException e) {
                 LOGGER.error("add vGroup in new cluster failed:{}", e.getMessage(), e);
                 return new Result<>("500", "add vGroup in new cluster failed");
             }
@@ -254,13 +255,12 @@ public class NamingManager {
             HashMap<String, String> params = new HashMap<>();
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
-            Map<String, String> header = new HashMap<>();
-            header.put("Content-Type", "application/x-www-form-urlencoded");
-            try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (httpResponse == null || httpResponse.code() != 200) {
+            try {
+                int statusCode = executeControlRequest(httpUrl, params);
+                if (statusCode != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");
                     return new Result<>(
-                            String.valueOf(httpResponse != null ? httpResponse.code() : 500),
+                            String.valueOf(statusCode),
                             "removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
                 }
                 LOGGER.info(
@@ -268,13 +268,31 @@ public class NamingManager {
                         namespace,
                         vGroup,
                         clusterName);
-            } catch (IOException e) {
+            } catch (RestClientException e) {
                 LOGGER.error("handle removing vGroup in old cluster failed:{}", e.getMessage(), e);
                 return new Result<>(
                         "500", "handle removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
             }
         }
         return new Result<>("200", "remove group in old cluster successfully!");
+    }
+
+    private int executeControlRequest(String httpUrl, Map<String, String> params) {
+        URI targetUri = buildControlUri(httpUrl, params);
+        Integer statusCode = restClient
+                .get()
+                .uri(targetUri)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .exchange((request, response) -> response.getStatusCode().value());
+        return Objects.requireNonNull(statusCode);
+    }
+
+    private URI buildControlUri(String httpUrl, Map<String, String> params) {
+        String rawUrl = Objects.requireNonNull(httpUrl);
+        String baseUrl = rawUrl.endsWith("?") ? rawUrl.substring(0, rawUrl.length() - 1) : rawUrl;
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        params.forEach(builder::queryParam);
+        return Objects.requireNonNull(builder.build().encode().toUri());
     }
 
     public boolean addGroup(String namespace, String clusterName, String unitName, String vGroup) {

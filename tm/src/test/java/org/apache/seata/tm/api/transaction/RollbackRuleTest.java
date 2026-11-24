@@ -33,7 +33,7 @@ public class RollbackRuleTest {
     }
 
     @Test
-    public void RollbackRule() {
+    public void rollbackRule() {
         RollbackRule rr = new RollbackRule(Exception.class);
         assertThat(rr.getDepth(new Exception())).isEqualTo(0);
     }

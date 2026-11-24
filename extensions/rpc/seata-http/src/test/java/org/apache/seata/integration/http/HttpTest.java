@@ -19,14 +19,17 @@ package org.apache.seata.integration.http;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.StringEntity;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.core.context.RootContext;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -39,10 +42,15 @@ import static org.apache.seata.integration.http.AbstractHttpExecutor.convertPara
 
 class HttpTest {
 
-    private static final String host = "http://127.0.0.1:8081";
-    private static final String testException = "/testException";
-    private static final String getPath = "/testGet";
-    private static final String postPath = "/testPost";
+    @BeforeAll
+    static void configureJsonUtil() {
+        System.setProperty("seata.config.name", "http-test-registry");
+    }
+
+    private static final String HOST = "http://127.0.0.1:8081";
+    private static final String TEST_EXCEPTION = "/testException";
+    private static final String GET_PATH = "/testGet";
+    private static final String POST_PATH = "/testPost";
     public static final String XID = "127.0.0.1:8081:87654321";
     private static final int PARAM_TYPE_MAP = 1;
     private static final int PARAM_TYPE_BEAN = 2;
@@ -104,7 +112,7 @@ class HttpTest {
         }
     }
 
-    private String consumerPostStart(int param_type) {
+    private String consumerPostStart(int paramType) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         String str = "{\n" + "    \"name\":\"zhangsan\",\n" + "    \"age\":15\n" + "}";
         Person person = JSON.parseObject(str, Person.class);
@@ -121,12 +129,12 @@ class HttpTest {
         try {
             HttpResponse response;
 
-            if (param_type == PARAM_TYPE_MAP) {
-                response = httpExecuter.executePost(host, postPath, map, HttpResponse.class);
-            } else if (param_type == PARAM_TYPE_BEAN) {
-                response = httpExecuter.executePost(host, postPath, person, HttpResponse.class);
+            if (paramType == PARAM_TYPE_MAP) {
+                response = httpExecuter.executePost(HOST, POST_PATH, map, HttpResponse.class);
+            } else if (paramType == PARAM_TYPE_BEAN) {
+                response = httpExecuter.executePost(HOST, POST_PATH, person, HttpResponse.class);
             } else {
-                response = httpExecuter.executePost(host, postPath, str, HttpResponse.class);
+                response = httpExecuter.executePost(HOST, POST_PATH, str, HttpResponse.class);
             }
 
             return readStreamAsStr(response.getEntity().getContent());
@@ -135,7 +143,7 @@ class HttpTest {
         }
     }
 
-    private String consumerGetStart(int param_type) {
+    private String consumerGetStart(int paramType) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         Map<String, String> params = new HashMap<>();
         params.put("name", "zhangsan");
@@ -146,13 +154,13 @@ class HttpTest {
         try {
             // support all type of parameter types
             HttpResponse response;
-            if (param_type == PARAM_TYPE_MAP) {
-                response = httpExecuter.executeGet(host, getPath, params, HttpResponse.class);
-            } else if (param_type == PARAM_TYPE_BEAN) {
-                response = httpExecuter.executeGet(host, getPath, convertParamOfBean(person), HttpResponse.class);
+            if (paramType == PARAM_TYPE_MAP) {
+                response = httpExecuter.executeGet(HOST, GET_PATH, params, HttpResponse.class);
+            } else if (paramType == PARAM_TYPE_BEAN) {
+                response = httpExecuter.executeGet(HOST, GET_PATH, convertParamOfBean(person), HttpResponse.class);
             } else {
                 response = httpExecuter.executeGet(
-                        host, getPath, convertParamOfJsonString(str, Person.class), HttpResponse.class);
+                        HOST, GET_PATH, convertParamOfJsonString(str, Person.class), HttpResponse.class);
             }
             return readStreamAsStr(response.getEntity().getContent());
 
@@ -160,7 +168,7 @@ class HttpTest {
             /* if in Travis CI env, only mock method call */
             MockHttpExecuter mockHttpExecuter = new MockHttpExecuter();
             try {
-                return mockHttpExecuter.executeGet(host, getPath, params, String.class);
+                return mockHttpExecuter.executeGet(HOST, GET_PATH, params, String.class);
             } catch (IOException ex) {
                 throw new RuntimeException(e);
             }
@@ -174,13 +182,13 @@ class HttpTest {
         params.put("age", "15");
         HttpResponse response;
         try {
-            response = httpExecuter.executeGet(host, testException, params, HttpResponse.class);
+            response = httpExecuter.executeGet(HOST, TEST_EXCEPTION, params, HttpResponse.class);
             return readStreamAsStr(response.getEntity().getContent());
         } catch (IOException e) {
             /* if in Travis CI inv, only mock method call */
             MockHttpExecuter mockHttpExecuter = new MockHttpExecuter();
             try {
-                return mockHttpExecuter.executeGet(host, testException, params, String.class);
+                return mockHttpExecuter.executeGet(HOST, TEST_EXCEPTION, params, String.class);
             } catch (IOException ex) {
                 throw new RuntimeException(e);
             }
@@ -218,5 +226,31 @@ class HttpTest {
         Person person = JSON.parseObject(str, Person.class);
         map = convertParamOfBean(person);
         Assertions.assertEquals(expected, map);
+    }
+
+    @Test
+    void convertParamOfBeanConvertsNullStringToEmptyRequestParameter() {
+        Person person = new Person();
+        person.setAge(15);
+
+        Map<String, String> parameters = convertParamOfBean(person);
+
+        Assertions.assertEquals("", parameters.get("name"));
+        Assertions.assertEquals("15", parameters.get("age"));
+    }
+
+    @Test
+    void executeSerializesRequestBodyWithJsonUtil() throws Exception {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("name", "zhangsan");
+        payload.put("age", 15);
+        Method execute =
+                AbstractHttpExecutor.class.getDeclaredMethod("execute", String.class, String.class, Object.class);
+        execute.setAccessible(true);
+
+        StringEntity entity =
+                (StringEntity) execute.invoke(DefaultHttpExecutor.getInstance(), HOST, POST_PATH, payload);
+
+        Assertions.assertEquals("{\"name\":\"zhangsan\",\"age\":15}", readStreamAsStr(entity.getContent()));
     }
 }

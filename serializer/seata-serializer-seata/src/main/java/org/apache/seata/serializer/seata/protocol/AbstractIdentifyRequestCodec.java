@@ -146,8 +146,6 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
             bs = new byte[len];
             in.get(bs);
             abstractIdentifyRequest.setExtraData(new String(bs, UTF8));
-        } else {
-            // maybe null
         }
     }
 }

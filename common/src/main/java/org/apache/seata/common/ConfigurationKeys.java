@@ -167,6 +167,11 @@ public interface ConfigurationKeys {
     String TRANSPORT_PREFIX = "transport.";
 
     /**
+     * The transport thread pool type configuration key.
+     */
+    String TRANSPORT_THREADPOOL = TRANSPORT_PREFIX + "threadpool";
+
+    /**
      * The constant CLIENT_RM_PREFIX.
      */
     String CLIENT_RM_PREFIX = CLIENT_PREFIX + "rm.";
@@ -211,7 +216,10 @@ public interface ConfigurationKeys {
 
     /**
      * The constant CLIENT_SAGA_JSON_PARSER.
+     *
+     * @deprecated use {@link #JSON_SERIALIZER_TYPE} instead
      */
+    @Deprecated
     String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
 
     /**
@@ -223,6 +231,12 @@ public interface ConfigurationKeys {
      * The constant CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE.
      */
     String CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaCompensatePersistModeUpdate";
+
+    /**
+     * The constant CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE.
+     * Enable action status report for SAGA/TCC annotation mode to handle empty compensation and suspension issues.
+     */
+    String CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE = CLIENT_RM_PREFIX + "sagaActionStatusReportEnable";
 
     /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
@@ -978,6 +992,11 @@ public interface ConfigurationKeys {
     String TCC_PREFIX = "tcc.";
 
     /**
+     * The constant JSON_PREFIX
+     */
+    String JSON_PREFIX = "json.";
+
+    /**
      * The constant TCC_FENCE_PREFIX
      */
     String TCC_FENCE_PREFIX = TCC_PREFIX + "fence.";
@@ -993,9 +1012,9 @@ public interface ConfigurationKeys {
     String TCC_FENCE_LOG_TABLE_NAME = TCC_FENCE_PREFIX + "logTableName";
 
     /**
-     * The constant TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME
+     * The constant JSON_SERIALIZER_TYPE
      */
-    String TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME = TCC_PREFIX + "contextJsonParserType";
+    String JSON_SERIALIZER_TYPE = JSON_PREFIX + "serializerType";
 
     /**
      * The constant rpcRmRequestTimeout

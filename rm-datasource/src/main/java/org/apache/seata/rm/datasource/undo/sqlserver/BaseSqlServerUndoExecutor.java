@@ -36,4 +36,9 @@ public abstract class BaseSqlServerUndoExecutor extends AbstractUndoExecutor {
     protected String buildCheckSql(String tableName, String whereCondition) {
         return "SELECT * FROM " + tableName + " WITH(UPDLOCK) WHERE " + whereCondition;
     }
+
+    @Override
+    protected String buildCheckSql(String tableName, String whereCondition, String selectColumns) {
+        return "SELECT " + selectColumns + " FROM " + tableName + " WITH(UPDLOCK) WHERE " + whereCondition;
+    }
 }

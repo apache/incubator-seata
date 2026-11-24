@@ -46,19 +46,16 @@ class ServerTransactionInterceptorTest {
 
     @Test
     void testInterceptCall_shouldExtractXidAndBranchTypeAndWrapListener() {
-        // Ready
         Metadata metadata = new Metadata();
         metadata.put(GrpcHeaderKey.XID_HEADER_KEY, "test-xid");
         metadata.put(GrpcHeaderKey.BRANCH_HEADER_KEY, "TCC");
 
-        // Mocks
         ServerCall<String, String> serverCall = mock(ServerCall.class);
         ServerCallHandler<String, String> serverCallHandler = mock(ServerCallHandler.class);
         Listener<String> originalListener = mock(Listener.class);
 
         when(serverCallHandler.startCall(serverCall, metadata)).thenReturn(originalListener);
 
-        // Call interceptor
         ServerCall.Listener<String> listener = interceptor.interceptCall(serverCall, metadata, serverCallHandler);
 
         assertNotNull(listener);
@@ -77,18 +74,5 @@ class ServerTransactionInterceptorTest {
         Metadata metadataLower = new Metadata();
         metadataLower.put(GrpcHeaderKey.XID_HEADER_KEY_LOWERCASE, "lower-xid");
         assertEquals("lower-xid", getRpcXidMethod.invoke(interceptor, metadataLower));
-    }
-
-    @Test
-    void testGetBranchName_shouldReturnCorrectValue() throws Exception {
-        Metadata metadata = new Metadata();
-        metadata.put(GrpcHeaderKey.BRANCH_HEADER_KEY, "branch-type");
-
-        Method getBranchNameMethod = interceptor.getClass().getDeclaredMethod("getBranchName", Metadata.class);
-        getBranchNameMethod.setAccessible(true);
-
-        String branchName = (String) getBranchNameMethod.invoke(interceptor, metadata);
-
-        assertEquals("branch-type", branchName);
     }
 }

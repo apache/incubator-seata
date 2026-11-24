@@ -18,7 +18,7 @@ package org.apache.seata.integration.tx.api.fence.config;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.seata.common.DefaultValues;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
@@ -61,7 +61,7 @@ public class CommonFenceConfig implements Disposable {
      * Common fence clean scheduled thread pool
      */
     private final ScheduledThreadPoolExecutor commonFenceClean =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("CommonFenceClean", 1));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("CommonFenceClean", 1);
 
     public AtomicBoolean getInitialized() {
         return initialized;

@@ -20,9 +20,11 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
+import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,6 +32,10 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * The type My sql insert recognizer test.
@@ -215,5 +221,28 @@ public class MySQLInsertRecognizerTest extends AbstractRecognizerTest {
         for (String insertColumn : insertColumns) {
             Assertions.assertTrue(insertColumn.contains("`"));
         }
+    }
+
+    @Test
+    public void testGetInsertRowsWithSqlMethodExpr() {
+        String sql =
+                "INSERT INTO test_table (id, name, geo) VALUES (?, ?, ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')')))";
+        SQLStatement statement = new MySqlStatementParser(sql).parseStatement();
+        MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, statement);
+
+        List<List<Object>> rows = recognizer.getInsertRows(Collections.emptyList());
+
+        assertNotNull(rows);
+        assertEquals(1, rows.size());
+
+        List<Object> firstRow = rows.get(0);
+        assertEquals(3, firstRow.size());
+
+        assertEquals("?", firstRow.get(0));
+        assertEquals("?", firstRow.get(1));
+
+        Object geoColumn = firstRow.get(2);
+        assertInstanceOf(SqlMethodExpr.class, geoColumn);
+        assertEquals(2, ((SqlMethodExpr) geoColumn).getPlaceholderCount());
     }
 }

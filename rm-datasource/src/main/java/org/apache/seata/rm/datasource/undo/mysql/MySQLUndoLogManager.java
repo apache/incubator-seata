@@ -188,7 +188,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             pst.setLong(1, branchId);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            pst.setObject(4, new ByteArrayInputStream(undoLogContent));
+            pst.setBlob(4, new ByteArrayInputStream(undoLogContent));
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {

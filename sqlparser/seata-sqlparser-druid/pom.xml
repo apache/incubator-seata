@@ -29,7 +29,7 @@
     <name>seata-sqlparser-druid ${project.version}</name>
     <description>sqlparser-druid for Seata built with Maven</description>
     <properties>
-        <druid-sqlparser.version>1.2.25</druid-sqlparser.version>
+        <druid-sqlparser.version>1.2.28</druid-sqlparser.version>
     </properties>
     <dependencies>
         <dependency>
@@ -48,6 +48,29 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>report</id>
+                        <configuration>
+                            <!-- The isolated Druid dependency is not Seata production code. -->
+                            <excludes>
+                                <exclude>lib/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <configuration>
+                            <excludes>
+                                <exclude>lib/**</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>

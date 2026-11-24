@@ -16,45 +16,28 @@
  */
 package org.apache.seata.rm.tcc.json;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.integration.tx.api.json.JsonParser;
 
 import java.io.IOException;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common module instead.
+ * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common-core module instead.
  */
 @Deprecated
 @LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {
 
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    public JacksonJsonParser() {
-        this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        this.mapper.activateDefaultTyping(
-                this.mapper.getPolymorphicTypeValidator(),
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY);
-        this.mapper.setConfig(this.mapper.getSerializationConfig().with(MapperFeature.PROPAGATE_TRANSIENT_MARKER));
-        this.mapper.setConfig(this.mapper.getDeserializationConfig().with(MapperFeature.PROPAGATE_TRANSIENT_MARKER));
-        this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    }
-
     @Override
     public String toJSONString(Object object) throws IOException {
-        return this.mapper.writeValueAsString(object);
+        return JsonUtil.toJSONString(object);
     }
 
     @Override
     public <T> T parseObject(String text, Class<T> clazz) throws IOException {
-        return this.mapper.readValue(text, clazz);
+        return JsonUtil.parseObject(text, clazz);
     }
 
     @Override

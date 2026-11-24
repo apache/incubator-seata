@@ -34,7 +34,7 @@ import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.store.StoreMode;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.serializer.SerializerType;
@@ -121,7 +121,7 @@ public class RaftStateMachine extends StateMachineAdapter {
     private final Lock lock = new ReentrantLock();
 
     private static final ScheduledThreadPoolExecutor RESYNC_METADATA_POOL =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("reSyncMetadataPool", 1, true));
+            ThreadPoolExecutorFactory.newScheduledThreadPoolExecutor("reSyncMetadataPool", 1, true);
 
     /**
      * Leader term

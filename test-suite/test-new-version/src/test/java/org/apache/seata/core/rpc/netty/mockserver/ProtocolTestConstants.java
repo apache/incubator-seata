@@ -16,12 +16,31 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
+import org.apache.seata.config.ConfigurationCache;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+
 /**
  * Mock Constants
  **/
 public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "mock_tx_app_id";
     public static final String SERVICE_GROUP = "mock_tx_group";
-    public static final int MOCK_SERVER_PORT = 8099;
+    public static final int MOCK_SERVER_PORT = findAvailablePort();
     public static final String MOCK_SERVER_ADDRESS = "0.0.0.0:" + MOCK_SERVER_PORT;
+
+    static {
+        System.setProperty("service.mock.grouplist", "127.0.0.1:" + MOCK_SERVER_PORT);
+        ConfigurationCache.clear();
+    }
+
+    private static int findAvailablePort() {
+        try (ServerSocket socket = new ServerSocket(0)) {
+            socket.setReuseAddress(true);
+            return socket.getLocalPort();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to allocate an available port", e);
+        }
+    }
 }

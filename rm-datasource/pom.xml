@@ -124,8 +124,8 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -161,7 +161,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>json-common</artifactId>
+            <artifactId>json-common-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

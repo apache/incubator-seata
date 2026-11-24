@@ -123,8 +123,9 @@ public class MockWebServer {
 
     private HttpTest.Person boxing(MockRequest myRequest) {
         Map params = null;
-        if ("get".equals(myRequest.getMethod())) params = getUrlParams(myRequest.getUrl());
-        else if ("post".equals(myRequest.getMethod())) {
+        if ("get".equals(myRequest.getMethod())) {
+            params = getUrlParams(myRequest.getUrl());
+        } else if ("post".equals(myRequest.getMethod())) {
             params = getBodyParams(myRequest.getBody());
         }
         return JSONObject.parseObject(JSONObject.toJSONString(params), HttpTest.Person.class);

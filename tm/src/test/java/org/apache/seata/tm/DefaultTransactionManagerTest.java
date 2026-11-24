@@ -16,7 +16,9 @@
  */
 package org.apache.seata.tm;
 
+import org.apache.seata.core.exception.TmTransactionException;
 import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionRequest;
@@ -151,6 +153,7 @@ public class DefaultTransactionManagerTest {
     @Test
     void testGlobalReportSuccess() throws Exception {
         GlobalReportResponse mockResponse = new GlobalReportResponse();
+        mockResponse.setResultCode(ResultCode.Success);
         mockResponse.setGlobalStatus(GlobalStatus.Committed);
 
         when(tmNettyRemotingClient.sendSyncRequest(any(GlobalReportRequest.class)))
@@ -159,6 +162,45 @@ public class DefaultTransactionManagerTest {
         GlobalStatus status = defaultTransactionManager.globalReport(DEFAULT_XID, GlobalStatus.Committed);
 
         Assertions.assertEquals(GlobalStatus.Committed, status);
+        Mockito.verify(tmNettyRemotingClient).sendSyncRequest(any(GlobalReportRequest.class));
+    }
+
+    @Test
+    void testGlobalReportFailureWithReportedStatus() throws Exception {
+        GlobalReportResponse mockResponse = new GlobalReportResponse();
+        mockResponse.setResultCode(ResultCode.Failed);
+        mockResponse.setGlobalStatus(GlobalStatus.Committed);
+        mockResponse.setTransactionExceptionCode(TransactionExceptionCode.GlobalTransactionStatusInvalid);
+        mockResponse.setMsg("Failed to report transaction status");
+
+        when(tmNettyRemotingClient.sendSyncRequest(any(GlobalReportRequest.class)))
+                .thenReturn(mockResponse);
+
+        TmTransactionException exception = Assertions.assertThrows(
+                TmTransactionException.class,
+                () -> defaultTransactionManager.globalReport(DEFAULT_XID, GlobalStatus.Committed));
+
+        Assertions.assertEquals(TransactionExceptionCode.GlobalTransactionStatusInvalid, exception.getCode());
+        Assertions.assertEquals(mockResponse.getMsg(), exception.getMessage());
+        Mockito.verify(tmNettyRemotingClient).sendSyncRequest(any(GlobalReportRequest.class));
+    }
+
+    @Test
+    void testGlobalReportFailureWithoutTransactionExceptionCode() throws Exception {
+        GlobalReportResponse mockResponse = new GlobalReportResponse();
+        mockResponse.setResultCode(ResultCode.Failed);
+        mockResponse.setGlobalStatus(GlobalStatus.Committed);
+        mockResponse.setMsg("RuntimeException[Failed to store transaction status]");
+
+        when(tmNettyRemotingClient.sendSyncRequest(any(GlobalReportRequest.class)))
+                .thenReturn(mockResponse);
+
+        TmTransactionException exception = Assertions.assertThrows(
+                TmTransactionException.class,
+                () -> defaultTransactionManager.globalReport(DEFAULT_XID, GlobalStatus.Committed));
+
+        Assertions.assertEquals(TransactionExceptionCode.Unknown, exception.getCode());
+        Assertions.assertEquals(mockResponse.getMsg(), exception.getMessage());
         Mockito.verify(tmNettyRemotingClient).sendSyncRequest(any(GlobalReportRequest.class));
     }
 

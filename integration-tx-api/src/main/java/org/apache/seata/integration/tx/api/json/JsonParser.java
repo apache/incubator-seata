@@ -19,7 +19,7 @@ package org.apache.seata.integration.tx.api.json;
 import java.io.IOException;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.JsonSerializer} in json-common module instead.
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializer} in json-common-core module instead.
  */
 @Deprecated
 public interface JsonParser {

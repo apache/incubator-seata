@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.BeforeEach;
@@ -247,6 +248,11 @@ public class ConnectionContextTest {
     @Test
     public void testToStringReturnsNonNull() {
         assertNotNull(connectionContext.toString());
+    }
+
+    @Test
+    public void testApplicationDataUsesJsonUtilFacade() throws TransactionException {
+        assertEquals("tracking:{autoCommit=false}:false", connectionContext.getApplicationData());
     }
 
     private Savepoint createSavepoint(String name) {

@@ -21,7 +21,7 @@ import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.constant.BenchmarkConstants;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
 import org.apache.seata.benchmark.model.TransactionRecord;
-import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +30,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.apache.seata.benchmark.constant.BenchmarkConstants.STATUS_FAILED;
 
 /**
  * Workload generator with TPS rate limiting
@@ -55,13 +56,13 @@ public class WorkloadGenerator {
         this.executor = executor;
         this.metrics = metrics;
         this.rateLimiter = RateLimiter.create(config.getTargetTps());
-        this.executorService = new ThreadPoolExecutor(
+        this.executorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                "workload-generator",
                 config.getThreads(),
                 config.getThreads(),
                 0L,
                 TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory("workload-generator", config.getThreads()));
+                new LinkedBlockingQueue<>());
     }
 
     public void start() {
@@ -100,20 +101,17 @@ public class WorkloadGenerator {
     }
 
     private void executeTransaction() {
+        long startTime = System.currentTimeMillis();
         try {
             TransactionRecord record = executor.execute();
-
-            if (record.isSuccess()) {
-                metrics.recordSuccess(record.getDuration());
-            } else {
-                metrics.recordFailure(record.getDuration());
-            }
+            metrics.recordTransaction(record.getStatus(), record.getDuration());
 
             addRecentRecord(record);
 
         } catch (Exception e) {
             LOGGER.error("Transaction execution error", e);
-            metrics.recordFailure(0);
+            long duration = System.currentTimeMillis() - startTime;
+            metrics.recordTransaction(STATUS_FAILED, duration);
         }
     }
 

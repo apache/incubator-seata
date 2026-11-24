@@ -48,7 +48,7 @@ public class TestConfigFromExtendSPI {
 
     private static final int STRING_LENGTH = 6;
 
-    private static final SecureRandom random = new SecureRandom();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @BeforeAll
     public static void setup() throws NacosException {
@@ -89,7 +89,7 @@ public class TestConfigFromExtendSPI {
     public static String generateRandomString() {
         StringBuilder sb = new StringBuilder(STRING_LENGTH);
         for (int i = 0; i < STRING_LENGTH; i++) {
-            sb.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+            sb.append(CHARACTERS.charAt(RANDOM.nextInt(CHARACTERS.length())));
         }
         return sb.toString();
     }

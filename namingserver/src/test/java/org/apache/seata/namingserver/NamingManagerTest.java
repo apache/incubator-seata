@@ -16,8 +16,7 @@
  */
 package org.apache.seata.namingserver;
 
-import okhttp3.Response;
-import okhttp3.ResponseBody;
+import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -25,7 +24,6 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
@@ -36,14 +34,17 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,11 +54,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.client.ExpectedCount.once;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -65,31 +69,22 @@ class NamingManagerTest {
 
     private NamingManager namingManager;
 
-    @Mock
     private ApplicationContext applicationContext;
 
-    @Mock
-    private Response httpResponse;
-
-    @Mock
-    private ResponseBody responseBody;
-
-    private MockedStatic<HttpClientUtil> mockedHttpClientUtil;
+    private MockRestServiceServer server;
 
     @BeforeEach
     void setUp() {
         namingManager = new NamingManager();
+        applicationContext = Mockito.mock(ApplicationContext.class);
         ReflectionTestUtils.setField(namingManager, "applicationContext", applicationContext);
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
         ReflectionTestUtils.setField(namingManager, "metricsManager", new NoOpNamingMetricsManager());
 
-        Mockito.when(httpResponse.code()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn(responseBody);
-        mockedHttpClientUtil = Mockito.mockStatic(HttpClientUtil.class);
-        mockedHttpClientUtil
-                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(httpResponse);
+        RestClient.Builder restClientBuilder = RestClient.builder();
+        server = MockRestServiceServer.bindTo(restClientBuilder).build();
+        ReflectionTestUtils.setField(namingManager, "restClient", restClientBuilder.build());
 
         namingManager.init();
     }
@@ -109,9 +104,7 @@ class NamingManagerTest {
 
     @AfterEach
     void tearDown() {
-        if (mockedHttpClientUtil != null) {
-            mockedHttpClientUtil.close();
-        }
+        server.reset();
     }
 
     @Test
@@ -235,17 +228,19 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        Mockito.when(httpResponse.code()).thenReturn(200);
         Result<String> result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         assertFalse(result.isSuccess());
-        vGroup = "test-vGroup2";
-        result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
+        String newVGroup = "test-vGroup2";
+        server.expect(
+                        once(),
+                        request -> assertControlRequest(
+                                request, "/vgroup/v1/addVGroup", "127.0.0.1", 9080, newVGroup, unitName))
+                .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
+        result = namingManager.createGroup(namespace, newVGroup, clusterName, unitName);
         assertTrue(result.isSuccess());
         assertEquals("200", result.getCode());
         assertEquals("add vGroup successfully!", result.getMessage());
-
-        mockedHttpClientUtil.verify(
-                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+        server.verify();
     }
 
     @Test
@@ -299,21 +294,18 @@ class NamingManagerTest {
         nodeList.add(node);
         unit.setNamingInstanceList(nodeList);
 
-        Mockito.when(httpResponse.code()).thenReturn(200);
-        Mockito.when(httpResponse.body()).thenReturn(responseBody);
-
-        mockedHttpClientUtil
-                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(httpResponse);
+        server.expect(
+                        once(),
+                        request -> assertControlRequest(
+                                request, "/vgroup/v1/removeVGroup", "127.0.0.1", 9000, vGroup, unitName))
+                .andRespond(withSuccess("", MediaType.APPLICATION_JSON));
 
         Result<String> result = namingManager.removeGroup(unit, vGroup, clusterName, namespace, unitName);
 
         assertTrue(result.isSuccess());
         assertEquals("200", result.getCode());
         assertEquals("remove group in old cluster successfully!", result.getMessage());
-
-        mockedHttpClientUtil.verify(
-                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+        server.verify();
     }
 
     @Test
@@ -434,5 +426,35 @@ class NamingManagerTest {
         // Test non-existent namespace
         ClusterData notFoundNamespace = namingManager.getClusterData("non-existent-namespace", clusterName);
         assertNull(notFoundNamespace);
+    }
+
+    private void assertControlRequest(
+            org.springframework.http.client.ClientHttpRequest request,
+            String expectedPath,
+            String expectedHost,
+            int expectedPort,
+            String expectedGroup,
+            String expectedUnit) {
+        assertEquals(HttpMethod.GET, request.getMethod());
+        assertEquals(expectedHost, request.getURI().getHost());
+        assertEquals(expectedPort, request.getURI().getPort());
+        assertEquals(expectedPath, request.getURI().getPath());
+        assertEquals(expectedGroup, extractQueryValue(request.getURI().getRawQuery(), CONSTANT_GROUP));
+        assertEquals(
+                expectedUnit, extractQueryValue(request.getURI().getRawQuery(), NamingServerConstants.CONSTANT_UNIT));
+        assertEquals("application/x-www-form-urlencoded", request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE));
+    }
+
+    private String extractQueryValue(String query, String key) {
+        if (query == null) {
+            return null;
+        }
+        for (String pair : query.split("&")) {
+            String[] parts = pair.split("=", 2);
+            if (parts.length == 2 && key.equals(parts[0])) {
+                return parts[1];
+            }
+        }
+        return null;
     }
 }

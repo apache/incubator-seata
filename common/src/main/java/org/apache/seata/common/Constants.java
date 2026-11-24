@@ -220,6 +220,16 @@ public interface Constants {
     String JACKSON_JSON_PARSER_NAME = "jackson";
 
     /**
+     * The constant FASTJSON2_JSON_PARSER_NAME
+     */
+    String FASTJSON2_JSON_PARSER_NAME = "fastjson2";
+
+    /**
+     * The constant JACKSON3_JSON_PARSER_NAME
+     */
+    String JACKSON3_JSON_PARSER_NAME = "jackson3";
+
+    /**
      * The constant GSON_JSON_PARSER_NAME
      */
     String GSON_JSON_PARSER_NAME = "gson";
@@ -250,4 +260,29 @@ public interface Constants {
      * CW stands for Cluster Watch
      */
     String WATCH_EVENT_PREFIX = "CW:";
+
+    /**
+     * Framework-reserved action status key (sys:: prefix avoids collisions with business keys)
+     */
+    String ACTION_STATUS = "sys::actionStatus";
+
+    /**
+     * Action status: phase one not started (branch registered, business never executed)
+     */
+    String ACTION_STATUS_NONE = "none";
+
+    /**
+     * Action status: phase one is in progress (anti-suspension guard)
+     */
+    String ACTION_STATUS_RUNNING = "running";
+
+    /**
+     * Action status: prepare method executed successfully
+     */
+    String ACTION_STATUS_SUCCESS = "success";
+
+    /**
+     * Action status: prepare method execution failed
+     */
+    String ACTION_STATUS_FAILED = "failed";
 }

@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in json-common module instead.
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in json-common-core module instead.
  */
 @Deprecated
 public class JsonParserFactory {
@@ -33,8 +33,8 @@ public class JsonParserFactory {
     private static final Map<String, JsonParserWrap> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
 
     public static JsonParserWrap getInstance(String jsonParserName) {
-        final String name = Optional.ofNullable(jsonParserName)
-                .orElse(DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
+        final String name =
+                Optional.ofNullable(jsonParserName).orElse(DefaultValues.BUSINESS_ACTION_CONTEXT_JSON_PARSER);
         return CollectionUtils.computeIfAbsent(
                 JSON_PARSER_INSTANCES,
                 name,

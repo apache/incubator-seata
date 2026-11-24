@@ -34,6 +34,7 @@ public class Fastjson2SerializerTest {
     @BeforeAll
     public static void before() {
         fastjson2Serializer = new Fastjson2Serializer();
+        fastjson2Serializer.init();
     }
 
     @Test

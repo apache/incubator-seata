@@ -22,7 +22,10 @@ import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +65,8 @@ public class TestServerHandler extends ChannelInboundHandlerAdapter {
                 handleRegisterTMRequest(ctx, rpcMessage, (RegisterTMRequest) body);
             } else if (body instanceof HeartbeatMessage) {
                 handleHeartbeatMessage(ctx, rpcMessage, (HeartbeatMessage) body);
+            } else if (body instanceof GlobalBeginRequest) {
+                handleGlobalBeginRequest(ctx, rpcMessage, (GlobalBeginRequest) body);
             }
         } else if (msg instanceof RegisterTMRequest) {
             // Handle direct requests (for backward compatibility)
@@ -83,10 +88,27 @@ public class TestServerHandler extends ChannelInboundHandlerAdapter {
         }
 
         RegisterTMResponse response = new RegisterTMResponse(identified);
-        response.setVersion(request.getVersion());
+        response.setVersion(request.getVersion() == null ? "" : request.getVersion());
         response.setMsg(respMsg);
 
         // Wrap response in RpcMessage
+        RpcMessage responseMsg = new RpcMessage();
+        responseMsg.setId(rpcMessage.getId());
+        responseMsg.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+        responseMsg.setCodec(rpcMessage.getCodec());
+        responseMsg.setCompressor(rpcMessage.getCompressor());
+        responseMsg.setBody(response);
+
+        ctx.writeAndFlush(responseMsg);
+    }
+
+    private void handleGlobalBeginRequest(
+            ChannelHandlerContext ctx, RpcMessage rpcMessage, GlobalBeginRequest request) {
+        GlobalBeginResponse response = new GlobalBeginResponse();
+        response.setResultCode(ResultCode.Success);
+        response.setXid("127.0.0.1:8091:" + rpcMessage.getId());
+        response.setExtraData(request.getTransactionName());
+
         RpcMessage responseMsg = new RpcMessage();
         responseMsg.setId(rpcMessage.getId());
         responseMsg.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);

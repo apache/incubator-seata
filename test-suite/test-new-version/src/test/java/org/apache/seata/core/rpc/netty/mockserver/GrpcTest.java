@@ -21,7 +21,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
@@ -47,8 +47,9 @@ public class GrpcTest {
     @BeforeAll
     public static void before() {
         ConfigurationFactory.reload();
-        ConfigurationTestHelper.putConfig(
+        System.setProperty(
                 ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
+        ConfigurationCache.clear();
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
@@ -62,7 +63,8 @@ public class GrpcTest {
     @AfterAll
     public static void after() {
         // MockServer.close();
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+        ConfigurationCache.clear();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
     }

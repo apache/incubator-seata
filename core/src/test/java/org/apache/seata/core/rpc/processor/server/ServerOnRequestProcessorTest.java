@@ -208,6 +208,37 @@ public class ServerOnRequestProcessorTest {
     }
 
     @Test
+    public void testProcessKeepsContextWhenChannelIsReleasedConcurrently() throws Exception {
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        when(transactionMessageHandler.onRequest(any(GlobalBeginRequest.class), any(RpcContext.class)))
+                .thenReturn(new GlobalBeginResponse());
+        RpcMessage rpcMessage = new RpcMessage() {
+            @Override
+            public Object getBody() {
+                // the IO thread drops the channel while the request is being handled
+                removeIdentifiedChannel(channel);
+                return super.getBody();
+            }
+        };
+        rpcMessage.setId(1);
+        rpcMessage.setBody(request);
+
+        processor.process(ctx, rpcMessage);
+
+        verify(transactionMessageHandler).onRequest(eq(request), eq(rpcContext));
+    }
+
+    private static void removeIdentifiedChannel(Channel channel) {
+        try {
+            Field field = ChannelManager.class.getDeclaredField("IDENTIFIED_CHANNELS");
+            field.setAccessible(true);
+            ((Map<?, ?>) field.get(null)).remove(channel);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @Test
     public void testProcessNonAbstractMessage() throws Exception {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(1);
@@ -611,8 +642,12 @@ public class ServerOnRequestProcessorTest {
             boolean hasCodec7 = false;
             boolean hasCodec8 = false;
             for (RpcMessage msg : capturedRpcMessages) {
-                if (msg.getCodec() == 7) hasCodec7 = true;
-                if (msg.getCodec() == 8) hasCodec8 = true;
+                if (msg.getCodec() == 7) {
+                    hasCodec7 = true;
+                }
+                if (msg.getCodec() == 8) {
+                    hasCodec8 = true;
+                }
             }
 
             assertTrue(hasCodec7 || hasCodec8);

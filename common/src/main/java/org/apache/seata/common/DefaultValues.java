@@ -78,6 +78,11 @@ public interface DefaultValues {
     boolean DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE = false;
 
     /**
+     * The constant DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE.
+     */
+    boolean DEFAULT_CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE = false;
+
+    /**
      * The default session store dir
      */
     String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
@@ -162,6 +167,11 @@ public interface DefaultValues {
      * The constant DEFAULT_PROTOCOL.
      */
     String DEFAULT_PROTOCOL = "seata";
+
+    /**
+     * The default transport thread pool type.
+     */
+    String DEFAULT_TRANSPORT_THREADPOOL = "auto";
 
     /**
      * The constant DEFAULT_MIN_HTTP_POOL_SIZE.
@@ -342,10 +352,9 @@ public interface DefaultValues {
     String DEFAULT_SAGA_JSON_PARSER = "fastjson";
 
     /**
-     * The constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER.
+     * The default global JSON serializer.
      */
-    // default tcc business action context json parser
-    String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "fastjson";
+    String BUSINESS_ACTION_CONTEXT_JSON_PARSER = "jackson";
 
     /**
      * The constant DEFAULT_SERVER_ENABLE_CHECK_AUTH.

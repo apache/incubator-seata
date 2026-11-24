@@ -99,7 +99,13 @@ public class BenchmarkConfigLoader {
             String applicationId,
             String txServiceGroup,
             Integer rollbackPercentage,
-            Integer branches) {
+            Integer branches,
+            String sagaShape,
+            String sagaWorkload,
+            String sagaFailStep,
+            Long sagaRandomSeed,
+            String sagaTimeoutStep,
+            Integer sagaTimeoutMs) {
         if (StringUtils.isNotEmpty(server)) {
             config.setServer(server);
         }
@@ -129,6 +135,24 @@ public class BenchmarkConfigLoader {
         }
         if (branches != null && branches >= 0) {
             config.setBranches(branches);
+        }
+        if (StringUtils.isNotEmpty(sagaShape)) {
+            config.setSagaShape(sagaShape);
+        }
+        if (StringUtils.isNotEmpty(sagaWorkload)) {
+            config.setSagaWorkload(sagaWorkload);
+        }
+        if (StringUtils.isNotEmpty(sagaFailStep)) {
+            config.setSagaFailStep(sagaFailStep);
+        }
+        if (sagaRandomSeed != null) {
+            config.setSagaRandomSeed(sagaRandomSeed);
+        }
+        if (StringUtils.isNotEmpty(sagaTimeoutStep)) {
+            config.setSagaTimeoutStep(sagaTimeoutStep);
+        }
+        if (sagaTimeoutMs != null && sagaTimeoutMs >= 0) {
+            config.setSagaTimeoutMs(sagaTimeoutMs);
         }
         return config;
     }

@@ -17,6 +17,8 @@
 package org.apache.seata.rm.datasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.mock.MockDriver;
@@ -237,7 +239,33 @@ public class DataSourceProxyTest {
 
             proxy.close();
 
+            verify(drm).unregisterResource(proxy);
             tmcfStatic.verify(() -> TableMetaCacheFactory.shutdown(proxy.getResourceId()));
         }
+    }
+
+    @Test
+    public void testCloseRemovesResourceFromManager() throws Exception {
+        final MockDriver mockDriver = new MockDriver();
+        final String username = "username";
+        final String jdbcUrl = "jdbc:mock:xxx";
+
+        final DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(jdbcUrl);
+        dataSource.setDriver(mockDriver);
+        dataSource.setUsername(username);
+        dataSource.setPassword("password");
+
+        DataSourceProxy proxy = getDataSourceProxy(dataSource);
+
+        ResourceManager atManager = DefaultResourceManager.get().getResourceManager(BranchType.AT);
+
+        // Ensure it's registered
+        Assertions.assertNotNull(atManager.getManagedResources().get(proxy.getResourceId()));
+
+        proxy.close();
+
+        // Ensure it's unregistered
+        Assertions.assertNull(atManager.getManagedResources().get(proxy.getResourceId()));
     }
 }
