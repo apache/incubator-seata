@@ -39,6 +39,9 @@ header:
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
+    # Vendored Font Awesome CSS retains its upstream MIT license header.
+    - 'console/src/main/resources/static/console-fe/public/css/font-awesome.css'
+    - 'console/src/main/resources/META-INF/licenses/font-awesome-MIT'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
     - 'distribution/licenses/**'
     - 'distribution/LICENSE'
