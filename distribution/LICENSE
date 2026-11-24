@@ -217,6 +217,8 @@ Apache-1.1 licenses
 Apache-2.0 licenses
 ========================================================================
 
+    org.springframework.ai:mcp-spring-webmvc 2.0.1 Apache-2.0
+
     @ampproject/remapping 2.2.1 Apache-2.0
     com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
@@ -571,6 +573,12 @@ ISC licenses
 MIT licenses
 ========================================================================
 
+    font-awesome.css 4.5.0 MIT (Font Awesome by Dave Gandy) see:licenses/font-awesome-MIT
+
+    io.modelcontextprotocol.sdk:mcp 2.0.0 MIT see:licenses/mcp-MIT
+    io.modelcontextprotocol.sdk:mcp-core 2.0.0 MIT see:licenses/mcp-core-MIT
+    io.modelcontextprotocol.sdk:mcp-json-jackson3 2.0.0 MIT see:licenses/mcp-json-jackson3-MIT
+
     @alicloud/console-components 1.6.2 MIT see:licenses/alicloud-console-components-MIT
     @alicloud/console-components-actions 1.1.1 MIT see:licenses/alicloud-console-components-actions-MIT
     @alicloud/console-components-app-layout 1.1.4 MIT
@@ -772,7 +780,7 @@ MIT licenses
     find-up 5.0.0 MIT see:licenses/find-up-MIT
     flatten 1.0.3 MIT see:licenses/flatten-MIT
     focus-trap 7.5.4 MIT see:licenses/focus-trap-MIT
-    follow-redirects 1.15.6 MIT see:licenses/follow-redirects-MIT
+    follow-redirects 1.16.2 MIT see:licenses/follow-redirects-MIT
     form-data 4.0.0 MIT see:licenses/form-data-MIT
     fsevents 2.3.3 MIT see:licenses/fsevents-MIT
     function-bind 1.1.2 MIT see:licenses/function-bind-MIT
