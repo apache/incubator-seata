@@ -16,7 +16,12 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.util.concurrent.EventExecutor;
@@ -30,6 +35,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -90,13 +96,14 @@ class NettyServerBootstrapTest {
                 });
 
                 bootstrap.shutdown();
-                bootstrap.shutdown();
 
                 try (ServerSocket rebound = new ServerSocket()) {
                     rebound.setReuseAddress(false);
                     rebound.bind(new InetSocketAddress(port), 1);
                     Assertions.assertEquals(port, rebound.getLocalPort());
                 }
+
+                Assertions.assertDoesNotThrow(bootstrap::shutdown);
             } finally {
                 bootstrap.shutdown();
             }
@@ -121,7 +128,6 @@ class NettyServerBootstrapTest {
             };
             for (Exception failure : failures) {
                 RegistryService<?> registryService = Mockito.mock(RegistryService.class);
-                Mockito.doThrow(failure).when(registryService).register(Mockito.any(Instance.class));
 
                 try (MockedStatic<MultiRegistryFactory> registryFactoryMock =
                         Mockito.mockStatic(MultiRegistryFactory.class)) {
@@ -137,9 +143,27 @@ class NettyServerBootstrapTest {
                     NettyServerConfig config = new NettyServerConfig();
                     config.setServerListenPort(port);
                     NettyServerBootstrap bootstrap = new NettyServerBootstrap(config);
+                    AtomicReference<Channel> capturedChannel = new AtomicReference<>();
+                    Mockito.doAnswer(invocation -> {
+                                @SuppressWarnings("unchecked")
+                                AtomicReference<Channel> serverChannel =
+                                        (AtomicReference<Channel>) getField(bootstrap, "serverChannel");
+                                Channel boundChannel = serverChannel.get();
+                                Assertions.assertNotNull(boundChannel);
+                                Assertions.assertTrue(boundChannel.isOpen());
+                                capturedChannel.set(boundChannel);
+                                throw failure;
+                            })
+                            .when(registryService)
+                            .register(Mockito.any(Instance.class));
                     try {
                         RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, bootstrap::start);
                         Assertions.assertSame(failure, thrown.getCause());
+
+                        Channel boundChannel = capturedChannel.get();
+                        Assertions.assertNotNull(boundChannel);
+                        Assertions.assertFalse(boundChannel.isOpen());
+                        Assertions.assertTrue(boundChannel.closeFuture().isDone());
 
                         @SuppressWarnings("unchecked")
                         AtomicReference<Channel> serverChannel =
@@ -163,6 +187,57 @@ class NettyServerBootstrapTest {
                 System.setProperty(ConfigurationKeys.SHUTDOWN_WAIT, previousShutdownWait);
             }
             ConfigurationCache.clear();
+        }
+    }
+
+    @Test
+    void testShutdownLogsWarningWhenCloseOrBossShutdownTimesOut() {
+        Logger logger = (Logger) LoggerFactory.getLogger(NettyServerBootstrap.class);
+        ListAppender<ILoggingEvent> events = new ListAppender<>();
+        events.start();
+        logger.addAppender(events);
+        try {
+            NettyServerBootstrap bootstrap = Mockito.mock(NettyServerBootstrap.class, Mockito.CALLS_REAL_METHODS);
+            Mockito.doReturn(8091).when(bootstrap).getListenPort();
+
+            Channel mockChannel = Mockito.mock(Channel.class);
+            ChannelFuture closeFuture = Mockito.mock(ChannelFuture.class);
+            Mockito.when(mockChannel.close()).thenReturn(closeFuture);
+            Mockito.when(closeFuture.awaitUninterruptibly(5L, TimeUnit.SECONDS)).thenReturn(false);
+
+            EventExecutor bossExecutor = Mockito.mock(EventExecutor.class);
+            Mockito.when(bossExecutor.inEventLoop()).thenReturn(false);
+
+            EventLoopGroup mockBossGroup = Mockito.mock(EventLoopGroup.class);
+            Mockito.when(mockBossGroup.iterator())
+                    .thenReturn(Collections.singletonList(bossExecutor).iterator());
+            Future<?> bossFuture = Mockito.mock(Future.class);
+            Mockito.doReturn(bossFuture).when(mockBossGroup).shutdownGracefully(0L, 5L, TimeUnit.SECONDS);
+            Mockito.when(bossFuture.awaitUninterruptibly(5L, TimeUnit.SECONDS)).thenReturn(false);
+
+            EventLoopGroup mockWorkerGroup = Mockito.mock(EventLoopGroup.class);
+
+            setField(bootstrap, "initialized", new AtomicBoolean(false));
+            setField(bootstrap, "serverChannel", new AtomicReference<>(mockChannel));
+            setField(bootstrap, "eventLoopGroupBoss", mockBossGroup);
+            setField(bootstrap, "eventLoopGroupWorker", mockWorkerGroup);
+
+            Assertions.assertDoesNotThrow(bootstrap::shutdown);
+            Mockito.verify(closeFuture).awaitUninterruptibly(5L, TimeUnit.SECONDS);
+            Mockito.verify(bossFuture).awaitUninterruptibly(5L, TimeUnit.SECONDS);
+            Mockito.verify(mockWorkerGroup).shutdownGracefully();
+
+            boolean hasChannelWarn = events.list.stream()
+                    .anyMatch(event -> event.getLevel() == Level.WARN
+                            && event.getFormattedMessage().contains("server channel"));
+            boolean hasBossWarn = events.list.stream()
+                    .anyMatch(event -> event.getLevel() == Level.WARN
+                            && event.getFormattedMessage().contains("boss event loop group"));
+            Assertions.assertTrue(hasChannelWarn);
+            Assertions.assertTrue(hasBossWarn);
+        } finally {
+            logger.detachAppender(events);
+            events.stop();
         }
     }
 

@@ -262,7 +262,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         Channel channel = this.serverChannel.getAndSet(null);
         if (channel != null) {
             try {
-                channel.close().awaitUninterruptibly(5, TimeUnit.SECONDS);
+                boolean closed = channel.close().awaitUninterruptibly(5, TimeUnit.SECONDS);
+                if (!closed) {
+                    LOGGER.warn("Timed out waiting for server channel to close, listen port: {}", getListenPort());
+                }
             } catch (Exception exx) {
                 LOGGER.error("close server channel error: {}", exx.getMessage(), exx);
             }
@@ -282,8 +285,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 }
             }
             Future<?> future = this.eventLoopGroupBoss.shutdownGracefully(0, 5, TimeUnit.SECONDS);
-            if (!inBossEventLoop) {
-                future.awaitUninterruptibly(5, TimeUnit.SECONDS);
+            if (!inBossEventLoop && !future.awaitUninterruptibly(5, TimeUnit.SECONDS)) {
+                LOGGER.warn(
+                        "Timed out waiting for boss event loop group to shut down, listen port: {}", getListenPort());
             }
         } catch (Exception exx) {
             LOGGER.error("shutdown boss event loop group error: {}", exx.getMessage(), exx);

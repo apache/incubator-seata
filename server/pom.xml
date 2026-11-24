@@ -466,6 +466,9 @@
                 <configuration>
                     <forkCount>2</forkCount>
                     <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <seata.test.forkNumber>${surefire.forkNumber}</seata.test.forkNumber>
+                    </systemPropertyVariables>
                     <excludes>
                         <exclude>**/cluster/raft/execute/*Test.java</exclude>
                         <exclude>**/cluster/raft/RaftServerTest.java</exclude>
