@@ -133,7 +133,7 @@ import {
   deleteGlobalLock,
   checkGlobalLock,
   type GlobalLockRecord,
-  type GlobalLockOperationParams,
+  type GlobalLockDeleteParams,
 } from '@/api/globalLock'
 import { useNamespaceOptions } from '@/composables/useNamespace'
 import TableActionColumn, { type RowAction } from '@/components/TableActionColumn.vue'
@@ -161,7 +161,7 @@ const {
 } = useNamespaceOptions()
 
 /** Current page data (returned by API) */
-type LockRow = GlobalLockRecord & { operationParams: GlobalLockOperationParams }
+type LockRow = GlobalLockRecord & { operationParams: GlobalLockDeleteParams }
 const tableData = ref<LockRow[]>([])
 /** Total record count */
 const totalRecords = ref(0)
@@ -271,7 +271,16 @@ const handleSearch = async () => {
     if (searchId !== latestSearch) return
     tableData.value = res.data.map(row => ({
       ...row,
-      operationParams: { xid: row.xid, branchId: row.branchId, namespace, cluster, vgroup: row.vgroup || vgroup },
+      operationParams: {
+        xid: row.xid,
+        branchId: row.branchId,
+        tableName: row.tableName,
+        pk: row.pk,
+        resourceId: row.resourceId,
+        namespace,
+        cluster,
+        vgroup: row.vgroup || vgroup,
+      },
     }))
     totalRecords.value = res.total
   } catch {
@@ -297,7 +306,7 @@ const handlePageChange = () => {
   handleSearch()
 }
 
-const handleDelete = async (operationParams: GlobalLockOperationParams) => {
+const handleDelete = async (operationParams: GlobalLockDeleteParams) => {
   if (!await confirmAction('globalLock.actions.delete')) return
 
   deleting.value = true

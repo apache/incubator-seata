@@ -32,6 +32,8 @@ export interface GlobalLockOperationParams {
   cluster?: string
 }
 
+export type GlobalLockDeleteParams = GlobalLockOperationParams & Pick<GlobalLockRecord, 'tableName' | 'pk' | 'resourceId'>
+
 /**
  * Global lock query parameters (mapped from backend GlobalLockParam + BaseParam)
  */
@@ -113,10 +115,10 @@ export function queryGlobalLocks(params: GlobalLockQueryParams): Promise<PageRes
 /**
  * Delete a global lock
  */
-export function deleteGlobalLock(params: GlobalLockOperationParams): Promise<{ code: string; message: string }> {
-  const { xid, branchId, vgroup, namespace, cluster } = params
+export function deleteGlobalLock(params: GlobalLockDeleteParams): Promise<{ code: string; message: string }> {
+  const { xid, branchId, tableName, pk, resourceId, vgroup, namespace, cluster } = params
   return request.delete('/console/globalLock/delete', {
-    params: { xid, branchId, vgroup },
+    params: { xid, branchId, tableName, pk, resourceId, vgroup },
     headers: {
       'x-seata-namespace': namespace,
       'x-seata-cluster': cluster,
