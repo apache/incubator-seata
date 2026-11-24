@@ -21,13 +21,13 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.ParameterParser;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +60,7 @@ public abstract class AbstractServerTest {
     }
 
     private static NettyRemotingServer nettyServer;
+    private static DefaultCoordinator coordinator;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(
             100, 500, 500, TimeUnit.SECONDS, new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
@@ -72,57 +73,57 @@ public abstract class AbstractServerTest {
         }
     }
 
-    protected static void startSeataServer() throws InterruptedException {
-        (new Thread(new Runnable() {
-                    public void run() {
-                        File file = new File("sessionStore/root.data");
-                        if (file.exists()) {
-                            file.delete();
-                        }
+    protected static void startSeataServer() {
+        File file = new File("sessionStore/root.data");
+        if (file.exists()) {
+            file.delete();
+        }
 
-                        ParameterParser parameterParser = new ParameterParser();
+        ParameterParser parameterParser = new ParameterParser();
+        MetricsManager.get().init();
 
-                        // initialize the metrics
-                        MetricsManager.get().init();
+        NettyServerConfig nettyServerConfig = new NettyServerConfig();
+        nettyServerConfig.setServerListenPort(SERVER_PORT);
+        nettyServer = new NettyRemotingServer(WORKING_THREADS, nettyServerConfig);
+        UUIDGenerator.init(parameterParser.getServerNode());
+        SessionHolder.init();
 
-                        NettyServerConfig nettyServerConfig = new NettyServerConfig();
-                        nettyServerConfig.setServerListenPort(SERVER_PORT);
-                        nettyServer = new NettyRemotingServer(WORKING_THREADS, nettyServerConfig);
-                        UUIDGenerator.init(parameterParser.getServerNode());
-                        // log store mode : file、db
-                        SessionHolder.init();
+        coordinator = DefaultCoordinator.getInstance(nettyServer);
+        coordinator.init();
+        nettyServer.setHandler(coordinator);
 
-                        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
-                        coordinator.init();
-                        nettyServer.setHandler(coordinator);
+        // 127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
+        XID.setPort(nettyServer.getListenPort());
 
-                        // register ShutdownHook
-                        ShutdownHook.getInstance().addDisposable(coordinator);
-
-                        // 127.0.0.1 and 0.0.0.0 are not valid here.
-                        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-                            XID.setIpAddress(parameterParser.getHost());
-                        } else {
-                            XID.setIpAddress(NetUtil.getLocalIp());
-                        }
-                        XID.setPort(nettyServer.getListenPort());
-
-                        nettyServer.init();
-                    }
-                }))
-                .start();
-        Thread.sleep(5000);
+        nettyServer.init();
     }
 
-    protected static final void stopSeataServer() throws InterruptedException {
-        if (nettyServer != null) {
-            nettyServer.destroy();
-            Thread.sleep(5000);
+    static DefaultCoordinator getTestCoordinator() {
+        return coordinator;
+    }
+
+    protected static final void stopSeataServer() {
+        try {
+            if (coordinator != null) {
+                coordinator.destroy();
+                Assertions.assertTrue(
+                        WORKING_THREADS.isShutdown(), "The Saga server's request executor must be shut down");
+            } else if (nettyServer != null) {
+                nettyServer.destroy();
+            }
+        } finally {
+            coordinator = null;
+            nettyServer = null;
+            restoreProperty("config.type", originalConfigType);
+            restoreProperty("config.file.name", originalConfigFileName);
+            restoreProperty("service.default.grouplist", originalGroupList);
+            ConfigurationCache.clear();
         }
-        restoreProperty("config.type", originalConfigType);
-        restoreProperty("config.file.name", originalConfigFileName);
-        restoreProperty("service.default.grouplist", originalGroupList);
-        ConfigurationCache.clear();
     }
 
     private static void restoreProperty(String key, String originalValue) {

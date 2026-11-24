@@ -68,6 +68,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -816,33 +817,47 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     @Override
     public void destroy() {
         // 1. first shutdown timed task
-        retryRollbacking.shutdown();
-        retryCommitting.shutdown();
-        asyncCommitting.shutdown();
-        timeoutCheck.shutdown();
-        undoLogDelete.shutdown();
+        // The sync scheduler queues one-shot retries that can outlive the shutdown timeout.
+        syncProcessing.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        List<ScheduledThreadPoolExecutor> schedulers = Arrays.asList(
+                syncProcessing, retryRollbacking, retryCommitting, asyncCommitting, timeoutCheck, undoLogDelete);
+        schedulers.forEach(ScheduledThreadPoolExecutor::shutdown);
         if (branchRemoveExecutor != null) {
             branchRemoveExecutor.shutdown();
         }
+        boolean interrupted = false;
         try {
-            retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            if (branchRemoveExecutor != null) {
-                branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            for (ScheduledThreadPoolExecutor scheduler : schedulers) {
+                if (!scheduler.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
+                    scheduler.shutdownNow();
+                    if (!scheduler.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
+                        LOGGER.warn("Coordinator scheduler still running during shutdown: {}", scheduler);
+                    }
+                }
             }
-        } catch (InterruptedException ignore) {
-
+            if (branchRemoveExecutor != null
+                    && !branchRemoveExecutor.awaitTermination(
+                            TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
+                LOGGER.warn("Coordinator branch removal still running during shutdown");
+            }
+        } catch (InterruptedException e) {
+            interrupted = true;
+            schedulers.forEach(ScheduledThreadPoolExecutor::shutdownNow);
+            LOGGER.warn("Interrupted while waiting for coordinator tasks to terminate", e);
         }
-        // 2. second close netty flow
-        if (remotingServer instanceof NettyRemotingServer) {
-            ((NettyRemotingServer) remotingServer).destroy();
+        try {
+            // 2. second close netty flow
+            if (remotingServer instanceof NettyRemotingServer) {
+                ((NettyRemotingServer) remotingServer).destroy();
+            }
+            // 3. third destroy SessionHolder
+            SessionHolder.destroy();
+            instance = null;
+        } finally {
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
         }
-        // 3. third destroy SessionHolder
-        SessionHolder.destroy();
-        instance = null;
     }
 
     /**
