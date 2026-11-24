@@ -84,6 +84,9 @@ Since you are ready to improve Seata with a PR, we suggest you could take a look
 
 ### Workspace Preparation
 
+See [Building Seata](./BUILDING.md) for the JDK/module matrix, development
+commands and complete-distribution build requirements.
+
 To put forward a PR, we assume you have a registered GitHub account. Then you could finish the preparation in the following steps:
 
 1. **FORK** Seata to your repository. To make this work, you just need to click the button Fork in right-left of [apache/incubator-seata](https://github.com/apache/incubator-seata) main page. Then you will end up with your repository in `https://github.com/<your-username>/incubator-seata`, in which `your-username` is your GitHub username.
