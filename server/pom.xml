@@ -32,14 +32,23 @@
     <description>server for Seata built with Maven</description>
 
     <properties>
-        <spring-boot-for-server.version>4.0.6</spring-boot-for-server.version>
-        <spring-framework-for-server.version>7.0.7</spring-framework-for-server.version>
+        <spring-boot-for-server.version>4.0.9</spring-boot-for-server.version>
+        <spring-framework-for-server.version>7.0.10</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
+        <sofa-common-tools-for-server.version>2.1.0</sofa-common-tools-for-server.version>
         <junit-jupiter.version>6.0.3</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Keep Netty aligned with seata-dependencies before the Spring Boot BOM import. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>
@@ -199,12 +208,12 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-       <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
             <scope>test</scope>
         </dependency>
+
 <!--        <dependency>
             <groupId>org.mariadb.jdbc</groupId>
             <artifactId>mariadb-java-client</artifactId>
@@ -217,6 +226,7 @@
         <dependency>
             <groupId>com.dameng</groupId>
             <artifactId>DmJdbcDriver18</artifactId>
+            <scope>test</scope>
         </dependency>
         <!-- Copyright restrictions, do not reference this dependency.
              You can add this dependency to the '/seata/lib' directory of the seata-server when necessary.
@@ -292,6 +302,11 @@
             <artifactId>bolt</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.alipay.sofa.common</groupId>
+            <artifactId>sofa-common-tools</artifactId>
+            <version>${sofa-common-tools-for-server.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.codehaus.janino</groupId>
             <artifactId>janino</artifactId>
         </dependency>
@@ -336,7 +351,7 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                             <!--resolve slf4j-simple conflicts-->
                             <includeScope>runtime</includeScope>
-                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql</excludeGroupIds>
+                            <excludeGroupIds>org.apache.logging.log4j,log4j,mysql,com.mysql,com.dameng</excludeGroupIds>
                             <skip>${dependencies.copy.skip}</skip>
                         </configuration>
                     </execution>
@@ -349,13 +364,8 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
-                                    <version>${mysql.jdbc.version}</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>mysql</groupId>
-                                    <artifactId>mysql-connector-java</artifactId>
+                                    <groupId>com.mysql</groupId>
+                                    <artifactId>mysql-connector-j</artifactId>
                                     <version>${mysql8.jdbc.version}</version>
                                 </artifactItem>
                             </artifactItems>
@@ -514,8 +524,7 @@
         <profile>
             <id>release-seata</id>
             <properties>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
             <build>
@@ -551,8 +560,7 @@
         <profile>
             <id>release-seata-jar</id>
             <properties>
-                <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
-                <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
+                <mysql8.jdbc.version>8.4.0</mysql8.jdbc.version>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
             <build>

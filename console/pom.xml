@@ -35,15 +35,24 @@
         <!-- required for java.net.http.HttpClient in RestClientConfig -->
         <java.version>17</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-        <spring-boot-for-server.version>4.0.6</spring-boot-for-server.version>
-        <spring-framework-for-server.version>7.0.7</spring-framework-for-server.version>
+        <spring-boot-for-server.version>4.0.9</spring-boot-for-server.version>
+        <spring-framework-for-server.version>7.0.10</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>11.0.25</tomcat-embed.version>
+        <tomcat-embed.version>11.0.27</tomcat-embed.version>
         <spring-ai.version>2.0.1</spring-ai.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- Keep Netty aligned with the rest of the Seata runtime. -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>${netty.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- junit5 -->
             <dependency>
                 <groupId>org.junit</groupId>
@@ -193,13 +202,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>npm install</id>
+                        <id>npm ci</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
-                            <arguments>install</arguments>
+                            <arguments>ci</arguments>
                         </configuration>
                     </execution>
                     <execution>
