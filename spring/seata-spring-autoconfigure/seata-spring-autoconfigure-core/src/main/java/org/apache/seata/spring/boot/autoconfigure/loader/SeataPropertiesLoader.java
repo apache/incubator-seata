@@ -45,9 +45,10 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
+@Order(Ordered.LOWEST_PRECEDENCE)
+public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
 
     List<String> prefixList = Arrays.asList(
             FILE_ROOT_PREFIX_CONFIG,
@@ -58,12 +59,18 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             TRANSPORT_PREFIX);
 
     @Override
+    public int getOrder() {
+        return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
-        if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null) {
-            ObjectHolder.INSTANCE.setObject(
-                    OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContext.getEnvironment());
+        // Skip Spring Cloud bootstrap context, where application.properties/yml have not been loaded yet
+        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+            return;
         }
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();

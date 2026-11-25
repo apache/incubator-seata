@@ -136,6 +136,8 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             // create FileConfiguration for read file.conf
             ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
+        } else {
+            ORIGIN_FILE_INSTANCE = null;
         }
     }
 
@@ -160,12 +162,19 @@ public final class ConfigurationFactory {
 
     private static Configuration buildConfiguration() {
         String configTypeName = getConfigType();
-        Configuration configuration = ORIGIN_FILE_INSTANCE;
-        Configuration extConfiguration = getSpringConfiguration();
+        Configuration configuration = null;
+        Configuration extConfiguration = null;
+        if (ConfigType.File.name().equalsIgnoreCase(configTypeName)) {
+            if (ORIGIN_FILE_INSTANCE == null) {
+                maybeNeedOriginFileInstance();
+            }
+            configuration = ORIGIN_FILE_INSTANCE;
+            extConfiguration = getSpringConfiguration();
+        }
         if (null == extConfiguration) {
-            Configuration springConfiguration = getNonSpringConfiguration(configTypeName);
-            if (null != springConfiguration) {
-                configuration = springConfiguration;
+            Configuration nonSpringConfiguration = getNonSpringConfiguration(configTypeName);
+            if (null != nonSpringConfiguration) {
+                configuration = nonSpringConfiguration;
             }
         }
         try {

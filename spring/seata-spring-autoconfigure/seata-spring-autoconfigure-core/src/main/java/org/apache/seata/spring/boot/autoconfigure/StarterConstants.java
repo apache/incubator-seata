@@ -122,4 +122,10 @@ public interface StarterConstants {
 
     String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
+
+    /**
+     * Spring Cloud bootstrap property source name.
+     * Matches {@code org.springframework.cloud.bootstrap.BootstrapApplicationListener#BOOTSTRAP_PROPERTY_SOURCE_NAME}.
+     */
+    String BOOTSTRAP_PROPERTY_SOURCE_NAME = "bootstrap";
 }

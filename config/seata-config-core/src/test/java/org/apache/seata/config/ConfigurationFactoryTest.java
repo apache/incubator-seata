@@ -62,6 +62,67 @@ class ConfigurationFactoryTest {
     }
 
     @Test
+    void testReloadClearsOriginFileInstanceForNonFileConfigType() {
+        String configTypeKey = ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE;
+        String previousConfigType = System.getProperty(configTypeKey);
+        try {
+            // Ensure file mode initializes ORIGIN_FILE_INSTANCE
+            System.setProperty(configTypeKey, "file");
+            ConfigurationFactory.reload();
+            Assertions.assertTrue(ConfigurationFactory.getOriginFileInstance().isPresent());
+
+            // Switching to a non-file config type should clear ORIGIN_FILE_INSTANCE
+            System.setProperty(configTypeKey, "non-existent-config-type");
+            ConfigurationFactory.reload();
+            Assertions.assertFalse(ConfigurationFactory.getOriginFileInstance().isPresent());
+        } finally {
+            if (previousConfigType == null) {
+                System.clearProperty(configTypeKey);
+            } else {
+                System.setProperty(configTypeKey, previousConfigType);
+            }
+            ConfigurationFactory.reload();
+        }
+    }
+
+    @Test
+    void testNonFileConfigTypeDoesNotUseStaleOriginFileInstance() throws Exception {
+        String configTypeKey = ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE;
+        String previousConfigType = System.getProperty(configTypeKey);
+        try {
+            // Initialize ORIGIN_FILE_INSTANCE in file mode
+            System.setProperty(configTypeKey, "file");
+            ConfigurationFactory.reload();
+            Assertions.assertTrue(ConfigurationFactory.getOriginFileInstance().isPresent());
+            Assertions.assertEquals(
+                    "defaultVal", ConfigurationFactory.getInstance().getConfig("non.existent.key", "defaultVal"));
+
+            // Simulate config.type changing to a non-file type before getInstance() is called,
+            // while ORIGIN_FILE_INSTANCE is still populated from an earlier static init
+            System.setProperty(configTypeKey, "non-existent-config-type");
+            ConfigurationCache.clear();
+            java.lang.reflect.Field instanceField = ConfigurationFactory.class.getDeclaredField("instance");
+            instanceField.setAccessible(true);
+            instanceField.set(null, null);
+
+            // Should not fall back to stale ORIGIN_FILE_INSTANCE when config.type is not "file"
+            Configuration config = ConfigurationFactory.getInstance();
+            Assertions.assertThrows(NullPointerException.class, () -> config.getConfig("another.non.existent.key"));
+        } finally {
+            if (previousConfigType == null) {
+                System.clearProperty(configTypeKey);
+            } else {
+                System.setProperty(configTypeKey, previousConfigType);
+            }
+            ConfigurationFactory.reload();
+        }
+    }
+
+    @Test
     void testOldConfigurationInvocationHandlerGetConfig() throws Throwable {
         io.seata.config.Configuration oldConfig = new io.seata.config.Configuration() {
             @Override

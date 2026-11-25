@@ -227,6 +227,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
     private Object getConfigFromEnvironment(String dataId, Class<?> dataType) {
         ConfigurableEnvironment environment =
                 (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        if (environment == null) {
+            return null;
+        }
         Object value = environment.getProperty(dataId, dataType);
         if (value == null) {
             value = environment.getProperty(org.apache.seata.common.util.StringUtils.hump2Line(dataId), dataType);
