@@ -21,6 +21,7 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.lock.Locker;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -38,6 +40,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.io.IOException;
 
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@MockitoBean(types = ServerRunner.class)
 public class RedisLockManagerTest extends BaseSpringBootTest {
     static LockManager lockManager = null;
 
@@ -92,7 +95,7 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
         Assertions.assertTrue(lockManager.acquireLock(branchLockSession));
 
         BranchSession branchSession = getBranchSession();
-        branchSession.setXid("abc-123:786754");
+        branchSession.setXid(getClass().getSimpleName() + ":786754");
 
         Assertions.assertFalse(lockManager.acquireLock(branchSession));
         Assertions.assertTrue(lockManager.releaseLock(branchLockSession));
@@ -107,17 +110,17 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
     @Test
     public void isLockable() throws TransactionException {
         BranchSession branchSession = new BranchSession();
-        branchSession.setXid("abc-123:56877898");
+        branchSession.setXid(getClass().getSimpleName() + ":56877898");
         branchSession.setTransactionId(245686786);
         branchSession.setBranchId(467568);
-        branchSession.setResourceId("abcss");
+        branchSession.setResourceId(getClass().getSimpleName());
         branchSession.setLockKey("t1:8,7;t2:1,2");
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
         BranchSession branchSession2 = new BranchSession();
-        branchSession2.setXid("abc-123:56877898");
+        branchSession2.setXid(getClass().getSimpleName() + ":56877898");
         branchSession2.setTransactionId(245686786);
         branchSession2.setBranchId(1242354576);
-        branchSession2.setResourceId("abcss");
+        branchSession2.setResourceId(getClass().getSimpleName());
         branchSession2.setLockKey("t1:8");
         Assertions.assertTrue(lockManager.isLockable(
                 branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
@@ -144,10 +147,10 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
 
     private BranchSession getBranchSession() {
         BranchSession branchSession = new BranchSession();
-        branchSession.setXid("abc-123:786756");
+        branchSession.setXid(getClass().getSimpleName() + ":786756");
         branchSession.setTransactionId(123543465);
         branchSession.setBranchId(5756678);
-        branchSession.setResourceId("abcss");
+        branchSession.setResourceId(getClass().getSimpleName());
         branchSession.setLockKey("t1:13,14;t2:11,12");
         return branchSession;
     }
