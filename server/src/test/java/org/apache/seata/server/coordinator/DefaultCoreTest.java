@@ -35,10 +35,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
 import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mockStatic;
 
 /**
  * The type Default core test.
@@ -396,15 +399,13 @@ public class DefaultCoreTest extends BaseSpringBootTest {
 
     @Test
     public void commitTimeoutTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, 1);
-        Thread.sleep(100);
-
-        GlobalStatus status = core.commit(xid);
-        Assertions.assertEquals(GlobalStatus.TimeoutRollbacking, status);
-
-        globalSession = SessionHolder.findGlobalSession(xid);
-        if (globalSession != null) {
-            globalSession.end();
+        GlobalSession expired = GlobalSession.createGlobalSession(applicationId, txServiceGroup, txName, timeout);
+        expired.setBeginTime(System.currentTimeMillis() - timeout - 1L);
+        String xid = expired.getXid();
+        // Give commit an expired session without letting the background rollback remove it first.
+        try (MockedStatic<SessionHolder> sessions = mockStatic(SessionHolder.class)) {
+            sessions.when(() -> SessionHolder.findGlobalSession(xid)).thenReturn(expired);
+            Assertions.assertEquals(GlobalStatus.TimeoutRollbacking, core.commit(xid));
         }
     }
 
