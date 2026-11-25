@@ -361,14 +361,16 @@ public class SessionHelper {
                             .add(session);
                 }
                 List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
-                map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return SessionHelper.forEach(v, handler, false);
-                    } catch (TransactionException e) {
-                        throw new RuntimeException(e);
-                    }
-                })));
                 try {
+                    for (List<BranchSession> resourceBranches : map.values()) {
+                        completableFutures.add(CompletableFuture.supplyAsync(() -> {
+                            try {
+                                return singleForEach(resourceBranches, handler);
+                            } catch (TransactionException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }));
+                    }
                     for (CompletableFuture<Boolean> completableFuture : completableFutures) {
                         result = completableFuture.get();
                         if (result == null) {
@@ -377,6 +379,7 @@ public class SessionHelper {
                         return result;
                     }
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new TransactionException(e);
                 } catch (ExecutionException e) {
                     Throwable throwable = e.getCause();
@@ -387,6 +390,11 @@ public class SessionHelper {
                         }
                     }
                     throw new TransactionException(e);
+                } finally {
+                    // The caller may release its lock on return. Drain even after an early result or interruption.
+                    CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture<?>[0]))
+                            .handle((ignored, failure) -> null)
+                            .join();
                 }
             } else {
                 for (BranchSession branchSession : sessions) {

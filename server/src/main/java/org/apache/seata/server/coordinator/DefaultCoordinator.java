@@ -75,6 +75,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -105,8 +106,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERI
 public class DefaultCoordinator extends AbstractTCInboundHandler implements TransactionMessageHandler, Disposable {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
-
-    private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
 
@@ -625,7 +624,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void rollbackingSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called =
                             SessionHolder.distributedLockAndExecute(ROLLBACKING, this::handleRollbackingByScheduled);
@@ -633,8 +632,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
     }
 
     /**
@@ -685,7 +683,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void committingSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called =
                             SessionHolder.distributedLockAndExecute(COMMITTING, this::handleCommittingByScheduled);
@@ -693,8 +691,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         committingSchedule(COMMITTING_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
     }
 
     /**
@@ -743,15 +740,25 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void endSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called = SessionHolder.distributedLockAndExecute(END, this::handleEndStatesByScheduled);
                     if (!called) {
                         endSchedule(END_STATUS_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
+    }
+
+    private void scheduleRecovery(Runnable task, long delay) {
+        try {
+            syncProcessing.schedule(task, delay, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            // An in-flight recovery scan may schedule its next run while the coordinator shuts down.
+            if (!syncProcessing.isShutdown()) {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -816,41 +823,24 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     public void destroy() {
-        // 1. first shutdown timed task
-        // The sync scheduler queues one-shot retries that can outlive the shutdown timeout.
+        // Cancel queued one-shot retries while allowing a scan already in progress to finish.
         syncProcessing.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         List<ScheduledThreadPoolExecutor> schedulers = Arrays.asList(
                 syncProcessing, retryRollbacking, retryCommitting, asyncCommitting, timeoutCheck, undoLogDelete);
         schedulers.forEach(ScheduledThreadPoolExecutor::shutdown);
-        if (branchRemoveExecutor != null) {
-            branchRemoveExecutor.shutdown();
-        }
-        boolean interrupted = false;
+        boolean interrupted = Thread.interrupted();
         try {
             for (ScheduledThreadPoolExecutor scheduler : schedulers) {
-                if (!scheduler.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
-                    scheduler.shutdownNow();
-                    if (!scheduler.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
-                        LOGGER.warn("Coordinator scheduler still running during shutdown: {}", scheduler);
-                    }
-                }
+                interrupted |= awaitTermination(scheduler);
             }
-            if (branchRemoveExecutor != null
-                    && !branchRemoveExecutor.awaitTermination(
-                            TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS)) {
-                LOGGER.warn("Coordinator branch removal still running during shutdown");
+            // In-flight retries can enqueue branch removals until their last branch completes.
+            if (branchRemoveExecutor != null) {
+                branchRemoveExecutor.shutdown();
+                interrupted |= awaitTermination(branchRemoveExecutor);
             }
-        } catch (InterruptedException e) {
-            interrupted = true;
-            schedulers.forEach(ScheduledThreadPoolExecutor::shutdownNow);
-            LOGGER.warn("Interrupted while waiting for coordinator tasks to terminate", e);
-        }
-        try {
-            // 2. second close netty flow
             if (remotingServer instanceof NettyRemotingServer) {
                 ((NettyRemotingServer) remotingServer).destroy();
             }
-            // 3. third destroy SessionHolder
             SessionHolder.destroy();
             instance = null;
         } finally {
@@ -858,6 +848,19 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private static boolean awaitTermination(ThreadPoolExecutor executor) {
+        boolean interrupted = false;
+        while (!executor.isTerminated()) {
+            try {
+                executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                // The caller restores the interrupt after closing resources that the workers still need.
+                interrupted = true;
+            }
+        }
+        return interrupted;
     }
 
     /**

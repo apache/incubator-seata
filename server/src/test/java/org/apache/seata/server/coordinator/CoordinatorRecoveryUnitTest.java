@@ -93,6 +93,32 @@ class CoordinatorRecoveryUnitTest extends BaseSpringBootTest {
     }
 
     @Test
+    void recoveryScanFinishesWhenShutdownRacesWithResubmission() {
+        ScheduledThreadPoolExecutor stoppingScheduler = new ScheduledThreadPoolExecutor(1) {
+            @Override
+            public ScheduledFuture<?> schedule(Runnable task, long delay, TimeUnit unit) {
+                // Start shutdown exactly as the running scan submits the next scan.
+                shutdown();
+                return super.schedule(task, delay, unit);
+            }
+        };
+        ReflectionTestUtils.setField(coordinator, "syncProcessing", stoppingScheduler);
+        when(manager.findGlobalSessions(any())).thenReturn(Collections.emptyList());
+
+        assertDoesNotThrow(coordinator::handleCommittingByScheduled);
+        verify(manager).findGlobalSessions(any());
+        assertTrue(stoppingScheduler.isTerminated());
+    }
+
+    @Test
+    void recoveryScanPropagatesRejectionWhileSchedulerIsRunning() {
+        RejectedExecutionException rejection = new RejectedExecutionException("rejected while running");
+        doThrow(rejection).when(scheduler).schedule(any(Runnable.class), anyLong(), eq(TimeUnit.MILLISECONDS));
+
+        assertSame(rejection, assertThrows(RejectedExecutionException.class, coordinator::handleCommittingByScheduled));
+    }
+
+    @Test
     void retryAndAsyncRecoveryAttemptCoreAndContainTransactionFailures() throws Exception {
         GlobalSession s = session(GlobalStatus.CommitRetrying);
         coordinator.handleRetryCommitting();
