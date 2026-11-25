@@ -26,7 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 
-@TestPropertySource(properties = {"server.port=${random.int[10000,60000]}"})
+@TestPropertySource(properties = {"server.port=0"})
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class BaseSpringBootTest {
@@ -45,7 +45,7 @@ public abstract class BaseSpringBootTest {
     }
 
     @AfterEach
-    public void AfterEach() {
+    public void afterEach() {
         ConfigurationFactory.reload();
         System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }

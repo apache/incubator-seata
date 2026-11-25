@@ -466,10 +466,17 @@
                 <configuration>
                     <forkCount>2</forkCount>
                     <reuseForks>true</reuseForks>
+                    <systemPropertyVariables>
+                        <seata.test.forkNumber>${surefire.forkNumber}</seata.test.forkNumber>
+                    </systemPropertyVariables>
                     <excludes>
                         <exclude>**/cluster/raft/execute/*Test.java</exclude>
                         <exclude>**/cluster/raft/RaftServerTest.java</exclude>
                         <exclude>**/cluster/manager/ClusterWatcherManagerTest.java</exclude>
+                        <exclude>**/lock/redis/**/*Test.java</exclude>
+                        <exclude>**/session/redis/**/*Test.java</exclude>
+                        <exclude>**/storage/redis/**/*Test.java</exclude>
+                        <exclude>**/console/impl/redis/**/*Test.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -499,6 +506,23 @@
                             <excludes combine.self="override"/>
                             <includes>
                                 <include>**/cluster/manager/ClusterWatcherManagerTest.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>redis-tests</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <forkCount>1</forkCount>
+                            <reuseForks>true</reuseForks>
+                            <excludes combine.self="override"/>
+                            <includes>
+                                <include>**/lock/redis/**/*Test.java</include>
+                                <include>**/session/redis/**/*Test.java</include>
+                                <include>**/storage/redis/**/*Test.java</include>
+                                <include>**/console/impl/redis/**/*Test.java</include>
                             </includes>
                         </configuration>
                     </execution>

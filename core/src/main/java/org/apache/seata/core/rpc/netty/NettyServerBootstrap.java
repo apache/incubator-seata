@@ -19,6 +19,7 @@ package org.apache.seata.core.rpc.netty;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -29,6 +30,8 @@ import io.netty.channel.epoll.EpollIoHandler;
 import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.Future;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
@@ -49,6 +52,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.seata.common.DefaultValues.SERVICE_DEFAULT_PORT;
 
@@ -67,6 +71,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     private ChannelHandler[] channelHandlers;
     private int listenPort;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+    private final AtomicReference<Channel> serverChannel = new AtomicReference<>();
 
     public NettyServerBootstrap(NettyServerConfig nettyServerConfig) {
         this.nettyServerConfig = nettyServerConfig;
@@ -204,7 +209,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 });
 
         try {
-            this.serverBootstrap.bind(port).sync();
+            ChannelFuture channelFuture = this.serverBootstrap.bind(port).sync();
+            this.serverChannel.set(channelFuture.channel());
             LOGGER.info("Server started, service listen port: {}", getListenPort());
             Instance instance = Instance.getInstance();
             // Lines 177-180 are just for compatibility with test cases
@@ -216,8 +222,10 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             }
             initialized.set(true);
         } catch (SocketException se) {
+            closeServerChannel();
             throw new RuntimeException("Server start failed, the listen port: " + getListenPort(), se);
         } catch (Exception exx) {
+            closeServerChannel();
             throw new RuntimeException("Server start failed", exx);
         }
     }
@@ -228,7 +236,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Shutting server down, the listen port: {}", getListenPort());
             }
-            if (initialized.get()) {
+            if (initialized.compareAndSet(true, false)) {
                 for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
                     registryService.unregister(Instance.getInstance());
                     registryService.close();
@@ -236,11 +244,53 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 // wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }
-
-            this.eventLoopGroupBoss.shutdownGracefully();
-            this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
             LOGGER.error("shutdown execute error: {}", exx.getMessage(), exx);
+        } finally {
+            closeServerChannel();
+            shutdownBossEventLoopGroup();
+            if (this.eventLoopGroupWorker != null) {
+                this.eventLoopGroupWorker.shutdownGracefully();
+            }
+        }
+    }
+
+    private void closeServerChannel() {
+        if (this.serverChannel == null) {
+            return;
+        }
+        Channel channel = this.serverChannel.getAndSet(null);
+        if (channel != null) {
+            try {
+                boolean closed = channel.close().awaitUninterruptibly(5, TimeUnit.SECONDS);
+                if (!closed) {
+                    LOGGER.warn("Timed out waiting for server channel to close, listen port: {}", getListenPort());
+                }
+            } catch (Exception exx) {
+                LOGGER.error("close server channel error: {}", exx.getMessage(), exx);
+            }
+        }
+    }
+
+    private void shutdownBossEventLoopGroup() {
+        if (this.eventLoopGroupBoss == null) {
+            return;
+        }
+        try {
+            boolean inBossEventLoop = false;
+            for (EventExecutor executor : this.eventLoopGroupBoss) {
+                if (executor.inEventLoop()) {
+                    inBossEventLoop = true;
+                    break;
+                }
+            }
+            Future<?> future = this.eventLoopGroupBoss.shutdownGracefully(0, 5, TimeUnit.SECONDS);
+            if (!inBossEventLoop && !future.awaitUninterruptibly(5, TimeUnit.SECONDS)) {
+                LOGGER.warn(
+                        "Timed out waiting for boss event loop group to shut down, listen port: {}", getListenPort());
+            }
+        } catch (Exception exx) {
+            LOGGER.error("shutdown boss event loop group error: {}", exx.getMessage(), exx);
         }
     }
 }

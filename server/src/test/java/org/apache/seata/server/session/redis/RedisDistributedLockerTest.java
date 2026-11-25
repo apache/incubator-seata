@@ -80,7 +80,7 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     }
 
     @Test
-    public void test_acquireScheduledLock_success_() {
+    public void test_acquireScheduledLock_sessionHolder_success() {
         String lockKey = retryRollbacking2;
         SessionHolder.init(SessionMode.REDIS);
 
@@ -96,14 +96,14 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     @Test
     public void test_acquireLock_concurrent() {
         // acquire the lock success
-        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000l));
+        boolean accquire = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue, 60000L));
         Assertions.assertTrue(accquire);
         String lockValueExisted = jedis.get(retryRollbacking);
         Assertions.assertEquals(lockValue, lockValueExisted);
 
         // concurrent acquire
         for (int i = 0; i < 10; i++) {
-            boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000l));
+            boolean b = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + i, 60000L));
             Assertions.assertFalse(b);
         }
 
@@ -127,7 +127,7 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
         }
 
         // other2 acquire the lock
-        boolean e = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000l));
+        boolean e = distributedLocker.acquireLock(new DistributedLockDO(retryRollbacking, lockValue + 2, 60000L));
         Assertions.assertTrue(e);
 
         // clear
@@ -138,7 +138,11 @@ public class RedisDistributedLockerTest extends BaseSpringBootTest {
     public void test_acquireLock_false() {
         String set = jedis.set(retryCommiting, lockValue);
         Assertions.assertEquals("OK", set);
-        boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000l));
-        Assertions.assertFalse(acquire);
+        try {
+            boolean acquire = distributedLocker.acquireLock(new DistributedLockDO(retryCommiting, lockValue, 60000L));
+            Assertions.assertFalse(acquire);
+        } finally {
+            jedis.del(retryCommiting);
+        }
     }
 }

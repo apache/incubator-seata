@@ -32,8 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.context.ApplicationContext;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.IOException;
 
@@ -52,19 +50,19 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
      */
     @BeforeAll
     public static void start(ApplicationContext context) throws IOException {
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMinIdle(1);
-        poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000))
-                .getResource();
-        lockManager = new RedisLockManagerForTest();
+        try (Jedis ignored = JedisPooledFactory.getJedisInstance()) {
+            lockManager = new RedisLockManagerForTest();
+        }
     }
 
     @Test
     public void acquireLock() throws TransactionException {
         BranchSession branchSession = getBranchSession();
-        Assertions.assertTrue(lockManager.acquireLock(branchSession));
-        Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        try {
+            Assertions.assertTrue(lockManager.acquireLock(branchSession));
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        }
     }
 
     /**
@@ -74,13 +72,16 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
     public void acquireLockByLuaFastFailure() throws TransactionException {
         BranchSession branchLockSession = getBranchSession();
         Assertions.assertTrue(lockManager.acquireLock(branchLockSession));
-        lockManager.updateLockStatus(branchLockSession.getXid(), LockStatus.Rollbacking);
+        try {
+            lockManager.updateLockStatus(branchLockSession.getXid(), LockStatus.Rollbacking);
 
-        BranchSession branchSession = getBranchSession();
-        Assertions.assertThrows(StoreException.class, () -> {
-            lockManager.acquireLock(branchSession, false, false);
-        });
-        Assertions.assertTrue(lockManager.releaseLock(branchLockSession));
+            BranchSession branchSession = getBranchSession();
+            Assertions.assertThrows(StoreException.class, () -> {
+                lockManager.acquireLock(branchSession, false, false);
+            });
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchLockSession));
+        }
     }
 
     /**
@@ -90,12 +91,14 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
     public void acquireLockByLuaHolding() throws TransactionException {
         BranchSession branchLockSession = getBranchSession();
         Assertions.assertTrue(lockManager.acquireLock(branchLockSession));
+        try {
+            BranchSession branchSession = getBranchSession();
+            branchSession.setXid("abc-123:786754");
 
-        BranchSession branchSession = getBranchSession();
-        branchSession.setXid("abc-123:786754");
-
-        Assertions.assertFalse(lockManager.acquireLock(branchSession));
-        Assertions.assertTrue(lockManager.releaseLock(branchLockSession));
+            Assertions.assertFalse(lockManager.acquireLock(branchSession));
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchLockSession));
+        }
     }
 
     @Test
@@ -113,23 +116,29 @@ public class RedisLockManagerTest extends BaseSpringBootTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:8,7;t2:1,2");
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
-        BranchSession branchSession2 = new BranchSession();
-        branchSession2.setXid("abc-123:56877898");
-        branchSession2.setTransactionId(245686786);
-        branchSession2.setBranchId(1242354576);
-        branchSession2.setResourceId("abcss");
-        branchSession2.setLockKey("t1:8");
-        Assertions.assertTrue(lockManager.isLockable(
-                branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
-        Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        try {
+            BranchSession branchSession2 = new BranchSession();
+            branchSession2.setXid("abc-123:56877898");
+            branchSession2.setTransactionId(245686786);
+            branchSession2.setBranchId(1242354576);
+            branchSession2.setResourceId("abcss");
+            branchSession2.setLockKey("t1:8");
+            Assertions.assertTrue(lockManager.isLockable(
+                    branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        }
     }
 
     @Test
     public void updateLockStatus() throws TransactionException {
         BranchSession branchSession = getBranchSession();
         Assertions.assertTrue(lockManager.acquireLock(branchSession));
-        lockManager.updateLockStatus(branchSession.getXid(), LockStatus.Rollbacking);
-        Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        try {
+            lockManager.updateLockStatus(branchSession.getXid(), LockStatus.Rollbacking);
+        } finally {
+            Assertions.assertTrue(lockManager.releaseLock(branchSession));
+        }
     }
 
     public static class RedisLockManagerForTest extends RedisLockManager {

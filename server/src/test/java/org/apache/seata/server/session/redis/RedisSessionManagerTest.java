@@ -88,7 +88,11 @@ public class RedisSessionManagerTest extends BaseSpringBootTest {
         session.setApplicationData("abc=878s");
         session.setStatus(GlobalStatus.Begin);
         sessionManager.addGlobalSession(session);
-        sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
+        try {
+            sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
+        } finally {
+            sessionManager.removeGlobalSession(session);
+        }
     }
 
     @Test
