@@ -470,6 +470,7 @@
                         <exclude>**/cluster/raft/execute/*Test.java</exclude>
                         <exclude>**/cluster/raft/RaftServerTest.java</exclude>
                         <exclude>**/cluster/manager/ClusterWatcherManagerTest.java</exclude>
+                        <exclude>**/storage/file/store/FileStoreFailureUnitTest.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -489,7 +490,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>cluster-watcher-tests</id>
+                        <id>isolated-tests</id>
                         <goals>
                             <goal>test</goal>
                         </goals>
@@ -499,6 +500,7 @@
                             <excludes combine.self="override"/>
                             <includes>
                                 <include>**/cluster/manager/ClusterWatcherManagerTest.java</include>
+                                <include>**/storage/file/store/FileStoreFailureUnitTest.java</include>
                             </includes>
                         </configuration>
                     </execution>

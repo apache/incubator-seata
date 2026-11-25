@@ -30,7 +30,9 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -110,33 +112,50 @@ class FileStoreFailureUnitTest extends BaseSpringBootTest {
         FileChannel closeChannel = mock(FileChannel.class);
         RandomAccessFile file = mock(RandomAccessFile.class);
         FileTransactionStoreManager.WriteDataFileRunnable worker = store.new WriteDataFileRunnable();
-        // Keep the synchronization check independent of counts shared by other file stores.
-        FileTransactionStoreManager.SyncFlushRequest sync =
-                spy(store.new SyncFlushRequest(Long.MAX_VALUE, syncChannel));
-        FileTransactionStoreManager.AsyncFlushRequest async =
-                spy(store.new AsyncFlushRequest(0, mock(FileChannel.class)));
-        FileTransactionStoreManager.CloseFileRequest close =
-                spy(new FileTransactionStoreManager.CloseFileRequest(closeChannel, file));
-
+        // This class runs in its own fork because all file stores share these counters.
+        AtomicLong writes =
+                (AtomicLong) ReflectionTestUtils.getField(FileTransactionStoreManager.class, "FILE_TRX_NUM");
+        AtomicLong flushes =
+                (AtomicLong) ReflectionTestUtils.getField(FileTransactionStoreManager.class, "FILE_FLUSH_NUM");
+        long syncTrx = writes.incrementAndGet();
+        assertTrue(flushes.get() < syncTrx);
+        FileTransactionStoreManager.SyncFlushRequest sync = store.new SyncFlushRequest(syncTrx, syncChannel);
         worker.putRequest(sync);
-        worker.putRequest(async);
-        worker.putRequest(close);
         worker.run();
 
         verify(syncChannel).force(false);
-        verify(sync).wakeup();
-        verify(async).getCurFileChannel();
+        assertEquals(syncTrx, flushes.get());
+
+        long closeTrx = writes.incrementAndGet();
+        FileChannel asyncChannel = mock(FileChannel.class);
+        FileTransactionStoreManager.AsyncFlushRequest async = spy(store.new AsyncFlushRequest(closeTrx, asyncChannel));
+        FileTransactionStoreManager.CloseFileRequest close =
+                new FileTransactionStoreManager.CloseFileRequest(closeChannel, file);
+
+        worker.putRequest(close);
+        worker.putRequest(async);
+        worker.run();
+
         verify(closeChannel).force(false);
         verify(file).close();
-        verify(close).wakeup();
+        assertEquals(closeTrx, flushes.get());
+        verify(async).getCurFileChannel();
+        verify(asyncChannel, never()).force(false);
 
         FileChannel failingChannel = mock(FileChannel.class);
         doThrow(new IOException("force failed")).when(failingChannel).force(false);
         FileTransactionStoreManager.SyncFlushRequest failed =
-                spy(store.new SyncFlushRequest(Long.MAX_VALUE, failingChannel));
+                store.new SyncFlushRequest(writes.incrementAndGet(), failingChannel);
         worker.putRequest(failed);
         assertDoesNotThrow(worker::run);
         verify(failingChannel).force(false);
-        verify(failed).wakeup();
+
+        // The wait methods also return on timeout, so their deadline must outlast the assertion.
+        long waitMillis = Duration.ofMinutes(1).toMillis();
+        assertTimeoutPreemptively(Duration.ofSeconds(5), () -> {
+            sync.waitForFlush(waitMillis);
+            close.waitForClose(waitMillis);
+            failed.waitForFlush(waitMillis);
+        });
     }
 }
