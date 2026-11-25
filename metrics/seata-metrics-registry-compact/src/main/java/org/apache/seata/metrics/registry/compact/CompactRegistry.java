@@ -39,12 +39,12 @@ import java.util.function.Supplier;
  */
 @LoadLevel(name = "compact", order = 1)
 public class CompactRegistry implements Registry {
-    private static final Map<String, Meter> METERS = new ConcurrentHashMap<>();
+    private final Map<String, Meter> meters = new ConcurrentHashMap<>();
 
     @Override
     public <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier) {
         return (Gauge<T>) CollectionUtils.computeIfAbsent(
-                METERS,
+                meters,
                 id.getMeterKey(),
                 key -> new CompactGauge<>(new Id(id.getName()).withTag(id.getTags()), supplier));
     }
@@ -52,33 +52,33 @@ public class CompactRegistry implements Registry {
     @Override
     public Counter getCounter(Id id) {
         return (Counter) CollectionUtils.computeIfAbsent(
-                METERS, id.getMeterKey(), key -> new CompactCounter(new Id(id.getName()).withTag(id.getTags())));
+                meters, id.getMeterKey(), key -> new CompactCounter(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Summary getSummary(Id id) {
         return (Summary) CollectionUtils.computeIfAbsent(
-                METERS, id.getMeterKey(), key -> new CompactSummary(new Id(id.getName()).withTag(id.getTags())));
+                meters, id.getMeterKey(), key -> new CompactSummary(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Timer getTimer(Id id) {
         return (Timer) CollectionUtils.computeIfAbsent(
-                METERS, id.getMeterKey(), key -> new CompactTimer(new Id(id.getName()).withTag(id.getTags())));
+                meters, id.getMeterKey(), key -> new CompactTimer(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Iterable<Measurement> measure() {
         final List<Measurement> measurements = new ArrayList<>();
-        if (METERS.isEmpty()) {
+        if (meters.isEmpty()) {
             return measurements;
         }
-        METERS.values().iterator().forEachRemaining(meter -> meter.measure().forEach(measurements::add));
+        meters.values().iterator().forEachRemaining(meter -> meter.measure().forEach(measurements::add));
         return measurements;
     }
 
     @Override
     public void clearUp() {
-        METERS.clear();
+        meters.clear();
     }
 }

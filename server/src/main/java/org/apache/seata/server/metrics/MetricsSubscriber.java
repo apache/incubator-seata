@@ -48,7 +48,7 @@ public class MetricsSubscriber {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsSubscriber.class);
     private final Registry registry;
-    private boolean active = true;
+    private volatile boolean active = true;
 
     private final Map<String, Consumer<GlobalTransactionEvent>> consumers;
 
@@ -214,20 +214,20 @@ public class MetricsSubscriber {
         increaseTimer(MeterIdConstants.TIMER_FAILED, event);
     }
 
-    // Wait for an in-flight callback and prevent queued callbacks from writing after shutdown.
-    synchronized void deactivate() {
+    // Unregistering from the async event bus leaves callbacks already in its queue.
+    void deactivate() {
         active = false;
     }
 
     @Subscribe
-    public synchronized void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
+    public void recordGlobalTransactionEventForMetrics(GlobalTransactionEvent event) {
         if (active && registry != null && consumers.containsKey(event.getStatus())) {
             consumers.get(event.getStatus()).accept(event);
         }
     }
 
     @Subscribe
-    public synchronized void exceptionEventForMetrics(ExceptionEvent event) {
+    public void exceptionEventForMetrics(ExceptionEvent event) {
         if (!active) {
             return;
         }
@@ -236,7 +236,7 @@ public class MetricsSubscriber {
     }
 
     @Subscribe
-    public synchronized void recordRateLimitEventForMetrics(RateLimitEvent event) {
+    public void recordRateLimitEventForMetrics(RateLimitEvent event) {
         if (!active) {
             return;
         }

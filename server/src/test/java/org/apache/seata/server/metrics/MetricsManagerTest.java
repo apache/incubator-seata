@@ -46,20 +46,27 @@ import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_EXPORTER_LIST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
 import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_ENABLED;
 import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_LIST;
 import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
 import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_PREFIX;
+import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_REGISTRY_TYPE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
@@ -99,6 +106,7 @@ class MetricsManagerTest {
                 (List<Disposable>) ReflectionTestUtils.getField(ServerRunner.class, "DISPOSABLE_LIST");
         List<Disposable> previousDisposables = new ArrayList<>(disposables);
         Object previousExporterLoader = spiLoaders.remove(Exporter.class);
+        Object previousRegistryLoader = spiLoaders.remove(Registry.class);
         disposables.clear();
         MetricsManager manager = new MetricsManager();
         ServerRunner runner = new ServerRunner();
@@ -114,12 +122,10 @@ class MetricsManagerTest {
 
         try (MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
                 MockedStatic<RegistryFactory> registries = mockStatic(RegistryFactory.class);
-                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class);
-                MockedStatic<MetricsManager> managers = mockStatic(MetricsManager.class)) {
+                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class)) {
             configurations.when(ConfigurationFactory::getInstance).thenReturn(config);
             registries.when(RegistryFactory::getInstance).thenReturn(registry);
             eventBuses.when(EventBusManager::get).thenReturn(eventBus);
-            managers.when(MetricsManager::get).thenReturn(manager);
 
             int port;
             try (ServerSocket occupied = new ServerSocket(0)) {
@@ -130,17 +136,21 @@ class MetricsManagerTest {
                 verifyNoInteractions(eventBus);
             }
 
-            MetricsSubscriber retired = startAndStopMetrics(manager, runner, eventBus, registry, port);
+            MetricsSubscriber retired = startAndStopMetrics(manager, runner, eventBus, registry, port, null);
             doThrow(new IllegalStateException("injected unregister failure"))
                     .when(eventBus)
                     .unregister(any(MetricsSubscriber.class));
-            MetricsSubscriber next = startAndStopMetrics(manager, runner, eventBus, registry, port);
+            MetricsSubscriber next = startAndStopMetrics(
+                    manager,
+                    runner,
+                    eventBus,
+                    registry,
+                    port,
+                    new IllegalStateException("coordinator shutdown failed"));
             assertNotSame(retired, next);
         } finally {
-            spiLoaders.remove(Exporter.class);
-            if (previousExporterLoader != null) {
-                spiLoaders.put(Exporter.class, previousExporterLoader);
-            }
+            spiLoaders.compute(Registry.class, (type, loader) -> previousRegistryLoader);
+            spiLoaders.compute(Exporter.class, (type, loader) -> previousExporterLoader);
             disposables.clear();
             disposables.addAll(previousDisposables);
         }
@@ -224,8 +234,71 @@ class MetricsManagerTest {
         }
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void inFlightCallbackCannotWriteToRestartedRegistry() throws Exception {
+        MetricsManager manager = new MetricsManager();
+        Configuration config = mock(Configuration.class);
+        Exporter exporter = mock(Exporter.class);
+        EventBus eventBus = mock(EventBus.class);
+        when(config.getBoolean(METRICS_PREFIX + METRICS_ENABLED, DEFAULT_METRICS_ENABLED))
+                .thenReturn(true);
+        when(config.getConfig(METRICS_PREFIX + METRICS_REGISTRY_TYPE, DEFAULT_METRICS_REGISTRY_TYPE))
+                .thenReturn("compact");
+
+        CountDownLatch entered = new CountDownLatch(1);
+        CountDownLatch restarted = new CountDownLatch(1);
+        ExceptionEvent event = mock(ExceptionEvent.class);
+        when(event.getName()).thenAnswer(call -> {
+            entered.countDown();
+            assertTrue(restarted.await(10, TimeUnit.SECONDS), "Shutdown waited for the callback");
+            return "in-flight";
+        });
+
+        Map<Class<?>, Object> spiLoaders =
+                (Map<Class<?>, Object>) ReflectionTestUtils.getField(EnhancedServiceLoader.class, "SERVICE_LOADERS");
+        Object previousRegistryLoader = spiLoaders.remove(Registry.class);
+        Object previousExporterLoader = spiLoaders.remove(Exporter.class);
+        try (MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
+                MockedStatic<ExporterFactory> factories = mockStatic(ExporterFactory.class);
+                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class)) {
+            configurations.when(ConfigurationFactory::getInstance).thenReturn(config);
+            factories.when(ExporterFactory::getInstanceList).thenReturn(List.of(exporter));
+            eventBuses.when(EventBusManager::get).thenReturn(eventBus);
+            try {
+                manager.init();
+                Registry retiredRegistry = manager.getRegistry();
+                ArgumentCaptor<MetricsSubscriber> subscriber = ArgumentCaptor.forClass(MetricsSubscriber.class);
+                verify(eventBus).register(subscriber.capture());
+                MetricsSubscriber retired = subscriber.getValue();
+                CompletableFuture<Void> callback =
+                        CompletableFuture.runAsync(() -> retired.exceptionEventForMetrics(event));
+                assertTrue(entered.await(10, TimeUnit.SECONDS), "Callback did not start");
+
+                manager.destroy();
+                manager.init();
+                restarted.countDown();
+                callback.get(10, TimeUnit.SECONDS);
+
+                assertTrue(retiredRegistry.measure().iterator().hasNext());
+                assertFalse(manager.getRegistry().measure().iterator().hasNext());
+            } finally {
+                restarted.countDown();
+                manager.destroy();
+            }
+        } finally {
+            spiLoaders.compute(Registry.class, (type, loader) -> previousRegistryLoader);
+            spiLoaders.compute(Exporter.class, (type, loader) -> previousExporterLoader);
+        }
+    }
+
     private static MetricsSubscriber startAndStopMetrics(
-            MetricsManager manager, ServerRunner runner, EventBus eventBus, Registry registry, int port)
+            MetricsManager manager,
+            ServerRunner runner,
+            EventBus eventBus,
+            Registry registry,
+            int port,
+            IllegalStateException coordinatorFailure)
             throws Exception {
         try {
             manager.init();
@@ -234,7 +307,16 @@ class MetricsManagerTest {
             ArgumentCaptor<MetricsSubscriber> subscriber = ArgumentCaptor.forClass(MetricsSubscriber.class);
             verify(eventBus).register(subscriber.capture());
             MetricsSubscriber retired = subscriber.getValue();
-            runner.destroy();
+            ServerRunner.addDisposable(manager);
+            if (coordinatorFailure == null) {
+                runner.destroy();
+            } else {
+                ServerRunner.addDisposable(() -> {
+                    assertSame(registry, manager.getRegistry());
+                    throw coordinatorFailure;
+                });
+                assertSame(coordinatorFailure, assertThrows(IllegalStateException.class, runner::destroy));
+            }
             try (ServerSocket released = new ServerSocket(port)) {
                 assertEquals(port, released.getLocalPort());
             }

@@ -75,7 +75,9 @@ public class Server {
         }
 
         // initialize the metrics
-        MetricsManager.get().init();
+        MetricsManager metricsManager = MetricsManager.get();
+        metricsManager.init();
+        ServerRunner.addDisposable(metricsManager);
 
         ThreadPoolExecutor workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
                 "ServerHandlerThread",

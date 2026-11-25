@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server;
 
+import com.google.common.io.Closer;
 import jakarta.annotation.Resource;
 import org.apache.seata.core.rpc.Disposable;
-import org.apache.seata.server.metrics.MetricsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -83,13 +83,13 @@ public class ServerRunner implements CommandLineRunner, DisposableBean, Applicat
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destroyAll starting");
         }
-        try {
+        // Closer runs every disposer in reverse startup order, including after a failure.
+        try (Closer closer = Closer.create()) {
             for (Disposable disposable : DISPOSABLE_LIST) {
-                disposable.destroy();
+                closer.register(disposable::destroy);
             }
         } finally {
             DISPOSABLE_LIST.clear();
-            MetricsManager.get().destroy();
         }
 
         if (LOGGER.isDebugEnabled()) {

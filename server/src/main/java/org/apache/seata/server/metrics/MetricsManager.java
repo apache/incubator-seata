@@ -19,6 +19,7 @@ package org.apache.seata.server.metrics;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.exporter.ExporterFactory;
 import org.apache.seata.metrics.registry.Registry;
@@ -36,7 +37,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
  * Manages the transaction coordinator's metrics resources.
  *
  */
-public class MetricsManager {
+public class MetricsManager implements Disposable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricsManager.class);
 
     private static class SingletonHolder {
@@ -55,7 +56,7 @@ public class MetricsManager {
         return registry;
     }
 
-    public synchronized void init() {
+    public void init() {
         if (subscriber != null) {
             return;
         }
@@ -86,7 +87,8 @@ public class MetricsManager {
         }
     }
 
-    public synchronized void destroy() {
+    @Override
+    public void destroy() {
         if (subscriber != null) {
             subscriber.deactivate();
             try {
@@ -119,6 +121,9 @@ public class MetricsManager {
                 previousRegistry.clearUp();
             } catch (RuntimeException e) {
                 LOGGER.warn("Failed to clear metrics registry", e);
+            } finally {
+                // An in-flight callback can finish against the retired registry after shutdown.
+                EnhancedServiceLoader.unload(Registry.class);
             }
         }
     }
