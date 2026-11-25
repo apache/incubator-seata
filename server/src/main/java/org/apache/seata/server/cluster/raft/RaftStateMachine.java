@@ -28,7 +28,6 @@ import com.alipay.sofa.jraft.rpc.InvokeContext;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
-import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -37,6 +36,7 @@ import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.thread.ThreadPoolExecutorFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.rpc.AdvertisedEndpointResolver;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
@@ -385,7 +385,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                                 leaderNode.getInternal().getPort())))) {
             Node leader = raftClusterMetadata.createNode(
                     cureentPeerId.getIp(),
-                    XID.getPort(),
+                    AdvertisedEndpointResolver.resolveTransactionPort(),
                     raftServer.getServerId().getPort(),
                     Integer.parseInt(
                             ((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
@@ -432,7 +432,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 PeerId cureentPeerId = raftServer.getServerId();
                 Node node = raftClusterMetadata.createNode(
                         cureentPeerId.getIp(),
-                        XID.getPort(),
+                        AdvertisedEndpointResolver.resolveTransactionPort(),
                         cureentPeerId.getPort(),
                         Integer.parseInt(((Environment)
                                         ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
