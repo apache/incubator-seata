@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.coordinator;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import io.netty.channel.Channel;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
@@ -68,9 +69,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,6 +109,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final int SHUTDOWN_WARN_AFTER_SECONDS = 5;
+    private static final String BRANCH_SESSION_REMOVE = "branchSessionRemove";
 
     /**
      * The constant COMMITTING_RETRY_PERIOD.
@@ -233,7 +236,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         // create branchRemoveExecutor
         if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
             branchRemoveExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                    "branchSessionRemove",
+                    BRANCH_SESSION_REMOVE,
                     BRANCH_ASYNC_POOL_SIZE,
                     BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE,
@@ -825,19 +828,23 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void destroy() {
         // Cancel queued one-shot retries while allowing a scan already in progress to finish.
         syncProcessing.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
-        List<ScheduledThreadPoolExecutor> schedulers = Arrays.asList(
-                syncProcessing, retryRollbacking, retryCommitting, asyncCommitting, timeoutCheck, undoLogDelete);
-        schedulers.forEach(ScheduledThreadPoolExecutor::shutdown);
+        Map<String, ScheduledThreadPoolExecutor> schedulers = new LinkedHashMap<>();
+        schedulers.put(SYNC_PROCESSING, syncProcessing);
+        schedulers.put(RETRY_ROLLBACKING, retryRollbacking);
+        schedulers.put(RETRY_COMMITTING, retryCommitting);
+        schedulers.put(ASYNC_COMMITTING, asyncCommitting);
+        schedulers.put(TX_TIMEOUT_CHECK, timeoutCheck);
+        schedulers.put(UNDOLOG_DELETE, undoLogDelete);
+        schedulers.values().forEach(ScheduledThreadPoolExecutor::shutdown);
+        schedulers.forEach(DefaultCoordinator::awaitTermination);
+        // In-flight retries can enqueue branch removals until their last branch completes.
+        if (branchRemoveExecutor != null) {
+            branchRemoveExecutor.shutdown();
+            awaitTermination(BRANCH_SESSION_REMOVE, branchRemoveExecutor);
+        }
+        // Preserve interrupts from the drain while allowing the transport to finish its own cleanup.
         boolean interrupted = Thread.interrupted();
         try {
-            for (ScheduledThreadPoolExecutor scheduler : schedulers) {
-                interrupted |= awaitTermination(scheduler);
-            }
-            // In-flight retries can enqueue branch removals until their last branch completes.
-            if (branchRemoveExecutor != null) {
-                branchRemoveExecutor.shutdown();
-                interrupted |= awaitTermination(branchRemoveExecutor);
-            }
             if (remotingServer instanceof NettyRemotingServer) {
                 ((NettyRemotingServer) remotingServer).destroy();
             }
@@ -850,17 +857,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
     }
 
-    private static boolean awaitTermination(ThreadPoolExecutor executor) {
-        boolean interrupted = false;
-        while (!executor.isTerminated()) {
-            try {
-                executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-            } catch (InterruptedException e) {
-                // The caller restores the interrupt after closing resources that the workers still need.
-                interrupted = true;
-            }
+    private static void awaitTermination(String name, ThreadPoolExecutor executor) {
+        if (!Uninterruptibles.awaitTerminationUninterruptibly(
+                executor, SHUTDOWN_WARN_AFTER_SECONDS, TimeUnit.SECONDS)) {
+            LOGGER.warn(
+                    "Still waiting for {} during coordinator shutdown after {} seconds (active tasks: {}, queued tasks: {}).",
+                    name,
+                    SHUTDOWN_WARN_AFTER_SECONDS,
+                    executor.getActiveCount(),
+                    executor.getQueue().size());
+            Uninterruptibles.awaitTerminationUninterruptibly(executor);
         }
-        return interrupted;
     }
 
     /**

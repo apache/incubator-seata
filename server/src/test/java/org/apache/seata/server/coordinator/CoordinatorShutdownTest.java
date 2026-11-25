@@ -16,6 +16,10 @@
  */
 package org.apache.seata.server.coordinator;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.AppenderBase;
 import io.netty.channel.Channel;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
@@ -31,6 +35,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InOrder;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -93,6 +98,19 @@ class CoordinatorShutdownTest extends BaseSpringBootTest {
 
         ExecutorService closer = Executors.newSingleThreadExecutor();
         Object previousCoordinator = ReflectionTestUtils.getField(DefaultCoordinator.class, "instance");
+        CountDownLatch slowRetryWarning = new CountDownLatch(1);
+        Logger logger = (Logger) LoggerFactory.getLogger(DefaultCoordinator.class);
+        AppenderBase<ILoggingEvent> appender = new AppenderBase<ILoggingEvent>() {
+            @Override
+            protected void append(ILoggingEvent event) {
+                if (event.getLevel() == Level.WARN
+                        && event.getFormattedMessage().contains(RETRY_COMMITTING)) {
+                    slowRetryWarning.countDown();
+                }
+            }
+        };
+        appender.start();
+        logger.addAppender(appender);
         try (MockedConstruction<DefaultCore> ignored = mockConstruction(DefaultCore.class)) {
             DefaultCoordinator coordinator = new DefaultCoordinator(server);
             ScheduledThreadPoolExecutor retry =
@@ -116,15 +134,19 @@ class CoordinatorShutdownTest extends BaseSpringBootTest {
                     }
                 });
                 assertTrue(closing.await(10, TimeUnit.SECONDS));
-                // Keep the ordinary shutdown pending beyond the previous five-second interruption threshold.
-                long holdMillis = interruptCloser ? 250 : 6000;
-                assertThrows(TimeoutException.class, () -> shutdown.get(holdMillis, TimeUnit.MILLISECONDS));
+                if (!interruptCloser) {
+                    assertTrue(slowRetryWarning.await(15, TimeUnit.SECONDS), "Identify the slow retry scheduler");
+                }
+                assertThrows(TimeoutException.class, () -> shutdown.get(250, TimeUnit.MILLISECONDS));
                 verify(unlock, never()).run();
                 verify(server, never()).destroy();
                 verify(store, never()).destroy();
                 allowReply.countDown();
                 assertEquals(interruptCloser, shutdown.get(10, TimeUnit.SECONDS).booleanValue());
                 scan.get(10, TimeUnit.SECONDS);
+                if (interruptCloser) {
+                    assertEquals(1L, slowRetryWarning.getCount(), "A short drain should finish without a warning");
+                }
                 InOrder order = inOrder(store, unlock, server);
                 order.verify(store).findGlobalSession("xid");
                 order.verify(unlock).run();
@@ -138,6 +160,8 @@ class CoordinatorShutdownTest extends BaseSpringBootTest {
                 assertTrue(closer.awaitTermination(15, TimeUnit.SECONDS));
             }
         } finally {
+            logger.detachAppender(appender);
+            appender.stop();
             closer.shutdownNow();
             ReflectionTestUtils.setField(DefaultCoordinator.class, "instance", previousCoordinator);
         }
