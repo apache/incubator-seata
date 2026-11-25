@@ -24,7 +24,7 @@
   <baseDirectory>apache-seata-${project.version}-incubating-src</baseDirectory>
   <fileSets>
     <fileSet>
-      <directory>${basedir}</directory>
+      <directory>${maven.multiModuleProjectDirectory}</directory>
       <outputDirectory>/</outputDirectory>
       <includes>
         <include>**/*</include>
@@ -41,7 +41,6 @@
         <exclude>**/*.log</exclude>
         <exclude>**/.DS_Store</exclude>
         <exclude>**/.flattened-pom.xml</exclude>
-        <exclude>distribution/**</exclude>
         <exclude>test-old-version/**</exclude>
         <exclude>test/**</exclude>
         <exclude>**/node_modules/**</exclude>

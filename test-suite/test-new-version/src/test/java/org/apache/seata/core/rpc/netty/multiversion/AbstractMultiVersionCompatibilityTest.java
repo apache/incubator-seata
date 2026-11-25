@@ -19,14 +19,21 @@ package org.apache.seata.core.rpc.netty.multiversion;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.protobuf.ByteString;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.nio.NioIoHandler;
@@ -34,6 +41,17 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
+import io.netty.handler.codec.http2.DefaultHttp2Headers;
+import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
+import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
+import io.netty.handler.codec.http2.Http2Headers;
+import io.netty.handler.codec.http2.Http2HeadersFrame;
+import io.netty.handler.codec.http2.Http2MultiplexHandler;
+import io.netty.handler.codec.http2.Http2ResetFrame;
+import io.netty.handler.codec.http2.Http2StreamChannel;
+import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
@@ -44,12 +62,17 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.compressor.Compressor;
+import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.generated.GrpcMessageProto;
+import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
 import org.apache.seata.core.rpc.netty.MultiProtocolDecoderTest;
 import org.apache.seata.core.rpc.netty.NettyClientBootstrap;
 import org.apache.seata.core.rpc.netty.NettyClientConfig;
@@ -57,7 +80,12 @@ import org.apache.seata.core.rpc.netty.NettyPoolKey;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.core.rpc.netty.TestClientHandler;
 import org.apache.seata.core.rpc.netty.TestServerHandler;
+import org.apache.seata.core.rpc.netty.grpc.GrpcDecoder;
+import org.apache.seata.core.rpc.netty.grpc.GrpcHeaderEnum;
 import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
+import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockNettyRemotingServer;
 import org.jetbrains.annotations.NotNull;
@@ -68,10 +96,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -150,11 +181,20 @@ public abstract class AbstractMultiVersionCompatibilityTest {
         responseLatch = new CountDownLatch(1);
     }
 
+    protected void useTransportProtocol(Protocol protocol) {
+        System.setProperty(ConfigurationKeys.TRANSPORT_PROTOCOL, protocol.value);
+        ConfigurationCache.clear();
+    }
+
     @AfterEach
     public void tearDown() throws InterruptedException {
         // Shutdown client
         if (clientChannel != null) {
+            Channel parentChannel = clientChannel instanceof Http2StreamChannel ? clientChannel.parent() : null;
             clientChannel.close().sync();
+            if (parentChannel != null) {
+                parentChannel.close().sync();
+            }
         }
         if (clientBootstrap != null) {
             clientBootstrap.shutdown();
@@ -216,6 +256,197 @@ public abstract class AbstractMultiVersionCompatibilityTest {
         ChannelFuture future = serverBootstrap.bind(port).sync();
         serverChannel = future.channel();
         LOGGER.info("V1 Server started on port {} (manual construction)", port);
+    }
+
+    // ==================== Legacy gRPC Server & Client Methods (simulate pre-4.2.21 peer) ====================
+
+    /**
+     * Start a legacy gRPC server (manual construction replicating pre-4.2.21 GrpcEncoder
+     * without HTTP/2 pseudo-header direction validation).
+     */
+    protected int startLegacyGrpcServer(int port, AtomicReference<Http2Headers> capturedRequestHeaders)
+            throws InterruptedException {
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        serverBootstrap
+                .group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) {
+                        ch.pipeline()
+                                .addLast(Http2FrameCodecBuilder.forServer()
+                                        .validateHeaders(false)
+                                        .build())
+                                .addLast(new Http2MultiplexHandler(new ChannelInitializer<Http2StreamChannel>() {
+                                    @Override
+                                    protected void initChannel(Http2StreamChannel streamChannel) {
+                                        streamChannel.pipeline().addLast(new ChannelInboundHandlerAdapter() {
+                                            @Override
+                                            public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                                                if (msg instanceof Http2HeadersFrame) {
+                                                    Http2HeadersFrame headersFrame = (Http2HeadersFrame) msg;
+                                                    if (capturedRequestHeaders != null) {
+                                                        capturedRequestHeaders.compareAndSet(
+                                                                null, headersFrame.headers());
+                                                    }
+                                                    CharSequence contentType = headersFrame
+                                                            .headers()
+                                                            .get(HttpHeaderNames.CONTENT_TYPE);
+                                                    ChannelPipeline pipeline = ctx.pipeline();
+                                                    if (contentType != null
+                                                            && contentType
+                                                                    .toString()
+                                                                    .endsWith("grpc")) {
+                                                        pipeline.addLast(new GrpcDecoder());
+                                                        pipeline.addLast(new LegacyGrpcEncoder());
+                                                        pipeline.addLast(createTestServerHandler());
+                                                    }
+                                                    pipeline.remove(this);
+                                                }
+                                                ctx.fireChannelRead(msg);
+                                            }
+                                        });
+                                    }
+                                }));
+                    }
+                });
+
+        ChannelFuture future = serverBootstrap.bind("127.0.0.1", port).sync();
+        serverChannel = future.channel();
+        int actualPort = ((InetSocketAddress) serverChannel.localAddress()).getPort();
+        LOGGER.info("Legacy gRPC Server started on port {} (manual construction)", actualPort);
+        return actualPort;
+    }
+
+    /**
+     * Connect a legacy gRPC client (manual construction replicating pre-4.2.21 GrpcEncoder
+     * that sends :status=200 on outbound client requests).
+     */
+    protected Http2StreamChannel connectLegacyGrpcClient(
+            String host,
+            int port,
+            int connectTimeout,
+            AtomicReference<Http2ResetFrame> resetFrameRef,
+            CountDownLatch resetLatch)
+            throws Exception {
+        testClientHandler = createTestClientHandler();
+
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(clientGroup).channel(NioSocketChannel.class);
+        bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout);
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) {
+                ch.pipeline()
+                        .addLast(Http2FrameCodecBuilder.forClient()
+                                .validateHeaders(false)
+                                .build())
+                        .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
+            }
+        });
+
+        ChannelFuture connectFuture = bootstrap.connect(host, port);
+        Assertions.assertTrue(
+                connectFuture.await(connectTimeout, TimeUnit.MILLISECONDS),
+                "Legacy gRPC client should connect within timeout");
+        Assertions.assertTrue(connectFuture.isSuccess(), "Legacy gRPC client connection should succeed");
+
+        Http2StreamChannel streamChannel = new Http2StreamChannelBootstrap(connectFuture.channel())
+                .handler(new ChannelInitializer<Http2StreamChannel>() {
+                    @Override
+                    protected void initChannel(Http2StreamChannel ch) {
+                        ch.pipeline()
+                                .addLast(new GrpcDecoder())
+                                .addLast(new LegacyGrpcEncoder())
+                                .addLast(new ChannelInboundHandlerAdapter() {
+                                    @Override
+                                    public void userEventTriggered(ChannelHandlerContext ctx, Object evt)
+                                            throws Exception {
+                                        if (evt instanceof Http2ResetFrame) {
+                                            if (resetFrameRef != null) {
+                                                resetFrameRef.compareAndSet(null, (Http2ResetFrame) evt);
+                                            }
+                                            if (resetLatch != null) {
+                                                resetLatch.countDown();
+                                            }
+                                        }
+                                        super.userEventTriggered(ctx, evt);
+                                    }
+
+                                    @Override
+                                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                                        if (resetLatch != null) {
+                                            resetLatch.countDown();
+                                        }
+                                        super.channelInactive(ctx);
+                                    }
+                                })
+                                .addLast(testClientHandler);
+                    }
+                })
+                .open()
+                .get(connectTimeout, TimeUnit.MILLISECONDS);
+        clientChannel = streamChannel;
+        LOGGER.info("Legacy gRPC Client connected to {}:{}", host, port);
+        return streamChannel;
+    }
+
+    /**
+     * Replicates the pre-Netty 4.2.21 GrpcEncoder behavior that always emitted :status=200 headers.
+     */
+    private static final class LegacyGrpcEncoder extends ChannelOutboundHandlerAdapter {
+        private final AtomicBoolean headerSent = new AtomicBoolean(false);
+
+        @Override
+        public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+            if (!(msg instanceof RpcMessage)) {
+                throw new UnsupportedOperationException("LegacyGrpcEncoder not support class:" + msg.getClass());
+            }
+
+            RpcMessage rpcMessage = (RpcMessage) msg;
+            byte messageType = rpcMessage.getMessageType();
+            Map<String, String> headMap = rpcMessage.getHeadMap();
+            Object body = rpcMessage.getBody();
+            int id = rpcMessage.getId();
+
+            if (headerSent.compareAndSet(false, true)) {
+                Http2Headers headers = new DefaultHttp2Headers();
+                headers.add(GrpcHeaderEnum.HTTP2_STATUS.header, String.valueOf(200));
+                headers.add(GrpcHeaderEnum.GRPC_STATUS.header, String.valueOf(0));
+                headers.add(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header, "application/grpc");
+                ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
+            }
+
+            ByteString dataBytes;
+            if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                    && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                Serializer serializer =
+                        SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+                byte[] serializedBytes = serializer.serialize(body);
+                Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+                dataBytes = ByteString.copyFrom(compressor.compress(serializedBytes));
+            } else {
+                dataBytes = ByteString.EMPTY;
+            }
+            headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode()));
+            headMap.put(GrpcHeaderEnum.COMPRESS_TYPE.header, String.valueOf(rpcMessage.getCompressor()));
+            GrpcMessageProto grpcMessageProto = GrpcMessageProto.newBuilder()
+                    .putAllHeadMap(headMap)
+                    .setMessageType(messageType)
+                    .setId(id)
+                    .setBody(ByteString.copyFrom(dataBytes.toByteArray()))
+                    .build();
+
+            byte[] bodyBytes = grpcMessageProto.toByteArray();
+            byte[] messageWithPrefix = new byte[bodyBytes.length + 5];
+            messageWithPrefix[0] = 0;
+            ByteBuffer buffer = ByteBuffer.allocate(4);
+            buffer.putInt(bodyBytes.length);
+            byte[] lengthBytes = buffer.array();
+            System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
+            System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
+            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)));
+        }
     }
 
     // ==================== V2 Server Methods (using MockNettyRemotingServer) ====================
@@ -352,7 +583,7 @@ public abstract class AbstractMultiVersionCompatibilityTest {
 
     private static final AtomicInteger MESSAGE_ID_GENERATOR = new AtomicInteger(0);
 
-    private int getNextMessageId() {
+    protected int getNextMessageId() {
         return MESSAGE_ID_GENERATOR.incrementAndGet();
     }
 
@@ -404,6 +635,26 @@ public abstract class AbstractMultiVersionCompatibilityTest {
 
         RegisterTMResponse tmResponse = (RegisterTMResponse) response;
         return tmResponse;
+    }
+
+    @NotNull
+    protected GlobalBeginResponse doSendGlobalBegin(String transactionName, int timeout) throws InterruptedException {
+        resetResponseLatch();
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        request.setTransactionName(transactionName);
+        request.setTimeout(timeout);
+        LOGGER.info("Sending GlobalBeginRequest:\n{}", toPrettyJson(request));
+        sendRequest(request);
+
+        boolean received = responseLatch.await(30, TimeUnit.SECONDS);
+        Assertions.assertTrue(received, "Should receive GlobalBeginResponse within timeout");
+
+        Object response = responseRef.get();
+        Assertions.assertNotNull(response, "Should receive GlobalBeginResponse from server");
+        Assertions.assertInstanceOf(GlobalBeginResponse.class, response, "Response should be GlobalBeginResponse");
+        LOGGER.info("Received GlobalBeginResponse:\n{}", toPrettyJson(response));
+
+        return (GlobalBeginResponse) response;
     }
 
     private void awaitChannelReady(Channel channel, long timeoutMillis) {

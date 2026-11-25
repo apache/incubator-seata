@@ -33,6 +33,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -127,8 +128,7 @@ public class DataCompareUtils {
      */
     private static Object parseDateTime(String text, Object other) {
         boolean iso = text.indexOf('T') > 0;
-        LocalDateTime dateTime =
-                iso ? LocalDateTime.parse(text) : Timestamp.valueOf(text).toLocalDateTime();
+        LocalDateTime dateTime = toLocalDateTime(text);
         if (other instanceof LocalDateTime || (iso && !(other instanceof Timestamp))) {
             return dateTime;
         }
@@ -144,6 +144,12 @@ public class DataCompareUtils {
         if (field.getValue() instanceof Timestamp && other.getValue() instanceof LocalDateTime) {
             field.setValue(((Timestamp) field.getValue()).toLocalDateTime());
         }
+    }
+
+    private static LocalDateTime toLocalDateTime(String text) {
+        return text.indexOf('T') > 0
+                ? LocalDateTime.parse(text)
+                : Timestamp.valueOf(text).toLocalDateTime();
     }
 
     private static void convertType(Field f0, Field f1) {
@@ -287,7 +293,7 @@ public class DataCompareUtils {
                     if (firstUnderline && j > 0) {
                         rowKey.append("_");
                     }
-                    rowKey.append(String.valueOf(field.getValue()));
+                    rowKey.append(rowKeyValue(field));
                     firstUnderline = true;
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
@@ -295,6 +301,33 @@ public class DataCompareUtils {
             rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
+    }
+
+    /**
+     * Rows are matched by the text of their primary key values before any field is converted. With fastjson a date
+     * time value has several texts: the undo log holds "yyyy-MM-dd HH:mm:ss[.f]" or the ISO form, while the row read
+     * from the database holds a Timestamp (whose text always ends with a fraction) or a LocalDateTime. Use one text
+     * for all of them, so a date time primary key still finds its row.
+     */
+    private static String rowKeyValue(Field field) {
+        Object value = field.getValue();
+        if (field.getType() == Types.TIMESTAMP
+                && StringUtils.equals(AbstractUndoLogManager.getCurrentSerializer(), FastjsonUndoLogParser.NAME)) {
+            if (value instanceof LocalDateTime) {
+                return value.toString();
+            }
+            if (value instanceof Timestamp) {
+                return ((Timestamp) value).toLocalDateTime().toString();
+            }
+            if (value instanceof String) {
+                try {
+                    return toLocalDateTime((String) value).toString();
+                } catch (IllegalArgumentException | DateTimeException e) {
+                    // not a date time text, keep it as it is
+                }
+            }
+        }
+        return String.valueOf(value);
     }
 
     private static boolean isDmdbTimestamp(Object obj) {
