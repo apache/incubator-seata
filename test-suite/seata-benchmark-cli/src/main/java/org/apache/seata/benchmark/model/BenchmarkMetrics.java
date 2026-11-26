@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongUnaryOperator;
 
 /**
  * Benchmark performance metrics
@@ -36,16 +37,27 @@ public class BenchmarkMetrics {
     private final AtomicLong compensatedCount = new AtomicLong(0);
     private final AtomicLong compensationFailedCount = new AtomicLong(0);
     private final AtomicLong unknownCount = new AtomicLong(0);
-    private final List<Long> latencies =
-            Collections.synchronizedList(new ArrayList<>(BenchmarkConstants.MAX_LATENCY_SAMPLES));
-    private final AtomicLong totalSamples = new AtomicLong(0);
+    private final int latencySampleLimit;
+    private final LongUnaryOperator randomIndex;
+    // All latency state is guarded by latencies.
+    private final List<Long> latencies;
+    private long totalSamples;
+    private long maxLatency;
+    private LatencyStats cachedStats;
     private volatile long startTime = System.currentTimeMillis();
 
     private volatile long lastCountSnapshot = 0;
     private volatile long lastSnapshotTime = System.currentTimeMillis();
 
-    private volatile LatencyStats cachedStats = null;
-    private volatile long lastStatsUpdateTime = 0;
+    public BenchmarkMetrics() {
+        this(BenchmarkConstants.MAX_LATENCY_SAMPLES, bound -> ThreadLocalRandom.current().nextLong(bound));
+    }
+
+    BenchmarkMetrics(int latencySampleLimit, LongUnaryOperator randomIndex) {
+        this.latencySampleLimit = latencySampleLimit;
+        this.randomIndex = randomIndex;
+        this.latencies = new ArrayList<>(latencySampleLimit);
+    }
 
     public void recordSuccess(long latencyMs) {
         totalCount.incrementAndGet();
@@ -83,14 +95,22 @@ public class BenchmarkMetrics {
     }
 
     private void addLatencySample(long latencyMs) {
-        totalSamples.incrementAndGet();
         synchronized (latencies) {
-            if (latencies.size() < BenchmarkConstants.MAX_LATENCY_SAMPLES) {
+            long samplesSeen = ++totalSamples;
+            if (samplesSeen == 1 || latencyMs > maxLatency) {
+                maxLatency = latencyMs;
+                cachedStats = null;
+            }
+            if (latencies.size() < latencySampleLimit) {
                 latencies.add(latencyMs);
+                cachedStats = null;
             } else {
-                // Random replacement strategy to maintain bounded samples
-                int index = ThreadLocalRandom.current().nextInt(BenchmarkConstants.MAX_LATENCY_SAMPLES);
-                latencies.set(index, latencyMs);
+                // Each of the samples seen so far has the same chance of remaining in the reservoir.
+                long index = randomIndex.applyAsLong(samplesSeen);
+                if (index < latencySampleLimit) {
+                    latencies.set((int) index, latencyMs);
+                    cachedStats = null;
+                }
             }
         }
     }
@@ -187,14 +207,8 @@ public class BenchmarkMetrics {
     }
 
     public LatencyStats getLatencyStats() {
-        long now = System.currentTimeMillis();
-        if (cachedStats != null && (now - lastStatsUpdateTime) < BenchmarkConstants.LATENCY_STATS_CACHE_MS) {
-            return cachedStats;
-        }
-
         synchronized (latencies) {
-            // Double-check
-            if (cachedStats != null && (now - lastStatsUpdateTime) < BenchmarkConstants.LATENCY_STATS_CACHE_MS) {
+            if (cachedStats != null) {
                 return cachedStats;
             }
 
@@ -209,12 +223,9 @@ public class BenchmarkMetrics {
                 long p95 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.95) - 1));
                 long p99 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.99) - 1));
                 long p999 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.999) - 1));
-                long max = sortedLatencies.get(size - 1);
-
-                cachedStats = new LatencyStats(p50, p95, p99, p999, max);
+                cachedStats = new LatencyStats(p50, p95, p99, p999, maxLatency);
             }
 
-            lastStatsUpdateTime = now;
             return cachedStats;
         }
     }
@@ -228,12 +239,14 @@ public class BenchmarkMetrics {
         compensatedCount.set(0);
         compensationFailedCount.set(0);
         unknownCount.set(0);
-        totalSamples.set(0);
-        latencies.clear();
+        synchronized (latencies) {
+            totalSamples = 0;
+            maxLatency = 0;
+            latencies.clear();
+            cachedStats = null;
+        }
         lastCountSnapshot = 0;
         lastSnapshotTime = System.currentTimeMillis();
-        cachedStats = null;
-        lastStatsUpdateTime = 0;
     }
 
     public static class LatencyStats {
