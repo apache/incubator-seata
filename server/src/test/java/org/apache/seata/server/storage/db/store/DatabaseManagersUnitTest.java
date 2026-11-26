@@ -16,12 +16,17 @@
  */
 package org.apache.seata.server.storage.db.store;
 
+import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.model.*;
 import org.apache.seata.core.store.*;
 import org.apache.seata.discovery.registry.*;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.*;
+import org.apache.seata.server.storage.db.session.DataBaseSessionManager;
+import org.apache.seata.server.store.AbstractTransactionStoreManager;
+import org.apache.seata.server.store.SessionStorable;
+import org.apache.seata.server.store.TransactionStoreManager;
 import org.apache.seata.server.store.TransactionStoreManager.LogOperation;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -111,5 +116,87 @@ class DatabaseManagersUnitTest extends BaseSpringBootTest {
                     .register(any(java.net.InetSocketAddress.class));
             assertThrows(RuntimeException.class, manager::notifyMapping);
         }
+    }
+
+    @Test
+    void batchRemoveGlobalSessionsDelegatesAndHandlesFailures() throws Exception {
+        DataBaseTransactionStoreManager storeManager = mock(DataBaseTransactionStoreManager.class, CALLS_REAL_METHODS);
+        LogStore logStore = mock(LogStore.class);
+        storeManager.setLogStore(logStore);
+
+        assertTrue(storeManager.removeGlobalSessions(null));
+        assertTrue(storeManager.removeGlobalSessions(Collections.emptyList()));
+        assertTrue(storeManager.removeGlobalSessions(Collections.singletonList(null)));
+        verify(logStore, never()).deleteGlobalTransactionDOs(anyList());
+
+        GlobalSession s1 = new GlobalSession("app", "group", "tx1", 1000);
+        s1.setXid("host:8091:1");
+        s1.setTransactionId(1L);
+        s1.setStatus(GlobalStatus.Committed);
+        GlobalSession s2 = new GlobalSession("app", "group", "tx2", 1000);
+        s2.setXid("host:8091:2");
+        s2.setTransactionId(2L);
+        s2.setStatus(GlobalStatus.Rollbacked);
+
+        when(logStore.deleteGlobalTransactionDOs(anyList())).thenReturn(true);
+        assertTrue(storeManager.removeGlobalSessions(Arrays.asList(s1, null, s2)));
+        verify(logStore)
+                .deleteGlobalTransactionDOs(argThat(list -> list.size() == 2
+                        && "host:8091:1".equals(list.get(0).getXid())
+                        && "host:8091:2".equals(list.get(1).getXid())));
+
+        DataBaseSessionManager sessionManager = new DataBaseSessionManager();
+        TransactionStoreManager mockStore = mock(TransactionStoreManager.class);
+        sessionManager.setTransactionStoreManager(mockStore);
+        sessionManager.removeGlobalSessions(null);
+        sessionManager.removeGlobalSessions(Collections.emptyList());
+        verify(mockStore, never()).removeGlobalSessions(anyList());
+
+        List<GlobalSession> sessions = Arrays.asList(s1, s2);
+        when(mockStore.removeGlobalSessions(sessions)).thenReturn(true);
+        sessionManager.removeGlobalSessions(sessions);
+        verify(mockStore).removeGlobalSessions(sessions);
+
+        when(mockStore.removeGlobalSessions(sessions)).thenReturn(false);
+        assertThrows(StoreException.class, () -> sessionManager.removeGlobalSessions(sessions));
+    }
+
+    @Test
+    void defaultBatchRemoveMethodsFallbackToSingleRemoval() throws Exception {
+        List<SessionStorable> removedByStore = new ArrayList<>();
+        TransactionStoreManager fallbackStore = new AbstractTransactionStoreManager() {
+            @Override
+            public boolean writeSession(LogOperation logOperation, SessionStorable session) {
+                assertEquals(LogOperation.GLOBAL_REMOVE, logOperation);
+                removedByStore.add(session);
+                return !("host:8091:fail".equals(((GlobalSession) session).getXid()));
+            }
+        };
+
+        GlobalSession s1 = new GlobalSession("app", "group", "tx1", 1000);
+        s1.setXid("host:8091:1");
+        GlobalSession sFail = new GlobalSession("app", "group", "tx2", 1000);
+        sFail.setXid("host:8091:fail");
+        GlobalSession s3 = new GlobalSession("app", "group", "tx3", 1000);
+        s3.setXid("host:8091:3");
+
+        assertTrue(fallbackStore.removeGlobalSessions(null));
+        assertTrue(fallbackStore.removeGlobalSessions(Collections.emptyList()));
+        assertTrue(fallbackStore.removeGlobalSessions(Arrays.asList(s1, null)));
+        assertEquals(Collections.singletonList(s1), removedByStore);
+
+        removedByStore.clear();
+        assertFalse(fallbackStore.removeGlobalSessions(Arrays.asList(s1, sFail, s3)));
+        assertEquals(Arrays.asList(s1, sFail), removedByStore);
+
+        SessionManager fallbackSessionManager = mock(SessionManager.class);
+        doCallRealMethod().when(fallbackSessionManager).removeGlobalSessions(any());
+        fallbackSessionManager.removeGlobalSessions(null);
+        fallbackSessionManager.removeGlobalSessions(Collections.emptyList());
+        verify(fallbackSessionManager, never()).removeGlobalSession(any());
+
+        fallbackSessionManager.removeGlobalSessions(Arrays.asList(s1, null, s3));
+        verify(fallbackSessionManager).removeGlobalSession(s1);
+        verify(fallbackSessionManager).removeGlobalSession(s3);
     }
 }

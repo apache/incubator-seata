@@ -72,6 +72,19 @@ public interface LogStoreSqls {
     String getDeleteGlobalTransactionSQL(String globalTable);
 
     /**
+     * Get delete global transactions sql string.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    default String getDeleteGlobalTransactionsSQL(String globalTable, String paramsPlaceHolder) {
+        return AbstractLogStoreSqls.DELETE_GLOBAL_TRANSACTIONS
+                .replace(AbstractLogStoreSqls.GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(AbstractLogStoreSqls.PRAMETER_PLACEHOLD, paramsPlaceHolder);
+    }
+
+    /**
      * Get query global transaction sql string.
      *
      * @param globalTable the global table
@@ -95,6 +108,39 @@ public interface LogStoreSqls {
      * @return the string
      */
     String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder);
+
+    /**
+     * Get query global transaction sql by status ordered by {@code (gmt_modified ASC, xid ASC)}.
+     *
+     * <p>Custom SPI implementations that do not override this method throw
+     * {@link UnsupportedOperationException}.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     * @throws UnsupportedOperationException if keyset pagination SQL is not supported by this dialect
+     */
+    default String getQueryGlobalTransactionSQLByStatusOrdered(String globalTable, String paramsPlaceHolder) {
+        throw new UnsupportedOperationException(
+                "Keyset pagination SQL is not supported by " + getClass().getName());
+    }
+
+    /**
+     * Get query global transaction sql by status strictly after the composite cursor
+     * {@code (gmt_modified, xid)}, ordered by {@code (gmt_modified ASC, xid ASC)}.
+     *
+     * <p>Custom SPI implementations that do not override this method throw
+     * {@link UnsupportedOperationException}.
+     *
+     * @param globalTable       the global table
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     * @throws UnsupportedOperationException if keyset pagination SQL is not supported by this dialect
+     */
+    default String getQueryGlobalTransactionSQLByStatusAfterCursor(String globalTable, String paramsPlaceHolder) {
+        throw new UnsupportedOperationException(
+                "Keyset pagination SQL is not supported by " + getClass().getName());
+    }
 
     /**
      * Get query global transaction for recovery sql string.

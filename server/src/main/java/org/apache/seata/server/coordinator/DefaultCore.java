@@ -40,6 +40,7 @@ import org.slf4j.MDC;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 import static org.apache.seata.common.ConfigurationKeys.ENABLE_PARALLEL_HANDLE_BRANCH_KEY;
 import static org.apache.seata.common.ConfigurationKeys.XAER_NOTA_RETRY_TIMEOUT;
@@ -62,6 +63,8 @@ public class DefaultCore implements Core {
             ConfigurationFactory.getInstance().getBoolean(ENABLE_PARALLEL_HANDLE_BRANCH_KEY, false);
 
     private static volatile DefaultCore instance;
+
+    private volatile Consumer<GlobalSession> asyncCommitPusher;
 
     /**
      * get the Default core.
@@ -233,6 +236,21 @@ public class DefaultCore implements Core {
         return session.getXid();
     }
 
+    /**
+     * Registers an internal non-blocking pusher used by {@link DefaultCoordinator} when the
+     * two-phase cleanup pipeline push mode is enabled under {@code db} or {@code redis} store modes.
+     *
+     * @param asyncCommitPusher non-blocking consumer enqueueing {@link GlobalStatus#AsyncCommitting}
+     *                          sessions, or {@code null} to disable push mode
+     */
+    public void setAsyncCommitPusher(Consumer<GlobalSession> asyncCommitPusher) {
+        this.asyncCommitPusher = asyncCommitPusher;
+    }
+
+    public Consumer<GlobalSession> getAsyncCommitPusher() {
+        return asyncCommitPusher;
+    }
+
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
@@ -246,6 +264,7 @@ public class DefaultCore implements Core {
         }
 
         // just lock changeStatus
+        boolean[] transitionedToAsync = {false};
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             boolean shouldCommitNow = false;
             if (globalSession.getStatus() == GlobalStatus.Begin) {
@@ -254,6 +273,7 @@ public class DefaultCore implements Core {
                 if (globalSession.canBeCommittedAsync()) {
                     globalSession.asyncCommit();
                     MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.Committed, false, false);
+                    transitionedToAsync[0] = true;
                 } else {
                     globalSession.changeGlobalStatus(GlobalStatus.Committing);
                     shouldCommitNow = true;
@@ -269,19 +289,74 @@ public class DefaultCore implements Core {
             // If successful and all remaining branches can be committed asynchronously, do async commit.
             if (success && globalSession.hasBranch() && globalSession.canBeCommittedAsync()) {
                 globalSession.asyncCommit();
+                if (!globalSession.isSaga()) {
+                    tryPushAsyncCommit(globalSession);
+                }
                 return GlobalStatus.Committed;
             } else {
                 return globalSession.getStatus();
             }
         } else {
-            return globalSession.getStatus() == GlobalStatus.AsyncCommitting
+            GlobalStatus resultStatus = globalSession.getStatus() == GlobalStatus.AsyncCommitting
                     ? GlobalStatus.Committed
                     : globalSession.getStatus();
+            if (transitionedToAsync[0] && !globalSession.isSaga()) {
+                tryPushAsyncCommit(globalSession);
+            }
+            return resultStatus;
+        }
+    }
+
+    private void tryPushAsyncCommit(GlobalSession globalSession) {
+        Consumer<GlobalSession> pusher = this.asyncCommitPusher;
+        if (pusher == null
+                || globalSession == null
+                || globalSession.isSaga()
+                || globalSession.getStatus() != GlobalStatus.AsyncCommitting) {
+            return;
+        }
+        try {
+            pusher.accept(globalSession);
+        } catch (Throwable t) {
+            LOGGER.warn(
+                    "Failed to enqueue async committing session xid={} to cleanup pipeline; fallback scanner will handle it",
+                    globalSession.getXid(),
+                    t);
         }
     }
 
     @Override
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        return doGlobalCommit(globalSession, retrying, false);
+    }
+
+    /**
+     * Executes phase-two commit for a session dispatched by the two-phase cleanup pipeline.
+     *
+     * <p>Always enforces {@code retrying = true} (Discussion #8211 Section 7.1). Saga sessions run
+     * the legacy inline completion path and return {@code false} so they are never handed off to
+     * the batch global session cleaner.
+     *
+     * @param globalSession the global session to commit
+     * @return {@code true} only when all branches are committed and removed and deferred
+     *         completion preparation succeeded (signaling handoff to the batch cleaner);
+     *         {@code false} otherwise
+     * @throws TransactionException if phase-two execution or deferred cleanup preparation fails
+     */
+    public boolean doGlobalCommitForPipeline(GlobalSession globalSession) throws TransactionException {
+        if (globalSession == null) {
+            return false;
+        }
+        if (globalSession.isSaga()) {
+            doGlobalCommit(globalSession, true, false);
+            return false;
+        }
+        boolean finished = doGlobalCommit(globalSession, true, true);
+        return finished && globalSession.getBranchSessions().isEmpty();
+    }
+
+    private boolean doGlobalCommit(GlobalSession globalSession, boolean retrying, boolean deferGlobalDelete)
+            throws TransactionException {
         boolean success = true;
         // start committing event
         MetricsPublisher.postSessionDoingEvent(globalSession, retrying);
@@ -391,7 +466,11 @@ public class DefaultCore implements Core {
         // if it succeeds and there is no branch, retrying=true is the asynchronous state when retrying. EndCommitted is
         // executed to improve concurrency performance, and the global transaction ends..
         if (success && globalSession.getBranchSessions().isEmpty()) {
-            SessionHelper.endCommitted(globalSession, retrying);
+            if (deferGlobalDelete && !globalSession.isSaga()) {
+                SessionHelper.prepareDeferredEndCommitted(globalSession);
+            } else {
+                SessionHelper.endCommitted(globalSession, retrying);
+            }
             LOGGER.info("Committing global transaction is successfully done, xid = {}.", globalSession.getXid());
         }
         return success;

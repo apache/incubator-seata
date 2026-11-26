@@ -166,6 +166,27 @@ public class SessionHelper {
     }
 
     /**
+     * Prepares a committed {@link GlobalSession} for deferred asynchronous batch row deletion by
+     * releasing global locks and publishing the post-commit completion metric without executing an
+     * intermediate {@code UPDATE global_table SET status = Committed} or inline row deletion.
+     *
+     * <p>If the node crashes or the cleaner buffer drops this session before the batch delete
+     * flushes, the row remains {@link GlobalStatus#AsyncCommitting} with zero branches so the
+     * fallback recovery scanner can finish deleting it immediately without waiting for the
+     * end-state admission window.
+     *
+     * @param globalSession the global session whose phase-two branch commits have all completed
+     * @throws TransactionException if releasing global locks fails
+     */
+    public static void prepareDeferredEndCommitted(GlobalSession globalSession) throws TransactionException {
+        long beginTime = System.currentTimeMillis();
+        boolean retryBranch = globalSession.getStatus() == GlobalStatus.CommitRetrying;
+        globalSession.clean();
+        MetricsPublisher.postSessionDoneEvent(
+                globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true, beginTime, retryBranch);
+    }
+
+    /**
      * End commit failed.
      *
      * @param globalSession the global session

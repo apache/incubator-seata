@@ -20,6 +20,7 @@ import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
@@ -86,6 +87,33 @@ public class RedisSessionManager extends AbstractSessionManager implements Initi
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Deletes global session entries from Redis in chunked pipelines (non-atomic across chunks,
+     * idempotent on retry). Does not delete branch keys or release locks.
+     */
+    @Override
+    public void removeGlobalSessions(List<GlobalSession> sessions) throws TransactionException {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return;
+        }
+        if (LOGGER.isDebugEnabled()) {
+            GlobalSession first = sessions.get(0);
+            GlobalSession last = sessions.get(sessions.size() - 1);
+            LOGGER.debug(
+                    "MANAGER[{}] batch remove {} global sessions (firstXid={}, lastXid={})",
+                    name,
+                    sessions.size(),
+                    first != null ? first.getXid() : null,
+                    last != null ? last.getXid() : null);
+        }
+        boolean ret = transactionStoreManager.removeGlobalSessions(sessions);
+        if (!ret) {
+            throw new StoreException("removeGlobalSessions failed.");
         }
     }
 

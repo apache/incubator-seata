@@ -16,6 +16,7 @@
  */
 package org.apache.seata.core.store;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -50,6 +51,32 @@ public interface LogStore {
     List<GlobalTransactionDO> queryGlobalTransactionDO(int[] status, int limit);
 
     /**
+     * Query global transaction do list ordered by {@code (gmt_modified ASC, xid ASC)},
+     * optionally resuming strictly after the composite cursor {@code (cursorGmtModified, cursorXid)}.
+     *
+     * <p>Implementations supporting keyset pagination require {@code cursorGmtModified} and
+     * {@code cursorXid} to be either provided together (for subsequent pages) or both omitted
+     * (for the first page); supplying only one throws {@link IllegalArgumentException}.
+     *
+     * <p><strong>Default fallback contract:</strong> Implementations that do not override this method
+     * fall back to {@link #queryGlobalTransactionDO(int[], int)}, which ignores both cursor parameters
+     * and always returns the first page. Callers looping across pages MUST detect a non-advancing
+     * cursor (e.g., identical trailing {@code (gmtModified, xid)}) and stop to avoid an infinite loop.
+     *
+     * @param statuses          the statuses
+     * @param cursorGmtModified the cursor gmt_modified (exclusive with {@code cursorXid}), or {@code null} for the first page
+     * @param cursorXid         the cursor xid tie-breaker, or {@code null} for the first page
+     * @param limit             the maximum number of rows to return
+     * @return the list of matching global transactions
+     * @throws IllegalArgumentException if a cursor-aware implementation receives only one of
+     *                                  {@code cursorGmtModified} or {@code cursorXid}
+     */
+    default List<GlobalTransactionDO> queryGlobalTransactionDO(
+            int[] statuses, Date cursorGmtModified, String cursorXid, int limit) {
+        return queryGlobalTransactionDO(statuses, limit);
+    }
+
+    /**
      * Insert global transaction do boolean.
      *
      * @param globalTransactionDO the global transaction do
@@ -81,6 +108,35 @@ public interface LogStore {
      * @return the boolean
      */
     boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+
+    /**
+     * Batch delete global transaction dos.
+     *
+     * <p>Precondition: this storage-level operation deletes global transaction records only and does
+     * <strong>not</strong> delete branch transaction records or release locks. Callers must ensure
+     * all associated branches and locks have already been cleaned up.
+     *
+     * <p>Non-atomicity and idempotency: implementations may execute chunked statements with
+     * {@code autoCommit=true}, so a failure on a later chunk can leave earlier chunks already
+     * deleted. Because deletion is idempotent, callers may safely retry the entire batch on failure.
+     *
+     * @param globalTransactionDOs the global transaction dos
+     * @return the boolean
+     */
+    default boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (globalTransactionDOs == null || globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO == null) {
+                continue;
+            }
+            if (!deleteGlobalTransactionDO(globalTransactionDO)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * Query branch transaction do list.

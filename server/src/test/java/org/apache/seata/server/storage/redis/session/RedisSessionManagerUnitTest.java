@@ -75,6 +75,18 @@ class RedisSessionManagerUnitTest extends BaseSpringBootTest {
             assertSame(sessions, manager.allSessions());
             assertSame(sessions, manager.findGlobalSessions(new SessionCondition()));
             assertEquals("executed", manager.lockAndExecute(global, () -> "executed"));
+
+            // batch removeGlobalSessions
+            manager.removeGlobalSessions(null);
+            manager.removeGlobalSessions(Collections.emptyList());
+            verify(store, never()).removeGlobalSessions(anyList());
+
+            when(store.removeGlobalSessions(sessions)).thenReturn(true);
+            manager.removeGlobalSessions(sessions);
+            verify(store).removeGlobalSessions(sessions);
+
+            when(store.removeGlobalSessions(sessions)).thenReturn(false);
+            assertThrows(StoreException.class, () -> manager.removeGlobalSessions(sessions));
         }
     }
 }

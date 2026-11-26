@@ -55,6 +55,12 @@ import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
+import org.apache.seata.server.coordinator.pipeline.BatchGlobalSessionCleaner;
+import org.apache.seata.server.coordinator.pipeline.FallbackRecoveryScanner;
+import org.apache.seata.server.coordinator.pipeline.PhaseTwoPipelineExecutor;
+import org.apache.seata.server.coordinator.pipeline.PipelineComponents;
+import org.apache.seata.server.coordinator.pipeline.PipelineConfig;
+import org.apache.seata.server.coordinator.pipeline.PipelineMetrics;
 import org.apache.seata.server.limit.LimitRequestDecorator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.session.BranchSession;
@@ -62,6 +68,7 @@ import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,6 +222,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final DefaultCore core;
 
+    private final PipelineComponents pipelineComponents;
+
+    private final FallbackRecoveryScanner fallbackRecoveryScanner;
+
+    private final boolean pushPusherRegistered;
+
     private static volatile DefaultCoordinator instance;
 
     /**
@@ -223,15 +236,25 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * @param remotingServer the remoting server
      */
     protected DefaultCoordinator(RemotingServer remotingServer) {
+        this(remotingServer, null, StoreConfig.getSessionMode(), PipelineConfig.fromConfiguration(), -1, -1L);
+    }
+
+    DefaultCoordinator(
+            RemotingServer remotingServer,
+            DefaultCore core,
+            SessionMode sessionMode,
+            PipelineConfig pipelineConfig,
+            int scanPageSize,
+            long maxTickDurationMs) {
         if (remotingServer == null) {
             throw new IllegalArgumentException("RemotingServer not allowed be null.");
         }
         this.remotingServer = remotingServer;
-        this.core = new DefaultCore(remotingServer);
+        this.core = core != null ? core : new DefaultCore(remotingServer);
         boolean enableBranchAsyncRemove =
                 CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
         // create branchRemoveExecutor
-        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
+        if (enableBranchAsyncRemove && sessionMode != SessionMode.FILE) {
             branchRemoveExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
                     "branchSessionRemove",
                     BRANCH_ASYNC_POOL_SIZE,
@@ -244,6 +267,73 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         } else {
             branchRemoveExecutor = null;
         }
+        if (isPipelineSupported(pipelineConfig, sessionMode)) {
+            BatchGlobalSessionCleaner.BatchDeleteHandler deleteHandler = sessions -> {
+                SessionManager rootSessionManager = SessionHolder.getRootSessionManager();
+                if (rootSessionManager != null && sessions != null && !sessions.isEmpty()) {
+                    rootSessionManager.removeGlobalSessions(sessions);
+                }
+            };
+            this.pipelineComponents = PipelineComponents.create(
+                    pipelineConfig,
+                    PhaseTwoPipelineExecutor.PhaseTwoCommitHandler.fromCoreForPipeline(this.core),
+                    deleteHandler,
+                    PipelineMetrics.withGlobalRegistry());
+            if (pipelineConfig.isPushEnabled()) {
+                this.core.setAsyncCommitPusher(
+                        session -> this.pipelineComponents.getExecutor().tryOffer(session));
+                this.pushPusherRegistered = true;
+            } else {
+                this.pushPusherRegistered = false;
+            }
+            int effectivePageSize = scanPageSize > 0 ? scanPageSize : resolveScanPageSize(sessionMode);
+            long effectiveMaxTickDurationMs = maxTickDurationMs > 0L ? maxTickDurationMs : resolveMaxTickDurationMs();
+            this.fallbackRecoveryScanner = new FallbackRecoveryScanner(
+                    pipelineConfig,
+                    SessionHolder::getRootSessionManager,
+                    this.pipelineComponents.getExecutor(),
+                    this.pipelineComponents.getDbResourceGuard(),
+                    this.pipelineComponents.getInFlightRegistry(),
+                    sessionMode,
+                    effectivePageSize,
+                    effectiveMaxTickDurationMs);
+        } else {
+            this.pipelineComponents = null;
+            this.fallbackRecoveryScanner = null;
+            this.pushPusherRegistered = false;
+        }
+    }
+
+    private static boolean isPipelineSupported(PipelineConfig pipelineConfig, SessionMode sessionMode) {
+        return pipelineConfig != null
+                && pipelineConfig.isEnabled()
+                && (sessionMode == SessionMode.DB || sessionMode == SessionMode.REDIS);
+    }
+
+    private static int resolveScanPageSize(SessionMode sessionMode) {
+        String key = sessionMode == SessionMode.REDIS
+                ? ConfigurationKeys.STORE_REDIS_QUERY_LIMIT
+                : ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT;
+        int limit = CONFIG.getInt(key, DefaultValues.DEFAULT_QUERY_LIMIT);
+        return limit > 0 ? limit : DefaultValues.DEFAULT_QUERY_LIMIT;
+    }
+
+    private static long resolveMaxTickDurationMs() {
+        long distributedLockExpireTime = CONFIG.getLong(
+                ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DefaultValues.DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
+        return Math.max(1000L, distributedLockExpireTime / 2L);
+    }
+
+    DefaultCore getCore() {
+        return core;
+    }
+
+    PipelineComponents getPipelineComponents() {
+        return pipelineComponents;
+    }
+
+    FallbackRecoveryScanner getFallbackRecoveryScanner() {
+        return fallbackRecoveryScanner;
     }
 
     public static DefaultCoordinator getInstance(RemotingServer remotingServer) {
@@ -522,6 +612,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Handle async committing.
      */
     protected void handleAsyncCommitting() {
+        if (fallbackRecoveryScanner != null
+                && pipelineComponents != null
+                && pipelineComponents.getExecutor().isRunning()) {
+            fallbackRecoveryScanner.scanAsyncCommitting();
+            return;
+        }
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.AsyncCommitting);
         Collection<GlobalSession> asyncCommittingSessions =
                 SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
@@ -757,6 +853,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Init.
      */
     public void init() {
+        if (pipelineComponents != null) {
+            pipelineComponents.start();
+        }
         retryRollbacking.scheduleAtFixedRate(
                 () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking),
                 0,
@@ -835,6 +934,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             }
         } catch (InterruptedException ignore) {
 
+        }
+        if (pushPusherRegistered) {
+            this.core.setAsyncCommitPusher(null);
+        }
+        if (pipelineComponents != null) {
+            pipelineComponents.shutdown(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS);
         }
         // 2. second close netty flow
         if (remotingServer instanceof NettyRemotingServer) {

@@ -50,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,6 +98,13 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
 
     /**the key of global transaction status for begin*/
     protected static final String REDIS_SEATA_BEGIN_TRANSACTIONS_KEY = "SEATA_BEGIN_TRANSACTIONS";
+
+    /**
+     * Maximum number of global transactions processed per pipelined batch deletion chunk so large
+     * batches do not build unbounded pipelines or hold a Jedis connection indefinitely.
+     * Package-private for Redis store subclasses and unit tests.
+     */
+    static final int MAX_BATCH_DELETE_SIZE = 500;
 
     private static volatile RedisTransactionStoreManager instance;
 
@@ -185,6 +193,23 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
+    }
+
+    @Override
+    public boolean removeGlobalSessions(List<GlobalSession> sessions) {
+        if (CollectionUtils.isEmpty(sessions)) {
+            return true;
+        }
+        List<GlobalTransactionDO> globalTransactionDOs = new ArrayList<>(sessions.size());
+        for (GlobalSession session : sessions) {
+            if (session != null) {
+                globalTransactionDOs.add(SessionConverter.convertGlobalTransactionDO(session));
+            }
+        }
+        if (globalTransactionDOs.isEmpty()) {
+            return true;
+        }
+        return deleteGlobalTransactionDOs(globalTransactionDOs);
     }
 
     /**
@@ -322,6 +347,81 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
                 pipelined.sync();
             }
             return true;
+        } catch (Exception ex) {
+            throw new RedisException(ex);
+        }
+    }
+
+    /**
+     * Batch delete global transactions in chunked pipeline mode.
+     *
+     * @param globalTransactionDOs the global transaction dos
+     * @return the boolean
+     */
+    protected boolean deleteGlobalTransactionDOs(List<GlobalTransactionDO> globalTransactionDOs) {
+        if (CollectionUtils.isEmpty(globalTransactionDOs)) {
+            return true;
+        }
+        List<GlobalTransactionDO> validDOs = new ArrayList<>(globalTransactionDOs.size());
+        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
+            if (globalTransactionDO != null) {
+                validDOs.add(globalTransactionDO);
+            }
+        }
+        if (validDOs.isEmpty()) {
+            return true;
+        }
+        for (int start = 0; start < validDOs.size(); start += MAX_BATCH_DELETE_SIZE) {
+            int end = Math.min(start + MAX_BATCH_DELETE_SIZE, validDOs.size());
+            deleteGlobalTransactionDOsChunk(validDOs.subList(start, end));
+        }
+        return true;
+    }
+
+    private void deleteGlobalTransactionDOsChunk(List<GlobalTransactionDO> chunk) {
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            List<Object> existingXids;
+            try (Pipeline checkPipeline = jedis.pipelined()) {
+                for (GlobalTransactionDO globalTransactionDO : chunk) {
+                    String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+                    checkPipeline.hget(globalKey, REDIS_KEY_GLOBAL_XID);
+                }
+                existingXids = checkPipeline.syncAndReturnAll();
+            }
+            List<GlobalTransactionDO> toDelete = new ArrayList<>(chunk.size());
+            for (int i = 0; i < chunk.size(); i++) {
+                GlobalTransactionDO globalTransactionDO = chunk.get(i);
+                Object existed = (existingXids != null && i < existingXids.size()) ? existingXids.get(i) : null;
+                if (existed instanceof Throwable) {
+                    throw new RedisException((Throwable) existed);
+                }
+                if (existed == null || StringUtils.isEmpty(String.valueOf(existed))) {
+                    LOGGER.warn(
+                            "Global transaction is not exist,xid = {}.Maybe has been deleted by another tc server",
+                            globalTransactionDO.getXid());
+                } else {
+                    toDelete.add(globalTransactionDO);
+                }
+            }
+            if (toDelete.isEmpty()) {
+                return;
+            }
+            try (Pipeline deletePipeline = jedis.pipelined()) {
+                for (GlobalTransactionDO globalTransactionDO : toDelete) {
+                    String globalKey = buildGlobalKeyByTransactionId(globalTransactionDO.getTransactionId());
+                    Integer status = globalTransactionDO.getStatus();
+                    String globalStatus = buildGlobalStatus(status);
+                    deletePipeline.lrem(globalStatus, 0, globalTransactionDO.getXid());
+                    deletePipeline.del(globalKey);
+                    if (status != null
+                            && (GlobalStatus.Begin.getCode() == status || GlobalStatus.UnKnown.getCode() == status)) {
+                        deletePipeline.zrem(REDIS_SEATA_BEGIN_TRANSACTIONS_KEY, globalKey);
+                    }
+                }
+                deletePipeline.sync();
+            }
+        } catch (RedisException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new RedisException(ex);
         }
@@ -544,7 +644,11 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
     }
 
     /**
-     * read the global session list by different condition
+     * Read the global session list by different condition.
+     *
+     * <p>When {@link SessionCondition#isRedisPagedQuery()} is {@code true} (and the query is not the
+     * single-{@link GlobalStatus#Begin} sorted-set timeout path), reads a page from the status lists
+     * using best-effort {@code LRANGE} offset pagination; DB keyset cursor fields are ignored.
      *
      * @param sessionCondition the session condition
      * @return the global sessions
@@ -569,11 +673,92 @@ public class RedisTransactionStoreManager extends AbstractTransactionStoreManage
         } else if (CollectionUtils.isNotEmpty(sessionCondition.getStatuses())) {
             if (sessionCondition.getStatuses().length == 1 && sessionCondition.getStatuses()[0] == GlobalStatus.Begin) {
                 return this.readSortByTimeoutBeginSessions(!sessionCondition.isLazyLoadBranch());
+            } else if (sessionCondition.isRedisPagedQuery()) {
+                return readSessionByPage(sessionCondition);
             } else {
                 return readSession(sessionCondition.getStatuses(), !sessionCondition.isLazyLoadBranch());
             }
         }
         return null;
+    }
+
+    /**
+     * Reads a best-effort page of global sessions across the requested status lists starting at
+     * {@link SessionCondition#getOffset()} (default {@code 0}) up to
+     * {@link SessionCondition#getPageSize()} (falling back to {@link #logQueryLimit}).
+     *
+     * <p>Because status lists mutate concurrently via {@code LREM}/{@code RPUSH}, items may be skipped
+     * or duplicated across pages and deleted session hashes may shorten a returned page below
+     * {@code pageSize}. Callers MUST be idempotent and MUST terminate on an empty page rather than on
+     * a short page.
+     */
+    private List<GlobalSession> readSessionByPage(SessionCondition sessionCondition) {
+        List<GlobalSession> globalSessions = new ArrayList<>();
+        Integer pageSize = sessionCondition.getPageSize();
+        int effectiveLimit = (pageSize != null && pageSize > 0) ? pageSize : logQueryLimit;
+        if (effectiveLimit <= 0) {
+            return globalSessions;
+        }
+        long startOffset = sessionCondition.getOffset() != null ? Math.max(sessionCondition.getOffset(), 0) : 0L;
+        List<String> statusKeys =
+                new ArrayList<>(new LinkedHashSet<>(convertStatusKeys(sessionCondition.getStatuses())));
+        if (statusKeys.isEmpty()) {
+            return globalSessions;
+        }
+        List<String> xids = readXidsByPage(statusKeys, startOffset, effectiveLimit);
+        boolean withBranchSessions = !sessionCondition.isLazyLoadBranch();
+        for (String xid : xids) {
+            GlobalSession globalSession = this.readSession(xid, withBranchSessions);
+            if (globalSession != null) {
+                globalSessions.add(globalSession);
+            }
+        }
+        return globalSessions;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<String> readXidsByPage(List<String> statusKeys, long offset, int limit) {
+        List<String> xids = new ArrayList<>();
+        try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
+            if (statusKeys.size() == 1) {
+                List<String> page = jedis.lrange(statusKeys.get(0), offset, offset + (long) limit - 1);
+                if (CollectionUtils.isNotEmpty(page)) {
+                    xids.addAll(page);
+                }
+                return xids;
+            }
+            List<Long> counts;
+            try (Pipeline pipelined = jedis.pipelined()) {
+                for (String key : statusKeys) {
+                    pipelined.llen(key);
+                }
+                counts = (List<Long>) (List<?>) pipelined.syncAndReturnAll();
+            }
+            long remainingSkip = offset;
+            long remainingTake = limit;
+            int countSize = counts == null ? 0 : counts.size();
+            for (int i = 0; i < statusKeys.size() && i < countSize && remainingTake > 0; i++) {
+                Long countObj = counts.get(i);
+                long len = countObj == null ? 0L : countObj;
+                if (len <= 0) {
+                    continue;
+                }
+                if (remainingSkip >= len) {
+                    remainingSkip -= len;
+                    continue;
+                }
+                long start = remainingSkip;
+                long take = Math.min(remainingTake, len - start);
+                long end = start + take - 1;
+                List<String> page = jedis.lrange(statusKeys.get(i), start, end);
+                remainingSkip = 0L;
+                if (CollectionUtils.isNotEmpty(page)) {
+                    xids.addAll(page);
+                    remainingTake -= page.size();
+                }
+            }
+        }
+        return xids;
     }
 
     /**
