@@ -1,0 +1,17 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "transaction.retry.resume",
+  "context": {
+    "profile": "prod"
+  },
+  "input": {
+    "xid": "10.0.0.1:8091:123",
+    "expected_direction": "rollback"
+  },
+  "options": {
+    "timeout_ms": 30000,
+    "client_request_id": "00000030-44d2-4ca8-8b6d-5b40c3e6d016",
+    "confirm_high_risk": true
+  }
+}

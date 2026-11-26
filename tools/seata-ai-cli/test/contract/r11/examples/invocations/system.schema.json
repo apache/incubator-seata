@@ -1,0 +1,12 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "system.schema",
+  "context": {},
+  "input": {
+    "command_id": "transaction.get"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}

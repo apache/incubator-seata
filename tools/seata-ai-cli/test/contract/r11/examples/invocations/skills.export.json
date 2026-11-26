@@ -1,0 +1,13 @@
+{
+  "protocol_version": "0.1",
+  "contract_revision": "R9",
+  "command": "skills.export",
+  "context": {},
+  "input": {
+    "root": "./exports",
+    "path": "skills"
+  },
+  "options": {
+    "timeout_ms": 30000
+  }
+}
