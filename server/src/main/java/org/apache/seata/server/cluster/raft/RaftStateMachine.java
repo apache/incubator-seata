@@ -137,8 +137,23 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     private ScheduledFuture<?> scheduledFuture;
 
+    private volatile boolean stopping;
+
+    /** Stop metadata submissions before JRaft tears down its apply queue. */
+    public void prepareShutdown() {
+        lock.lock();
+        try {
+            stopping = true;
+            if (scheduledFuture != null) {
+                scheduledFuture.cancel(false);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public boolean isLeader() {
-        return this.leaderTerm.get() > 0;
+        return !stopping && this.leaderTerm.get() > 0;
     }
 
     public RaftStateMachine(String group) {
@@ -232,29 +247,38 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onLeaderStart(final long term) {
-        boolean leader = isLeader();
-        this.leaderTerm.set(term);
-        LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
-        this.currentTerm.set(term);
-        syncMetadata();
-        if (!leader && RaftServerManager.isRaftMode()) {
-            CompletableFuture.runAsync(() -> {
-                LOGGER.info(
-                        "reload session, groupId: {}, session map size: {} ",
-                        group,
-                        SessionHolder.getRootSessionManager().allSessions().size());
-                SeataClusterContext.bindGroup(group);
-                try {
-                    // become the leader again,reloading global session
-                    SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(), SessionMode.RAFT, false);
-                } finally {
-                    SeataClusterContext.unbindGroup();
-                }
-            });
-            Configuration conf = RouteTable.getInstance().getConfiguration(group);
-            // A member change might trigger a leader re-election. At this point, it’s necessary to filter out
-            // non-existent members and synchronize again.
-            changePeers(conf);
+        lock.lock();
+        try {
+            if (stopping) {
+                return;
+            }
+            boolean leader = isLeader();
+            this.leaderTerm.set(term);
+            LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
+            this.currentTerm.set(term);
+            syncMetadata();
+            if (!leader && RaftServerManager.isRaftMode()) {
+                CompletableFuture.runAsync(() -> {
+                    LOGGER.info(
+                            "reload session, groupId: {}, session map size: {} ",
+                            group,
+                            SessionHolder.getRootSessionManager().allSessions().size());
+                    SeataClusterContext.bindGroup(group);
+                    try {
+                        // become the leader again,reloading global session
+                        SessionHolder.reload(
+                                SessionHolder.getRootSessionManager().allSessions(), SessionMode.RAFT, false);
+                    } finally {
+                        SeataClusterContext.unbindGroup();
+                    }
+                });
+                Configuration conf = RouteTable.getInstance().getConfiguration(group);
+                // A member change might trigger a leader re-election. At this point, it’s necessary to filter out
+                // non-existent members and synchronize again.
+                changePeers(conf);
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -325,18 +349,23 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     public void syncMetadata() {
-        if (isLeader()) {
-            SeataClusterContext.bindGroup(group);
-            try {
-                RaftClusterMetadataMsg raftClusterMetadataMsg =
-                        new RaftClusterMetadataMsg(changeOrInitRaftClusterMetadata());
-                RaftTaskUtil.createTask(
-                        status -> refreshClusterMetadata(raftClusterMetadataMsg), raftClusterMetadataMsg, null);
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
-            } finally {
-                SeataClusterContext.unbindGroup();
+        lock.lock();
+        try {
+            if (isLeader()) {
+                SeataClusterContext.bindGroup(group);
+                try {
+                    RaftClusterMetadataMsg raftClusterMetadataMsg =
+                            new RaftClusterMetadataMsg(changeOrInitRaftClusterMetadata());
+                    RaftTaskUtil.createTask(
+                            status -> refreshClusterMetadata(raftClusterMetadataMsg), raftClusterMetadataMsg, null);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                } finally {
+                    SeataClusterContext.unbindGroup();
+                }
             }
+        } finally {
+            lock.unlock();
         }
     }
 
