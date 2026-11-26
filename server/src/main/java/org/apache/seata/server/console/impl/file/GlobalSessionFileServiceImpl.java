@@ -92,10 +92,10 @@ public class GlobalSessionFileServiceImpl extends AbstractGlobalService implemen
                             || session.getTransactionServiceGroup().equals(param.getVgroup()))
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= session.getBeginTime() / 1000)
+                    (isNull(param.getTimeStart()) || session.getBeginTime() / 1000 >= param.getTimeStart() / 1000)
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= session.getBeginTime() / 1000);
+                    (isNull(param.getTimeEnd()) || session.getBeginTime() / 1000 <= param.getTimeEnd() / 1000);
         };
     }
 }
