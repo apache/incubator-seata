@@ -23,7 +23,7 @@ import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
 import { wireResult, write, serialize } from "../dist/output/emitter.js";
 const cli = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
-const base = {
+const common = {
   protocol_version: "0.1",
   contract_revision: "R9",
   ok: true,
@@ -34,8 +34,8 @@ const base = {
   context: {},
   meta: { duration_ms: 0, partial: false },
   warnings: [],
-  data: {},
 };
+const base = { ...common, data: {} };
 const error = (type) => ({
   type,
   subtype: "test",
@@ -58,7 +58,7 @@ test("envelopes use the expected exit codes and output streams", () => {
     cancelled: 11,
   })) {
     const r = wireResult({
-      ...base,
+      ...common,
       ok: false,
       state: "failed",
       error: error(type),
@@ -100,6 +100,40 @@ test("envelopes use the expected exit codes and output streams", () => {
       error: error("indeterminate"),
     }),
   );
+});
+test("the envelope enforces state, partial data and delegation metadata", () => {
+  const failed = { ...common, ok: false, state: "failed", error: error("validation") };
+  const partial = {
+    ...base,
+    ok: false,
+    state: "partial",
+    meta: { ...base.meta, partial: true },
+    error: error("partial_failure"),
+  };
+  const delegated = { ...base, meta: { ...base.meta, invoked_via: "system.invoke" } };
+  for (const valid of [base, failed, partial, delegated]) wireResult(valid);
+
+  for (const invalid of [
+    { ...base, meta: { ...base.meta, partial: true } },
+    { ...partial, meta: base.meta },
+    { ...failed, meta: { ...base.meta, partial: true } },
+    { ...failed, data: {} },
+    { ...delegated, meta: { ...delegated.meta, invoked_via: "system.version" } },
+    { ...delegated, meta: { ...delegated.meta, invoked_via: null } },
+  ])
+    assert.throws(() => wireResult(invalid), e => e.subtype === "contract_violation");
+});
+test("serialization omits undefined object fields and rejects non-finite numbers", () => {
+  const result = wireResult({
+    ...base,
+    data: { ignored: undefined, values: [undefined, 0], nested: { ignored: undefined, kept: 2 } },
+  });
+  assert.deepEqual(JSON.parse(serialize(result)).data, { values: [null, 0], nested: { kept: 2 } });
+  for (const value of [NaN, Infinity, -Infinity])
+    assert.throws(
+      () => serialize(wireResult({ ...base, data: { nested: [value] } })),
+      e => e.type === "internal" && e.subtype === "contract_violation",
+    );
 });
 test("backpressure waits for write completion; EPIPE rejects without another emission", async () => {
   let done = false,

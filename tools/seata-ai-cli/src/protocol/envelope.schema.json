@@ -141,6 +141,9 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 128
+        },
+        "invoked_via": {
+          "const": "system.invoke"
         }
       },
       "required": [
@@ -200,20 +203,20 @@
           "ok": {
             "const": true
           },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": false
+              }
+            }
+          },
+          "error": false,
           "data": {}
         },
         "required": [
           "data"
         ],
-        "not": {
-          "required": [
-            "error"
-          ],
-          "type": "object",
-          "properties": {
-            "error": {}
-          }
-        },
         "type": "object"
       }
     },
@@ -238,6 +241,14 @@
               }
             },
             "type": "object"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": true
+              }
+            }
           },
           "data": {}
         },
@@ -274,7 +285,16 @@
               }
             },
             "type": "object"
-          }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": false
+              }
+            }
+          },
+          "data": false
         },
         "required": [
           "error"

@@ -66,6 +66,7 @@ dependency:
     - pom.xml
     - saga/seata-saga-statemachine-designer/package.json
     - console/src/main/resources/static/console-fe/package.json
+    - tools/seata-ai-cli/package.json
   excludes:
     - name: org.apache.seata:*
       recursive: false

@@ -106,7 +106,7 @@ invoke.invocation = {
 await write("api/protocol/registry.json", registry);
 await write("api/protocol/outputs.json", outputs());
 
-const envelope = await read("test/contract/r11/schemas/envelope.schema.json");
+const envelope = await read("src/protocol/envelope.schema.json");
 envelope.properties.command = { enum: registry.map(spec => spec.id) };
 await write("schemas/envelope.schema.json", envelope);
 const files = [

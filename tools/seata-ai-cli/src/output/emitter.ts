@@ -114,6 +114,8 @@ export function serialize(result: Result): string {
       string(value);
       return;
     }
+    if (typeof value === "number" && !Number.isFinite(value))
+      throw new CliError("internal", "contract_violation", "Output contains a non-finite number.");
     if (
       value === null ||
       typeof value === "boolean" ||
@@ -134,6 +136,7 @@ export function serialize(result: Result): string {
     append("{");
     let first = true;
     for (const [key, item] of Object.entries(value)) {
+      if (item === undefined) continue;
       if (!first) append(",");
       first = false;
       string(key);

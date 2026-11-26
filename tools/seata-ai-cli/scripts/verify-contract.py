@@ -19,6 +19,9 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker
 
 root = Path(__file__).resolve().parent.parent
+envelope = json.loads((root / "schemas/envelope.schema.json").read_text())
+Draft202012Validator.check_schema(envelope)
+
 count = 0
 fixtures = root / "test/contract/r11/examples/invocations"
 schemas = root / "schemas/invocations"
@@ -32,4 +35,4 @@ for path in sorted(schemas.glob("*.schema.json")):
     example = json.loads((root / "test/contract/r11/examples/invocations" / (command + ".json")).read_text())
     Draft202012Validator(schema, format_checker=FormatChecker()).validate(example)
     count += 1
-print(f"{count} generated invocation schemas and independent examples passed Python validation")
+print(f"Envelope schema and {count} invocation schemas with independent examples passed Python validation")
