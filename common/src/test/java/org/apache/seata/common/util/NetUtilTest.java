@@ -53,11 +53,8 @@ public class NetUtilTest {
      */
     @Test
     public void testToStringAddress() {
-        try {
-            String stringAddress = NetUtil.toStringAddress(InetSocketAddress.createUnresolved("127.0.0.1", 9828));
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(NullPointerException.class);
-        }
+        assertThat(NetUtil.toStringAddress(InetSocketAddress.createUnresolved("127.0.0.1", 9828)))
+                .isEqualTo("127.0.0.1:9828");
     }
 
     /**
@@ -105,11 +102,7 @@ public class NetUtilTest {
      */
     @Test
     public void testToInetSocketAddress() {
-        try {
-            NetUtil.toInetSocketAddress("23939:ks");
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(IllegalArgumentException.class);
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NetUtil.toInetSocketAddress("23939:ks"));
     }
 
     /**
@@ -160,11 +153,7 @@ public class NetUtilTest {
      */
     @Test
     public void testToLong() {
-        try {
-            NetUtil.toLong("kdskdsfk");
-        } catch (Exception e) {
-            assertThat(e).isInstanceOf(IllegalArgumentException.class);
-        }
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NetUtil.toLong("kdskdsfk"));
     }
 
     /**
