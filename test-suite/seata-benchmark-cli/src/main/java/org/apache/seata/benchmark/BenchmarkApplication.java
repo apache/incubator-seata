@@ -18,7 +18,6 @@ package org.apache.seata.benchmark;
 
 import org.apache.seata.benchmark.config.BenchmarkConfig;
 import org.apache.seata.benchmark.config.BenchmarkConfigLoader;
-import org.apache.seata.benchmark.constant.BenchmarkConstants;
 import org.apache.seata.core.model.BranchType;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -125,24 +124,6 @@ public class BenchmarkApplication implements Callable<Integer> {
     private Integer sagaTimeoutMs;
 
     public static void main(String[] args) {
-        // Parse server address from args before any Seata class loading
-        String serverAddr = BenchmarkConstants.DEFAULT_SERVER_ADDRESS;
-        String txGroup = BenchmarkConstants.DEFAULT_TX_GROUP;
-        for (int i = 0; i < args.length; i++) {
-            if (("-s".equals(args[i]) || "--server".equals(args[i])) && i + 1 < args.length) {
-                serverAddr = args[i + 1];
-            }
-            if ("--tx-service-group".equals(args[i]) && i + 1 < args.length) {
-                txGroup = args[i + 1];
-            }
-        }
-
-        // Set Seata configuration properties BEFORE any Seata class loading
-        System.setProperty("seata.config.type", "file");
-        System.setProperty("seata.registry.type", "file");
-        System.setProperty("service.default.grouplist", serverAddr);
-        System.setProperty("service.vgroupMapping." + txGroup, "default");
-
         int exitCode = new CommandLine(new BenchmarkApplication()).execute(args);
         System.exit(exitCode);
     }
@@ -155,6 +136,11 @@ public class BenchmarkApplication implements Callable<Integer> {
 
         BenchmarkConfig config = buildConfig();
         config.validate();
+        // Configure the registry before the runner initializes the Seata clients.
+        System.setProperty("seata.config.type", "file");
+        System.setProperty("seata.registry.type", "file");
+        System.setProperty("service.default.grouplist", config.getServer());
+        System.setProperty("service.vgroupMapping." + config.getTxServiceGroup(), "default");
         printConfiguration(config);
 
         BenchmarkRunner runner = new BenchmarkRunner(config);
