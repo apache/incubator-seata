@@ -53,7 +53,6 @@ public final class BenchmarkConstants {
 
     // Latency sampling configuration
     public static final int MAX_LATENCY_SAMPLES = 500000;
-    public static final long LATENCY_STATS_CACHE_MS = 1000;
 
     // TPS configuration
     public static final int UNLIMITED_TPS_THRESHOLD = 10000;
