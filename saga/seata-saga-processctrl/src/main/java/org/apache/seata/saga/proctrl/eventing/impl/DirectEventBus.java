@@ -55,7 +55,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
             try (ResourceLock ignored = contextLock.obtain()) {
                 currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
-                    currentStack = new Stack<>();
+                    currentStack = new ExecutionStack();
                     context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
                     isFirstEvent = true;
                 }
@@ -77,5 +77,14 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
             }
         }
         return true;
+    }
+
+    private static class ExecutionStack extends Stack<ProcessContext> {
+
+        @Override
+        public String toString() {
+            // Pending contexts refer back to this stack through their variables or parent context.
+            return "ExecutionStack{size=" + size() + '}';
+        }
     }
 }
