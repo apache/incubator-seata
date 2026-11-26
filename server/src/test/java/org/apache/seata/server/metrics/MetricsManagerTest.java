@@ -25,18 +25,26 @@ import org.apache.seata.core.event.ExceptionEvent;
 import org.apache.seata.core.event.GlobalTransactionEvent;
 import org.apache.seata.core.event.RateLimitEvent;
 import org.apache.seata.core.rpc.Disposable;
+import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.exporter.ExporterFactory;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
+import org.apache.seata.server.ParameterParser;
+import org.apache.seata.server.Server;
 import org.apache.seata.server.ServerRunner;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.event.EventBusManager;
+import org.apache.seata.server.instance.SeataInstanceStrategy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -49,6 +57,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
@@ -70,8 +79,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -99,6 +111,8 @@ class MetricsManagerTest {
     @Test
     @SuppressWarnings("unchecked")
     void retriesPrometheusAndReleasesItsPortOnServerShutdown() throws Exception {
+        DefaultCoordinator coordinator = mock(DefaultCoordinator.class);
+        IllegalStateException startupFailure = new IllegalStateException("injected failure before coordinator startup");
         // Preserve resources owned by any running Spring test context in this test JVM.
         Map<Class<?>, Object> spiLoaders =
                 (Map<Class<?>, Object>) ReflectionTestUtils.getField(EnhancedServiceLoader.class, "SERVICE_LOADERS");
@@ -109,7 +123,6 @@ class MetricsManagerTest {
         Object previousRegistryLoader = spiLoaders.remove(Registry.class);
         disposables.clear();
         MetricsManager manager = new MetricsManager();
-        ServerRunner runner = new ServerRunner();
         Configuration config = mock(Configuration.class);
         Registry registry = mock(Registry.class);
         Summary summary = mock(Summary.class);
@@ -120,12 +133,18 @@ class MetricsManagerTest {
                 .thenReturn("prometheus");
         when(registry.getSummary(any())).thenReturn(summary);
 
-        try (MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
+        // Initialize configuration-dependent classes before replacing ConfigurationFactory.
+        try (MockedConstruction<ParameterParser> parsers = mockConstruction(ParameterParser.class);
+                MockedStatic<NettyServerConfig> netty = mockStatic(NettyServerConfig.class);
+                MockedStatic<ConfigurationFactory> configurations = mockStatic(ConfigurationFactory.class);
                 MockedStatic<RegistryFactory> registries = mockStatic(RegistryFactory.class);
-                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class)) {
+                MockedStatic<EventBusManager> eventBuses = mockStatic(EventBusManager.class);
+                MockedStatic<MetricsManager> managers = mockStatic(MetricsManager.class)) {
+            netty.when(NettyServerConfig::getMinServerPoolSize).thenThrow(startupFailure);
             configurations.when(ConfigurationFactory::getInstance).thenReturn(config);
             registries.when(RegistryFactory::getInstance).thenReturn(registry);
             eventBuses.when(EventBusManager::get).thenReturn(eventBus);
+            managers.when(MetricsManager::get).thenReturn(manager);
 
             int port;
             try (ServerSocket occupied = new ServerSocket(0)) {
@@ -136,17 +155,12 @@ class MetricsManagerTest {
                 verifyNoInteractions(eventBus);
             }
 
-            MetricsSubscriber retired = startAndStopMetrics(manager, runner, eventBus, registry, port, null);
+            MetricsSubscriber retired = startAndStopMetrics(manager, eventBus, registry, port, startupFailure, null);
             doThrow(new IllegalStateException("injected unregister failure"))
                     .when(eventBus)
                     .unregister(any(MetricsSubscriber.class));
-            MetricsSubscriber next = startAndStopMetrics(
-                    manager,
-                    runner,
-                    eventBus,
-                    registry,
-                    port,
-                    new IllegalStateException("coordinator shutdown failed"));
+            MetricsSubscriber next =
+                    startAndStopMetrics(manager, eventBus, registry, port, startupFailure, coordinator);
             assertNotSame(retired, next);
         } finally {
             spiLoaders.compute(Registry.class, (type, loader) -> previousRegistryLoader);
@@ -294,33 +308,56 @@ class MetricsManagerTest {
 
     private static MetricsSubscriber startAndStopMetrics(
             MetricsManager manager,
-            ServerRunner runner,
             EventBus eventBus,
             Registry registry,
             int port,
-            IllegalStateException coordinatorFailure)
+            IllegalStateException startupFailure,
+            DefaultCoordinator coordinator)
             throws Exception {
-        try {
-            manager.init();
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.registerBean("seataServer", Server.class);
+            context.registerBean(SeataInstanceStrategy.class, () -> mock(SeataInstanceStrategy.class));
+            context.registerBean(ServerRunner.class);
+            context.refresh();
+            Server server = context.getBean(Server.class);
+            Disposable other = mock(Disposable.class);
+            ServerRunner.addDisposable(other);
+            assertSame(startupFailure, assertThrows(IllegalStateException.class, () -> server.start(new String[0])));
             assertThrows(BindException.class, () -> new ServerSocket(port).close());
             manager.init();
             ArgumentCaptor<MetricsSubscriber> subscriber = ArgumentCaptor.forClass(MetricsSubscriber.class);
             verify(eventBus).register(subscriber.capture());
             MetricsSubscriber retired = subscriber.getValue();
-            ServerRunner.addDisposable(manager);
-            if (coordinatorFailure == null) {
-                runner.destroy();
+            AtomicBoolean portBoundDuringCoordinatorShutdown = new AtomicBoolean();
+            if (coordinator != null) {
+                ReflectionTestUtils.setField(server, "coordinator", coordinator);
+                doThrow(new IllegalStateException("unrelated shutdown failed"))
+                        .when(other)
+                        .destroy();
+                doAnswer(call -> {
+                            assertThrows(BindException.class, () -> new ServerSocket(port).close());
+                            portBoundDuringCoordinatorShutdown.set(true);
+                            throw new IllegalStateException("coordinator shutdown failed");
+                        })
+                        .when(coordinator)
+                        .destroy();
             } else {
-                ServerRunner.addDisposable(() -> {
-                    assertSame(registry, manager.getRegistry());
-                    throw coordinatorFailure;
-                });
-                assertSame(coordinatorFailure, assertThrows(IllegalStateException.class, runner::destroy));
+                context.getBean(ServerRunner.class).destroy();
+                try (ServerSocket released = new ServerSocket(port)) {
+                    assertEquals(port, released.getLocalPort());
+                }
             }
+            context.close();
             try (ServerSocket released = new ServerSocket(port)) {
                 assertEquals(port, released.getLocalPort());
             }
-            runner.destroy();
+            context.close();
+            if (coordinator != null) {
+                InOrder shutdown = inOrder(other, coordinator);
+                shutdown.verify(other).destroy();
+                shutdown.verify(coordinator).destroy();
+                assertTrue(portBoundDuringCoordinatorShutdown.get());
+            }
             verify(eventBus).unregister(same(retired));
             verify(registry).clearUp();
             assertNull(manager.getRegistry());

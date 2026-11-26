@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -25,6 +26,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
@@ -41,6 +43,7 @@ import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
@@ -51,7 +54,10 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  * The type Server.
  */
 @Component("seataServer")
-public class Server {
+public class Server implements Disposable {
+
+    private final AtomicReference<MetricsManager> metricsManager = new AtomicReference<>();
+    private volatile DefaultCoordinator coordinator;
 
     @Resource
     SeataInstanceStrategy seataInstanceStrategy;
@@ -74,10 +80,10 @@ public class Server {
             requireIpLiteral(parameterParser.getHost());
         }
 
-        // initialize the metrics
-        MetricsManager metricsManager = MetricsManager.get();
-        metricsManager.init();
-        ServerRunner.addDisposable(metricsManager);
+        MetricsManager metrics = MetricsManager.get();
+        metrics.init();
+        metricsManager.set(metrics);
+        ServerRunner.addDisposable(this);
 
         ThreadPoolExecutor workingThreads = ThreadPoolExecutorFactory.newThreadPoolExecutor(
                 "ServerHandlerThread",
@@ -130,12 +136,30 @@ public class Server {
         // log store mode : file, db, redis
         SessionHolder.init();
         LockerManagerFactory.init();
+        this.coordinator = coordinator;
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
         Optional.ofNullable(seataInstanceStrategy).ifPresent(SeataInstanceStrategy::init);
-        // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
-        ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
+    }
+
+    // Spring also disposes this bean if an earlier ServerRunner callback fails.
+    @PreDestroy
+    @Override
+    public void destroy() {
+        MetricsManager initializedMetrics = metricsManager.getAndSet(null);
+        if (initializedMetrics == null) {
+            return;
+        }
+        DefaultCoordinator initializedCoordinator = coordinator;
+        coordinator = null;
+        try {
+            if (initializedCoordinator != null) {
+                initializedCoordinator.destroy();
+            }
+        } finally {
+            initializedMetrics.destroy();
+        }
     }
 
     static String getRegistryConfig(String dataId) {
