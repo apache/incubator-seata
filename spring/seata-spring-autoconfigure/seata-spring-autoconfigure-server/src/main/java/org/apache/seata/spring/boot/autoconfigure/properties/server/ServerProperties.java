@@ -33,6 +33,7 @@ public class ServerProperties {
     private Boolean enableParallelHandleBranch = false;
     private Integer retryDeadThreshold = 70000;
     private Integer servicePort;
+    private Integer registryPort;
     private Integer xaerNotaRetryTimeout = 60000;
 
     private Boolean applicationDataLimitCheck = false;
@@ -98,6 +99,15 @@ public class ServerProperties {
 
     public ServerProperties setServicePort(Integer servicePort) {
         this.servicePort = servicePort;
+        return this;
+    }
+
+    public Integer getRegistryPort() {
+        return registryPort;
+    }
+
+    public ServerProperties setRegistryPort(Integer registryPort) {
+        this.registryPort = registryPort;
         return this;
     }
 

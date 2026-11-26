@@ -18,6 +18,7 @@ package org.apache.seata.server.store;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.core.rpc.AdvertisedEndpointResolver;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -59,7 +60,8 @@ public interface VGroupMappingStoreManager {
         Map<String, Object> map = this.readVGroups();
         instance.addMetadata("vGroup", map);
         try {
-            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            InetSocketAddress address =
+                    new InetSocketAddress(XID.getIpAddress(), AdvertisedEndpointResolver.resolveTransactionPort());
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }

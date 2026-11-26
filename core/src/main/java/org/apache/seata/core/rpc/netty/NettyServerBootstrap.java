@@ -39,6 +39,7 @@ import org.apache.seata.core.protocol.detector.Http2Detector;
 import org.apache.seata.core.protocol.detector.HttpDetector;
 import org.apache.seata.core.protocol.detector.ProtocolDetector;
 import org.apache.seata.core.protocol.detector.SeataDetector;
+import org.apache.seata.core.rpc.AdvertisedEndpointResolver;
 import org.apache.seata.core.rpc.RemotingBootstrap;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -209,7 +210,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             Instance instance = Instance.getInstance();
             // Lines 177-180 are just for compatibility with test cases
             if (instance.getTransaction() == null) {
-                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
+                Instance.getInstance()
+                        .setTransaction(new Node.Endpoint(
+                                XID.getIpAddress(), AdvertisedEndpointResolver.resolveTransactionPort(), "netty"));
             }
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(Instance.getInstance());
