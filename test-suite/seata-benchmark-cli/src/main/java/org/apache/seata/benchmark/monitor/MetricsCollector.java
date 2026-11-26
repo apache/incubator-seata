@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Metrics collector with export capability
@@ -63,11 +64,11 @@ public class MetricsCollector {
             writer.println("Execution Failed Count," + metrics.getExecutionFailedCount());
             writer.println("Compensation Failed Count," + metrics.getCompensationFailedCount());
             writer.println("Unknown Count," + metrics.getUnknownCount());
-            writer.println("Success Rate (%)," + String.format("%.2f", metrics.getSuccessRate()));
-            writer.println("Committed Rate (%)," + String.format("%.2f", metrics.getCommittedRate()));
-            writer.println("Compensated Rate (%)," + String.format("%.2f", metrics.getCompensatedRate()));
-            writer.println("End-State Success Rate (%)," + String.format("%.2f", metrics.getEndStateSuccessRate()));
-            writer.println("Average TPS," + String.format("%.2f", metrics.getAverageTps()));
+            writer.println("Success Rate (%)," + String.format(Locale.ROOT, "%.2f", metrics.getSuccessRate()));
+            writer.println("Committed Rate (%)," + String.format(Locale.ROOT, "%.2f", metrics.getCommittedRate()));
+            writer.println("Compensated Rate (%)," + String.format(Locale.ROOT, "%.2f", metrics.getCompensatedRate()));
+            writer.println("End-State Success Rate (%)," + String.format(Locale.ROOT, "%.2f", metrics.getEndStateSuccessRate()));
+            writer.println("Average TPS," + String.format(Locale.ROOT, "%.2f", metrics.getAverageTps()));
             writer.println("Elapsed Time (s)," + metrics.getElapsedTimeSeconds());
 
             BenchmarkMetrics.LatencyStats latency = metrics.getLatencyStats();
