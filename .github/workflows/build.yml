@@ -81,9 +81,27 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java }}
+      - name: "Test distribution server launcher"
+        if: matrix.java == '17'
+        run: bash distribution/src/test/bin/seata-server-test.sh
       # step 4
       - name: "Print maven version"
         run: ./mvnw -version
+      - name: "Check distribution JDK requirement"
+        env:
+          BUILD_JAVA_VERSION: ${{ matrix.java }}
+        run: |
+          if [ "$BUILD_JAVA_VERSION" -ge 25 ]; then
+            ./mvnw -B -pl :seata-parent validate -Prelease-seata
+          else
+            if ./mvnw -B -pl :seata-parent validate -Prelease-seata > release-jdk-check.log 2>&1; then
+              cat release-jdk-check.log
+              echo "The complete distribution unexpectedly accepted JDK $BUILD_JAVA_VERSION"
+              exit 1
+            fi
+            cat release-jdk-check.log
+            grep -F 'The complete Seata distribution requires JDK 25 or later.' release-jdk-check.log
+          fi
       # step 5
       - name: "Restore local maven repository cache"
         uses: actions/cache/restore@v4
@@ -111,7 +129,7 @@ jobs:
           echo "CHANGED_FILES: $CHANGED_FILES"
           export CHECKSTYLE_INCLUDES=$(echo "$CHANGED_FILES" | grep '\.java$' | sed -e 's#.*src/main/java/##g' -e 's#.*src/test/java/##g' | tr '\n' ',')
           echo "CHECKSTYLE_INCLUDES: $CHECKSTYLE_INCLUDES"
-          mvn -T 4C -e -B clean checkstyle:check -Dcheckstyle.skip=false -Dcheckstyle.includes=$CHECKSTYLE_INCLUDES
+          ./mvnw -T 4C -e -B clean checkstyle:check -Dcheckstyle.skip=false -Dcheckstyle.includes=$CHECKSTYLE_INCLUDES
       # step 6.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         env:
@@ -175,3 +193,7 @@ jobs:
               -Prelease-seata \
               -DskipTests \
               -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+      - name: "Check distribution application artifacts"
+        run: |
+          test -s server/target/seata-server-exec.jar
+          test -s namingserver/target/seata-namingserver-exec.jar

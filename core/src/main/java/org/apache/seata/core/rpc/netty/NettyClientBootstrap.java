@@ -200,7 +200,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                                         nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                                         nettyClientConfig.getChannelMaxAllIdleSeconds()));
                         channel.pipeline().addLast(new GrpcDecoder());
-                        channel.pipeline().addLast(new GrpcEncoder());
+                        channel.pipeline().addLast(new GrpcEncoder(false, address));
                         if (channelHandlers != null) {
                             addChannelPipelineLast(channel, channelHandlers);
                         }

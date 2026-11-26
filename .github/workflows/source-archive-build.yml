@@ -1,0 +1,88 @@
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements. See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Source archive build
+
+on:
+  push:
+    branches: [ 2.x, develop, master ]
+  pull_request:
+    branches: [ 2.x, develop, master ]
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  source-archive-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Assemble source archive
+        shell: bash
+        run: |
+          ./mvnw -B -Psource-release -pl :seata-parent assembly:single
+          archives=(target/apache-seata-*-incubating-src.tar.gz)
+          test "${#archives[@]}" -eq 1
+          test -s "${archives[0]}"
+          mkdir "$RUNNER_TEMP/seata-source"
+          tar -xzf "${archives[0]}" -C "$RUNNER_TEMP/seata-source" --strip-components=1
+      - name: Build the extracted source with an isolated Maven repository
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP/seata-source"
+          test ! -e .git
+          test -s distribution/pom.xml
+          test -s distribution/release-seata.xml
+          test -s console/src/main/resources/static/console-fe/package-lock.json
+          test -s saga/seata-saga-statemachine-designer/package-lock.json
+          # Do not restore Maven caches: a locally installed Seata SNAPSHOT must
+          # not hide a missing module in the source archive.
+          test ! -e "$RUNNER_TEMP/seata-source-m2"
+          ./mvnw -B -T 2 clean install -Prelease-seata -DskipTests \
+            -Dmaven.git-commit-id.skip=true \
+            -Dmaven.repo.local="$RUNNER_TEMP/seata-source-m2" \
+            | tee "$RUNNER_TEMP/seata-source-build.log"
+      - name: Verify the rebuilt distribution
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP/seata-source"
+          test -s server/target/seata-server-exec.jar
+          test -s namingserver/target/seata-namingserver-exec.jar
+          archives=(distribution/target/apache-seata-*-incubating-bin.tar.gz)
+          test "${#archives[@]}" -eq 1
+          tar -tzf "${archives[0]}" > "$RUNNER_TEMP/seata-binary-contents.txt"
+          grep -E '/seata-server/target/seata-server.jar$' "$RUNNER_TEMP/seata-binary-contents.txt"
+          grep -E '/seata-namingserver/target/seata-namingserver.jar$' "$RUNNER_TEMP/seata-binary-contents.txt"
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-archive-build-diagnostics
+          path: |
+            ${{ runner.temp }}/seata-source-build.log
+            ${{ runner.temp }}/seata-binary-contents.txt
+          if-no-files-found: ignore

@@ -16,34 +16,46 @@
  */
 package org.apache.seata.server.storage.redis.store;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.seata.common.exception.RedisException;
 import org.apache.seata.common.util.BeanUtils;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
+import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
+import org.apache.seata.server.store.TransactionStoreManager.LogOperation;
 import org.junit.jupiter.api.*;
 import org.mockito.MockedStatic;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import redis.clients.jedis.*;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@MockitoBean(types = ServerRunner.class)
 class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
     private Jedis jedis;
     private Pipeline pipeline;
     private Transaction transaction;
     private MockedStatic<JedisPooledFactory> factory;
     private RedisTransactionStoreManager store;
+    private ImmutableMap<LogOperation, Function<GlobalTransactionDO, Boolean>> previousGlobalOperations;
+    private ImmutableMap<LogOperation, Function<BranchTransactionDO, Boolean>> previousBranchOperations;
 
     @BeforeEach
     void open() {
+        previousGlobalOperations = RedisTransactionStoreManager.globalMap;
+        previousBranchOperations = RedisTransactionStoreManager.branchMap;
         jedis = mock(Jedis.class);
         pipeline = mock(Pipeline.class);
         transaction = mock(Transaction.class);
@@ -51,12 +63,19 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         factory.when(JedisPooledFactory::getJedisInstance).thenReturn(jedis);
         when(jedis.pipelined()).thenReturn(pipeline);
         when(jedis.multi()).thenReturn(transaction);
+        // The shared maps can hold method references bound to a Lua store.
+        RedisTransactionStoreManager.globalMap = null;
+        RedisTransactionStoreManager.branchMap = null;
         store = new RedisTransactionStoreManager();
     }
 
     @AfterEach
     void close() {
-        factory.close();
+        RedisTransactionStoreManager.globalMap = previousGlobalOperations;
+        RedisTransactionStoreManager.branchMap = previousBranchOperations;
+        if (factory != null) {
+            factory.close();
+        }
     }
 
     private GlobalTransactionDO global() {
@@ -199,7 +218,15 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         assertEquals(1, store.findBranchSessionByXid(xid).size());
         assertEquals(1, store.readSession(condition).size());
         assertEquals(1, store.readSession(new SessionCondition(xid)).size());
-        assertTrue(store.readSession(xid, false).getBranchSessions().isEmpty());
+        SessionManager rootSessionManager = mock(SessionManager.class);
+        try (MockedStatic<SessionHolder> holder = mockStatic(SessionHolder.class)) {
+            holder.when(SessionHolder::getRootSessionManager).thenReturn(rootSessionManager);
+            GlobalSession lazySession = store.readSession(xid, false);
+            assertEquals(xid, lazySession.getXid());
+            verifyNoInteractions(rootSessionManager);
+            assertTrue(lazySession.getBranchSessions().isEmpty());
+            verify(rootSessionManager).findGlobalSession(xid, true);
+        }
     }
 
     @Test
@@ -263,10 +290,8 @@ class RedisTransactionStoreUnitTest extends BaseSpringBootTest {
         branch.setBranchId(7L);
         branch.setBranchType(org.apache.seata.core.model.BranchType.AT);
         branch.setStatus(org.apache.seata.core.model.BranchStatus.Registered);
-        assertTrue(store.writeSession(
-                org.apache.seata.server.store.TransactionStoreManager.LogOperation.GLOBAL_ADD, global));
-        assertTrue(store.writeSession(
-                org.apache.seata.server.store.TransactionStoreManager.LogOperation.BRANCH_ADD, branch));
+        assertTrue(store.writeSession(LogOperation.GLOBAL_ADD, global));
+        assertTrue(store.writeSession(LogOperation.BRANCH_ADD, branch));
         verify(pipeline).hmset(eq("SEATA_GLOBAL_42"), anyMap());
         verify(pipeline).hmset(eq("SEATA_BRANCH_7"), anyMap());
     }

@@ -76,7 +76,7 @@ public class Http2Detector implements ProtocolDetector {
                 final ChannelPipeline p = ctx.pipeline();
                 if (contentType != null && contentType.toString().endsWith("grpc")) {
                     p.addLast(new GrpcDecoder());
-                    p.addLast(new GrpcEncoder());
+                    p.addLast(new GrpcEncoder(true));
                     p.addLast(serverHandlers);
                 } else {
                     p.addLast(new Http2HttpHandler());
