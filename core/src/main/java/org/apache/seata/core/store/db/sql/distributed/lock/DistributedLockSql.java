@@ -28,6 +28,20 @@ public interface DistributedLockSql {
     String getSelectDistributeForUpdateSql(String distributedLockTable);
 
     /**
+     * Get the select distribute lock sql with NOWAIT semantics for fast-fail
+     * acquisition. Dialects that do not support NOWAIT should fall back to the
+     * regular {@link #getSelectDistributeForUpdateSql(String)} so the locker
+     * keeps the legacy blocking behavior.
+     *
+     * @param distributedLockTable the table name of the distribute lock table
+     * @return the sql with NOWAIT clause when supported, otherwise the regular SELECT FOR UPDATE
+     * @since 2.5.0
+     */
+    default String getSelectDistributeForUpdateNoWaitSql(String distributedLockTable) {
+        return getSelectDistributeForUpdateSql(distributedLockTable);
+    }
+
+    /**
      * Get insert distribute lock sql
      * @param distributedLockTable the table name of the distribute lock table
      * @return the sql
