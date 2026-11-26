@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request';
+import { createRequest } from './request'
 
-const requestV2 = createRequest('/api/v2');
+const requestV2 = createRequest('/api/v2')
 
-export default requestV2;
+export default requestV2
