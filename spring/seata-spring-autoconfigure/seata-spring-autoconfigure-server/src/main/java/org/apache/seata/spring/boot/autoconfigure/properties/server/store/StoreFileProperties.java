@@ -31,6 +31,7 @@ public class StoreFileProperties {
     private Integer fileWriteBufferCacheSize = 16384;
     private Integer sessionReloadReadSize = DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE;
     private String flushDiskMode = "async";
+    private String engine = "file";
 
     public String getDir() {
         return dir;
@@ -83,6 +84,15 @@ public class StoreFileProperties {
 
     public StoreFileProperties setFlushDiskMode(String flushDiskMode) {
         this.flushDiskMode = flushDiskMode;
+        return this;
+    }
+
+    public String getEngine() {
+        return engine;
+    }
+
+    public StoreFileProperties setEngine(String engine) {
+        this.engine = engine;
         return this;
     }
 }
