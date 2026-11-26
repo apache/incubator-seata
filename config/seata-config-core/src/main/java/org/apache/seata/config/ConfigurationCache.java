@@ -34,8 +34,11 @@ public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String PROXY_METHOD_PREFIX = "get";
 
-    private static final String[] NOT_PROXY_METHOD_NAMES =
-            new String[] {PROXY_METHOD_PREFIX + "LatestConfig", PROXY_METHOD_PREFIX + "ConfigListeners"};
+    private static final String[] NOT_PROXY_METHOD_NAMES = new String[] {
+        PROXY_METHOD_PREFIX + "LatestConfig",
+        PROXY_METHOD_PREFIX + "ConfigListeners",
+        PROXY_METHOD_PREFIX + "ConfigFromSys"
+    };
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private static final Set<String> DATA_ID_CACHED = new HashSet<>();
