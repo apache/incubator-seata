@@ -30,6 +30,77 @@ you only need to follow the instructions below and keep the corresponding config
 | store.db.user            | service.vgroupMapping.default_tx_group                       |
 | store.db.password        | service.disableGlobalTransaction                             |
 
+## Configuration Architecture
+
+Before using these scripts, it is important to understand the Seata configuration architecture:
+
+### Two Configuration Files
+
+Seata uses two distinct configuration files:
+
+1. **`server/src/main/resources/application.yml`** — The Seata **server** configuration file (Spring Boot style). It contains:
+   - Server port, logging, and Spring application settings
+   - `seata.config.type` — Where the server reads its configuration from (`file`, `nacos`, `consul`, `apollo`, `zk`, `etcd3`)
+   - `seata.registry.type` — Where the server registers itself for service discovery (`file`, `nacos`, `eureka`, `redis`, `zk`, `consul`, `etcd3`, `sofa`, `seata`)
+   - `seata.store.mode` — Transaction log storage mode (`file`, `db`, `redis`, `raft`)
+
+2. **`script/config-center/config.txt`** — The **client-side** configuration file (key-value properties format). It contains:
+   - Transport settings (protocol, heartbeat, thread pool)
+   - Transaction group mappings (`service.vgroupMapping.xxx`)
+   - Client-side settings (lock, undo, retry policies)
+   - Storage configuration (when `store.mode=db` or `redis`)
+
+### How They Relate
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     Seata Server                              │
+│  ┌────────────────────────────────┐                          │
+│  │  application.yml (server config)│                          │
+│  │  - seata.config.type=nacos     │──┐                       │
+│  │  - seata.registry.type=nacos   │  │                       │
+│  │  - seata.store.mode=db         │  │                       │
+│  └────────────────────────────────┘  │                       │
+└──────────────────────────────────────┼───────────────────────┘
+                                       │
+                                       │ reads config from
+                                       ▼
+┌──────────────────────────────────────────────────────────────┐
+│              Configuration Center (e.g. Nacos)               │
+│  ┌────────────────────────────────┐                          │
+│  │  config.txt (client config)   │                          │
+│  │  - transport.*                │                          │
+│  │  - service.vgroupMapping.*    │                          │
+│  │  - store.* (db settings)      │                          │
+│  └────────────────────────────────┘                          │
+└──────────────────────────────────────────────────────────────┘
+                                       ▲
+                                       │ reads config from
+┌──────────────────────────────────────┼───────────────────────┐
+│                     Seata Client (TM/RM)                     │
+│  ┌────────────────────────────────┐                          │
+│  │  application.yml (client)      │                          │
+│  │  - seata.tx-service-group     │                          │
+│  │  - seata.service.vgroup-mapping│                         │
+│  │  - seata.config.type=nacos     │──┘                       │
+│  └────────────────────────────────┘                          │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### Common Questions
+
+**Q: Where should `seata.config.nacos.data-id` be placed?**
+
+A: In the **client's** `application.yml`, this setting tells the Seata client which Nacos data ID to read for client configuration. On the server side, `seata.config.type=nacos` in `application.yml` tells the server to read from Nacos instead of the local `config.txt`.
+
+**Q: What does `config.txt` do?**
+
+A: `config.txt` contains the default client-side configuration. The scripts in this directory (`nacos-config.sh`, `apollo-config.sh`, etc.) push these configurations **into** your configuration center (Nacos, Apollo, Consul, etc.) so that both the Seata server and clients can read them centrally.
+
+**Q: Should I use `config.txt` or `application.yml`?**
+
+A: Both. `application.yml` configures the server itself, while `config.txt` provides the transaction-related configuration that clients need. When using a configuration center (Nacos, Apollo, etc.), the scripts push `config.txt` content into the center, and both server and clients read from there.
+
 ## Script Introduction
 
 The Script has interactive and non-interactive configuration modes,different patterns are distinguished by different file names.
