@@ -132,8 +132,17 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public void xaCommit(String xid, long branchId, String applicationData) throws XAException {
         try (ResourceLock ignored = resourceLock.obtain()) {
-            XAXid xaXid = XAXidBuilder.build(xid, branchId);
-            xaResource.commit(xaXid, false);
+            XAXid xaXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
+            try {
+                xaResource.commit(xaXid, false);
+            } catch (XAException e) {
+                if (isLegacyPreparedBranch(e, xaXid)) {
+                    // resolve the branch with its original physical XA identity
+                    xaResource.commit(XAXidBuilder.build(xid, branchId), false);
+                } else {
+                    throw e;
+                }
+            }
             releaseIfNecessary();
         }
     }
@@ -149,8 +158,17 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             if (this.xaBranchXid != null) {
                 xaRollback(xaBranchXid);
             } else {
-                XAXid xaXid = XAXidBuilder.build(xid, branchId);
-                xaRollback(xaXid);
+                XAXid xaXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
+                try {
+                    xaRollback(xaXid);
+                } catch (XAException e) {
+                    if (isLegacyPreparedBranch(e, xaXid)) {
+                        // resolve the branch with its original physical XA identity
+                        xaRollback(XAXidBuilder.build(xid, branchId));
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
     }
@@ -164,6 +182,19 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         xaEnd(xaXid, XAResource.TMFAIL);
         xaResource.rollback(xaXid);
         releaseIfNecessary();
+    }
+
+    /**
+     * A DM branch prepared by an RM running a version before the per-branch-gtrid format keeps
+     * the legacy physical XA identity (formatId 9752, gtrid = xid). When the rebuilt
+     * per-branch-qualified Xid misses such a branch (XAER_NOTA) during phase two, the commit or
+     * rollback must be retried once with the legacy Xid, so that an upgraded RM can still resolve
+     * branches that were prepared before the upgrade.
+     */
+    private boolean isLegacyPreparedBranch(XAException e, XAXid xaXid) {
+        return e.errorCode == XAException.XAER_NOTA
+                && xaXid.getFormatId() == XABranchXid.SEATA_XA_XID_FORMAT_ID_PER_BRANCH_GTRID
+                && JdbcConstants.DM.equalsIgnoreCase(resource.getDbType());
     }
 
     @Override
@@ -204,7 +235,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                         "failed to register xa branch " + xid + " since " + te.getCode() + ":" + te.getMessage(), te);
             }
             // 2. build XA-Xid with xid and branchId
-            this.xaBranchXid = XAXidBuilder.build(xid, branchId);
+            this.xaBranchXid = XAXidBuilder.build(xid, branchId, resource.getDbType());
             // Keep the Connection if necessary
             keepIfNecessary();
             try {
