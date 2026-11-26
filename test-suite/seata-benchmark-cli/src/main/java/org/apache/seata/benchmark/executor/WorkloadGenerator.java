@@ -32,6 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.LongSupplier;
 
 import static org.apache.seata.benchmark.constant.BenchmarkConstants.STATUS_FAILED;
 
@@ -45,24 +46,42 @@ public class WorkloadGenerator {
     private final BenchmarkConfig config;
     private final TransactionExecutor executor;
     private final BenchmarkMetrics metrics;
-    private final RateLimiter rateLimiter;
+    private final Runnable acquirePermit;
+    private final LongSupplier currentTimeMillis;
     private final ExecutorService executorService;
     private final AtomicBoolean running = new AtomicBoolean(false);
     private final AtomicBoolean paused = new AtomicBoolean(false);
     private final List<TransactionRecord> recentRecords = Collections.synchronizedList(new ArrayList<>());
 
     public WorkloadGenerator(BenchmarkConfig config, TransactionExecutor executor, BenchmarkMetrics metrics) {
+        this(
+                config,
+                executor,
+                metrics,
+                RateLimiter.create(config.getTargetTps())::acquire,
+                System::currentTimeMillis,
+                ThreadPoolExecutorFactory.newThreadPoolExecutor(
+                        "workload-generator",
+                        config.getThreads(),
+                        config.getThreads(),
+                        0L,
+                        TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>()));
+    }
+
+    WorkloadGenerator(
+            BenchmarkConfig config,
+            TransactionExecutor executor,
+            BenchmarkMetrics metrics,
+            Runnable acquirePermit,
+            LongSupplier currentTimeMillis,
+            ExecutorService executorService) {
         this.config = config;
         this.executor = executor;
         this.metrics = metrics;
-        this.rateLimiter = RateLimiter.create(config.getTargetTps());
-        this.executorService = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                "workload-generator",
-                config.getThreads(),
-                config.getThreads(),
-                0L,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>());
+        this.acquirePermit = acquirePermit;
+        this.currentTimeMillis = currentTimeMillis;
+        this.executorService = executorService;
     }
 
     public void start() {
@@ -72,14 +91,14 @@ public class WorkloadGenerator {
                     config.getTargetTps(),
                     config.getThreads());
 
-            long startTime = System.currentTimeMillis();
+            long startTime = currentTimeMillis.getAsLong();
             // Total duration includes warmup + benchmark duration
             long totalDuration = (config.getWarmupDuration() + config.getDuration()) * 1000L;
             long endTime = startTime + totalDuration;
 
             for (int i = 0; i < config.getThreads(); i++) {
                 executorService.submit(() -> {
-                    while (running.get() && System.currentTimeMillis() < endTime) {
+                    while (withinRunWindow(endTime)) {
                         if (paused.get()) {
                             try {
                                 Thread.sleep(BenchmarkConstants.PAUSE_CHECK_INTERVAL_MS);
@@ -90,7 +109,10 @@ public class WorkloadGenerator {
                             continue;
                         }
 
-                        rateLimiter.acquire();
+                        acquirePermit.run();
+                        if (!withinRunWindow(endTime)) {
+                            break;
+                        }
                         executeTransaction();
                     }
                 });
@@ -98,6 +120,10 @@ public class WorkloadGenerator {
 
             LOGGER.info("Workload generator started");
         }
+    }
+
+    private boolean withinRunWindow(long endTime) {
+        return running.get() && currentTimeMillis.getAsLong() < endTime;
     }
 
     private void executeTransaction() {
