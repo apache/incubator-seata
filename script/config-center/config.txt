@@ -208,4 +208,4 @@ server.http.filter.xss.keywords=["<script>", "</script>", "javascript:", "vbscri
 metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
-metrics.exporterPrometheusPort=9898
+metrics.exporterPrometheusPort=-1

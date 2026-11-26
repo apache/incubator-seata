@@ -16,8 +16,18 @@
  */
 package org.apache.seata.metrics.exporter.prometheus;
 
+import org.apache.seata.metrics.Id;
+import org.apache.seata.metrics.Measurement;
+import org.apache.seata.metrics.registry.Registry;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.Collections;
+
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * test {@link PrometheusExporter}
@@ -30,5 +40,35 @@ public class PrometheusExporterTest {
         Assertions.assertDoesNotThrow(() -> {
             PrometheusExporter.getUnknownType();
         });
+    }
+
+    @Test
+    public void scrapesRegisteredMeasurementsOnTheTcPortByDefault() throws IOException {
+        try (PrometheusExporter exporter = new PrometheusExporter(DEFAULT_PROMETHEUS_PORT)) {
+            Assertions.assertTrue(exporter.usesTcPort());
+            Assertions.assertEquals("", exporter.scrape());
+
+            Registry registry = mock(Registry.class);
+            Id id = new Id("seata.transaction").withTag("app", "orders");
+            when(registry.measure()).thenReturn(Collections.singletonList(new Measurement(id, 1234, 7)));
+            exporter.setRegistry(registry);
+
+            String text = exporter.scrape();
+            Assertions.assertTrue(text.contains("# HELP seata seata\n"));
+            Assertions.assertTrue(text.contains("seata_transaction{app=\"orders\""));
+            Assertions.assertTrue(text.contains("} 7.0 1234\n"));
+        }
+    }
+
+    @Test
+    public void zeroStillStartsADedicatedListener() throws IOException {
+        try (PrometheusExporter exporter = new PrometheusExporter(0)) {
+            Assertions.assertFalse(exporter.usesTcPort());
+        }
+    }
+
+    @Test
+    public void rejectsPortsBelowTheTcPortSentinel() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new PrometheusExporter(-2));
     }
 }

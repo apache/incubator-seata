@@ -248,7 +248,7 @@ seata:
     enabled: false
     registry-type: compact
     exporter-list: prometheus
-    exporter-prometheus-port: 9898
+    exporter-prometheus-port: -1 # Use the TC service port, or set a dedicated port such as 9898
   transport:
     rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false

@@ -31,6 +31,8 @@ public class MetricsProperties {
     private boolean enabled = DEFAULT_METRICS_ENABLED;
     private String registryType = DEFAULT_METRICS_REGISTRY_TYPE;
     private String exporterList = DEFAULT_METRICS_EXPORTER_LIST;
+
+    /** Use -1 to share the TC listener, 0 for an ephemeral port, or a positive port for a dedicated listener. */
     private int exporterPrometheusPort = DEFAULT_PROMETHEUS_PORT;
 
     public Boolean getEnabled() {
