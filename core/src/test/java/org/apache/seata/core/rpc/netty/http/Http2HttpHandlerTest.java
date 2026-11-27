@@ -19,12 +19,14 @@ package org.apache.seata.core.rpc.netty.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
+import org.apache.seata.common.rpc.http.HttpTextResponse;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
@@ -35,8 +37,10 @@ import org.mockito.MockedStatic;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -63,8 +67,10 @@ class Http2HttpHandlerTest {
     }
 
     static class TestController {
-        public String handleRequest(String param) {
-            return "Processed: " + param;
+        private Function<String, Object> response = param -> "Processed: " + param;
+
+        public Object handleRequest(String param) {
+            return response.apply(param);
         }
     }
 
@@ -129,6 +135,56 @@ class Http2HttpHandlerTest {
         DefaultHttp2DataFrame respData = (DefaultHttp2DataFrame) responseDataFrame;
         String content = respData.content().toString(StandardCharsets.UTF_8);
         assertTrue(content.contains("Processed: testValue"));
+    }
+
+    @Test
+    void endsStreamWithEmptyBodyForNullControllerResult() {
+        HttpRequestFilterManager.initializeFilters();
+        testController.response = ignored -> null;
+        Http2Headers request = new DefaultHttp2Headers().method("GET").path("/test?param=empty");
+        channel.writeInbound(new DefaultHttp2HeadersFrame(request, true));
+
+        Http2HeadersFrame headers = (Http2HeadersFrame) waitForHttp2Response(5000);
+        assertNotNull(headers);
+        assertEquals("200", headers.headers().status().toString());
+        assertEquals(0, headers.headers().getInt(HttpHeaderNames.CONTENT_LENGTH));
+
+        DefaultHttp2DataFrame data = (DefaultHttp2DataFrame) waitForHttp2Response(5000);
+        assertNotNull(data);
+        try {
+            assertEquals(0, data.content().readableBytes());
+            assertTrue(data.isEndStream());
+        } finally {
+            data.release();
+        }
+    }
+
+    @Test
+    void sendsTextResponseAsUtf8WithControllerStatusAndContentType() {
+        HttpRequestFilterManager.initializeFilters();
+        String body = "metric{region=\"Montréal\"} 1\n";
+        String contentType = "text/plain; version=0.0.4; charset=utf-8";
+        testController.response =
+                ignored -> new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
+        Http2Headers request = new DefaultHttp2Headers().method("POST").path("/test?param=text");
+        channel.writeInbound(new DefaultHttp2HeadersFrame(request, true));
+
+        Http2HeadersFrame headers = (Http2HeadersFrame) waitForHttp2Response(5000);
+        assertNotNull(headers);
+        assertEquals("405", headers.headers().status().toString());
+        assertEquals("GET", headers.headers().get(HttpHeaderNames.ALLOW).toString());
+        assertEquals(
+                contentType, headers.headers().get(HttpHeaderNames.CONTENT_TYPE).toString());
+        assertEquals(
+                body.getBytes(StandardCharsets.UTF_8).length, headers.headers().getInt(HttpHeaderNames.CONTENT_LENGTH));
+        DefaultHttp2DataFrame data = (DefaultHttp2DataFrame) waitForHttp2Response(5000);
+        assertNotNull(data);
+        try {
+            assertEquals(body, data.content().toString(StandardCharsets.UTF_8));
+            assertTrue(data.isEndStream());
+        } finally {
+            data.release();
+        }
     }
 
     @Test

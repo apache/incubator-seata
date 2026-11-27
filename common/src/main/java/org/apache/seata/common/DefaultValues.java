@@ -508,9 +508,9 @@ public interface DefaultValues {
     int DEFAULT_SERVICE_SESSION_RELOAD_READ_SIZE = 100;
 
     /**
-     * the constant DEFAULT_PROMETHEUS_PORT
+     * Share the TC listener by default. A nonnegative port starts a separate Prometheus listener.
      */
-    int DEFAULT_PROMETHEUS_PORT = 9898;
+    int DEFAULT_PROMETHEUS_PORT = -1;
 
     /**
      * the const DEFAULT_METRICS_ENABLED

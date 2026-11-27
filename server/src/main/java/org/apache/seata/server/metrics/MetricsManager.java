@@ -16,10 +16,12 @@
  */
 package org.apache.seata.server.metrics;
 
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.exporter.ExporterFactory;
+import org.apache.seata.metrics.exporter.prometheus.PrometheusExporter;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.event.EventBusManager;
@@ -27,6 +29,9 @@ import org.apache.seata.server.event.EventBusManager;
 import java.util.List;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_ENABLED;
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
+import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT;
+import static org.apache.seata.core.constants.ConfigurationKeys.METRICS_PREFIX;
 
 /**
  * Metrics manager for init
@@ -41,16 +46,24 @@ public class MetricsManager {
         return MetricsManager.SingletonHolder.INSTANCE;
     }
 
-    private Registry registry;
+    private volatile Registry registry;
+    private volatile boolean prometheusOnTcPort;
 
     public Registry getRegistry() {
         return registry;
     }
 
+    public Registry getSharedPrometheusRegistry() {
+        // An in-flight scrape must keep the registry whose endpoint it observed.
+        Registry current = registry;
+        return prometheusOnTcPort && current == registry ? current : null;
+    }
+
     public void init() {
-        boolean enabled = ConfigurationFactory.getInstance()
-                .getBoolean(
-                        ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, DEFAULT_METRICS_ENABLED);
+        prometheusOnTcPort = false;
+        Configuration config = ConfigurationFactory.getInstance();
+        boolean enabled =
+                config.getBoolean(METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, DEFAULT_METRICS_ENABLED);
         if (enabled) {
             registry = RegistryFactory.getInstance();
             if (registry != null) {
@@ -59,6 +72,13 @@ public class MetricsManager {
                 if (exporters.size() != 0) {
                     exporters.forEach(exporter -> exporter.setRegistry(registry));
                     EventBusManager.get().register(new MetricsSubscriber(registry));
+                    // An SPI instance can survive a restart with different port settings.
+                    if (config.getInt(METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT)
+                            == -1) {
+                        prometheusOnTcPort = exporters.stream()
+                                .anyMatch(exporter -> exporter instanceof PrometheusExporter
+                                        && ((PrometheusExporter) exporter).usesTcPort());
+                    }
                 }
             }
         }
