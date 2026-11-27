@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,10 +82,10 @@ class HttpDispatchHandlerTest {
     private EmbeddedChannel embeddedChannel;
 
     class TestController {
-        private HttpTextResponse textResponse;
+        private Function<String, Object> response = param -> "Processed: " + param;
 
         public Object handleRequest(String param) {
-            return textResponse != null ? textResponse : "Processed: " + param;
+            return response.apply(param);
         }
     }
 
@@ -156,12 +157,29 @@ class HttpDispatchHandlerTest {
     }
 
     @Test
+    void sendsAnEmptyBodyForNullControllerResult() {
+        HttpRequestFilterManager.initializeFilters();
+        testController.response = ignored -> null;
+        channel.writeInbound(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=empty"));
+
+        FullHttpResponse response = waitForResponse(5000);
+        assertNotNull(response);
+        try {
+            assertEquals(HttpResponseStatus.OK, response.status());
+            assertEquals(0, response.content().readableBytes());
+            assertNull(response.headers().get(HttpHeaderNames.CONTENT_LENGTH));
+        } finally {
+            response.release();
+        }
+    }
+
+    @Test
     void sendsTextResponseAsUtf8WithControllerStatusAndContentType() {
         HttpRequestFilterManager.initializeFilters();
         String body = "metric{region=\"Montréal\"} 1\n";
         String contentType = "text/plain; version=0.0.4; charset=utf-8";
-        testController.textResponse =
-                new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
+        testController.response =
+                ignored -> new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
         channel.writeInbound(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/test?param=text"));
         FullHttpResponse response = waitForResponse(5000);
         assertNotNull(response);

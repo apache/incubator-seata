@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -66,10 +67,10 @@ class Http2HttpHandlerTest {
     }
 
     static class TestController {
-        private HttpTextResponse textResponse;
+        private Function<String, Object> response = param -> "Processed: " + param;
 
         public Object handleRequest(String param) {
-            return textResponse != null ? textResponse : "Processed: " + param;
+            return response.apply(param);
         }
     }
 
@@ -137,12 +138,34 @@ class Http2HttpHandlerTest {
     }
 
     @Test
+    void endsStreamWithEmptyBodyForNullControllerResult() {
+        HttpRequestFilterManager.initializeFilters();
+        testController.response = ignored -> null;
+        Http2Headers request = new DefaultHttp2Headers().method("GET").path("/test?param=empty");
+        channel.writeInbound(new DefaultHttp2HeadersFrame(request, true));
+
+        Http2HeadersFrame headers = (Http2HeadersFrame) waitForHttp2Response(5000);
+        assertNotNull(headers);
+        assertEquals("200", headers.headers().status().toString());
+        assertEquals(0, headers.headers().getInt(HttpHeaderNames.CONTENT_LENGTH));
+
+        DefaultHttp2DataFrame data = (DefaultHttp2DataFrame) waitForHttp2Response(5000);
+        assertNotNull(data);
+        try {
+            assertEquals(0, data.content().readableBytes());
+            assertTrue(data.isEndStream());
+        } finally {
+            data.release();
+        }
+    }
+
+    @Test
     void sendsTextResponseAsUtf8WithControllerStatusAndContentType() {
         HttpRequestFilterManager.initializeFilters();
         String body = "metric{region=\"Montréal\"} 1\n";
         String contentType = "text/plain; version=0.0.4; charset=utf-8";
-        testController.textResponse =
-                new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
+        testController.response =
+                ignored -> new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
         Http2Headers request = new DefaultHttp2Headers().method("POST").path("/test?param=text");
         channel.writeInbound(new DefaultHttp2HeadersFrame(request, true));
 
