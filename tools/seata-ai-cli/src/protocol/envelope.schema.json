@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "R9 Runtime Envelope — stream/exit verified outside JSON",
+  "type": "object",
+  "properties": {
+    "protocol_version": {
+      "const": "0.1"
+    },
+    "contract_revision": {
+      "const": "R9"
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "partial",
+        "failed"
+      ]
+    },
+    "command": {
+      "type": "string"
+    },
+    "request_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "cluster": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "vgroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "not": {
+        "required": [
+          "cluster",
+          "vgroup"
+        ],
+        "type": "object",
+        "properties": {
+          "cluster": {},
+          "vgroup": {}
+        }
+      }
+    },
+    "data": {
+      "type": "object"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "api",
+            "validation",
+            "authentication",
+            "authorization",
+            "config",
+            "network",
+            "internal",
+            "policy",
+            "not_found",
+            "conflict",
+            "partial_failure",
+            "cancelled"
+          ]
+        },
+        "subtype": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 8192
+        },
+        "retry": {
+          "type": "string",
+          "enum": [
+            "never",
+            "read_only",
+            "new_execution_after_fix"
+          ]
+        },
+        "details": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "type",
+        "subtype",
+        "message",
+        "retry",
+        "details"
+      ],
+      "additionalProperties": true
+    },
+    "meta": {
+      "type": "object",
+      "properties": {
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "client_request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "state_store_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "invoked_via": {
+          "const": "system.invoke"
+        }
+      },
+      "required": [
+        "duration_ms",
+        "partial"
+      ],
+      "additionalProperties": true
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 8192
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "protocol_version",
+    "contract_revision",
+    "ok",
+    "state",
+    "command",
+    "request_id",
+    "timestamp",
+    "context",
+    "meta",
+    "warnings"
+  ],
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "completed"
+          }
+        },
+        "type": "object"
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": true
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": false
+              }
+            }
+          },
+          "error": false,
+          "data": {}
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "partial"
+          }
+        },
+        "type": "object"
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "properties": {
+              "type": {
+                "const": "partial_failure"
+              }
+            },
+            "type": "object"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": true
+              }
+            }
+          },
+          "data": {}
+        },
+        "required": [
+          "data",
+          "error"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "failed"
+          }
+        },
+        "type": "object"
+      },
+      "then": {
+        "properties": {
+          "ok": {
+            "const": false
+          },
+          "error": {
+            "properties": {
+              "type": {
+                "not": {
+                  "enum": [
+                    "partial_failure",
+                    "indeterminate"
+                  ]
+                }
+              }
+            },
+            "type": "object"
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "partial": {
+                "const": false
+              }
+            }
+          },
+          "data": false
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      }
+    }
+  ]
+}
