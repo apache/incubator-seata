@@ -23,9 +23,11 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.transaction.*;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.netty.ChannelManager;
+import org.apache.seata.core.rpc.netty.NettyServerBootstrap;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.*;
 import org.junit.jupiter.api.*;
+import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.slf4j.MDC;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,12 +39,25 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class CoordinatorRecoveryUnitTest extends BaseSpringBootTest {
+    private static MockedConstruction<NettyServerBootstrap> serverBootstrap;
+
     private DefaultCoordinator coordinator;
     private DefaultCore core;
     private SessionManager manager;
     private ScheduledExecutorService scheduler;
     private RemotingServer remoting;
     private MockedStatic<SessionHolder> holder;
+
+    @BeforeAll
+    static void startWithoutListening() {
+        // Initialize the real coordinator for SessionHelper while the test supplies its own remoting server.
+        serverBootstrap = mockConstruction(NettyServerBootstrap.class);
+    }
+
+    @AfterAll
+    static void releaseBootstrapMock() {
+        serverBootstrap.close();
+    }
 
     @BeforeEach
     void open() {

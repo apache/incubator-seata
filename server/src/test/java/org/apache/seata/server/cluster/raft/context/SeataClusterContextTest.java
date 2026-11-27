@@ -17,8 +17,10 @@
 package org.apache.seata.server.cluster.raft.context;
 
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.ServerRunner;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Arrays;
 
@@ -29,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * Unit tests for SeataClusterContext covering context management logic.
  */
+@MockitoBean(types = ServerRunner.class)
 public class SeataClusterContextTest extends BaseSpringBootTest {
 
     @AfterEach

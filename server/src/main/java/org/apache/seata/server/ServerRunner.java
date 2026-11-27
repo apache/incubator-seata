@@ -82,14 +82,17 @@ public class ServerRunner implements CommandLineRunner, DisposableBean, Applicat
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destroyAll starting");
         }
-        for (Disposable disposable : DISPOSABLE_LIST) {
-            disposable.destroy();
+        try {
+            for (Disposable disposable : DISPOSABLE_LIST) {
+                disposable.destroy();
+            }
+        } finally {
+            DISPOSABLE_LIST.clear();
         }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("destroyAll finish");
         }
-        DISPOSABLE_LIST.clear();
     }
 
     @Override
