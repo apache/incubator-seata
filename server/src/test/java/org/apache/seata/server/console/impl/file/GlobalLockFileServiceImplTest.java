@@ -29,6 +29,7 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.file.lock.FileLocker.BucketLockMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -312,16 +313,25 @@ public class GlobalLockFileServiceImplTest extends BaseSpringBootTest {
             when(mockSessionManager.allSessions()).thenReturn(Collections.singletonList(mockGlobalSession));
             when(mockGlobalSession.getBeginTime()).thenReturn(2500L);
             when(mockGlobalSession.getBranchSessions()).thenReturn(Collections.singletonList(mockBranchSession));
-            when(mockBranchSession.getLockHolder()).thenReturn(Collections.singletonMap(null, Collections.emptySet()));
+            BucketLockMap bucket = new BucketLockMap();
+            bucket.get().put("1", mockBranchSession);
+            when(mockBranchSession.getLockHolder())
+                    .thenReturn(Collections.singletonMap(bucket, Collections.singleton("1")));
             RowLock lock = new RowLock();
             lock.setTransactionId(1L);
             lock.setBranchId(2L);
+            lock.setTableName("test_table");
+            lock.setPk("1");
             LockManager lockManager = mock(LockManager.class);
             when(lockManager.collectRowLocks(mockBranchSession)).thenReturn(Collections.singletonList(lock));
             lockManagerFactoryMock.when(LockerManagerFactory::getLockManager).thenReturn(lockManager);
 
-            Assertions.assertEquals(
-                    expectedCount, service.query(param).getData().size());
+            List<GlobalLockVO> locks = service.query(param).getData();
+            Assertions.assertEquals(expectedCount, locks.size());
+            if (expectedCount == 1) {
+                Assertions.assertEquals("test_table", locks.get(0).getTableName());
+                Assertions.assertEquals("1", locks.get(0).getPk());
+            }
         }
     }
 }
