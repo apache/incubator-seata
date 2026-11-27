@@ -59,3 +59,13 @@ jobs:
         run: npm run test:contract:python
       - name: Install and verify the actual tarball
         run: npm run test:install
+      - name: Check all CLI runtime dependency licenses
+        if: matrix.node == '22.13.0'
+        run: |
+          archive="$RUNNER_TEMP/skywalking-license-eye.tgz"
+          curl --fail --silent --show-error --location --retry 3 -o "$archive" \
+            https://github.com/apache/skywalking-eyes/releases/download/v0.9.0/skywalking-license-eye-0.9.0-bin.tgz
+          echo "e312511e0c28ba5508ee0dbeb64ec20a9d202b6eaf2aa6dc365f27488a37fda6  $archive" | sha256sum --check
+          tar -xzf "$archive" -C "$RUNNER_TEMP" --strip-components=3 \
+            skywalking-license-eye-0.9.0-bin/bin/linux/license-eye
+          node scripts/check-dependency-licenses.mjs "$RUNNER_TEMP/license-eye"
