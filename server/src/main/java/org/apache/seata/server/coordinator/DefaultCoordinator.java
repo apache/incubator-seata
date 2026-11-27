@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.coordinator;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import io.netty.channel.Channel;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
@@ -70,10 +71,12 @@ import org.slf4j.MDC;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -105,9 +108,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
-    private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
-
     private static final String TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final int SHUTDOWN_WARN_AFTER_SECONDS = 5;
+    private static final String BRANCH_SESSION_REMOVE = "branchSessionRemove";
 
     /**
      * The constant COMMITTING_RETRY_PERIOD.
@@ -233,7 +236,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         // create branchRemoveExecutor
         if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
             branchRemoveExecutor = ThreadPoolExecutorFactory.newThreadPoolExecutor(
-                    "branchSessionRemove",
+                    BRANCH_SESSION_REMOVE,
                     BRANCH_ASYNC_POOL_SIZE,
                     BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE,
@@ -624,7 +627,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void rollbackingSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called =
                             SessionHolder.distributedLockAndExecute(ROLLBACKING, this::handleRollbackingByScheduled);
@@ -632,8 +635,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         rollbackingSchedule(ROLLBACKING_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
     }
 
     /**
@@ -684,7 +686,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void committingSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called =
                             SessionHolder.distributedLockAndExecute(COMMITTING, this::handleCommittingByScheduled);
@@ -692,8 +694,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                         committingSchedule(COMMITTING_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
     }
 
     /**
@@ -742,15 +743,25 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     private void endSchedule(long delay) {
-        syncProcessing.schedule(
+        scheduleRecovery(
                 () -> {
                     boolean called = SessionHolder.distributedLockAndExecute(END, this::handleEndStatesByScheduled);
                     if (!called) {
                         endSchedule(END_STATUS_RETRY_PERIOD);
                     }
                 },
-                delay,
-                TimeUnit.MILLISECONDS);
+                delay);
+    }
+
+    private void scheduleRecovery(Runnable task, long delay) {
+        try {
+            syncProcessing.schedule(task, delay, TimeUnit.MILLISECONDS);
+        } catch (RejectedExecutionException e) {
+            // An in-flight recovery scan may schedule its next run while the coordinator shuts down.
+            if (!syncProcessing.isShutdown()) {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -815,34 +826,48 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     @Override
     public void destroy() {
-        // 1. first shutdown timed task
-        retryRollbacking.shutdown();
-        retryCommitting.shutdown();
-        asyncCommitting.shutdown();
-        timeoutCheck.shutdown();
-        undoLogDelete.shutdown();
+        // Cancel queued one-shot retries while allowing a scan already in progress to finish.
+        syncProcessing.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        Map<String, ScheduledThreadPoolExecutor> schedulers = new LinkedHashMap<>();
+        schedulers.put(SYNC_PROCESSING, syncProcessing);
+        schedulers.put(RETRY_ROLLBACKING, retryRollbacking);
+        schedulers.put(RETRY_COMMITTING, retryCommitting);
+        schedulers.put(ASYNC_COMMITTING, asyncCommitting);
+        schedulers.put(TX_TIMEOUT_CHECK, timeoutCheck);
+        schedulers.put(UNDOLOG_DELETE, undoLogDelete);
+        schedulers.values().forEach(ScheduledThreadPoolExecutor::shutdown);
+        schedulers.forEach(DefaultCoordinator::awaitTermination);
+        // In-flight retries can enqueue branch removals until their last branch completes.
         if (branchRemoveExecutor != null) {
             branchRemoveExecutor.shutdown();
+            awaitTermination(BRANCH_SESSION_REMOVE, branchRemoveExecutor);
         }
+        // Preserve interrupts from the drain while allowing the transport to finish its own cleanup.
+        boolean interrupted = Thread.interrupted();
         try {
-            retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            undoLogDelete.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-            if (branchRemoveExecutor != null) {
-                branchRemoveExecutor.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            if (remotingServer instanceof NettyRemotingServer) {
+                ((NettyRemotingServer) remotingServer).destroy();
             }
-        } catch (InterruptedException ignore) {
+            SessionHolder.destroy();
+        } finally {
+            instance = null;
+            if (interrupted) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 
+    private static void awaitTermination(String name, ThreadPoolExecutor executor) {
+        if (!Uninterruptibles.awaitTerminationUninterruptibly(
+                executor, SHUTDOWN_WARN_AFTER_SECONDS, TimeUnit.SECONDS)) {
+            LOGGER.warn(
+                    "Still waiting for {} during coordinator shutdown after {} seconds (active tasks: {}, queued tasks: {}).",
+                    name,
+                    SHUTDOWN_WARN_AFTER_SECONDS,
+                    executor.getActiveCount(),
+                    executor.getQueue().size());
+            Uninterruptibles.awaitTerminationUninterruptibly(executor);
         }
-        // 2. second close netty flow
-        if (remotingServer instanceof NettyRemotingServer) {
-            ((NettyRemotingServer) remotingServer).destroy();
-        }
-        // 3. third destroy SessionHolder
-        SessionHolder.destroy();
-        instance = null;
     }
 
     /**

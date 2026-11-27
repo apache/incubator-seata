@@ -38,6 +38,7 @@ import org.apache.seata.saga.rm.StateMachineEngineHolder;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
@@ -49,11 +50,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -63,15 +67,18 @@ import java.util.concurrent.TimeUnit;
 public class StateMachineDBTests extends AbstractServerTest {
 
     private static StateMachineEngine stateMachineEngine;
+    private static ScheduledFuture<?> delayedCoordinatorTask;
 
     private static int sleepTime = 1500;
 
     private static int sleepTimeLong = 2500;
 
     @BeforeAll
-    public static void initApplicationContext() throws InterruptedException {
+    public static void initApplicationContext() throws ReflectiveOperationException {
         TransactionManagerHolder.set(EnhancedServiceLoader.load(TransactionManager.class));
         startSeataServer();
+        delayedCoordinatorTask =
+                getScheduler(getTestCoordinator(), "syncProcessing").schedule(() -> {}, 1, TimeUnit.DAYS);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
         ApplicationContext applicationContext =
@@ -81,10 +88,39 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @AfterAll
-    public static void destroy() throws InterruptedException {
-        stopSeataServer();
-        TmNettyRemotingClient.getInstance().destroy();
-        RmNettyRemotingClient.getInstance().destroy();
+    public static void destroy() throws ReflectiveOperationException {
+        DefaultCoordinator coordinator = getTestCoordinator();
+        try {
+            stopSeataServer();
+            if (coordinator != null) {
+                for (String name : new String[] {
+                    "syncProcessing",
+                    "retryRollbacking",
+                    "retryCommitting",
+                    "asyncCommitting",
+                    "timeoutCheck",
+                    "undoLogDelete"
+                }) {
+                    Assertions.assertTrue(
+                            getScheduler(coordinator, name).isTerminated(),
+                            name + " must terminate before RM disconnect");
+                }
+            }
+            if (delayedCoordinatorTask != null) {
+                Assertions.assertTrue(
+                        delayedCoordinatorTask.isCancelled(), "Queued coordinator retry must be cancelled");
+            }
+        } finally {
+            TmNettyRemotingClient.getInstance().destroy();
+            RmNettyRemotingClient.getInstance().destroy();
+        }
+    }
+
+    private static ScheduledThreadPoolExecutor getScheduler(DefaultCoordinator coordinator, String name)
+            throws ReflectiveOperationException {
+        Field field = DefaultCoordinator.class.getDeclaredField(name);
+        field.setAccessible(true);
+        return (ScheduledThreadPoolExecutor) field.get(coordinator);
     }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance) {

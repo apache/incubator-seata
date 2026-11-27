@@ -211,7 +211,8 @@ public abstract class BaseNettyClientTest {
 
         public void destroy() {
             if (server != null) {
-                server.destroy();
+                // The coordinator also closes this server and releases its singleton and session store.
+                ((DefaultCoordinator) server.getHandler()).destroy();
             }
         }
     }

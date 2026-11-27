@@ -23,10 +23,18 @@ import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockedStatic;
 import org.slf4j.MDC;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -85,6 +93,43 @@ class SessionHelperUnitTest extends BaseSpringBootTest {
         assertEquals(6, calls.get());
         assertNull(MDC.get(RootContext.MDC_KEY_XID));
         assertNull(SeataClusterContext.getGroup());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void parallelBranchFailureWaitsForOutstandingResource(boolean throwException) throws Exception {
+        BranchSession failing = SessionHelper.newBranch(BranchType.AT, "xid", 1, "a", "data");
+        BranchSession pending = SessionHelper.newBranch(BranchType.AT, "xid", 2, "b", "data");
+        TransactionException failure = new TransactionException("branch failed");
+        CountDownLatch branchesStarted = new CountDownLatch(2);
+        CompletableFuture<Void> finishPendingBranch = new CompletableFuture<>();
+        FutureTask<Boolean> batch = new FutureTask<>(
+                () -> SessionHelper.parallelForEach(Arrays.asList(failing, pending), (BranchSessionHandler) branch -> {
+                    branchesStarted.countDown();
+                    if (branch == pending) {
+                        finishPendingBranch.join();
+                        return null;
+                    }
+                    if (throwException) {
+                        throw failure;
+                    }
+                    return false;
+                }));
+        Thread caller = new Thread(batch);
+        caller.start();
+        try {
+            assertTrue(branchesStarted.await(5, TimeUnit.SECONDS));
+            assertThrows(TimeoutException.class, () -> batch.get(200, TimeUnit.MILLISECONDS));
+        } finally {
+            finishPendingBranch.complete(null);
+            caller.join(5000);
+        }
+        if (throwException) {
+            ExecutionException exception = assertThrows(ExecutionException.class, () -> batch.get(5, TimeUnit.SECONDS));
+            assertSame(failure, exception.getCause());
+        } else {
+            assertFalse(batch.get(5, TimeUnit.SECONDS));
+        }
     }
 
     @Test
