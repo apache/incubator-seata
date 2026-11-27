@@ -20,7 +20,6 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
-import io.prometheus.client.exporter.common.TextFormat;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -29,10 +28,8 @@ import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.registry.Registry;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -48,31 +45,14 @@ public class PrometheusExporter extends Collector implements Collector.Describab
 
     private final HTTPServer server;
 
-    private volatile Registry registry;
+    private Registry registry;
 
     public PrometheusExporter() throws IOException {
-        this(ConfigurationFactory.getInstance()
-                .getInt(ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT));
-    }
-
-    PrometheusExporter(int port) throws IOException {
-        if (port == -1) {
-            server = null;
-        } else {
-            CollectorRegistry collectorRegistry = new CollectorRegistry(true);
-            register(collectorRegistry);
-            server = new HTTPServer(new InetSocketAddress(port), collectorRegistry, true);
-        }
-    }
-
-    public boolean usesTcPort() {
-        return server == null;
-    }
-
-    public String scrape() throws IOException {
-        StringWriter writer = new StringWriter();
-        TextFormat.write004(writer, Collections.enumeration(collect()));
-        return writer.toString();
+        int port = ConfigurationFactory.getInstance()
+                .getInt(ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT);
+        CollectorRegistry collectorRegistry = new CollectorRegistry(true);
+        this.register(collectorRegistry);
+        this.server = new HTTPServer(new InetSocketAddress(port), collectorRegistry, true);
     }
 
     @Override
@@ -83,9 +63,8 @@ public class PrometheusExporter extends Collector implements Collector.Describab
     @Override
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> familySamples = new ArrayList<>();
-        Registry currentRegistry = registry;
-        if (currentRegistry != null) {
-            Iterable<Measurement> measurements = currentRegistry.measure();
+        if (registry != null) {
+            Iterable<Measurement> measurements = registry.measure();
             List<Sample> samples = new ArrayList<>();
             measurements.forEach(measurement -> samples.add(convertMeasurementToSample(measurement)));
 
@@ -131,8 +110,6 @@ public class PrometheusExporter extends Collector implements Collector.Describab
 
     @Override
     public void close() {
-        if (server != null) {
-            server.stop();
-        }
+        server.stop();
     }
 }

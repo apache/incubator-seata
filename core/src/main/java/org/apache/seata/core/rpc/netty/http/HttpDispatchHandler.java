@@ -18,7 +18,6 @@ package org.apache.seata.core.rpc.netty.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,7 +31,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.common.rpc.http.HttpContext;
-import org.apache.seata.common.rpc.http.HttpTextResponse;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.RequestParseUtils.BodyParseResult;
 import org.apache.seata.core.rpc.netty.http.RequestParseUtils.QueryParseResult;
@@ -44,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -152,22 +149,14 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
     private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result, HttpFilterContext<?> context)
             throws JsonProcessingException {
         FullHttpResponse response;
-        if (result instanceof HttpTextResponse) {
-            HttpTextResponse text = (HttpTextResponse) result;
-            response = new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.valueOf(text.getStatus()),
-                    Unpooled.copiedBuffer(text.getBody(), StandardCharsets.UTF_8));
-            text.getHeaders().forEach(response.headers()::set);
-            response.headers().set(HttpHeaderNames.CONTENT_TYPE, text.getContentType());
-        } else {
-            ByteBuf body = result == null
-                    ? Unpooled.EMPTY_BUFFER
-                    : Unpooled.wrappedBuffer(OBJECT_MAPPER.writeValueAsBytes(result));
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, body);
-        }
         if (result != null) {
-            HttpUtil.setContentLength(response, response.content().readableBytes());
+            byte[] body = OBJECT_MAPPER.writeValueAsBytes(result);
+            response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(body));
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, body.length);
+        } else {
+            response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         }
         context.setResponse(response);
         if (!keepAlive) {

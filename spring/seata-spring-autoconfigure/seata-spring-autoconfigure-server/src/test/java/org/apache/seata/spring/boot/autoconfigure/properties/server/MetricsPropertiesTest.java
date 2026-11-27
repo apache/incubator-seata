@@ -24,15 +24,14 @@ public class MetricsPropertiesTest {
     @Test
     public void testMetricsProperties() {
         MetricsProperties metricsProperties = new MetricsProperties();
-        Assertions.assertEquals(-1, metricsProperties.getExporterPrometheusPort());
         metricsProperties.setRegistryType("type");
         metricsProperties.setExporterList("list");
         metricsProperties.setEnabled(true);
-        metricsProperties.setExporterPrometheusPort(9898);
+        metricsProperties.setExporterPrometheusPort(1);
 
         Assertions.assertEquals("type", metricsProperties.getRegistryType());
         Assertions.assertEquals("list", metricsProperties.getExporterList());
         Assertions.assertTrue(metricsProperties.getEnabled());
-        Assertions.assertEquals(9898, metricsProperties.getExporterPrometheusPort());
+        Assertions.assertEquals(1, metricsProperties.getExporterPrometheusPort());
     }
 }

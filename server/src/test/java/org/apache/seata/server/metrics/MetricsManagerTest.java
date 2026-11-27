@@ -29,7 +29,6 @@ import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.exporter.ExporterFactory;
-import org.apache.seata.metrics.exporter.prometheus.PrometheusExporter;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.ParameterParser;
@@ -201,10 +200,8 @@ class MetricsManagerTest {
         Registry registry = mock(Registry.class);
         EventBus eventBus = mock(EventBus.class);
         Exporter failingExporter = mock(Exporter.class);
-        PrometheusExporter otherExporter = mock(PrometheusExporter.class);
-        PrometheusExporter replacementExporter = mock(PrometheusExporter.class);
-        when(otherExporter.usesTcPort()).thenReturn(true);
-        when(replacementExporter.usesTcPort()).thenReturn(true);
+        Exporter otherExporter = mock(Exporter.class);
+        Exporter replacementExporter = mock(Exporter.class);
         IllegalStateException registrationFailure = new IllegalStateException("injected registration failure");
 
         when(config.getBoolean(METRICS_PREFIX + METRICS_ENABLED, DEFAULT_METRICS_ENABLED))
@@ -240,17 +237,14 @@ class MetricsManagerTest {
                 loaders.verify(() -> EnhancedServiceLoader.unload(Exporter.class));
                 verify(registry).clearUp();
                 assertNull(manager.getRegistry());
-                assertNull(manager.getSharedPrometheusExporter());
 
                 manager.init();
                 verify(replacementExporter).setRegistry(same(registry));
-                assertSame(replacementExporter, manager.getSharedPrometheusExporter());
                 assertSame(registry, manager.getRegistry());
             } finally {
                 manager.destroy();
             }
             verify(replacementExporter).close();
-            assertNull(manager.getSharedPrometheusExporter());
         }
     }
 

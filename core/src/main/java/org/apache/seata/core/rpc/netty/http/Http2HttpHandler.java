@@ -31,7 +31,6 @@ import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
 import org.apache.seata.common.rpc.http.HttpContext;
-import org.apache.seata.common.rpc.http.HttpTextResponse;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.RequestParseUtils.BodyParseResult;
 import org.apache.seata.core.rpc.netty.http.RequestParseUtils.QueryParseResult;
@@ -45,7 +44,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.seata.core.protocol.ProtocolConstants.MAX_FRAME_LENGTH;
@@ -211,19 +209,9 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
     }
 
     private void sendResponse(ChannelHandlerContext ctx, Object result) throws Exception {
-        byte[] body;
-        Http2Headers headers = new DefaultHttp2Headers();
-        if (result instanceof HttpTextResponse) {
-            HttpTextResponse text = (HttpTextResponse) result;
-            body = text.getBody().getBytes(StandardCharsets.UTF_8);
-            text.getHeaders().forEach((name, value) -> headers.set(name.toLowerCase(Locale.ROOT), value));
-            headers.status(HttpResponseStatus.valueOf(text.getStatus()).codeAsText());
-            headers.set(HttpHeaderNames.CONTENT_TYPE, text.getContentType());
-        } else {
-            body = result != null ? OBJECT_MAPPER.writeValueAsBytes(result) : new byte[0];
-            headers.status(HttpResponseStatus.OK.codeAsText());
-            headers.set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
-        }
+        byte[] body = result != null ? OBJECT_MAPPER.writeValueAsBytes(result) : new byte[0];
+        Http2Headers headers = new DefaultHttp2Headers().status(HttpResponseStatus.OK.codeAsText());
+        headers.set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=UTF-8");
         headers.set(HttpHeaderNames.CONTENT_LENGTH, String.valueOf(body.length));
 
         ctx.write(new DefaultHttp2HeadersFrame(headers));

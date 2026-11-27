@@ -22,7 +22,6 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.metrics.exporter.Exporter;
 import org.apache.seata.metrics.exporter.ExporterFactory;
-import org.apache.seata.metrics.exporter.prometheus.PrometheusExporter;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.server.event.EventBusManager;
@@ -51,15 +50,10 @@ public class MetricsManager implements Disposable {
 
     private volatile Registry registry;
     private final Set<Exporter> exporters = new LinkedHashSet<>();
-    private volatile PrometheusExporter sharedPrometheusExporter;
     private MetricsSubscriber subscriber;
 
     public Registry getRegistry() {
         return registry;
-    }
-
-    public PrometheusExporter getSharedPrometheusExporter() {
-        return sharedPrometheusExporter;
     }
 
     public void init() {
@@ -79,16 +73,9 @@ public class MetricsManager implements Disposable {
             }
             exporters.addAll(ExporterFactory.getInstanceList());
             if (!exporters.isEmpty()) {
-                PrometheusExporter shared = null;
-                for (Exporter exporter : exporters) {
-                    exporter.setRegistry(registry);
-                    if (exporter instanceof PrometheusExporter && ((PrometheusExporter) exporter).usesTcPort()) {
-                        shared = (PrometheusExporter) exporter;
-                    }
-                }
+                exporters.forEach(exporter -> exporter.setRegistry(registry));
                 subscriber = new MetricsSubscriber(registry);
                 EventBusManager.get().register(subscriber);
-                sharedPrometheusExporter = shared;
             }
         } catch (RuntimeException | Error failure) {
             try {
@@ -102,7 +89,6 @@ public class MetricsManager implements Disposable {
 
     @Override
     public void destroy() {
-        sharedPrometheusExporter = null;
         if (subscriber != null) {
             subscriber.deactivate();
             try {
