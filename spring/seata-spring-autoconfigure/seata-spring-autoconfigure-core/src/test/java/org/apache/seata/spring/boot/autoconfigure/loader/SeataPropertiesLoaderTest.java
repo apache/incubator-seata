@@ -30,6 +30,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.OrderUtils;
 import org.springframework.core.env.MapPropertySource;
 
 import java.lang.reflect.Field;
@@ -69,17 +70,20 @@ class SeataPropertiesLoaderTest {
     @Test
     void testOrderIsAfterSpringCloudPropertySourceBootstrap() {
         SeataPropertiesLoader loader = new SeataPropertiesLoader();
-        assertEquals(Ordered.LOWEST_PRECEDENCE, loader.getOrder());
+        assertEquals(Ordered.HIGHEST_PRECEDENCE + 11, OrderUtils.getOrder(SeataPropertiesLoader.class));
 
-        // Simulate Spring Cloud PropertySourceBootstrapConfiguration order (HIGHEST_PRECEDENCE + 10)
+        // Simulate Spring Cloud PropertySourceBootstrapConfiguration (HIGHEST_PRECEDENCE + 10)
+        // and a default user initializer (order 0)
         ApplicationContextInitializer<ConfigurableApplicationContext> cloudPropertySourceInitializer =
                 new OrderedInitializer(Ordered.HIGHEST_PRECEDENCE + 10);
+        ApplicationContextInitializer<ConfigurableApplicationContext> userInitializer = new OrderedInitializer(0);
         List<ApplicationContextInitializer<ConfigurableApplicationContext>> initializers =
-                Arrays.asList(loader, cloudPropertySourceInitializer);
+                Arrays.asList(userInitializer, loader, cloudPropertySourceInitializer);
         AnnotationAwareOrderComparator.sort(initializers);
 
         assertSame(cloudPropertySourceInitializer, initializers.get(0));
         assertSame(loader, initializers.get(1));
+        assertSame(userInitializer, initializers.get(2));
     }
 
     @Test
@@ -127,10 +131,40 @@ class SeataPropertiesLoaderTest {
                     mainContext.getEnvironment(),
                     ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT));
             assertTrue(mainContext.getEnvironment().getPropertySources().contains("seataOldConfig"));
+            assertFalse(ConfigurationFactory.getOriginFileInstance().isPresent());
 
             Configuration providerConfig =
                     new SpringBootConfigurationProvider().provide(new FileConfiguration("registry", false));
             assertEquals("nacos", providerConfig.getConfig("config.type"));
+        }
+    }
+
+    @Test
+    void testOverwriteBootstrapEnvironmentButPreserveExistingMainEnvironment() {
+        SeataPropertiesLoader loader = new SeataPropertiesLoader();
+
+        try (AnnotationConfigApplicationContext bootstrapContext = new AnnotationConfigApplicationContext();
+                AnnotationConfigApplicationContext mainContext = new AnnotationConfigApplicationContext();
+                AnnotationConfigApplicationContext refreshOrChildContext = new AnnotationConfigApplicationContext()) {
+            bootstrapContext
+                    .getEnvironment()
+                    .getPropertySources()
+                    .addFirst(new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, Collections.emptyMap()));
+            // Simulate an earlier listener having stored the bootstrap environment
+            ObjectHolder.INSTANCE.setObject(
+                    OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, bootstrapContext.getEnvironment());
+
+            // Main context should replace the stored bootstrap environment
+            loader.initialize(mainContext);
+            assertSame(
+                    mainContext.getEnvironment(),
+                    ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT));
+
+            // Subsequent child or temporary refresh context must not overwrite the main environment
+            loader.initialize(refreshOrChildContext);
+            assertSame(
+                    mainContext.getEnvironment(),
+                    ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT));
         }
     }
 

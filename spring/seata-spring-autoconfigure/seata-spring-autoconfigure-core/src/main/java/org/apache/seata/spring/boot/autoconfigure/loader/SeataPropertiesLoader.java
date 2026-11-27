@@ -47,8 +47,9 @@ import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
-@Order(Ordered.LOWEST_PRECEDENCE)
-public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext>, Ordered {
+// Run right after Spring Cloud's PropertySourceBootstrapConfiguration (HIGHEST_PRECEDENCE + 10)
+@Order(Ordered.HIGHEST_PRECEDENCE + 11)
+public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     List<String> prefixList = Arrays.asList(
             FILE_ROOT_PREFIX_CONFIG,
@@ -59,18 +60,16 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             TRANSPORT_PREFIX);
 
     @Override
-    public int getOrder() {
-        return Ordered.LOWEST_PRECEDENCE;
-    }
-
-    @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
         // Skip Spring Cloud bootstrap context, where application.properties/yml have not been loaded yet
-        if (environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+        if (isBootstrapEnvironment(environment)) {
             return;
         }
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+        Object existingEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        if (existingEnvironment == null || isBootstrapEnvironment(existingEnvironment)) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+        }
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
@@ -111,6 +110,13 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             // of the program.
             // StoreConfig only exists on the server side
         }
+    }
+
+    private boolean isBootstrapEnvironment(Object environment) {
+        return environment instanceof ConfigurableEnvironment
+                && ((ConfigurableEnvironment) environment)
+                        .getPropertySources()
+                        .contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
     }
 
     private Optional<String> invokeEnumMethod(Class<?> clazz, String enumMethodName, String getterMethodName)

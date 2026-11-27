@@ -360,6 +360,10 @@ public class FileConfiguration extends AbstractConfiguration {
         return fileConfig;
     }
 
+    String getName() {
+        return name;
+    }
+
     /**
      * The type FileListener.
      */

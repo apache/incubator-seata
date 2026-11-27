@@ -61,6 +61,9 @@ public class SeataClientEnvironmentPostProcessorTest {
                     .addFirst(new MapPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, Collections.emptyMap()));
 
             SeataClientEnvironmentPostProcessor processor = new SeataClientEnvironmentPostProcessor();
+            processor.postProcessEnvironment(null, null);
+            Assertions.assertNull(ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT));
+
             processor.postProcessEnvironment(bootstrapEnvironment, null);
             Assertions.assertNull(ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT));
 

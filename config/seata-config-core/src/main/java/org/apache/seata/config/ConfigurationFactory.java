@@ -130,12 +130,19 @@ public final class ConfigurationFactory {
     }
 
     private static void maybeNeedOriginFileInstance() {
-        if (ConfigType.File.name().equalsIgnoreCase(getConfigType())) {
+        maybeNeedOriginFileInstance(getConfigType());
+    }
+
+    private static void maybeNeedOriginFileInstance(String configTypeName) {
+        if (ConfigType.File.name().equalsIgnoreCase(configTypeName)) {
             String pathDataId = String.join(
                     ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            // create FileConfiguration for read file.conf
-            ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
+            FileConfiguration originFileInstance = ORIGIN_FILE_INSTANCE;
+            if (originFileInstance == null || !Objects.equals(originFileInstance.getName(), name)) {
+                // create FileConfiguration for read file.conf
+                ORIGIN_FILE_INSTANCE = new FileConfiguration(name);
+            }
         } else {
             ORIGIN_FILE_INSTANCE = null;
         }
@@ -157,17 +164,18 @@ public final class ConfigurationFactory {
     }
 
     public static Optional<FileConfiguration> getOriginFileInstance() {
-        return Optional.ofNullable(ORIGIN_FILE_INSTANCE);
+        synchronized (Configuration.class) {
+            maybeNeedOriginFileInstance();
+            return Optional.ofNullable(ORIGIN_FILE_INSTANCE);
+        }
     }
 
     private static Configuration buildConfiguration() {
         String configTypeName = getConfigType();
+        maybeNeedOriginFileInstance(configTypeName);
         Configuration configuration = null;
         Configuration extConfiguration = null;
         if (ConfigType.File.name().equalsIgnoreCase(configTypeName)) {
-            if (ORIGIN_FILE_INSTANCE == null) {
-                maybeNeedOriginFileInstance();
-            }
             configuration = ORIGIN_FILE_INSTANCE;
             extConfiguration = getSpringConfiguration();
         }
@@ -254,6 +262,7 @@ public final class ConfigurationFactory {
 
     public static void reload() {
         ConfigurationCache.clear();
+        ORIGIN_FILE_INSTANCE = null;
         initOriginConfiguration();
         load();
         maybeNeedOriginFileInstance();
