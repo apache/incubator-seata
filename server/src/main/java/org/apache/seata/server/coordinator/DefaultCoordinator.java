@@ -849,8 +849,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 ((NettyRemotingServer) remotingServer).destroy();
             }
             SessionHolder.destroy();
-            instance = null;
         } finally {
+            instance = null;
             if (interrupted) {
                 Thread.currentThread().interrupt();
             }

@@ -50,10 +50,13 @@ import java.util.concurrent.TimeoutException;
 
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockConstruction;
@@ -63,6 +66,38 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class CoordinatorShutdownTest extends BaseSpringBootTest {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void cleanupFailureReleasesCoordinatorSingleton(boolean failTransport) {
+        Object previousCoordinator = ReflectionTestUtils.getField(DefaultCoordinator.class, "instance");
+        try (MockedConstruction<DefaultCore> ignored = mockConstruction(DefaultCore.class);
+                MockedStatic<SessionHolder> holder = mockStatic(SessionHolder.class)) {
+            ReflectionTestUtils.setField(DefaultCoordinator.class, "instance", null);
+            NettyRemotingServer server = mock(NettyRemotingServer.class);
+            DefaultCoordinator coordinator = DefaultCoordinator.getInstance(server);
+            IllegalStateException failure = new IllegalStateException("cleanup failed");
+            if (failTransport) {
+                doThrow(failure).when(server).destroy();
+            } else {
+                holder.when(SessionHolder::destroy).thenThrow(failure);
+            }
+
+            assertSame(failure, assertThrows(IllegalStateException.class, coordinator::destroy));
+            assertThrows(IllegalArgumentException.class, DefaultCoordinator::getInstance);
+
+            holder.reset();
+            DefaultCoordinator restarted = DefaultCoordinator.getInstance(mock(NettyRemotingServer.class));
+            try {
+                assertNotSame(coordinator, restarted);
+                assertSame(restarted, DefaultCoordinator.getInstance());
+            } finally {
+                restarted.destroy();
+            }
+        } finally {
+            ReflectionTestUtils.setField(DefaultCoordinator.class, "instance", previousCoordinator);
+        }
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void waitsForParallelRetryBeforeClosingResources(boolean interruptCloser) throws Exception {
