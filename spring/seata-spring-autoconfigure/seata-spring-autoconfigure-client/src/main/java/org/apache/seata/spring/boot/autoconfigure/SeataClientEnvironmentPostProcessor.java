@@ -35,6 +35,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_TM_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
@@ -53,7 +54,9 @@ public class SeataClientEnvironmentPostProcessor implements EnvironmentPostProce
 
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+        if (environment != null && !environment.getPropertySources().contains(BOOTSTRAP_PROPERTY_SOURCE_NAME)) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
+        }
         PROPERTY_BEAN_MAP.put(SEATA_PREFIX, SeataProperties.class);
 
         PROPERTY_BEAN_MAP.put(CLIENT_RM_PREFIX, RmProperties.class);

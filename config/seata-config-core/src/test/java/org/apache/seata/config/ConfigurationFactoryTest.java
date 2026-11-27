@@ -16,11 +16,16 @@
  */
 package org.apache.seata.config;
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +64,149 @@ class ConfigurationFactoryTest {
     void testGetOriginFileInstanceRegistry() {
         FileConfiguration fileConfiguration = ConfigurationFactory.getOriginFileInstanceRegistry();
         Assertions.assertNotNull(fileConfiguration);
+    }
+
+    @Test
+    void testReloadClearsOriginFileInstanceForNonFileConfigType() {
+        String configTypeKey = ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE;
+        String previousConfigType = System.getProperty(configTypeKey);
+        try {
+            // Ensure file mode initializes ORIGIN_FILE_INSTANCE
+            System.setProperty(configTypeKey, "file");
+            ConfigurationFactory.reload();
+            Assertions.assertTrue(ConfigurationFactory.getOriginFileInstance().isPresent());
+
+            // Switching to a non-file config type should clear ORIGIN_FILE_INSTANCE
+            System.setProperty(configTypeKey, "non-existent-config-type");
+            ConfigurationFactory.reload();
+            Assertions.assertFalse(ConfigurationFactory.getOriginFileInstance().isPresent());
+        } finally {
+            if (previousConfigType == null) {
+                System.clearProperty(configTypeKey);
+            } else {
+                System.setProperty(configTypeKey, previousConfigType);
+            }
+            ConfigurationFactory.reload();
+        }
+    }
+
+    @Test
+    void testNonFileConfigTypeDoesNotUseStaleOriginFileInstance() throws Exception {
+        String configTypeKey = ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE;
+        String previousConfigType = System.getProperty(configTypeKey);
+        ConfigurationProvider customProvider = Mockito.mock(ConfigurationProvider.class);
+        Configuration customConfig = Mockito.mock(Configuration.class);
+        Mockito.when(customProvider.provide()).thenReturn(customConfig);
+        Mockito.when(customConfig.getConfig("test.non.file.custom.key")).thenReturn("custom-value");
+        Mockito.when(customConfig.getLatestConfig("service.vgroupMapping.default_tx_group", null, 1000))
+                .thenReturn(null);
+        Field instanceField = ConfigurationFactory.class.getDeclaredField("instance");
+        instanceField.setAccessible(true);
+        try {
+            // Initialize ORIGIN_FILE_INSTANCE in file mode (file.conf has vgroupMapping.default_tx_group = "default")
+            System.setProperty(configTypeKey, "file");
+            ConfigurationFactory.reload();
+            Assertions.assertTrue(ConfigurationFactory.getOriginFileInstance().isPresent());
+            Assertions.assertEquals(
+                    "default",
+                    ConfigurationFactory.getInstance()
+                            .getLatestConfig("service.vgroupMapping.default_tx_group", null, 1000));
+
+            // Simulate config.type changing to a non-file type before getInstance() is called,
+            // while ORIGIN_FILE_INSTANCE is still populated from an earlier static init.
+            // Hold Configuration.class monitor so background FileListener threads cannot race instance rebuild.
+            try (MockedStatic<EnhancedServiceLoader> services =
+                    Mockito.mockStatic(EnhancedServiceLoader.class, Mockito.CALLS_REAL_METHODS)) {
+                services.when(() -> EnhancedServiceLoader.load(io.seata.config.ConfigurationProvider.class, "custom"))
+                        .thenThrow(new EnhancedServiceNotFoundException("missing legacy provider"));
+                services.when(() -> EnhancedServiceLoader.load(ConfigurationProvider.class, "custom", false))
+                        .thenReturn(customProvider);
+
+                Configuration config;
+                synchronized (Configuration.class) {
+                    System.setProperty(configTypeKey, "custom");
+                    ConfigurationCache.clear();
+                    instanceField.set(null, null);
+                    config = ConfigurationFactory.getInstance();
+                }
+                Assertions.assertFalse(
+                        ConfigurationFactory.getOriginFileInstance().isPresent());
+                Assertions.assertEquals("custom-value", config.getConfig("test.non.file.custom.key"));
+                // Verify entries from file.conf (ORIGIN_FILE_INSTANCE) are not served
+                Assertions.assertNull(config.getLatestConfig("service.vgroupMapping.default_tx_group", null, 1000));
+            }
+        } finally {
+            synchronized (Configuration.class) {
+                if (previousConfigType == null) {
+                    System.clearProperty(configTypeKey);
+                } else {
+                    System.setProperty(configTypeKey, previousConfigType);
+                }
+                ConfigurationFactory.reload();
+            }
+        }
+    }
+
+    @Test
+    void testFileConfigNameChangeRefreshesOriginFileInstance() throws Exception {
+        String configTypeKey = ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE;
+        String configFileNameKey = String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, "file", "name");
+        String groupListKey = "service.default.grouplist";
+        String previousConfigType = System.getProperty(configTypeKey);
+        String previousConfigFileName = System.getProperty(configFileNameKey);
+        String previousGroupList = System.getProperty(groupListKey);
+        Field instanceField = ConfigurationFactory.class.getDeclaredField("instance");
+        instanceField.setAccessible(true);
+        try {
+            // 1. Early init with default file.conf (service.default.grouplist = 127.0.0.1:8091)
+            System.setProperty(configTypeKey, "file");
+            System.clearProperty(configFileNameKey);
+            System.clearProperty(groupListKey);
+            ConfigurationFactory.reload();
+            Assertions.assertEquals(
+                    "127.0.0.1:8091", ConfigurationFactory.getInstance().getConfig(groupListKey));
+
+            // 2. Simulate config.file.name changing to file-test-pro.conf (service.default.grouplist = 127.0.0.1:8092)
+            // after early static init, before getOriginFileInstance() / getInstance() are called
+            synchronized (Configuration.class) {
+                System.setProperty(configFileNameKey, "file-test-pro.conf");
+                ConfigurationCache.clear();
+                instanceField.set(null, null);
+
+                Assertions.assertTrue(
+                        ConfigurationFactory.getOriginFileInstance().isPresent());
+                Assertions.assertEquals(
+                        "127.0.0.1:8092",
+                        ConfigurationFactory.getOriginFileInstance().get().getConfig(groupListKey));
+
+                // Reset ORIGIN_FILE_INSTANCE back to stale file.conf to also verify buildConfiguration() refreshes it
+                ConfigurationFactory.ORIGIN_FILE_INSTANCE = new FileConfiguration("file.conf");
+                Assertions.assertEquals(
+                        "127.0.0.1:8092", ConfigurationFactory.getInstance().getConfig(groupListKey));
+            }
+        } finally {
+            synchronized (Configuration.class) {
+                restoreSystemProperty(configTypeKey, previousConfigType);
+                restoreSystemProperty(configFileNameKey, previousConfigFileName);
+                restoreSystemProperty(groupListKey, previousGroupList);
+                ConfigurationFactory.reload();
+            }
+        }
+    }
+
+    private static void restoreSystemProperty(String key, String previousValue) {
+        if (previousValue == null) {
+            System.clearProperty(key);
+        } else {
+            System.setProperty(key, previousValue);
+        }
     }
 
     @Test

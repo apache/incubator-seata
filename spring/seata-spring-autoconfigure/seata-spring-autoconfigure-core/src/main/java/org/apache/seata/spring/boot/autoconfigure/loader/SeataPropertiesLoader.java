@@ -45,8 +45,10 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.BOOTSTRAP_PROPERTY_SOURCE_NAME;
 
-@Order(Ordered.HIGHEST_PRECEDENCE)
+// Run right after Spring Cloud's PropertySourceBootstrapConfiguration (HIGHEST_PRECEDENCE + 10)
+@Order(Ordered.HIGHEST_PRECEDENCE + 11)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
     List<String> prefixList = Arrays.asList(
@@ -60,9 +62,13 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
-        if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null) {
-            ObjectHolder.INSTANCE.setObject(
-                    OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContext.getEnvironment());
+        // Skip Spring Cloud bootstrap context, where application.properties/yml have not been loaded yet
+        if (isBootstrapEnvironment(environment)) {
+            return;
+        }
+        Object existingEnvironment = ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        if (existingEnvironment == null || isBootstrapEnvironment(existingEnvironment)) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         }
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
@@ -104,6 +110,13 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             // of the program.
             // StoreConfig only exists on the server side
         }
+    }
+
+    private boolean isBootstrapEnvironment(Object environment) {
+        return environment instanceof ConfigurableEnvironment
+                && ((ConfigurableEnvironment) environment)
+                        .getPropertySources()
+                        .contains(BOOTSTRAP_PROPERTY_SOURCE_NAME);
     }
 
     private Optional<String> invokeEnumMethod(Class<?> clazz, String enumMethodName, String getterMethodName)
