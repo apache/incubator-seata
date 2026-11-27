@@ -18,22 +18,29 @@ package org.apache.seata.server.console.impl.file;
 
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.core.lock.RowLock;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 import org.apache.seata.server.console.exception.ConsoleException;
+import org.apache.seata.server.lock.LockManager;
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.file.lock.FileLocker.BucketLockMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -276,6 +283,55 @@ public class GlobalLockFileServiceImplTest extends BaseSpringBootTest {
 
             // Should throw ConsoleException when branch session size != 1
             Assertions.assertThrows(ConsoleException.class, () -> service.deleteLock(param));
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+            value = {
+                ",,1",
+                "1000,3000,1",
+                "2200,2900,1",
+                "3000,4000,0",
+                "0,1999,0",
+                "1000,,1",
+                "3000,,0",
+                ",3000,1",
+                ",1999,0"
+            })
+    public void testQuery_WithTimeBounds(Long timeStart, Long timeEnd, int expectedCount) {
+        GlobalLockParam param = new GlobalLockParam();
+        param.setPageSize(10);
+        param.setPageNum(1);
+        param.setTimeStart(timeStart);
+        param.setTimeEnd(timeEnd);
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class);
+                MockedStatic<LockerManagerFactory> lockManagerFactoryMock =
+                        Mockito.mockStatic(LockerManagerFactory.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+            when(mockSessionManager.allSessions()).thenReturn(Collections.singletonList(mockGlobalSession));
+            when(mockGlobalSession.getBeginTime()).thenReturn(2500L);
+            when(mockGlobalSession.getBranchSessions()).thenReturn(Collections.singletonList(mockBranchSession));
+            BucketLockMap bucket = new BucketLockMap();
+            bucket.get().put("1", mockBranchSession);
+            when(mockBranchSession.getLockHolder())
+                    .thenReturn(Collections.singletonMap(bucket, Collections.singleton("1")));
+            RowLock lock = new RowLock();
+            lock.setTransactionId(1L);
+            lock.setBranchId(2L);
+            lock.setTableName("test_table");
+            lock.setPk("1");
+            LockManager lockManager = mock(LockManager.class);
+            when(lockManager.collectRowLocks(mockBranchSession)).thenReturn(Collections.singletonList(lock));
+            lockManagerFactoryMock.when(LockerManagerFactory::getLockManager).thenReturn(lockManager);
+
+            List<GlobalLockVO> locks = service.query(param).getData();
+            Assertions.assertEquals(expectedCount, locks.size());
+            if (expectedCount == 1) {
+                Assertions.assertEquals("test_table", locks.get(0).getTableName());
+                Assertions.assertEquals("1", locks.get(0).getPk());
+            }
         }
     }
 }

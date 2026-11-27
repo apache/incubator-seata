@@ -189,10 +189,10 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
                     (isBlank(param.getXid()) || globalSession.getXid().contains(param.getXid()))
                     &&
                     // timeStart
-                    (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= globalSession.getBeginTime() / 1000)
+                    (isNull(param.getTimeStart()) || globalSession.getBeginTime() / 1000 >= param.getTimeStart() / 1000)
                     &&
                     // timeEnd
-                    (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= globalSession.getBeginTime() / 1000);
+                    (isNull(param.getTimeEnd()) || globalSession.getBeginTime() / 1000 <= param.getTimeEnd() / 1000);
         };
     }
 }

@@ -27,11 +27,14 @@ import org.apache.seata.server.session.SessionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
@@ -178,6 +181,37 @@ public class GlobalSessionFileServiceImplTest extends BaseSpringBootTest {
 
             Assertions.assertNotNull(result);
             Assertions.assertFalse(result.getData().isEmpty());
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+            value = {
+                ",,1",
+                "1000,3000,1",
+                "2200,2900,1",
+                "3000,4000,0",
+                "0,1999,0",
+                "1000,,1",
+                "3000,,0",
+                ",3000,1",
+                ",1999,0"
+            })
+    public void testQuery_WithTimeBounds(Long timeStart, Long timeEnd, int expectedCount) {
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageSize(10);
+        param.setPageNum(1);
+        param.setTimeStart(timeStart);
+        param.setTimeEnd(timeEnd);
+
+        try (MockedStatic<SessionHolder> sessionHolderMock = Mockito.mockStatic(SessionHolder.class)) {
+            sessionHolderMock.when(SessionHolder::getRootSessionManager).thenReturn(mockSessionManager);
+            when(mockSessionManager.allSessions()).thenReturn(Collections.singletonList(mockGlobalSession));
+            when(mockGlobalSession.getBeginTime()).thenReturn(2500L);
+            when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Begin);
+
+            Assertions.assertEquals(
+                    expectedCount, service.query(param).getData().size());
         }
     }
 }
