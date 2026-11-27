@@ -67,21 +67,19 @@ Prometheus发布器`PrometheusExporter`，将度量数据同步给Prometheus。
 >说明：不同的监控系统，采集度量数据的方式不尽相同，例如Zabbix支持用zabbix-agent推送，Prometheus则推荐使用prometheus-server[拉取](https://prometheus.io/docs/practices/pushing/)的方式；同样数据交换协议也不同，因此往往需要逐一适配。
 
 #### 如何使用
-如果需要开启TC的Metrics，需要在其配置中增加配置项：
-```text
-## metrics settings
-metrics {
-  enable = true
-  registry-type = "compact"
-  # multi exporters use comma divided
-  exporter-list = "prometheus"
-  exporter-prometheus-port = 9898
-}
+在 TC 的 `application.yml` 中启用 Prometheus：
+
+```yaml
+seata:
+  metrics:
+    enabled: true
+    registry-type: compact
+    exporter-list: prometheus
 ```
 
-启动TC，即可在`http://tc-server-ip:9898/metrics`上获取到Metrics的文本格式数据。
+启动 TC 后，Prometheus 可以从 TC 的服务端口抓取 `/metrics`。例如，TC 使用 `8091` 时，抓取地址为 `http://tc-server-ip:8091/metrics`。
 
->提示：默认使用`9898`端口，Prometheus已登记的端口列表[在此](https://github.com/prometheus/prometheus/wiki/Default-port-allocations)，如果想更换端口，可通过`metrics.exporter-prometheus-port`配置修改。
+`seata.metrics.exporter-prometheus-port` 默认值为 `-1`，表示复用 TC 服务端口。升级时，如果 Prometheus 原先抓取默认的 `9898`，可以将抓取目标改为实际的 TC 服务端口，也可以显式配置 `seata.metrics.exporter-prometheus-port=9898` 保留原地址。指定独立端口时，指标仅通过该端口提供。
 
 ##### 下载并启动Prometheus
 下载完毕后，修改Prometheus的配置文件`prometheus.yml`，在`scrape_configs`中增加一项抓取Seata的度量数据：
@@ -102,7 +100,7 @@ scrape_configs:
     # scheme defaults to 'http'.
 
     static_configs:
-    - targets: ['tc-server-ip:9898']
+    - targets: ['tc-server-ip:8091']
 ```
 
 ##### 查看数据输出

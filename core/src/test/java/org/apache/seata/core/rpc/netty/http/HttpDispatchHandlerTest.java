@@ -23,11 +23,13 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.common.rpc.http.HttpContext;
+import org.apache.seata.common.rpc.http.HttpTextResponse;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
@@ -45,6 +47,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -78,8 +81,10 @@ class HttpDispatchHandlerTest {
     private EmbeddedChannel embeddedChannel;
 
     class TestController {
-        public String handleRequest(String param) {
-            return "Processed: " + param;
+        private HttpTextResponse textResponse;
+
+        public Object handleRequest(String param) {
+            return textResponse != null ? textResponse : "Processed: " + param;
         }
     }
 
@@ -147,6 +152,29 @@ class HttpDispatchHandlerTest {
             assertTrue(content.contains("Processed: testValue"));
         } finally {
             clearControllerManager();
+        }
+    }
+
+    @Test
+    void sendsTextResponseAsUtf8WithControllerStatusAndContentType() {
+        HttpRequestFilterManager.initializeFilters();
+        String body = "metric{region=\"Montréal\"} 1\n";
+        String contentType = "text/plain; version=0.0.4; charset=utf-8";
+        testController.textResponse =
+                new HttpTextResponse(405, contentType, body, Collections.singletonMap("Allow", "GET"));
+        channel.writeInbound(new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/test?param=text"));
+        FullHttpResponse response = waitForResponse(5000);
+        assertNotNull(response);
+        try {
+            assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+            assertEquals("GET", response.headers().get(HttpHeaderNames.ALLOW));
+            assertEquals(contentType, response.headers().get(HttpHeaderNames.CONTENT_TYPE));
+            assertEquals(
+                    body.getBytes(StandardCharsets.UTF_8).length,
+                    response.headers().getInt(HttpHeaderNames.CONTENT_LENGTH));
+            assertEquals(body, response.content().toString(StandardCharsets.UTF_8));
+        } finally {
+            response.release();
         }
     }
 
