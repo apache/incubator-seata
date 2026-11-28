@@ -15,7 +15,7 @@
       "Legal Entity" shall mean the union of the acting entity and all
       other entities that control, are controlled by, or are under common
       control with that entity. For the purposes of this definition,
-      "control" means (properties) the power, direct or indirect, to cause the
+      "control" means (i) the power, direct or indirect, to cause the
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
@@ -514,14 +514,14 @@ CDDL-1.0 licenses
     javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 see:licenses/CDDL-1.0
 
 ========================================================================
-CDDL+GPL-1.1 licenses
+CDDL-1.1 licenses
 ========================================================================
 
-    javax.servlet:javax.servlet-api 4.0.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    org.glassfish:javax.json 1.0.4 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey:jersey-client 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey:jersey-core 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.1 see:licenses/CDDL-1.1
+    org.glassfish:javax.json 1.0.4 CDDL-1.1 see:licenses/CDDL-1.1
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.1 see:licenses/CDDL-1.1
+    com.sun.jersey:jersey-client 1.19.1 CDDL-1.1 see:licenses/CDDL-1.1
+    com.sun.jersey:jersey-core 1.19.1 CDDL-1.1 see:licenses/CDDL-1.1
 
 ========================================================================
 EPL-1.0 licenses

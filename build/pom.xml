@@ -473,5 +473,13 @@
                 </maven.surefire.argLine>
             </properties>
         </profile>
+
+        <!-- profile: args-for-client-test -->
+        <profile>
+            <id>args-for-client-test</id>
+            <properties>
+                <maven.surefire.excludes>org/apache/seata/server/**/*.java,org/apache/seata/console/**/*.java</maven.surefire.excludes>
+            </properties>
+        </profile>
     </profiles>
 </project>
