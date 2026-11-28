@@ -18,7 +18,7 @@ name: "Publish Docker Image"
 
 on:
   push:
-    branches: [ snapshot, "*.*.*" ]
+    branches: [ snapshot, "*.*.*-release" ]
     #tags: [ "*" ]
 
   # Temporarily disable scheduled latest image publication.

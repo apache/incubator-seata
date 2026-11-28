@@ -13,3 +13,11 @@ The Apache Software Foundation (http://www.apache.org/).
 The original idea and initial implementation of the maven-wrapper module is derived
 from the Gradle Wrapper which was written originally by Hans Dockter and Adam Murdoch.
 Copyright 2007 the original author or authors.
+-----------------------------------------------------------------------
+Snap.svg
+Snap.svg is licensed under the Apache license version 2.0, January 2004 (see LICENSE file).
+Copyright (c) 2013 - 2017 Adobe Systems Incorporated. All rights reserved.
+
+This product contains a modified portion of Snap.svg
+(https://github.com/adobe-webplatform/Snap.svg/blob/master/src/svg.js)
+in saga/seata-saga-statemachine-designer/src/render/PathMap.js.

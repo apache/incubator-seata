@@ -59,12 +59,192 @@
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>${maven-antrun-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>aggregate-binary-license-and-notice</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- Split on semantic section markers instead of line
+                                             numbers, so component files can grow independently. -->
+                                        <concat destfile="${project.build.directory}/LICENSE-server-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+\r?\nSeata Subcomponents:.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <concat destfile="${project.build.directory}/LICENSE-namingserver-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="(?:\r?\n)+=+\r?\nSeata Subcomponents:.*\z"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <condition property="license.common.headers.match">
+                                            <filesmatch file1="${project.build.directory}/LICENSE-server-common.tmp"
+                                                        file2="${project.build.directory}/LICENSE-namingserver-common.tmp"/>
+                                        </condition>
+                                        <fail unless="license.common.headers.match"
+                                              message="LICENSE-server and LICENSE-namingserver must have identical common license text"/>
+
+                                        <!-- Keep the common Apache License text once, then
+                                             retain component ownership for dependency terms. -->
+                                        <copy file="${project.build.directory}/LICENSE-server-common.tmp"
+                                              tofile="${project.build.directory}/LICENSE" overwrite="true"/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-server
+
+]]></echo>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/LICENSE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\nSeata Subcomponents:)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/LICENSE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-namingserver
+
+]]></echo>
+                                        <echo file="${project.build.directory}/LICENSE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/LICENSE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/LICENSE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\nSeata Subcomponents:)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+
+                                        <!-- Shared ASF product header only (first 5 lines).
+                                             Component-specific attributions (e.g. Snap.svg on
+                                             namingserver/console) may differ after that. -->
+                                        <concat destfile="${project.build.directory}/NOTICE-server-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-server"/>
+                                            <filterchain>
+                                                <headfilter lines="5"/>
+                                            </filterchain>
+                                        </concat>
+                                        <concat destfile="${project.build.directory}/NOTICE-namingserver-common.tmp"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-namingserver"/>
+                                            <filterchain>
+                                                <headfilter lines="5"/>
+                                            </filterchain>
+                                        </concat>
+                                        <condition property="notice.common.headers.match">
+                                            <filesmatch file1="${project.build.directory}/NOTICE-server-common.tmp"
+                                                        file2="${project.build.directory}/NOTICE-namingserver-common.tmp"/>
+                                        </condition>
+                                        <fail unless="notice.common.headers.match"
+                                              message="NOTICE-server and NOTICE-namingserver must share the same ASF product header (first 5 lines)"/>
+
+                                        <!-- Root NOTICE: ASF header + Snap (console ships with
+                                             namingserver) + per-component dependency notices. -->
+                                        <copy file="${project.build.directory}/NOTICE-server-common.tmp"
+                                              tofile="${project.build.directory}/NOTICE" overwrite="true"/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+
+Snap.svg
+Snap.svg is licensed under the Apache license version 2.0, January 2004 (see LICENSE file).
+Copyright (c) 2013 - 2017 Adobe Systems Incorporated. All rights reserved.
+
+This product contains a modified portion of Snap.svg
+(https://github.com/adobe-webplatform/Snap.svg/blob/master/src/svg.js)
+in saga/seata-saga-statemachine-designer/src/render/PathMap.js,
+bundled into the console saga designer.
+
+]]></echo>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-server
+
+]]></echo>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/NOTICE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-server"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\n)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <echo file="${project.build.directory}/NOTICE" append="true"
+                                              encoding="UTF-8"><![CDATA[
+Component: seata-namingserver
+
+]]></echo>
+                                        <echo file="${project.build.directory}/NOTICE" append="true" message=""/>
+                                        <concat destfile="${project.build.directory}/NOTICE" append="true"
+                                                encoding="UTF-8" fixlastline="true">
+                                            <file file="${project.basedir}/NOTICE-namingserver"/>
+                                            <filterchain>
+                                                <tokenfilter>
+                                                    <filetokenizer/>
+                                                    <replaceregex flags="s"
+                                                                  pattern="\A.*?(?==+\r?\n)"
+                                                                  replace=""/>
+                                                </tokenfilter>
+                                            </filterchain>
+                                        </concat>
+                                        <delete>
+                                            <fileset dir="${project.build.directory}" includes="*-common.tmp"/>
+                                        </delete>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
                         <version>${maven-assembly-plugin.version}</version>
                         <configuration>
                             <descriptors>
+                                <!-- Binary convenience package only.
+                                     Source release must be built from the repository root
+                                     (profile source-release / git archive), not from this
+                                     module — ${basedir} here is distribution/ and cannot
+                                     assemble the full multi-module tree. -->
                                 <descriptor>release-seata.xml</descriptor>
-                                <descriptor>source-release.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>

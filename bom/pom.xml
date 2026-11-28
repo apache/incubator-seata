@@ -58,6 +58,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
+                <artifactId>json-common-jackson3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-config-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
